@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2004  John Champion
+//Copyright ?2004  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -85,14 +85,20 @@ namespace ZedGraph
 		/// </summary>
 		internal Link _link;
 
-	#endregion
+        [CLSCompliant(false)]
+        protected bool _isMoving;
 
-	#region Defaults
-		/// <summary>
-		/// A simple struct that defines the
-		/// default property values for the <see cref="GraphObj"/> class.
-		/// </summary>
-		public struct Default
+        [CLSCompliant(false)]
+        protected bool _isSelected;
+
+        #endregion
+
+        #region Defaults
+        /// <summary>
+        /// A simple struct that defines the
+        /// default property values for the <see cref="GraphObj"/> class.
+        /// </summary>
+        public struct Default
 		{
 			// Default text item properties
 			/// <summary>
@@ -198,17 +204,28 @@ namespace ZedGraph
 			}
 		}
 
-	#endregion
-	
-	#region Constructors
-		/// <overloads>
-		/// Constructors for the <see cref="GraphObj"/> class.
-		/// </overloads>
-		/// <summary>
-		/// Default constructor that sets all <see cref="GraphObj"/> properties to default
-		/// values as defined in the <see cref="Default"/> class.
-		/// </summary>
-		public GraphObj() :
+        public bool IsSelected
+        {
+            get { return _isSelected; }
+            set { _isSelected = value; }
+        }
+
+        public bool IsMoving
+        {
+            get { return _isMoving; }
+            set { _isMoving = value; }
+        }
+        #endregion
+
+        #region Constructors
+        /// <overloads>
+        /// Constructors for the <see cref="GraphObj"/> class.
+        /// </overloads>
+        /// <summary>
+        /// Default constructor that sets all <see cref="GraphObj"/> properties to default
+        /// values as defined in the <see cref="Default"/> class.
+        /// </summary>
+        public GraphObj() :
 			this( 0, 0, Default.CoordFrame, Default.AlignH, Default.AlignV )
 		{
 		}
@@ -311,6 +328,8 @@ namespace ZedGraph
 			_zOrder = ZOrder.A_InFront;
 			_location = new Location( x, y, coordType, alignH, alignV );
 			_link = new Link();
+            _isSelected = false;
+            _isMoving = false;
 		}
 
 		/// <summary>
@@ -346,7 +365,9 @@ namespace ZedGraph
 			_zOrder = ZOrder.A_InFront;
 			_location = new Location( x, y, x2, y2, coordType, alignH, alignV );
 			_link = new Link();
-		}
+            _isSelected = false;
+            _isMoving = false;
+        }
 
 		/// <summary>
 		/// The Copy Constructor
@@ -358,6 +379,10 @@ namespace ZedGraph
 			_isVisible = rhs.IsVisible;
 			_isClippedToChartRect = rhs._isClippedToChartRect;
 			_zOrder = rhs.ZOrder;
+
+            // copy moving, selected property ?
+            _isMoving = rhs._isMoving;
+            _isSelected = rhs._isSelected;
 
 			// copy reference types by cloning
 			if ( rhs.Tag is ICloneable )
@@ -422,6 +447,9 @@ namespace ZedGraph
 
 			_isClippedToChartRect = info.GetBoolean( "isClippedToChartRect" );
 			_link = (Link) info.GetValue( "link", typeof( Link ) );
+
+            _isSelected = info.GetBoolean("isSelected");
+            _isMoving = info.GetBoolean("isMoving");
 		}
 		/// <summary>
 		/// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -439,6 +467,9 @@ namespace ZedGraph
 
 			info.AddValue( "isClippedToChartRect", _isClippedToChartRect );
 			info.AddValue( "link", _link );
+
+            info.AddValue( "isSelected", _isSelected );
+            info.AddValue( "isMoving", _isMoving );
 		}
 	#endregion
 
@@ -496,13 +527,48 @@ namespace ZedGraph
 			return true;
 		}
 
-		/// <summary>
-		/// Determines the shape type and Coords values for this GraphObj
-		/// </summary>
-		abstract public void GetCoords( PaneBase pane, Graphics g, float scaleFactor,
+        virtual public bool FindNearestEdge(PointF pt, PaneBase pane, out int index)
+        {
+            index = -1;
+            return false;
+        }
+
+        virtual public void ResizeEdge(int edge, PointF pt, Location old, PaneBase pane)
+        {
+            // do nothing
+        }
+
+        /// <summary>
+        /// Determines the shape type and Coords values for this GraphObj
+        /// </summary>
+        abstract public void GetCoords( PaneBase pane, Graphics g, float scaleFactor,
 				out string shape, out string coords );
 
 	#endregion
 	
 	}
+
+
+    public class Utils
+    {
+        public static double Distance(double dx, double dy)
+        {
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+
+        public static double Distance(double x0, double y0, double x1, double y1)
+        {
+            return Distance(x0 - x1, y0 - y1);
+        }
+
+        public static double AngleInDegree(double dy, double dx)
+        {
+            return 180 * Math.Atan2(dy, dx) / Math.PI;
+        }
+
+        public static double AngleInDegree(double x1, double y1, double x0, double y0)
+        {
+            return 180 * Math.Atan2(y1 - y0, x1 - x0) / Math.PI;
+        }
+    }
 }
