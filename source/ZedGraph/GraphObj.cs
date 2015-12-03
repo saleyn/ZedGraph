@@ -533,7 +533,7 @@ namespace ZedGraph
             return false;
         }
 
-        virtual public void ResizeEdge(int edge, PointF pt, Location old, PaneBase pane)
+        virtual public void ResizeEdge(int edge, PointF pt, PaneBase pane)
         {
             // do nothing
         }
