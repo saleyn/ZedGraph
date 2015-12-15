@@ -527,12 +527,25 @@ namespace ZedGraph
 			return true;
 		}
 
+        /// <summary>
+        /// Find the nearest edge for point which is used to resize graph
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="pane"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
         virtual public bool FindNearestEdge(PointF pt, PaneBase pane, out int index)
         {
             index = -1;
             return false;
         }
 
+        /// <summary>
+        /// Resize the graph 
+        /// </summary>
+        /// <param name="edge"></param>
+        /// <param name="pt"></param>
+        /// <param name="pane"></param>
         virtual public void ResizeEdge(int edge, PointF pt, PaneBase pane)
         {
             // do nothing
@@ -544,28 +557,68 @@ namespace ZedGraph
         abstract public void GetCoords( PaneBase pane, Graphics g, float scaleFactor,
 				out string shape, out string coords );
 
-	#endregion
-	
-	}
+        /// <summary>
+        /// The rect list of each edge
+        /// </summary>
+        /// <param name="pane"></param>
+        /// <returns></returns>
+        virtual public RectangleF[] EdgeRects(PaneBase pane)
+        {
+            return new RectangleF[0];
+        }
 
+    #endregion
 
+    }
+
+    /// <summary>
+    /// Helper utils
+    /// </summary>
     public class Utils
     {
+        /// <summary>
+        /// Distance between two points
+        /// </summary>
+        /// <param name="dx"></param>
+        /// <param name="dy"></param>
+        /// <returns></returns>
         public static double Distance(double dx, double dy)
         {
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
+        /// <summary>
+        /// Angle between two points with O
+        /// </summary>
+        /// <param name="x0"></param>
+        /// <param name="y0"></param>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <returns></returns>
         public static double Distance(double x0, double y0, double x1, double y1)
         {
             return Distance(x0 - x1, y0 - y1);
         }
 
+        /// <summary>
+        /// Angle for two lines
+        /// </summary>
+        /// <param name="dy"></param>
+        /// <param name="dx"></param>
+        /// <returns></returns>
         public static double AngleInDegree(double dy, double dx)
         {
             return 180 * Math.Atan2(dy, dx) / Math.PI;
         }
 
+        /// <summary>
+        /// Angle between two points with O
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="x0"></param>
+        /// <param name="y0"></param>
+        /// <returns></returns>
         public static double AngleInDegree(double x1, double y1, double x0, double y0)
         {
             return 180 * Math.Atan2(y1 - y0, x1 - x0) / Math.PI;
