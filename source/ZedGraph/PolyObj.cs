@@ -40,10 +40,7 @@ namespace ZedGraph
 	{
 
 	#region Fields
-
 		private List<PointD> _points = new List<PointD>();
-
-		private PointD _lastPoint;
 
 		/// <summary>
 		/// private value that determines if the polygon will be automatically closed.
@@ -254,7 +251,7 @@ namespace ZedGraph
 		/// </param>
 		override public void Draw( Graphics g, PaneBase pane, float scaleFactor )
 		{
-			if ( _points != null && _points.Count > 0 )
+			if ( _points != null && _points.Count > 1 )
 			{
 				using ( GraphicsPath path = MakePath( pane ) )
 				{
@@ -284,7 +281,8 @@ namespace ZedGraph
 
 							g.DrawPath(pen, path);
 
-							if (_lastPoint.X != 0 && !_isClosedFigure)
+
+							if (!_isClosedFigure)
 							{
 								PointF lastPt = path.GetLastPoint();
 								PointF firstPt = path.PathPoints[0];
@@ -295,9 +293,7 @@ namespace ZedGraph
 								// Create a custom dash pattern.
 								pen.DashPattern = new float[] { 4.0F, 4.0F };
 
-								g.DrawLine(pen, firstPt.X, firstPt.Y, 
-										(float)_lastPoint.X, 
-										(float)_lastPoint.Y);
+								g.DrawLine(pen, firstPt.X, firstPt.Y, lastPt.X, lastPt.Y);
 							}
 
 							if (IsSelected)
@@ -346,11 +342,7 @@ namespace ZedGraph
 
 			if (_isClosedFigure)
 				path.CloseFigure();
-			else if (_lastPoint.X != 0)
-			{
-				path.AddLine(lastPt.X, lastPt.Y, 
-					(float)_lastPoint.X, (float)_lastPoint.Y);
-			}
+
 
 			return path;
 		}
@@ -391,6 +383,10 @@ namespace ZedGraph
 
 		override public void ResizeEdge(int edge, PointF pt, PaneBase pane)
 		{
+			// when edge is int.MaxValue, we assume it is last point
+			if (edge == int.MaxValue)
+				edge = _points.Count - 1;
+
 			// do nothing if edge is invalid
 			if (edge < 0 && edge >= _points.Count)
 				return;
@@ -434,6 +430,7 @@ namespace ZedGraph
 		}
 		
 	#endregion
+	
 	#region Point Related Method
 		public void AddPoint(PointD pt)
 		{
@@ -450,8 +447,19 @@ namespace ZedGraph
 
 		public PointD LastPoint
 		{
-			get { return _lastPoint; }
-			set { _lastPoint = value; }
+			get
+			{
+				if (_points.Count > 0)
+					return _points[_points.Count - 1];
+				else
+					return new PointD(0, 0);
+			}
+
+			set
+			{
+				if (_points.Count > 0)
+					_points[_points.Count - 1] = value;
+			}
 		}
 	#endregion
 
