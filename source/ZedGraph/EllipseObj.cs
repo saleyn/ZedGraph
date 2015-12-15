@@ -39,6 +39,17 @@ namespace ZedGraph
 	[Serializable]
 	public class EllipseObj : BoxObj, ICloneable, ISerializable
 	{
+	#region Fields
+		private float _angle = 0f;
+		#endregion
+
+		#region Properties
+		public float Angle
+		{
+			get { return _angle; }
+			set { _angle = value; }
+		}
+	#endregion
 	#region Constructors
 		/// <overloads>Constructors for the <see cref="EllipseObj"/> object</overloads>
 		/// <summary>
@@ -53,11 +64,11 @@ namespace ZedGraph
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
 		/// <param name="height">The height of this <see cref="BoxObj" />.  This will be in units determined by
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
-		public EllipseObj( double x, double y, double width, double height )
-			: base( x, y, width, height )
+		public EllipseObj(double x, double y, double width, double height)
+			: base(x, y, width, height)
 		{
 		}
-		
+
 		/// <summary>
 		/// A default constructor that places the <see cref="EllipseObj"/> at location (0,0),
 		/// with width/height of (1,1).  Other properties are defaulted.
@@ -65,7 +76,7 @@ namespace ZedGraph
 		public EllipseObj() : base()
 		{
 		}
-		
+
 		/// <summary>
 		/// A constructor that allows the position, border color, and solid fill color
 		/// of the <see cref="EllipseObj"/> to be pre-specified.
@@ -82,8 +93,8 @@ namespace ZedGraph
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
 		/// <param name="height">The height of this <see cref="BoxObj" />.  This will be in units determined by
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
-		public EllipseObj( double x, double y, double width, double height, Color borderColor, Color fillColor )
-			: base( x, y, width, height, borderColor, fillColor )
+		public EllipseObj(double x, double y, double width, double height, Color borderColor, Color fillColor)
+			: base(x, y, width, height, borderColor, fillColor)
 		{
 		}
 
@@ -106,9 +117,9 @@ namespace ZedGraph
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
 		/// <param name="height">The height of this <see cref="BoxObj" />.  This will be in units determined by
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
-		public EllipseObj( double x, double y, double width, double height, Color borderColor,
-							Color fillColor1, Color fillColor2 ) :
-				base( x, y, width, height, borderColor, fillColor1, fillColor2 )
+		public EllipseObj(double x, double y, double width, double height, Color borderColor,
+							Color fillColor1, Color fillColor2) :
+				base(x, y, width, height, borderColor, fillColor1, fillColor2)
 		{
 		}
 
@@ -117,8 +128,9 @@ namespace ZedGraph
 		/// </summary>
 		/// <param name="rhs">The <see cref="EllipseObj"/> object from
 		/// which to copy</param>
-		public EllipseObj( BoxObj rhs ) : base( rhs )
+		public EllipseObj(EllipseObj rhs) : base(rhs)
 		{
+			rhs._angle = this._angle;
 		}
 
 		/// <summary>
@@ -137,7 +149,7 @@ namespace ZedGraph
 		/// <returns>A new, independent copy of this class</returns>
 		public new EllipseObj Clone()
 		{
-			return new EllipseObj( this );
+			return new EllipseObj(this);
 		}
 
 	#endregion
@@ -146,7 +158,7 @@ namespace ZedGraph
 		/// <summary>
 		/// Current schema value that defines the version of the serialized file
 		/// </summary>
-		public const int schema3 = 10;
+		public const int schema3 = 11;
 
 		/// <summary>
 		/// Constructor for deserializing objects
@@ -155,25 +167,28 @@ namespace ZedGraph
 		/// </param>
 		/// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data
 		/// </param>
-		protected EllipseObj( SerializationInfo info, StreamingContext context ) : base( info, context )
+		protected EllipseObj(SerializationInfo info, StreamingContext context) : base(info, context)
 		{
 			// The schema value is just a file version parameter.  You can use it to make future versions
 			// backwards compatible as new member variables are added to classes
-			int sch = info.GetInt32( "schema3" );
+			int sch = info.GetInt32("schema3");
+			if (sch >= 11)
+				_angle = (float)info.GetDouble("angle");
 		}
 		/// <summary>
 		/// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
 		/// </summary>
 		/// <param name="info">A <see cref="SerializationInfo"/> instance that defines the serialized data</param>
 		/// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data</param>
-		[SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
-		public override void GetObjectData( SerializationInfo info, StreamingContext context )
+		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			base.GetObjectData( info, context );
-			info.AddValue( "schema3", schema3 );
+			base.GetObjectData(info, context);
+			info.AddValue("schema3", schema3);
+			info.AddValue("angle", _angle);
 		}
 	#endregion
-	
+
 	#region Rendering Methods
 		/// <summary>
 		/// Render this object to the specified <see cref="Graphics"/> device.
@@ -196,27 +211,60 @@ namespace ZedGraph
 		/// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
 		/// font sizes, etc. according to the actual size of the graph.
 		/// </param>
-		override public void Draw( Graphics g, PaneBase pane, float scaleFactor )
+		override public void Draw(Graphics g, PaneBase pane, float scaleFactor)
 		{
 			// Convert the arrow coordinates from the user coordinate system
 			// to the screen coordinate system
-			RectangleF pixRect = this.Location.TransformRect( pane );
+			RectangleF pixRect = this.Location.TransformRect(pane);
 
-			if (	Math.Abs( pixRect.Left ) < 100000 &&
-					Math.Abs( pixRect.Top ) < 100000 &&
-					Math.Abs( pixRect.Right ) < 100000 &&
-					Math.Abs( pixRect.Bottom ) < 100000 )
+			if (Math.Abs(pixRect.Left) < 100000 &&
+					Math.Abs(pixRect.Top) < 100000 &&
+					Math.Abs(pixRect.Right) < 100000 &&
+					Math.Abs(pixRect.Bottom) < 100000)
 			{
-				if ( _fill.IsVisible )
-					using ( Brush brush = _fill.MakeBrush( pixRect ) )
-						g.FillEllipse( brush, pixRect );
+				GraphicsState state = g.Save();
 
-				if ( _border.IsVisible )
-					using ( Pen pen = _border.GetPen( pane, scaleFactor ) )
-						g.DrawEllipse( pen, pixRect );
+				g.SmoothingMode = SmoothingMode.AntiAlias;
+
+				Matrix matrix = g.Transform;
+
+				matrix.RotateAt(Angle, Center(pixRect));
+				//matrix.Rotate(Angle);
+
+				g.Transform = matrix;
+				if (_fill.IsVisible)
+					using (Brush brush = _fill.MakeBrush(pixRect))
+						g.FillEllipse(brush, pixRect);
+
+				if (_border.IsVisible)
+					using (Pen pen = _border.GetPen(pane, scaleFactor))
+					{
+						if (IsMoving)
+						{
+							// Set the DashCap to round.
+							pen.DashCap = DashCap.Round;
+
+							// Create a custom dash pattern.
+							pen.DashPattern = new float[] { 4.0F, 4.0F };
+						}
+
+						g.DrawEllipse(pen, pixRect);
+
+						if (IsSelected)
+						{
+							Brush brush = new SolidBrush(Color.White);
+
+							g.FillRectangles(brush, EdgeRects(pane));
+
+							pen.DashStyle = DashStyle.Solid;
+
+							g.DrawRectangles(pen, EdgeRects(pane));
+						}
+					}
+
+				g.Restore(state);
 			}
 		}
-		
 		/// <summary>
 		/// Determine if the specified screen point lies inside the bounding box of this
 		/// <see cref="BoxObj"/>.
@@ -237,23 +285,157 @@ namespace ZedGraph
 		/// font sizes, etc. according to the actual size of the graph.
 		/// </param>
 		/// <returns>true if the point lies in the bounding box, false otherwise</returns>
-		override public bool PointInBox( PointF pt, PaneBase pane, Graphics g, float scaleFactor )
+		override public bool PointInBox(PointF pt, PaneBase pane, Graphics g, float scaleFactor)
 		{
-			if ( ! base.PointInBox(pt, pane, g, scaleFactor ) )
+			if (!base.PointInBox(pt, pane, g, scaleFactor))
 				return false;
 
 			// transform the x,y location from the user-defined
 			// coordinate frame to the screen pixel location
-			RectangleF pixRect = _location.TransformRect( pane );
+			RectangleF pixRect = _location.TransformRect(pane);
 
-			using ( GraphicsPath path = new GraphicsPath() )
+			using (GraphicsPath path = new GraphicsPath())
 			{
-				path.AddEllipse( pixRect );
-				return path.IsVisible( pt );
+				path.AddEllipse(pixRect);
+
+				Matrix matrix = new Matrix();
+				matrix.RotateAt(Angle, Center(pixRect));
+				path.Transform(matrix);
+
+				//g.DrawPath(new Pen(Color.Blue), path);
+				return path.IsVisible(pt);
 			}
 		}
-		
+
 	#endregion
-	
+	#region Overwrite Methods
+		override public RectangleF[] EdgeRects(PaneBase pane)
+		{
+			RectangleF pixRect = _location.TransformRect(pane);
+
+			RectangleF[] rects = new RectangleF[4];
+
+			float left = pixRect.Left;
+			float top = pixRect.Top;
+			float right = pixRect.Right;
+			float bottom = pixRect.Bottom;
+
+			float h = (bottom - top) / 2;
+			float w = (right - left) / 2;
+
+			float centerX = (left + right) / 2;
+			float centerY = (top + bottom) / 2;
+
+			// left: 0
+			rects[0] = new RectangleF(left - 2, centerY - 2, 4, 4);
+
+			// right: 1
+			rects[1] = new RectangleF(right - 2, centerY - 2, 4, 4);
+
+			// top: 2
+			rects[2] = new RectangleF(centerX - 2, top - 2, 4, 4);
+
+			// bottom: 3
+			rects[3] = new RectangleF(centerX - 2, bottom - 2, 4, 4);
+
+			return rects;
+		}
+
+		private static PointF Center(RectangleF pixRect)
+		{
+			return new PointF((pixRect.Left + pixRect.Right) / 2,
+				(pixRect.Top + pixRect.Bottom) / 2);
+		}
+		private PointF Center(PaneBase pane)
+		{
+			RectangleF pixRect = _location.TransformRect(pane);
+
+			return Center(pixRect);
+		}
+
+		override public bool FindNearestEdge(PointF pt, PaneBase pane, out int index)
+		{
+			RectangleF pixRect = _location.TransformRect(pane);
+
+			float left = pixRect.Left;
+			float top = pixRect.Top;
+			float right = pixRect.Right;
+			float bottom = pixRect.Bottom;
+
+			float h = (bottom - top) / 2;
+			float w = (right - left) / 2;
+
+			float centerX = (left + right) / 2;
+			float centerY = (top + bottom) / 2;
+
+			float angle = (float)(-180 * Math.Atan2(pt.Y - centerY, pt.X - centerX) / Math.PI);
+			float distance = (float)(Math.Sqrt(Math.Pow(pt.Y - centerY, 2) + Math.Pow(pt.X - centerX, 2)));
+			float diff = angle - -Angle;
+
+			index = -1;
+
+			// check angle first
+			if (Math.Abs(diff) < 1 && Math.Abs(distance - w) < 2)
+			{
+				index = 1;
+			}
+			else if ((Math.Abs(diff - 180) < 1 || Math.Abs(diff + 180) < 1)
+				&& Math.Abs(distance - w) < 2)
+			{
+				index = 0;
+			}
+			else if (Math.Abs(diff - 90) < 1 && Math.Abs(distance - h) < 2)
+			{
+				index = 2;
+			}
+			else if (Math.Abs(diff - -90) < 1 && Math.Abs(distance - h) < 2)
+			{
+				index = 3;
+			}
+
+			//System.Diagnostics.Trace.WriteLine(String.Format("angle {0} {1}  diff {2} {3}",
+			//    angle, Angle, diff, index));
+
+			return index != -1;
+		}
+
+		override public void ResizeEdge(int edge, PointF pt, PaneBase pane)
+		{
+			switch (edge)
+			{
+				case 0: // resize left
+				case 1: // resize right
+					{
+						PointF o = Center(pane);
+
+						double ds = Utils.Distance(pt.Y - o.Y, pt.X - o.X);
+						double angle = Utils.AngleInDegree(pt.Y - o.Y, pt.X - o.X);
+
+						if (ds > 0.01)
+						{
+							_location.X = (o.X - ds) / pane.Rect.Width;
+							_location.Width = ds * 2 / pane.Rect.Width;
+						}
+
+						Angle = (float)angle;
+					}
+					break;
+
+				case 2: // resize top
+				case 3: // resize bottom
+					{
+						PointF o = Center(pane);
+						double ds = Utils.Distance(pt.Y - o.Y, pt.X - o.X);
+
+						if (ds > 0.01)
+						{
+							_location.Y = (o.Y - ds) / pane.Rect.Height;
+							_location.Height = ds * 2 / pane.Rect.Height;
+						}
+					}
+					break;
+			}
+		}
+	#endregion
 	}
 }
