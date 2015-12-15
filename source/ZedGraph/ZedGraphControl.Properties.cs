@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2007  John Champion
+//Copyright ?2007  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -1230,7 +1230,19 @@ namespace ZedGraph
 			}
 		}
 
-	#endregion
+        /// <summary>
+		/// Gets or sets a value that determines whether or not editing of graph object.
+		/// </summary>
+		/// <remarks>
+		[Bindable(true), Category("Display"), NotifyParentProperty(true),
+         DefaultValue(false),
+         Description("true to allow editing the graph object")]
+        public bool IsEnableGraphEdit
+        {
+            get { return _isEnableGraphEdit; }
+            set { _isEnableGraphEdit = value; }
+        }
 
-	}
+	#endregion
+    }
 }

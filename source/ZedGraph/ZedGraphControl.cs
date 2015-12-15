@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2004  John Champion
+//Copyright ?2004  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -215,6 +215,11 @@ namespace ZedGraph
 		/// Internal variable that indicates if the control can manage selections. 
 		/// </summary>
 		private bool _isEnableSelection = false;
+
+        /// <summary>
+        /// Internal variable that indicates if the graph object can be moving, resizing.
+        /// </summary>
+        private bool _isEnableGraphEdit = false;
 
 		private double _zoomStepFraction = 0.1;
 
@@ -479,11 +484,17 @@ namespace ZedGraph
 		private ZoomState _zoomState;
 		private ZoomStateStack _zoomStateStack;
 
-		//temporarily save the location of a context menu click so we can use it for reference
-		// Note that Control.MousePosition ends up returning the position after the mouse has
-		// moved to the menu item within the context menu.  Therefore, this point is saved so
-		// that we have the point at which the context menu was first right-clicked
-		internal Point _menuClickPt;
+        /// <summary>
+        /// private field that stores the state of drag graph
+        /// </summary>
+        private GraphDragState _graphDragState;
+        private bool _isGraphDragging = false;
+
+        //temporarily save the location of a context menu click so we can use it for reference
+        // Note that Control.MousePosition ends up returning the position after the mouse has
+        // moved to the menu item within the context menu.  Therefore, this point is saved so
+        // that we have the point at which the context menu was first right-clicked
+        internal Point _menuClickPt;
 
 	#endregion
 
@@ -551,6 +562,8 @@ namespace ZedGraph
 
 			_zoomState = null;
 			_zoomStateStack = new ZoomStateStack();
+
+            _graphDragState = new GraphDragState();
 		}
 
 		/// <summary>
