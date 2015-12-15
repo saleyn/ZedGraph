@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2005  John Champion
+//Copyright ?2005  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -40,7 +41,9 @@ namespace ZedGraph
 
 	#region Fields
 
-		private PointD[] _points;
+		private List<PointD> _points = new List<PointD>();
+
+		private PointD _lastPoint;
 
 		/// <summary>
 		/// private value that determines if the polygon will be automatically closed.
@@ -58,7 +61,7 @@ namespace ZedGraph
 		/// the polygon.  This will be in units determined by
 		/// <see cref="ZedGraph.Location.CoordinateFrame"/>.
 		/// </summary>
-		public PointD[] Points
+		public List<PointD> Points
 		{
 			get { return _points; }
 			set { _points = value; }
@@ -102,7 +105,13 @@ namespace ZedGraph
 		public PolyObj( PointD[] points, Color borderColor, Color fillColor ) :
 				base( 0, 0, 1, 1, borderColor, fillColor )
 		{
-			_points = points;
+			_points.AddRange(points);
+		}
+
+		public PolyObj(PointD point, Color borderColor, Color fillColor) :
+				base(0, 0, 1, 1, borderColor, fillColor)
+		{
+			_points.Add(point);
 		}
 
 		/// <summary>
@@ -115,7 +124,7 @@ namespace ZedGraph
 		/// </param>
 		public PolyObj( PointD[] points ) : base( 0, 0, 1, 1 )
 		{
-			_points = points;
+			_points.AddRange(points);
 		}
 
 		/// <summary>
@@ -145,7 +154,7 @@ namespace ZedGraph
 							Color fillColor1, Color fillColor2 ) :
 				base( 0, 0, 1, 1, borderColor, fillColor1, fillColor2 )
 		{
-			_points = points;
+			_points.AddRange(points);
 		}
 
 		/// <summary>
@@ -154,7 +163,7 @@ namespace ZedGraph
 		/// <param name="rhs">The <see cref="PolyObj"/> object from which to copy</param>
 		public PolyObj( PolyObj rhs ) : base( rhs )
 		{
-			rhs._points = (PointD[]) _points.Clone();
+			rhs._points.AddRange(_points);
 			rhs._isClosedFigure = _isClosedFigure;
 		}
 
@@ -183,7 +192,7 @@ namespace ZedGraph
 		/// <summary>
 		/// Current schema value that defines the version of the serialized file
 		/// </summary>
-		public const int schema3 = 11;
+		public const int schema3 = 12;
 
 		/// <summary>
 		/// Constructor for deserializing objects
@@ -197,9 +206,10 @@ namespace ZedGraph
 			// The schema value is just a file version parameter.  You can use it to make future versions
 			// backwards compatible as new member variables are added to classes
 			int sch = info.GetInt32( "schema3" );
-
-			_points = (PointD[]) info.GetValue( "points", typeof(PointD[]) );
-
+			
+			if (sch >= 12) 
+				_points = (List<PointD>) info.GetValue( "points", typeof(List<PointD>) );
+			
 			if ( schema3 >= 11 )
 				_isClosedFigure = info.GetBoolean( "isClosedFigure" );
 
@@ -244,7 +254,7 @@ namespace ZedGraph
 		/// </param>
 		override public void Draw( Graphics g, PaneBase pane, float scaleFactor )
 		{
-			if ( _points != null && _points.Length > 1 )
+			if ( _points != null && _points.Count > 0 )
 			{
 				using ( GraphicsPath path = MakePath( pane ) )
 				{
@@ -257,8 +267,52 @@ namespace ZedGraph
 
 					if ( _border.IsVisible )
 					{
-						using ( Pen pen = _border.GetPen( pane, scaleFactor ) )
-							g.DrawPath( pen, path );
+						var sm = g.SmoothingMode;
+
+						g.SmoothingMode = SmoothingMode.AntiAlias;
+
+						using (Pen pen = _border.GetPen(pane, scaleFactor))
+						{
+							if (IsMoving)
+							{
+								// Set the DashCap to round.
+								pen.DashCap = DashCap.Round;
+
+								// Create a custom dash pattern.
+								pen.DashPattern = new float[] { 4.0F, 4.0F };
+							}
+
+							g.DrawPath(pen, path);
+
+							if (_lastPoint.X != 0 && !_isClosedFigure)
+							{
+								PointF lastPt = path.GetLastPoint();
+								PointF firstPt = path.PathPoints[0];
+
+								// Set the DashCap to round.
+								pen.DashCap = DashCap.Round;
+
+								// Create a custom dash pattern.
+								pen.DashPattern = new float[] { 4.0F, 4.0F };
+
+								g.DrawLine(pen, firstPt.X, firstPt.Y, 
+										(float)_lastPoint.X, 
+										(float)_lastPoint.Y);
+							}
+
+							if (IsSelected)
+							{
+								Brush brush = new SolidBrush(Color.White);
+
+								g.FillRectangles(brush, EdgeRects(pane));
+
+								pen.DashStyle = DashStyle.Solid;
+
+								g.DrawRectangles(pen, EdgeRects(pane));
+							}
+						}
+
+						g.SmoothingMode = sm;
 					}
 				}
 			}
@@ -290,10 +344,59 @@ namespace ZedGraph
 				}
 			}
 
-			if ( _isClosedFigure )
+			if (_isClosedFigure)
 				path.CloseFigure();
+			else if (_lastPoint.X != 0)
+			{
+				path.AddLine(lastPt.X, lastPt.Y, 
+					(float)_lastPoint.X, (float)_lastPoint.Y);
+			}
 
 			return path;
+		}
+
+		override public RectangleF[] EdgeRects(PaneBase pane)
+		{
+			RectangleF[] rects = new RectangleF[_points.Count];
+
+			for (int i = 0; i < rects.Length; i++)
+			{
+				PointF pixPt = Location.Transform(pane, 
+						_points[i].X + _location.X, _points[i].Y + _location.Y,
+						_location.CoordinateFrame);
+
+				rects[i] = new RectangleF(pixPt.X - 2, pixPt.Y - 2, 4, 4);
+			}
+
+			return rects;
+		}
+
+		override public bool FindNearestEdge(PointF pt, PaneBase pane, out int index)
+		{
+			RectangleF[] edges = EdgeRects(pane);
+
+			index = -1;
+
+			for (int i = 0; i < edges.Length; i++)
+			{
+				if (edges[i].Contains(pt))
+				{
+					index = i;
+					break;
+				}
+			}
+
+			return index != -1;
+		}
+
+		override public void ResizeEdge(int edge, PointF pt, PaneBase pane)
+		{
+			// do nothing if edge is invalid
+			if (edge < 0 && edge >= _points.Count)
+				return;
+
+			_points[edge] = new PointD(pt.X / pane.Rect.Width - _location.X,  
+									   pt.Y / pane.Rect.Height - _location.Y);
 		}
 
 		/// <summary>
@@ -318,7 +421,7 @@ namespace ZedGraph
 		/// <returns>true if the point lies in the bounding box, false otherwise</returns>
 		override public bool PointInBox( PointF pt, PaneBase pane, Graphics g, float scaleFactor )
 		{
-			if ( _points != null && _points.Length > 1 )
+			if ( _points != null && _points.Count > 1 )
 			{
 				if ( ! base.PointInBox(pt, pane, g, scaleFactor ) )
 					return false;
@@ -331,6 +434,26 @@ namespace ZedGraph
 		}
 		
 	#endregion
-	
+	#region Point Related Method
+		public void AddPoint(PointD pt)
+		{
+			_points.Add(pt);
+		}
+
+		public void AddPoint(double x, double y)
+		{
+			AddPoint(new PointD(x, y));
+
+			//System.Diagnostics.Trace.WriteLine(String.Format("points {0}  {1} {2}",
+			//	_points.Count, _lastPoint.X, _lastPoint.Y));
+		}
+
+		public PointD LastPoint
+		{
+			get { return _lastPoint; }
+			set { _lastPoint = value; }
+		}
+	#endregion
+
 	}
 }
