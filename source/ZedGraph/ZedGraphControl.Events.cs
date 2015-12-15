@@ -414,23 +414,7 @@ namespace ZedGraph
 					return;
 			}
 
-			// handle double click for Polygon graph
-			if (e.Clicks > 1 && _isEnableGraphEdit && _isGraphDragging)
-			{
-				if (_graphDragState.Obj is PolyObj
-					&& _graphDragState.State == GraphDragState.DragState.Polygon)
-				{
-					(_graphDragState.Obj as PolyObj).IsClosedFigure = true;
 
-					_graphDragState.Obj.IsMoving = false;
-					_graphDragState.State = GraphDragState.DragState.None;
-
-					_isGraphDragging = false;
-
-					Refresh();
-					return;
-				}
-			}
 
 			if ( e.Clicks > 1 || _masterPane == null )
 				return;
@@ -1612,11 +1596,7 @@ namespace ZedGraph
 				{
 					_graphDragState.Obj.ResizeEdge(_dragIndex, mousePt, _graphDragState.Pane);
 				}
-				else if (_graphDragState.State == GraphDragState.DragState.Polygon
-						&& _graphDragState.Obj is PolyObj)
-				{
-					(_graphDragState.Obj as PolyObj).LastPoint = new PointD(mousePt.X, mousePt.Y);
-				}
+
 				else
 				{
 					int index;
@@ -1638,17 +1618,12 @@ namespace ZedGraph
 
 		private void HandleGraphDragFinish()
 		{
-			if (_graphDragState.Obj != null 
-				&& _graphDragState.State != GraphDragState.DragState.Polygon)
+			if (_graphDragState.Obj != null)
 			{
+                // do not modify current selected graph 
 				_graphDragState.Obj.IsMoving = false;
 				_graphDragState.State = GraphDragState.DragState.None;
 
-				//selectedObj.IsSelected = false;
-
-				//this.Cursor = Cursors.Default;
-
-				//zedGraph.Invalidate();
 				// force a redraw
 				Refresh();
 			}
