@@ -65,8 +65,8 @@ namespace ZedGraph
 		{
 			/// <summary>
 			/// The default pen width used for the <see cref="BoxObj"/> border
-            /// (<see cref="ZedGraph.LineBase.Width"/> property).  Units are points (1/72 inch).
-            /// </summary>
+			/// (<see cref="ZedGraph.LineBase.Width"/> property).  Units are points (1/72 inch).
+			/// </summary>
 			public static float PenWidth = 1.0F;
 			/// <summary>
 			/// The default color used for the <see cref="BoxObj"/> border
@@ -86,7 +86,7 @@ namespace ZedGraph
 		/// Gets or sets the <see cref="ZedGraph.Fill"/> data for this
 		/// <see cref="BoxObj"/>.
 		/// </summary>
-		public Fill	Fill
+		public Fill Fill
 		{
 			get { return _fill; }
 			set { _fill = value; }
@@ -102,7 +102,7 @@ namespace ZedGraph
 			set { _border = value; }
 		}
 	#endregion
-	
+
 	#region Constructors
 		/// <overloads>Constructors for the <see cref="BoxObj"/> object</overloads>
 		/// <summary>
@@ -121,11 +121,11 @@ namespace ZedGraph
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
 		/// <param name="height">The height of this <see cref="BoxObj" />.  This will be in units determined by
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
-		public BoxObj( double x, double y, double width, double height, Color borderColor, Color fillColor )
-			: base( x, y, width, height )
+		public BoxObj(double x, double y, double width, double height, Color borderColor, Color fillColor)
+			: base(x, y, width, height)
 		{
-			this.Border = new Border( borderColor, Default.PenWidth );
-			this.Fill = new Fill( fillColor );
+			this.Border = new Border(borderColor, Default.PenWidth);
+			this.Fill = new Fill(fillColor);
 		}
 
 		/// <summary>
@@ -140,19 +140,19 @@ namespace ZedGraph
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
 		/// <param name="height">The height of this <see cref="BoxObj" />.  This will be in units determined by
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
-		public BoxObj( double x, double y, double width, double height )
+		public BoxObj(double x, double y, double width, double height)
 			:
-			base( x, y, width, height )
+			base(x, y, width, height)
 		{
-			this.Border = new Border( Default.BorderColor, Default.PenWidth );
-			this.Fill = new Fill( Default.FillColor );
+			this.Border = new Border(Default.BorderColor, Default.PenWidth);
+			this.Fill = new Fill(Default.FillColor);
 		}
 
 		/// <summary>
 		/// A default constructor that creates a <see cref="BoxObj"/> using a location of (0,0),
 		/// and a width,height of (1,1).  Other properties are defaulted.
 		/// </summary>
-		public BoxObj() : this( 0, 0, 1, 1 )
+		public BoxObj() : this(0, 0, 1, 1)
 		{
 		}
 
@@ -175,19 +175,19 @@ namespace ZedGraph
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
 		/// <param name="height">The height of this <see cref="BoxObj" />.  This will be in units determined by
 		/// <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
-		public BoxObj( double x, double y, double width, double height, Color borderColor,
-							Color fillColor1, Color fillColor2 ) :
-				base( x, y, width, height )
+		public BoxObj(double x, double y, double width, double height, Color borderColor,
+							Color fillColor1, Color fillColor2) :
+				base(x, y, width, height)
 		{
-			this.Border = new Border( borderColor, Default.PenWidth );
-			this.Fill = new Fill( fillColor1, fillColor2 );
+			this.Border = new Border(borderColor, Default.PenWidth);
+			this.Fill = new Fill(fillColor1, fillColor2);
 		}
 
 		/// <summary>
 		/// The Copy Constructor
 		/// </summary>
 		/// <param name="rhs">The <see cref="BoxObj"/> object from which to copy</param>
-		public BoxObj( BoxObj rhs ) : base( rhs )
+		public BoxObj(BoxObj rhs) : base(rhs)
 		{
 			this.Border = rhs.Border.Clone();
 			this.Fill = rhs.Fill.Clone();
@@ -209,7 +209,7 @@ namespace ZedGraph
 		/// <returns>A new, independent copy of this class</returns>
 		public BoxObj Clone()
 		{
-			return new BoxObj( this );
+			return new BoxObj(this);
 		}
 
 	#endregion
@@ -227,30 +227,30 @@ namespace ZedGraph
 		/// </param>
 		/// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data
 		/// </param>
-		protected BoxObj( SerializationInfo info, StreamingContext context ) : base( info, context )
+		protected BoxObj(SerializationInfo info, StreamingContext context) : base(info, context)
 		{
 			// The schema value is just a file version parameter.  You can use it to make future versions
 			// backwards compatible as new member variables are added to classes
-			int sch = info.GetInt32( "schema2" );
+			int sch = info.GetInt32("schema2");
 
-			_fill = (Fill) info.GetValue( "fill", typeof(Fill) );
-			_border = (Border) info.GetValue( "border", typeof(Border) );
+			_fill = (Fill)info.GetValue("fill", typeof(Fill));
+			_border = (Border)info.GetValue("border", typeof(Border));
 		}
 		/// <summary>
 		/// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
 		/// </summary>
 		/// <param name="info">A <see cref="SerializationInfo"/> instance that defines the serialized data</param>
 		/// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data</param>
-		[SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
-		public override void GetObjectData( SerializationInfo info, StreamingContext context )
+		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			base.GetObjectData( info, context );
-			info.AddValue( "schema2", schema2 );
-			info.AddValue( "fill", _fill );
-			info.AddValue( "border", _border );
+			base.GetObjectData(info, context);
+			info.AddValue("schema2", schema2);
+			info.AddValue("fill", _fill);
+			info.AddValue("border", _border);
 		}
 	#endregion
-	
+
 	#region Rendering Methods
 		/// <summary>
 		/// Render this object to the specified <see cref="Graphics"/> device.
@@ -273,30 +273,68 @@ namespace ZedGraph
 		/// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
 		/// font sizes, etc. according to the actual size of the graph.
 		/// </param>
-		override public void Draw( Graphics g, PaneBase pane, float scaleFactor )
+		override public void Draw(Graphics g, PaneBase pane, float scaleFactor)
 		{
 			// Convert the arrow coordinates from the user coordinate system
 			// to the screen coordinate system
-			RectangleF pixRect = this.Location.TransformRect( pane );
+			RectangleF pixRect = this.Location.TransformRect(pane);
 
 			// Clip the rect to just outside the PaneRect so we don't end up with wild coordinates.
 			RectangleF tmpRect = pane.Rect;
-			tmpRect.Inflate( 20, 20 );
-			pixRect.Intersect( tmpRect );
+			tmpRect.Inflate(20, 20);
+			pixRect.Intersect(tmpRect);
 
-			if (	Math.Abs( pixRect.Left ) < 100000 &&
-					Math.Abs( pixRect.Top ) < 100000 &&
-					Math.Abs( pixRect.Right ) < 100000 &&
-					Math.Abs( pixRect.Bottom ) < 100000 )
+			if (Math.Abs(pixRect.Left) < 100000 &&
+				Math.Abs(pixRect.Top) < 100000 &&
+				Math.Abs(pixRect.Right) < 100000 &&
+				Math.Abs(pixRect.Bottom) < 100000)
 			{
 				// If the box is to be filled, fill it
-				_fill.Draw( g, pixRect );
-				
+				_fill.Draw(g, pixRect);
+
 				// Draw the border around the box if required
-				_border.Draw( g, pane, scaleFactor, pixRect );
+				//_border.Draw( g, pane, scaleFactor, pixRect );
+
+				if (_border.IsVisible)
+				{
+					var smode = g.SmoothingMode;
+					g.SmoothingMode = SmoothingMode.AntiAlias;
+
+					RectangleF tRect = pixRect;
+
+					float scaledInflate = (float)(_border.InflateFactor * scaleFactor);
+					tRect.Inflate(scaledInflate, scaledInflate);
+
+					using (Pen pen = _border.GetPen(pane, scaleFactor))
+					{
+						if (IsMoving)
+						{
+							// Set the DashCap to round.
+							pen.DashCap = DashCap.Round;
+
+							// Create a custom dash pattern.
+							pen.DashPattern = new float[] { 4.0F, 4.0F };
+						}
+
+						g.DrawRectangle(pen, tRect.X, tRect.Y, tRect.Width, tRect.Height);
+
+						if (IsSelected)
+						{
+							Brush brush = new SolidBrush(Color.White);
+
+							g.FillRectangles(brush, EdgeRects(pane));
+
+							pen.DashStyle = DashStyle.Solid;
+
+							g.DrawRectangles(pen, EdgeRects(pane));
+						}
+					}
+
+					g.SmoothingMode = smode;
+				}
 			}
 		}
-		
+
 		/// <summary>
 		/// Determine if the specified screen point lies inside the bounding box of this
 		/// <see cref="BoxObj"/>.
@@ -317,34 +355,142 @@ namespace ZedGraph
 		/// font sizes, etc. according to the actual size of the graph.
 		/// </param>
 		/// <returns>true if the point lies in the bounding box, false otherwise</returns>
-		override public bool PointInBox( PointF pt, PaneBase pane, Graphics g, float scaleFactor )
+		override public bool PointInBox(PointF pt, PaneBase pane, Graphics g, float scaleFactor)
 		{
-			if ( ! base.PointInBox(pt, pane, g, scaleFactor ) )
+			if (!base.PointInBox(pt, pane, g, scaleFactor))
 				return false;
 
 			// transform the x,y location from the user-defined
 			// coordinate frame to the screen pixel location
-			RectangleF pixRect = _location.TransformRect( pane );
+			RectangleF pixRect = _location.TransformRect(pane);
 
-			return pixRect.Contains( pt );
+			return pixRect.Contains(pt);
 		}
 
 		/// <summary>
 		/// Determines the shape type and Coords values for this GraphObj
 		/// </summary>
-		override public void GetCoords( PaneBase pane, Graphics g, float scaleFactor,
-				out string shape, out string coords )
+		override public void GetCoords(PaneBase pane, Graphics g, float scaleFactor,
+				out string shape, out string coords)
 		{
 			// transform the x,y location from the user-defined
 			// coordinate frame to the screen pixel location
-			RectangleF pixRect = _location.TransformRect( pane );
+			RectangleF pixRect = _location.TransformRect(pane);
 
 			shape = "rect";
-			coords = String.Format( "{0:f0},{1:f0},{2:f0},{3:f0}",
-						pixRect.Left, pixRect.Top, pixRect.Right, pixRect.Bottom );
+			coords = String.Format("{0:f0},{1:f0},{2:f0},{3:f0}",
+						pixRect.Left, pixRect.Top, pixRect.Right, pixRect.Bottom);
 		}
 
 	#endregion
-	
+
+	#region Overwrite Methods
+		override public RectangleF[] EdgeRects(PaneBase pane)
+		{
+			RectangleF[] rects = new RectangleF[8];
+
+			RectangleF pixRect = _location.TransformRect(pane);
+
+			float left = pixRect.Left;
+			float top = pixRect.Top;
+			float right = pixRect.Right;
+			float bottom = pixRect.Bottom;
+
+			float h = (bottom - top) / 2;
+			float w = (right - left) / 2;
+
+			rects[0] = new RectangleF(left - 2, top - 2, 4, 4);
+			rects[1] = new RectangleF(left + w - 2, top - 2, 4, 4);
+			rects[2] = new RectangleF(right - 2, top - 2, 4, 4);
+			rects[3] = new RectangleF(right - 2, top + h - 2, 4, 4);
+			rects[4] = new RectangleF(right - 2, bottom - 2, 4, 4);
+			rects[5] = new RectangleF(left + w - 2, bottom - 2, 4, 4);
+			rects[6] = new RectangleF(left - 2, bottom - 2, 4, 4);
+			rects[7] = new RectangleF(left - 2, top + h - 2, 4, 4);
+
+			return rects;
+		}
+
+		override public bool FindNearestEdge(PointF pt, PaneBase pane, out int index)
+		{
+			RectangleF[] edges = EdgeRects(pane);
+
+			index = -1;
+
+			for (int i = 0; i < edges.Length; i++)
+			{
+				if (edges[i].Contains(pt))
+				{
+					index = i;
+					break;
+				}
+			}
+
+			return index != -1;
+		}
+
+		override public void ResizeEdge(int edge, PointF pt, PaneBase pane)
+		{
+			// do nothing if edge is invalid
+			if (edge < 0 && edge > 8)
+				return;
+
+			RectangleF[] edges = EdgeRects(pane);
+			RectangleF s = edges[edge];
+
+			float dx = (pt.X - s.X) / pane.Rect.Width;
+			float dy = (pt.Y - s.Y) / pane.Rect.Height;
+
+			switch (edge)
+			{
+				case 0:
+					_location.X += dx;
+					_location.Y += dy;
+					_location.Width -= dx;
+					_location.Height -= dy;
+					break;
+
+				case 2:
+					//_location.X += dx;
+					_location.Y += dy;
+					_location.Width += dx;
+					_location.Height -= dy;
+					break;
+
+				case 4:
+					//_location.X += dx;
+					//_location.Y += dy;
+					_location.Width += dx;
+					_location.Height += dy;
+					break;
+
+				case 6:
+					_location.X += dx;
+					//_location.Y += dy;
+					_location.Width -= dx;
+					_location.Height += dy;
+					break;
+
+				case 1:
+					_location.Y += dy;
+					_location.Height -= dy;
+					break;
+
+				case 5:
+					_location.Height += dy;
+					break;
+
+				case 3:
+					_location.Width += dx;
+					break;
+
+				case 7:
+					_location.X += dx;
+					_location.Width -= dx;
+					break;
+			}
+
+		}
+	#endregion
 	}
 }
