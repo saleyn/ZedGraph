@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2007  John Champion
+//Copyright ?2007  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -196,7 +196,7 @@ namespace ZedGraph
 		/// </summary>
 		/// <param name="sender">The source <see cref="ZedGraphControl"/> object</param>
 		/// <param name="pane">The <see cref="GraphPane"/> object that contains the cursor of interest</param>
-        /// <param name="mousePt">The <see cref="Point"/> object that represents the cursor value location</param>
+		/// <param name="mousePt">The <see cref="Point"/> object that represents the cursor value location</param>
 		/// <seealso cref="CursorValueEvent" />
 		public delegate string CursorValueHandler( ZedGraphControl sender, GraphPane pane,
 			Point mousePt );
@@ -414,6 +414,24 @@ namespace ZedGraph
 					return;
 			}
 
+			// handle double click for Polygon graph
+			if (e.Clicks > 1 && _isEnableGraphEdit && _isGraphDragging)
+			{
+				if (_graphDragState.Obj is PolyObj
+					&& _graphDragState.State == GraphDragState.DragState.Polygon)
+				{
+					(_graphDragState.Obj as PolyObj).IsClosedFigure = true;
+
+					_graphDragState.Obj.IsMoving = false;
+					_graphDragState.State = GraphDragState.DragState.None;
+
+					_isGraphDragging = false;
+
+					Refresh();
+					return;
+				}
+			}
+
 			if ( e.Clicks > 1 || _masterPane == null )
 				return;
 
@@ -456,47 +474,97 @@ namespace ZedGraph
 			pane = this.MasterPane.FindChartRect( mousePt );
 			//Rectangle rect = new Rectangle( mousePt, new Size( 1, 1 ) );
 
-			if ( pane != null &&
-				( _isEnableHPan || _isEnableVPan ) &&
-				( ( e.Button == _panButtons && Control.ModifierKeys == _panModifierKeys ) ||
-				( e.Button == _panButtons2 && Control.ModifierKeys == _panModifierKeys2 ) ) )
+			// check if dragging graph
+			if (pane != null && _isEnableGraphEdit)
+			{
+				int index;
+
+				// check if dragAction is actived
+				if (_graphDragState.Obj != null
+					&& _graphDragState.Obj.FindNearestEdge(mousePt, pane, out index))
+				{
+					_graphDragState.State = GraphDragState.DragState.Resize;
+					_dragStartPt = mousePt;
+					_dragIndex = index;
+					_graphDragState.Pane = pane;
+				}
+				else
+				{
+					// select object
+					object obj;
+
+					if (pane.FindNearestObject(mousePt,
+							this.CreateGraphics(), out obj, out index))
+					{
+						if (_graphDragState.Obj != obj)
+						{
+							_graphDragState.Reset();
+						}
+
+						if (obj is GraphObj)
+						{
+							_graphDragState.Obj = obj as GraphObj;
+							_graphDragState.Obj.IsSelected = true;
+
+							_graphDragState.State = GraphDragState.DragState.Select;
+							_dragStartPt = mousePt;
+							_dragIndex = 0;
+							_graphDragState.Pane = pane;
+						}
+					}  
+				}
+
+				_isGraphDragging = _graphDragState.Obj != null;
+
+				// skip below if graph dragging is going
+				if (_isGraphDragging)
+				{
+					Refresh();
+					return;
+				}
+			}
+
+			if (pane != null &&
+				(_isEnableHPan || _isEnableVPan) &&
+				((e.Button == _panButtons && Control.ModifierKeys == _panModifierKeys) ||
+				(e.Button == _panButtons2 && Control.ModifierKeys == _panModifierKeys2)))
 			{
 				_isPanning = true;
 				_dragStartPt = mousePt;
 				_dragPane = pane;
 				//_zoomState = new ZoomState( _dragPane, ZoomState.StateType.Pan );
-				ZoomStateSave( _dragPane, ZoomState.StateType.Pan );
+				ZoomStateSave(_dragPane, ZoomState.StateType.Pan);
 			}
-			else if ( pane != null && ( _isEnableHZoom || _isEnableVZoom ) &&
-				( ( e.Button == _zoomButtons && Control.ModifierKeys == _zoomModifierKeys ) ||
-				( e.Button == _zoomButtons2 && Control.ModifierKeys == _zoomModifierKeys2 ) ) )
+			else if (pane != null && (_isEnableHZoom || _isEnableVZoom) &&
+				((e.Button == _zoomButtons && Control.ModifierKeys == _zoomModifierKeys) ||
+				(e.Button == _zoomButtons2 && Control.ModifierKeys == _zoomModifierKeys2)))
 			{
 				_isZooming = true;
 				_dragStartPt = mousePt;
 				_dragEndPt = mousePt;
-				_dragEndPt.Offset( 1, 1 );
+				_dragEndPt.Offset(1, 1);
 				_dragPane = pane;
-				ZoomStateSave( _dragPane, ZoomState.StateType.Zoom );
+				ZoomStateSave(_dragPane, ZoomState.StateType.Zoom);
 			}
 			//Revision: JCarpenter 10/06
-			else if ( pane != null && _isEnableSelection && e.Button == _selectButtons &&
-				( Control.ModifierKeys == _selectModifierKeys ||
-					Control.ModifierKeys == _selectAppendModifierKeys ) )
+			else if (pane != null && _isEnableSelection && e.Button == _selectButtons &&
+				(Control.ModifierKeys == _selectModifierKeys ||
+					Control.ModifierKeys == _selectAppendModifierKeys))
 			{
 				_isSelecting = true;
 				_dragStartPt = mousePt;
 				_dragEndPt = mousePt;
-				_dragEndPt.Offset( 1, 1 );
+				_dragEndPt.Offset(1, 1);
 				_dragPane = pane;
 			}
-			else if ( pane != null && ( _isEnableHEdit || _isEnableVEdit ) &&
-				 ( e.Button == EditButtons && Control.ModifierKeys == EditModifierKeys ) )
+			else if (pane != null && (_isEnableHEdit || _isEnableVEdit) &&
+				 (e.Button == EditButtons && Control.ModifierKeys == EditModifierKeys))
 			{
 
 				// find the point that was clicked, and make sure the point list is editable
 				// and that it's a primary Y axis (the first Y or Y2 axis)
-				if ( pane.FindNearestPoint( mousePt, out _dragCurve, out _dragIndex ) &&
-							_dragCurve.Points is IPointListEdit )
+				if (pane.FindNearestPoint(mousePt, out _dragCurve, out _dragIndex) &&
+							_dragCurve.Points is IPointListEdit)
 				{
 					_isEditing = true;
 					_dragPane = pane;
@@ -519,9 +587,28 @@ namespace ZedGraph
 		/// </summary>
 		protected void SetCursor( Point mousePt )
 		{
-			if ( _masterPane != null )
+			if (_masterPane != null)
 			{
-				GraphPane pane = _masterPane.FindChartRect( mousePt );
+				GraphPane pane = _masterPane.FindChartRect(mousePt);
+
+				if (pane != null && _isEnableGraphEdit && _isGraphDragging)
+				{
+					int index;
+					Object obj;
+
+					if (_graphDragState.Obj != null
+						&& _graphDragState.Obj.FindNearestEdge(mousePt, _graphDragState.Pane, out index))
+						this.Cursor = Cursors.SizeAll;
+					else if (pane.FindNearestObject(mousePt,
+							this.CreateGraphics(), out obj, out index) && obj == _graphDragState.Obj)
+						this.Cursor = Cursors.Hand;
+					else
+						this.Cursor = Cursors.Default;
+	  
+					if (this.Cursor != Cursors.Default)
+						return;
+				}
+
 				if ( ( _isEnableHPan || _isEnableVPan ) && ( Control.ModifierKeys == Keys.Shift || _isPanning ) &&
 					( pane != null || _isPanning ) )
 					this.Cursor = Cursors.Hand;
@@ -594,16 +681,19 @@ namespace ZedGraph
 			if ( _masterPane != null && _dragPane != null )
 			{
 				// If the MouseUp event occurs, the user is done dragging.
-				if ( _isZooming )
-					HandleZoomFinish( sender, e );
-				else if ( _isPanning )
+				if (_isZooming)
+					HandleZoomFinish(sender, e);
+				else if (_isPanning)
 					HandlePanFinish();
-				else if ( _isEditing )
+				else if (_isEditing)
 					HandleEditFinish();
 				//Revision: JCarpenter 10/06
-				else if ( _isSelecting )
-					HandleSelectionFinish( sender, e );
+				else if (_isSelecting)
+					HandleSelectionFinish(sender, e);
 			}
+
+			if (_isGraphDragging)
+				HandleGraphDragFinish();
 
 			// Reset the rectangle.
 			//dragStartPt = new Rectangle( 0, 0, 0, 0 );
@@ -683,19 +773,21 @@ namespace ZedGraph
 
 				// If the mouse is being dragged,
 				// undraw and redraw the rectangle as the mouse moves.
-				if ( _isZooming )
-					HandleZoomDrag( mousePt );
-				else if ( _isPanning )
-					HandlePanDrag( mousePt );
-				else if ( _isEditing )
-					HandleEditDrag( mousePt );
-				else if ( _isShowCursorValues )
-					HandleCursorValues( mousePt );
-				else if ( _isShowPointValues )
-					HandlePointValues( mousePt );
+				if (_isZooming)
+					HandleZoomDrag(mousePt);
+				else if (_isPanning)
+					HandlePanDrag(mousePt);
+				else if (_isEditing)
+					HandleEditDrag(mousePt);
+				else if (_isShowCursorValues)
+					HandleCursorValues(mousePt);
+				else if (_isShowPointValues)
+					HandlePointValues(mousePt);
 				//Revision: JCarpenter 10/06
-				else if ( _isSelecting )
-					HandleZoomDrag( mousePt );
+				else if (_isSelecting)
+					HandleZoomDrag(mousePt);
+				else if (_isGraphDragging)
+					HandleGraphDrag(mousePt);
 			}
 		}
 
@@ -707,7 +799,6 @@ namespace ZedGraph
 
 			using ( Graphics g = this.CreateGraphics() )
 			{
-
 				if ( _masterPane.FindNearestPaneObject( mousePt,
 					g, out pane, out nearestObj, out iPt ) )
 				{
@@ -728,7 +819,6 @@ namespace ZedGraph
 						}
 						else
 						{
-
 							if ( curve is PieItem )
 							{
 								this.SetToolTip(((PieItem)curve).Value.ToString(this._pointValueFormat), mousePt);
@@ -1495,5 +1585,75 @@ namespace ZedGraph
 
 	#endregion
 
+	#region Graph Drag Events
+		private void HandleGraphDrag(Point mousePt)
+		{
+			if (_graphDragState.Obj != null)
+			{
+				if (_graphDragState.State == GraphDragState.DragState.Select)
+				{
+					_graphDragState.Obj.IsMoving = true;
+					_graphDragState.State = GraphDragState.DragState.Move;
+				}
+
+				if (_graphDragState.State == GraphDragState.DragState.Move)
+				{
+					_graphDragState.Obj.Location.X += (mousePt.X - _dragStartPt.X) / _graphDragState.Pane.Rect.Width;
+					_graphDragState.Obj.Location.Y += (mousePt.Y - _dragStartPt.Y) / _graphDragState.Pane.Rect.Height;
+
+					//_graphDragState.startPt = e.Location;
+					_dragStartPt = mousePt;
+
+					//this.Text = String.Format("{0} {1} -- {2} {3}",
+					//    drag.obj.Location.X, selectedLocation.Y,
+					//    drag.obj.Location.Location.X, selectedObj.Location.Y);
+				}
+				else if (_graphDragState.State == GraphDragState.DragState.Resize)
+				{
+					_graphDragState.Obj.ResizeEdge(_dragIndex, mousePt, _graphDragState.Pane);
+				}
+				else if (_graphDragState.State == GraphDragState.DragState.Polygon
+						&& _graphDragState.Obj is PolyObj)
+				{
+					(_graphDragState.Obj as PolyObj).LastPoint = new PointD(mousePt.X, mousePt.Y);
+				}
+				else
+				{
+					int index;
+					if (_graphDragState.Obj.FindNearestEdge(mousePt, _graphDragState.Pane, out index))
+					{
+						//this.Text = String.Format("edge is {0}", index);
+						//this.Cursor = Cursors.SizeAll;
+					}
+				}
+
+				//zedGraph.Invalidate();
+
+				// force a redraw
+				Refresh();
+
+				//return true;
+			}
+		}
+
+		private void HandleGraphDragFinish()
+		{
+			if (_graphDragState.Obj != null 
+				&& _graphDragState.State != GraphDragState.DragState.Polygon)
+			{
+				_graphDragState.Obj.IsMoving = false;
+				_graphDragState.State = GraphDragState.DragState.None;
+
+				//selectedObj.IsSelected = false;
+
+				//this.Cursor = Cursors.Default;
+
+				//zedGraph.Invalidate();
+				// force a redraw
+				Refresh();
+			}
+		}
+
+	#endregion
 	}
 }
