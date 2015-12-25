@@ -385,7 +385,7 @@ namespace ZedGraph
 	#endregion
 
 	#region Overwrite Methods
-		override public RectangleF[] EdgeRects(PaneBase pane)
+        override public RectangleF[] EdgeRects(PaneBase pane)
 		{
 			RectangleF[] rects = new RectangleF[8];
 

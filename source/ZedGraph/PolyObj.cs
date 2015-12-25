@@ -313,8 +313,8 @@ namespace ZedGraph
 				}
 			}
 		}
-		
-		internal GraphicsPath MakePath( PaneBase pane )
+
+        override public GraphicsPath MakePath( PaneBase pane )
 		{
 			GraphicsPath path = new GraphicsPath();
 			bool first = true;

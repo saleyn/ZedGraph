@@ -287,29 +287,33 @@ namespace ZedGraph
 		/// <returns>true if the point lies in the bounding box, false otherwise</returns>
 		override public bool PointInBox(PointF pt, PaneBase pane, Graphics g, float scaleFactor)
 		{
-			if (!base.PointInBox(pt, pane, g, scaleFactor))
-				return false;
+			//if (!base.PointInBox(pt, pane, g, scaleFactor))
+			//	return false;
 
-			// transform the x,y location from the user-defined
-			// coordinate frame to the screen pixel location
-			RectangleF pixRect = _location.TransformRect(pane);
-
-			using (GraphicsPath path = new GraphicsPath())
-			{
-				path.AddEllipse(pixRect);
-
-				Matrix matrix = new Matrix();
-				matrix.RotateAt(Angle, Center(pixRect));
-				path.Transform(matrix);
-
-				//g.DrawPath(new Pen(Color.Blue), path);
-				return path.IsVisible(pt);
-			}
-		}
-
+            using (GraphicsPath path = MakePath(pane))
+                return path.IsVisible(pt);
+        }
 	#endregion
+
 	#region Overwrite Methods
-		override public RectangleF[] EdgeRects(PaneBase pane)
+        override public GraphicsPath MakePath(PaneBase pane)
+        {
+            GraphicsPath path = new GraphicsPath();
+
+            // transform the x,y location from the user-defined
+            // coordinate frame to the screen pixel location
+            RectangleF pixRect = _location.TransformRect(pane);
+            
+            path.AddEllipse(pixRect);
+
+            Matrix matrix = new Matrix();
+            matrix.RotateAt(Angle, Center(pixRect));
+            path.Transform(matrix);
+
+            return path;
+        }
+
+        override public RectangleF[] EdgeRects(PaneBase pane)
 		{
 			RectangleF pixRect = _location.TransformRect(pane);
 

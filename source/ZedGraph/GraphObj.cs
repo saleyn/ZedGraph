@@ -527,6 +527,19 @@ namespace ZedGraph
 			return true;
 		}
 
+        virtual public GraphicsPath MakePath(PaneBase pane)
+        {
+            GraphicsPath path = new GraphicsPath();
+
+            // transform the x,y location from the user-defined
+            // coordinate frame to the screen pixel location
+            RectangleF pixRect = _location.TransformRect(pane);
+
+            path.AddRectangle(pixRect);
+
+            return path;
+        }
+
         /// <summary>
         /// Find the nearest edge for point which is used to resize graph
         /// </summary>
