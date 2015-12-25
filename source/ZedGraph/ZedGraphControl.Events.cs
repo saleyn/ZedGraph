@@ -381,6 +381,19 @@ namespace ZedGraph
 		 Description( "Subscribe to be notified when a link-enabled item is clicked" )]
 		public event LinkEventHandler LinkEvent;
 
+        /// <summary>
+        /// A delegate that allows notification of move/modify graph object
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="pane"></param>
+        /// <param name="source"></param>
+        public delegate void GraphEventHandler(ZedGraphControl sender, GraphPane pane,
+            GraphObj source);
+
+        [Bindable(true), Category("Events"),
+            Description("Subscribe to be notifiied when graph object is changed")]
+        public event GraphEventHandler GraphEvent;
+
 	#endregion
 
 	#region Mouse Events
@@ -413,8 +426,6 @@ namespace ZedGraph
 				if ( this.MouseDownEvent( this, e ) )
 					return;
 			}
-
-
 
 			if ( e.Clicks > 1 || _masterPane == null )
 				return;
@@ -1588,15 +1599,23 @@ namespace ZedGraph
 					//_graphDragState.startPt = e.Location;
 					_dragStartPt = mousePt;
 
-					//this.Text = String.Format("{0} {1} -- {2} {3}",
-					//    drag.obj.Location.X, selectedLocation.Y,
-					//    drag.obj.Location.Location.X, selectedObj.Location.Y);
-				}
+                    //this.Text = String.Format("{0} {1} -- {2} {3}",
+                    //    drag.obj.Location.X, selectedLocation.Y,
+                    //    drag.obj.Location.Location.X, selectedObj.Location.Y);
+                    //if (this.GraphEvent != null)
+                    //{
+                    //    this.GraphEvent(this, _graphDragState.Pane, _graphDragState.Obj);
+                    //}
+                }
 				else if (_graphDragState.State == GraphDragState.DragState.Resize)
 				{
 					_graphDragState.Obj.ResizeEdge(_dragIndex, mousePt, _graphDragState.Pane);
-				}
 
+                    //if (this.GraphEvent != null)
+                    //{
+                    //    this.GraphEvent(this, _graphDragState.Pane, _graphDragState.Obj);
+                    //}
+                }
 				else
 				{
 					int index;
@@ -1623,6 +1642,11 @@ namespace ZedGraph
                 // do not modify current selected graph 
 				_graphDragState.Obj.IsMoving = false;
 				_graphDragState.State = GraphDragState.DragState.None;
+
+                if (this.GraphEvent != null)
+                {
+                    this.GraphEvent(this, _graphDragState.Pane, _graphDragState.Obj);
+                }
 
 				// force a redraw
 				Refresh();
