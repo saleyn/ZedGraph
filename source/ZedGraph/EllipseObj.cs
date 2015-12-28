@@ -303,7 +303,7 @@ namespace ZedGraph
             // transform the x,y location from the user-defined
             // coordinate frame to the screen pixel location
             RectangleF pixRect = _location.TransformRect(pane);
-            
+
             path.AddEllipse(pixRect);
 
             Matrix matrix = new Matrix();
@@ -311,6 +311,98 @@ namespace ZedGraph
             path.Transform(matrix);
 
             return path;
+        }
+
+        internal GraphicsPath MakeInnerPath(PaneBase pane)
+        {
+            GraphicsPath path = new GraphicsPath();
+
+            // transform the x,y location from the user-defined
+            // coordinate frame to the screen pixel location
+            RectangleF pixRect = _location.TransformRect(pane);
+
+            float left = pixRect.Left;
+            float top = pixRect.Top;
+            float right = pixRect.Right;
+            float bottom = pixRect.Bottom;
+
+            float h = (bottom - top) / 2;
+            float w = (right - left) / 2;
+
+            float centerX = (left + right) / 2;
+            float centerY = (top + bottom) / 2;
+
+            path.AddPolygon(new PointF[] {
+                new PointF(left + w, top),
+                new PointF(right, top + h),
+                new PointF(left + w, bottom),
+                new PointF(left, top + h) });
+
+            Matrix matrix = new Matrix();
+            matrix.RotateAt(Angle, Center(pixRect));
+            path.Transform(matrix);
+
+            return path;
+        }
+
+        internal GraphicsPath MakeOuterPath(PaneBase pane)
+        {
+            GraphicsPath path = new GraphicsPath();
+
+            // transform the x,y location from the user-defined
+            // coordinate frame to the screen pixel location
+            RectangleF pixRect = _location.TransformRect(pane);
+
+            path.AddRectangle(pixRect);
+
+            Matrix matrix = new Matrix();
+            matrix.RotateAt(Angle, Center(pixRect));
+            path.Transform(matrix);
+
+            return path;
+        }
+
+        override public PointPairList FilterCurve(PaneBase pane, CurveList curveList)
+        {
+            PointPairList lst = new PointPairList();
+
+            GraphicsPath path = MakePath(pane);
+            GraphicsPath outerPath = MakeOuterPath(pane);
+            GraphicsPath innerPath = MakeInnerPath(pane);
+
+            foreach (var curve in curveList)
+            {
+                Axis yAxis = curve.GetYAxis((GraphPane)pane);
+                Axis xAxis = curve.GetXAxis((GraphPane)pane);
+
+                for (int i = 0; i < curve.NPts; i++)
+                {
+                    PointPair pp = curve.Points[i];
+
+                    float x = xAxis.Scale.Transform(pp.X);
+                    float y = yAxis.Scale.Transform(pp.Y);
+
+                    PointF pt = new PointF(x, y);
+
+                    if (outerPath != null && !outerPath.IsVisible(pt))
+                    {
+                        continue;
+                    }
+
+                    if (innerPath != null && innerPath.IsVisible(pt))
+                    {
+                        lst.Add(pp.X, pp.Y, pp.Z);
+                        continue;
+                    }
+
+                    if (path != null && path.IsVisible(pt))
+                    {
+                        lst.Add(pp.X, pp.Y, pp.Z);
+                    }
+                }
+            }
+
+            return lst;
         }
 
         override public RectangleF[] EdgeRects(PaneBase pane)
