@@ -91,9 +91,9 @@ namespace ZedGraph
         [CLSCompliant(false)]
         protected bool _isSelected;
 
-        #endregion
+    #endregion
 
-        #region Defaults
+    #region Defaults
         /// <summary>
         /// A simple struct that defines the
         /// default property values for the <see cref="GraphObj"/> class.
@@ -217,7 +217,7 @@ namespace ZedGraph
         }
         #endregion
 
-        #region Constructors
+    #region Constructors
         /// <overloads>
         /// Constructors for the <see cref="GraphObj"/> class.
         /// </overloads>
@@ -527,6 +527,11 @@ namespace ZedGraph
 			return true;
 		}
 
+        /// <summary>
+        /// Get path of graph object which is used for PointInBox 
+        /// </summary>
+        /// <param name="pane"></param>
+        /// <returns></returns>
         virtual public GraphicsPath MakePath(PaneBase pane)
         {
             GraphicsPath path = new GraphicsPath();
@@ -538,6 +543,42 @@ namespace ZedGraph
             path.AddRectangle(pixRect);
 
             return path;
+        }
+
+        /// <summary>
+        /// Filter points in curve list and build new point list
+        /// </summary>
+        /// <param name="pane"></param>
+        /// <param name="curveList"></param>
+        /// <returns></returns>
+        virtual public PointPairList FilterCurve(PaneBase pane, CurveList curveList)
+        {
+            PointPairList lst = new PointPairList();
+
+            GraphicsPath path = MakePath(pane);
+
+            foreach (var curve in curveList)
+            {
+                Axis yAxis = curve.GetYAxis((GraphPane)pane);
+                Axis xAxis = curve.GetXAxis((GraphPane)pane);
+
+                for (int i = 0; i < curve.NPts; i++)
+                {
+                    PointPair pp = curve.Points[i];
+
+                    float x = xAxis.Scale.Transform(pp.X);
+                    float y = yAxis.Scale.Transform(pp.Y);
+
+                    PointF pt = new PointF(x, y);
+
+                    if (path != null && path.IsVisible(pt))
+                    {
+                        lst.Add(pp.X, pp.Y, pp.Z);
+                    }
+                }
+            }
+
+            return lst;
         }
 
         /// <summary>
@@ -579,7 +620,6 @@ namespace ZedGraph
         {
             return new RectangleF[0];
         }
-
     #endregion
 
     }
