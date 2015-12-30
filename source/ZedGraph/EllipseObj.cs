@@ -43,13 +43,14 @@ namespace ZedGraph
 		private float _angle = 0f;
 		#endregion
 
-		#region Properties
+	#region Properties
 		public float Angle
 		{
 			get { return _angle; }
 			set { _angle = value; }
 		}
 	#endregion
+
 	#region Constructors
 		/// <overloads>Constructors for the <see cref="EllipseObj"/> object</overloads>
 		/// <summary>
@@ -362,7 +363,7 @@ namespace ZedGraph
             return path;
         }
 
-        override public PointPairList FilterCurve(PaneBase pane, CurveList curveList)
+        override public PointPairList FilterPoints(PaneBase pane, IPointList target)
         {
             PointPairList lst = new PointPairList();
 
@@ -370,35 +371,32 @@ namespace ZedGraph
             GraphicsPath outerPath = MakeOuterPath(pane);
             GraphicsPath innerPath = MakeInnerPath(pane);
 
-            foreach (var curve in curveList)
+            Axis yAxis = (pane as GraphPane).YAxis;
+            Axis xAxis = (pane as GraphPane).XAxis;
+
+            for (int i = 0; i < target.Count; i++)
             {
-                Axis yAxis = curve.GetYAxis((GraphPane)pane);
-                Axis xAxis = curve.GetXAxis((GraphPane)pane);
+                var pp = target[i];
 
-                for (int i = 0; i < curve.NPts; i++)
+                float x = xAxis.Scale.Transform(pp.X);
+                float y = yAxis.Scale.Transform(pp.Y);
+
+                PointF pt = new PointF(x, y);
+
+                if (outerPath != null && !outerPath.IsVisible(pt))
                 {
-                    PointPair pp = curve.Points[i];
+                    continue;
+                }
 
-                    float x = xAxis.Scale.Transform(pp.X);
-                    float y = yAxis.Scale.Transform(pp.Y);
+                if (innerPath != null && innerPath.IsVisible(pt))
+                {
+                    lst.Add(pp.X, pp.Y, pp.Z);
+                    continue;
+                }
 
-                    PointF pt = new PointF(x, y);
-
-                    if (outerPath != null && !outerPath.IsVisible(pt))
-                    {
-                        continue;
-                    }
-
-                    if (innerPath != null && innerPath.IsVisible(pt))
-                    {
-                        lst.Add(pp.X, pp.Y, pp.Z);
-                        continue;
-                    }
-
-                    if (path != null && path.IsVisible(pt))
-                    {
-                        lst.Add(pp.X, pp.Y, pp.Z);
-                    }
+                if (path != null && path.IsVisible(pt))
+                {
+                    lst.Add(pp.X, pp.Y, pp.Z);
                 }
             }
 

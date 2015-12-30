@@ -549,32 +549,29 @@ namespace ZedGraph
         /// Filter points in curve list and build new point list
         /// </summary>
         /// <param name="pane"></param>
-        /// <param name="curveList"></param>
+        /// <param name="target"></param>
         /// <returns></returns>
-        virtual public PointPairList FilterCurve(PaneBase pane, CurveList curveList)
+        virtual public PointPairList FilterPoints(PaneBase pane, IPointList target)
         {
             PointPairList lst = new PointPairList();
 
             GraphicsPath path = MakePath(pane);
 
-            foreach (var curve in curveList)
+            Axis yAxis = (pane as GraphPane).YAxis;
+            Axis xAxis = (pane as GraphPane).XAxis;
+
+            for (int i = 0; i < target.Count; i++)
             {
-                Axis yAxis = curve.GetYAxis((GraphPane)pane);
-                Axis xAxis = curve.GetXAxis((GraphPane)pane);
+                var pp = target[i];
 
-                for (int i = 0; i < curve.NPts; i++)
+                float x = xAxis.Scale.Transform(pp.X);
+                float y = yAxis.Scale.Transform(pp.Y);
+
+                PointF pt = new PointF(x, y);
+
+                if (path != null && path.IsVisible(pt))
                 {
-                    PointPair pp = curve.Points[i];
-
-                    float x = xAxis.Scale.Transform(pp.X);
-                    float y = yAxis.Scale.Transform(pp.Y);
-
-                    PointF pt = new PointF(x, y);
-
-                    if (path != null && path.IsVisible(pt))
-                    {
-                        lst.Add(pp.X, pp.Y, pp.Z);
-                    }
+                    lst.Add(pp.X, pp.Y, pp.Z);
                 }
             }
 
