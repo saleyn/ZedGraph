@@ -433,7 +433,7 @@ namespace ZedGraph
 			// First, see if the click is within a Linkable object within any GraphPane
 			GraphPane pane = this.MasterPane.FindPane( mousePt );
 			if ( pane != null &&
-					e.Button == _linkButtons && Control.ModifierKeys == _linkModifierKeys )
+				e.Button == _linkButtons && Control.ModifierKeys == _linkModifierKeys )
 			{
 				object source;
 				Link link;
@@ -474,8 +474,8 @@ namespace ZedGraph
 			{
 				int index;
 
-				// check if dragAction is actived
-				if (_graphDragState.Obj != null
+                // check if dragAction is actived
+                if (_graphDragState.Obj != null
 					&& _graphDragState.Obj.FindNearestEdge(mousePt, pane, out index))
 				{
 					_graphDragState.State = GraphDragState.DragState.Resize;
@@ -488,26 +488,26 @@ namespace ZedGraph
 					// select object
 					object obj;
 
-					if (pane.FindNearestObject(mousePt,
-							this.CreateGraphics(), out obj, out index))
+                    bool found = pane.FindNearestObject(mousePt,
+                            this.CreateGraphics(), out obj, out index);
+
+					if (_graphDragState.Obj != obj)
 					{
-						if (_graphDragState.Obj != obj)
-						{
-							_graphDragState.Reset();
-						}
+						_graphDragState.Reset();
+                        Refresh();
+                    }
 
-						if (obj is GraphObj)
-						{
-							_graphDragState.Obj = obj as GraphObj;
-							_graphDragState.Obj.IsSelected = true;
+                    if (found && (obj is GraphObj))
+                    {
+                        _graphDragState.Obj = obj as GraphObj;
+                        _graphDragState.Obj.IsSelected = true;
 
-							_graphDragState.State = GraphDragState.DragState.Select;
-							_dragStartPt = mousePt;
-							_dragIndex = 0;
-							_graphDragState.Pane = pane;
-						}
-					}  
-				}
+                        _graphDragState.State = GraphDragState.DragState.Select;
+                        _dragStartPt = mousePt;
+                        _dragIndex = 0;
+                        _graphDragState.Pane = pane;
+                    }
+                }
 
 				_isGraphDragging = _graphDragState.Obj != null;
 
@@ -586,36 +586,50 @@ namespace ZedGraph
 			{
 				GraphPane pane = _masterPane.FindChartRect(mousePt);
 
+                Cursor cursor = null;
+
 				if (pane != null && _isEnableGraphEdit && _isGraphDragging)
 				{
 					int index;
 					Object obj;
 
-					if (_graphDragState.Obj != null
-						&& _graphDragState.Obj.FindNearestEdge(mousePt, _graphDragState.Pane, out index))
-						this.Cursor = Cursors.SizeAll;
-					else if (pane.FindNearestObject(mousePt,
-							this.CreateGraphics(), out obj, out index) && obj == _graphDragState.Obj)
-						this.Cursor = Cursors.Hand;
-					else
-						this.Cursor = Cursors.Default;
-	  
-					if (this.Cursor != Cursors.Default)
-						return;
+                    if ( // current obj is resizing or edge is selected
+                        _graphDragState.Obj != null
+                        && (_graphDragState.State == GraphDragState.DragState.Resize
+                        ||  _graphDragState.Obj.FindNearestEdge(mousePt, _graphDragState.Pane, out index)))
+                        cursor = Cursors.SizeAll;
+                    else if ( // current obj is moving or selected
+                            (_graphDragState.Obj != null 
+                            && _graphDragState.State == GraphDragState.DragState.Move)
+                        || (pane.FindNearestObject(mousePt,
+                            this.CreateGraphics(), out obj, out index) 
+                            && obj == _graphDragState.Obj))
+                        cursor = Cursors.Hand;
+                    else
+                        cursor = Cursors.Default;
 				}
 
-				if ( ( _isEnableHPan || _isEnableVPan ) && ( Control.ModifierKeys == Keys.Shift || _isPanning ) &&
+                if (cursor != null && cursor != Cursors.Default)
+                {
+                    // do nothing, just for ...
+                }
+                else if ( ( _isEnableHPan || _isEnableVPan ) && ( Control.ModifierKeys == Keys.Shift || _isPanning ) &&
 					( pane != null || _isPanning ) )
-					this.Cursor = Cursors.Hand;
+                    cursor = Cursors.Hand;
 				else if ( ( _isEnableVZoom || _isEnableHZoom ) && ( pane != null || _isZooming ) )
-					this.Cursor = Cursors.Cross;
+                    cursor = Cursors.Cross;
 				else if ( _isEnableSelection && ( pane != null || _isSelecting ) )
-					this.Cursor = Cursors.Cross;
+                    cursor = Cursors.Cross;
 				else
-					this.Cursor = Cursors.Default;
+                    cursor = Cursors.Default;
 
 				//			else if ( isZoomMode || isPanMode )
 				//				this.Cursor = Cursors.No;
+
+                if (cursor != null)
+                {
+                    this.Cursor = cursor;
+                }
 			}
 		}
 
