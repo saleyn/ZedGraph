@@ -21,6 +21,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -551,9 +552,12 @@ namespace ZedGraph
         /// <param name="pane"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        virtual public PointPairList FilterPoints(PaneBase pane, IPointList target)
+        virtual public List<PointPairList> FilterPoints(PaneBase pane, IPointList target)
         {
-            PointPairList lst = new PointPairList();
+            List<PointPairList> lst = new List<PointPairList>(2);
+
+            lst.Add(new PointPairList());
+            lst.Add(new PointPairList());
 
             GraphicsPath path = MakePath(pane);
 
@@ -571,7 +575,11 @@ namespace ZedGraph
 
                 if (path != null && path.IsVisible(pt))
                 {
-                    lst.Add(pp.X, pp.Y, pp.Z);
+                    lst[0].Add(pp.X, pp.Y, pp.Z);
+                }
+                else
+                {
+                    lst[1].Add(pp.X, pp.Y, pp.Z);
                 }
             }
 

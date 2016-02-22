@@ -21,6 +21,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -363,9 +364,12 @@ namespace ZedGraph
             return path;
         }
 
-        override public PointPairList FilterPoints(PaneBase pane, IPointList target)
+        override public List<PointPairList> FilterPoints(PaneBase pane, IPointList target)
         {
-            PointPairList lst = new PointPairList();
+            List<PointPairList> lst = new List<PointPairList>(2);
+
+            lst.Add(new PointPairList());
+            lst.Add(new PointPairList());
 
             GraphicsPath path = MakePath(pane);
             GraphicsPath outerPath = MakeOuterPath(pane);
@@ -385,18 +389,23 @@ namespace ZedGraph
 
                 if (outerPath != null && !outerPath.IsVisible(pt))
                 {
+                    lst[1].Add(pp.X, pp.Y, pp.Z);
                     continue;
                 }
 
                 if (innerPath != null && innerPath.IsVisible(pt))
                 {
-                    lst.Add(pp.X, pp.Y, pp.Z);
+                    lst[0].Add(pp.X, pp.Y, pp.Z);
                     continue;
                 }
 
                 if (path != null && path.IsVisible(pt))
                 {
-                    lst.Add(pp.X, pp.Y, pp.Z);
+                    lst[0].Add(pp.X, pp.Y, pp.Z);
+                }
+                else
+                {
+                    lst[1].Add(pp.X, pp.Y, pp.Z);
                 }
             }
 
