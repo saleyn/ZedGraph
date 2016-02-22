@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2004  John Champion
+//Copyright ?2004  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -171,6 +171,11 @@ namespace ZedGraph
 		/// </summary>
 		/// <value>The size of the font, measured in points (1/72 inch).</value>
 		private float _scaledSize;
+
+        /// <summary>
+        /// Private field that store if the font scale factor
+        /// </summary>
+        private float _scaleFactor;
 	#endregion
 
 	#region Defaults
@@ -240,6 +245,12 @@ namespace ZedGraph
 			/// the offset distance of the drop shadow for this <see cref="FontSpec" />.
 			/// </summary>
 			public static float DropShadowOffset = 0.05f;
+            /// <summary>
+            /// Default value for font scale factor. 
+            /// 0: auto scale
+            /// others: fixed scale factor
+            /// </summary>
+            public static float ScaleFactor = 0;
 
 		}
 	#endregion
@@ -536,6 +547,7 @@ namespace ZedGraph
 			_dropShadowColor = Default.DropShadowColor;
 			_dropShadowAngle = Default.DropShadowAngle;
 			_dropShadowOffset = Default.DropShadowOffset;
+            _scaleFactor = Default.ScaleFactor;
 
 			_fill = new Fill( fillColor, fillBrush, fillType );
 			_border = new Border( true, Color.Black, 1.0F );
@@ -567,6 +579,7 @@ namespace ZedGraph
 			_dropShadowColor = rhs._dropShadowColor;
 			_dropShadowAngle = rhs._dropShadowAngle;
 			_dropShadowOffset = rhs._dropShadowOffset;
+            _scaleFactor = rhs._scaleFactor;
 
 			_scaledSize = rhs._scaledSize;
 			Remake( 1.0F, _size, ref _scaledSize, ref _font );
@@ -599,7 +612,7 @@ namespace ZedGraph
 		/// </summary>
 		// Change to 2 with addition of isDropShadow, dropShadowColor, dropShadowAngle, dropShadowOffset
 		// changed to 10 with the version 5 refactor -- not backwards compatible
-		public const int schema = 10;
+		public const int schema = 11;
 
 		/// <summary>
 		/// Constructor for deserializing objects
@@ -631,6 +644,7 @@ namespace ZedGraph
 			_dropShadowColor = (Color)info.GetValue( "dropShadowColor", typeof( Color ) );
 			_dropShadowAngle = info.GetSingle( "dropShadowAngle" );
 			_dropShadowOffset = info.GetSingle( "dropShadowOffset" );
+            _scaleFactor = info.GetSingle("scaleFactor");
 
 			_scaledSize = -1;
 			Remake( 1.0F, _size, ref _scaledSize, ref _font );
@@ -661,6 +675,8 @@ namespace ZedGraph
 			info.AddValue( "dropShadowColor", _dropShadowColor );
 			info.AddValue( "dropShadowAngle", _dropShadowAngle );
 			info.AddValue( "dropShadowOffset", _dropShadowOffset );
+
+            info.AddValue("scaleFactor", _scaleFactor);
 		}
 	#endregion
 
@@ -681,7 +697,10 @@ namespace ZedGraph
 		/// <param name="font">A reference to the <see cref="Font"/> object</param>
 		private void Remake( float scaleFactor, float size, ref float scaledSize, ref Font font )
 		{
-			float newSize = size * scaleFactor;
+            if (_scaleFactor != 0)
+                scaleFactor = _scaleFactor;
+
+            float newSize = size * scaleFactor;
 
 			float oldSize = ( font == null ) ? 0.0f : font.Size;
 
@@ -871,6 +890,9 @@ namespace ZedGraph
 				// CenterTop of the text needs to be.
 				//RectangleF layoutArea = new RectangleF( 0.0F, 0.0F, sizeF.Width, sizeF.Height );
 				g.DrawString( text, _font, brush, rectF, strFormat );
+
+                //System.Diagnostics.Trace.WriteLine(string.Format("draw {0} font size {1}",
+                //    text, _font.Size));
 			}
 
 			// Restore the transform matrix back to original
