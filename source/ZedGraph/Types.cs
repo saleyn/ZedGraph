@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2004  John Champion
+//Copyright ?2004  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -485,9 +485,13 @@ namespace ZedGraph
 		/// corresponds to the values of the Y2 scale.  Values outside the scale range will be
 		/// outside the <see cref="Chart.Rect" />.
 		/// </remarks>
-		XChartFractionY2Scale
+		XChartFractionY2Scale,
 
-	}
+        /// <summary>
+        /// Coordinates are specified according to the Panel
+        /// </summary>
+        PaneRelative
+    }
 	
 	/// <summary>
 	/// Enumeration type that defines how a curve is drawn.  Curves can be drawn
