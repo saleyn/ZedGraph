@@ -399,6 +399,16 @@ namespace ZedGraph
 			float h = (bottom - top) / 2;
 			float w = (right - left) / 2;
 
+            /**
+               0       1       2
+               +---------------+
+               |               |
+             7 |               | 3
+               |               |
+               +---------------+
+               6       5       4
+            */
+
 			rects[0] = new RectangleF(left - 2, top - 2, 4, 4);
 			rects[1] = new RectangleF(left + w - 2, top - 2, 4, 4);
 			rects[2] = new RectangleF(right - 2, top - 2, 4, 4);
@@ -438,59 +448,138 @@ namespace ZedGraph
 			RectangleF[] edges = EdgeRects(pane);
 			RectangleF s = edges[edge];
 
-			float dx = (pt.X - s.X) / pane.Rect.Width;
-			float dy = (pt.Y - s.Y) / pane.Rect.Height;
+            GraphPane gPane = pane as GraphPane;
 
-			switch (edge)
+            // convert location to screen coordinate
+            PointF ptPix1 = gPane.GeneralTransform(_location.X1, _location.Y1,
+                    _location.CoordinateFrame);
+
+            PointF ptPix2 = gPane.GeneralTransform(_location.X2, _location.Y2,
+                    _location.CoordinateFrame);
+
+            /*
+            // calc new position
+            ptPix1.X += (mousePt.X - _dragStartPt.X);
+            ptPix1.Y += (mousePt.Y - _dragStartPt.Y);
+
+            ptPix2.X += (mousePt.X - _dragStartPt.X);
+            ptPix2.Y += (mousePt.Y - _dragStartPt.Y);
+
+            // convert to user coordinate
+            PointD pt1 = pane.GeneralReverseTransform(ptPix1, obj.Location.CoordinateFrame);
+            PointD pt2 = pane.GeneralReverseTransform(ptPix2, obj.Location.CoordinateFrame);
+
+            obj.Location.X = pt1.X;
+            obj.Location.Y = pt1.Y;
+            obj.Location.Width = pt2.X - pt1.X;
+            obj.Location.Height = pt2.Y - pt1.Y;
+            */
+
+            //float dx = (pt.X - s.X) / pane.Rect.Width;
+			//float dy = (pt.Y - s.Y) / pane.Rect.Height;
+
+            float dx = (pt.X - s.X) ;
+            float dy = (pt.Y - s.Y) ;
+
+            /**
+               0       1       2
+               +---------------+
+               |               |
+             7 |               | 3
+               |               |
+               +---------------+
+               6       5       4
+            */
+
+            switch (edge)
 			{
 				case 0:
-					_location.X += dx;
-					_location.Y += dy;
-					_location.Width -= dx;
-					_location.Height -= dy;
-					break;
+                    //_location.X += dx;
+                    //_location.Y += dy;
+                    //_location.Width -= dx;
+                    //_location.Height -= dy;
+
+                    // calc new position
+                    ptPix1.X += dx;
+                    ptPix1.Y += dy;
+                    //ptPix2.X -= dx;
+                    //ptPix2.Y -= dy;
+                    break;
 
 				case 2:
-					//_location.X += dx;
-					_location.Y += dy;
-					_location.Width += dx;
-					_location.Height -= dy;
-					break;
+                    //_location.Y += dy;
+                    //_location.Width += dx;
+                    //_location.Height -= dy;
+
+                    // calc new position
+                    ptPix1.Y += dy;
+                    ptPix2.X += dx;
+                    //ptPix2.Y -= dy;
+                    break;
 
 				case 4:
-					//_location.X += dx;
-					//_location.Y += dy;
-					_location.Width += dx;
-					_location.Height += dy;
-					break;
+                    //_location.Width += dx;
+                    //_location.Height += dy;
+
+                    // calc new position
+                    ptPix2.X += dx;
+                    ptPix2.Y += dy;
+                    break;
 
 				case 6:
-					_location.X += dx;
-					//_location.Y += dy;
-					_location.Width -= dx;
-					_location.Height += dy;
-					break;
+					//_location.X += dx;
+					//_location.Width -= dx;
+					//_location.Height += dy;
+
+                    // calc new position
+                    ptPix1.X += dx;
+                    //ptPix2.X -= dx;
+                    ptPix2.Y += dy;
+                    break;
 
 				case 1:
-					_location.Y += dy;
-					_location.Height -= dy;
-					break;
+					//_location.Y += dy;
+					//_location.Height -= dy;
+
+                    // calc new position
+                    ptPix1.Y += dy;
+                    //ptPix2.Y -= dy;
+                    break;
 
 				case 5:
-					_location.Height += dy;
-					break;
+					//_location.Height += dy;
+
+                    // calc new position
+                    ptPix2.Y += dy;
+                    break;
 
 				case 3:
-					_location.Width += dx;
-					break;
+					//_location.Width += dx;
+
+                    // calc new position
+                    ptPix2.X += dx;
+                    break;
 
 				case 7:
-					_location.X += dx;
-					_location.Width -= dx;
-					break;
+					//_location.X += dx;
+					//_location.Width -= dx;
+
+                    // calc new position
+                    ptPix1.X += dx;
+                    //ptPix2.X -= dx;
+                    break;
 			}
 
-		}
+
+            // convert to user space coordinate
+            PointD pt1 = gPane.GeneralReverseTransform(ptPix1, _location.CoordinateFrame);
+            PointD pt2 = gPane.GeneralReverseTransform(ptPix2, _location.CoordinateFrame);
+
+            _location.X = pt1.X;
+            _location.Y = pt1.Y;
+            _location.Width = pt2.X - pt1.X;
+            _location.Height = pt2.Y - pt1.Y;
+        }
 	#endregion
 	}
 }
