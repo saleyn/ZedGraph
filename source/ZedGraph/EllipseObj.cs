@@ -219,7 +219,14 @@ namespace ZedGraph
 			// to the screen coordinate system
 			RectangleF pixRect = this.Location.TransformRect(pane);
 
-			if (Math.Abs(pixRect.Left) < 100000 &&
+            //GraphPane gPane = pane as GraphPane;
+
+            //System.Diagnostics.Trace.WriteLine("XScale " + gPane.XAxis.Scale);
+            //System.Diagnostics.Trace.WriteLine("YScale " + gPane.YAxis.Scale);
+
+            //System.Diagnostics.Trace.WriteLine(pixRect.X);
+
+            if (Math.Abs(pixRect.Left) < 100000 &&
 					Math.Abs(pixRect.Top) < 100000 &&
 					Math.Abs(pixRect.Right) < 100000 &&
 					Math.Abs(pixRect.Bottom) < 100000)
@@ -504,21 +511,55 @@ namespace ZedGraph
 
 		override public void ResizeEdge(int edge, PointF pt, PaneBase pane)
 		{
-			switch (edge)
+            /*
+            // convert location to screen coordinate
+            PointF ptPix1 = pane.GeneralTransform(obj.Location.X1, obj.Location.Y1,
+                    obj.Location.CoordinateFrame);
+
+            PointF ptPix2 = pane.GeneralTransform(obj.Location.X2, obj.Location.Y2,
+                    obj.Location.CoordinateFrame);
+
+            // calc new position
+            ptPix1.X += (mousePt.X - _dragStartPt.X);
+            ptPix1.Y += (mousePt.Y - _dragStartPt.Y);
+
+            ptPix2.X += (mousePt.X - _dragStartPt.X);
+            ptPix2.Y += (mousePt.Y - _dragStartPt.Y);
+
+            // convert to user coordinate
+            PointD pt1 = pane.GeneralReverseTransform(ptPix1, obj.Location.CoordinateFrame);
+            PointD pt2 = pane.GeneralReverseTransform(ptPix2, obj.Location.CoordinateFrame);
+
+            obj.Location.X = pt1.X;
+            obj.Location.Y = pt1.Y;
+            obj.Location.Width = pt2.X - pt1.X;
+            obj.Location.Height = pt2.Y - pt1.Y;
+            */
+            GraphPane gPane = pane as GraphPane;
+
+            switch (edge)
 			{
 				case 0: // resize left
 				case 1: // resize right
 					{
-						PointF o = Center(pane);
+						PointF o = Center(gPane);
 
 						double ds = Utils.Distance(pt.Y - o.Y, pt.X - o.X);
 						double angle = Utils.AngleInDegree(pt.Y - o.Y, pt.X - o.X);
 
 						if (ds > 0.01)
 						{
-							_location.X = (o.X - ds) / pane.Rect.Width;
-							_location.Width = ds * 2 / pane.Rect.Width;
-						}
+                            //_location.X = (o.X - ds) / pane.Rect.Width;
+                            //_location.Width = ds * 2 / pane.Rect.Width;
+
+                            PointD pt1 = gPane.GeneralReverseTransform((float)(o.X - ds), 0,
+                                _location.CoordinateFrame);
+                            PointD pt2 = gPane.GeneralReverseTransform((float)(o.X + ds), 0,
+                                _location.CoordinateFrame);
+
+                            _location.X = pt1.X;
+                            _location.Width = pt2.X - pt1.X;
+                        }
 
 						Angle = (float)angle;
 					}
@@ -532,9 +573,17 @@ namespace ZedGraph
 
 						if (ds > 0.01)
 						{
-							_location.Y = (o.Y - ds) / pane.Rect.Height;
-							_location.Height = ds * 2 / pane.Rect.Height;
-						}
+                            //_location.Y = (o.Y - ds) / pane.Rect.Height;
+                            //_location.Height = ds * 2 / pane.Rect.Height;
+
+                            PointD pt1 = gPane.GeneralReverseTransform(0, (float)(o.Y - ds),
+                                _location.CoordinateFrame);
+                            PointD pt2 = gPane.GeneralReverseTransform(0, (float)(o.Y + ds),
+                                _location.CoordinateFrame);
+
+                            _location.Y = pt1.Y;
+                            _location.Height = pt2.Y - pt1.Y;
+                        }
 					}
 					break;
 			}
