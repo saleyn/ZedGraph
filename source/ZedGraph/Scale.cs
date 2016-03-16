@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2004  John Champion
+//Copyright ?2004  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -943,14 +943,68 @@ namespace ZedGraph
 			info.AddValue( "fontSpec", _fontSpec );
 			info.AddValue( "labelGap", _labelGap );
 		}
-	#endregion
 
-	#region properties
+#if false
+        public override string ToString()
+        {
+            string s = "";
 
-		/// <summary>
-		/// Get an <see cref="AxisType" /> enumeration that indicates the type of this scale.
-		/// </summary>
-		abstract public AxisType Type { get; }
+            s += string.Format("min: {0}; ", _min);
+            s += string.Format("max: {0}; ", _max);
+
+            s += string.Format("_maxLinTemp: {0}  _minLinTemp: {1} ; ", _maxLinTemp, _minLinTemp);
+            s += string.Format("_maxPix: {0}  _minPix: {1} ; ", _maxPix, _minPix);
+
+
+            //s += string.Format("majorStep: {0}; ", _majorStep);
+            //s += string.Format("minorStep: {0}; ", _minorStep);
+            //s += string.Format("exponent: {0}; ", _exponent);
+            //s += string.Format("baseTic: {0}; ", _baseTic);
+
+            //s += string.Format("minAuto: {0}; ", _minAuto);
+            //s += string.Format("maxAuto: {0}; ", _maxAuto);
+            //s += string.Format("majorStepAuto: {0}; ", _majorStepAuto);
+            //s += string.Format("minorStepAuto: {0}; ", _minorStepAuto);
+            //s += string.Format("magAuto: {0}; ", _magAuto);
+            //s += string.Format("formatAuto: {0}; ", _formatAuto);
+
+            //s += string.Format("minGrace: {0}; ", _minGrace);
+            //s += string.Format("maxGrace: {0}; ", _maxGrace);
+
+            //s += string.Format("mag: {0}; ", _mag);
+            //s += string.Format("isReverse: {0}; ", _isReverse);
+            //s += string.Format("isPreventLabelOverlap: {0}; ", _isPreventLabelOverlap);
+            //s += string.Format("isUseTenPower: {0}; ", _isUseTenPower);
+            //s += string.Format("isVisible: {0}; ", _isVisible);
+            //s += string.Format("isSkipFirstLabel: {0}; ", _isSkipFirstLabel);
+            //s += string.Format("isSkipLastLabel: {0}; ", _isSkipLastLabel);
+            //s += string.Format("isSkipCrossLabel: {0}; ", _isSkipCrossLabel);
+
+
+            //s += string.Format("textLabels: {0}; ", _textLabels);
+            //s += string.Format("format: {0}; ", _format);
+
+            //s += string.Format("majorUnit: {0}; ", _majorUnit);
+            //s += string.Format("minorUnit: {0}; ", _minorUnit);
+
+            //s += string.Format("isLabelsInside: {0}; ", _isLabelsInside);
+            //s += string.Format("align: {0}; ", _align);
+            //s += string.Format("alignH: {0}; ", _alignH);
+            //s += string.Format("fontSpec: {0}; ", _fontSpec);
+            //s += string.Format("labelGap: {0}; ", _labelGap);
+
+            return s;
+        }
+#endif
+
+    #endregion
+
+    #region properties
+
+        /// <summary>
+        /// Get an <see cref="AxisType" /> enumeration that indicates the type of this scale.
+        /// </summary>
+        abstract public AxisType Type { get; }
 
 		/// <summary>
 		/// True if this scale is <see cref="AxisType.Log" />, false otherwise.
