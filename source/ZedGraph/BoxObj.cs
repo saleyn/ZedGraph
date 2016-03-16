@@ -502,11 +502,17 @@ namespace ZedGraph
                     // calc new position
                     ptPix1.X += dx;
                     ptPix1.Y += dy;
-                    //ptPix2.X -= dx;
-                    //ptPix2.Y -= dy;
                     break;
 
-				case 2:
+                case 1:
+                    //_location.Y += dy;
+                    //_location.Height -= dy;
+
+                    // calc new position
+                    ptPix1.Y += dy;
+                    break;
+
+                case 2:
                     //_location.Y += dy;
                     //_location.Width += dx;
                     //_location.Height -= dy;
@@ -514,10 +520,16 @@ namespace ZedGraph
                     // calc new position
                     ptPix1.Y += dy;
                     ptPix2.X += dx;
-                    //ptPix2.Y -= dy;
                     break;
 
-				case 4:
+                case 3:
+                    //_location.Width += dx;
+
+                    // calc new position
+                    ptPix2.X += dx;
+                    break;
+
+                case 4:
                     //_location.Width += dx;
                     //_location.Height += dy;
 
@@ -526,38 +538,21 @@ namespace ZedGraph
                     ptPix2.Y += dy;
                     break;
 
-				case 6:
+                case 5:
+                    //_location.Height += dy;
+
+                    // calc new position
+                    ptPix2.Y += dy;
+                    break;
+
+                case 6:
 					//_location.X += dx;
 					//_location.Width -= dx;
 					//_location.Height += dy;
 
                     // calc new position
                     ptPix1.X += dx;
-                    //ptPix2.X -= dx;
                     ptPix2.Y += dy;
-                    break;
-
-				case 1:
-					//_location.Y += dy;
-					//_location.Height -= dy;
-
-                    // calc new position
-                    ptPix1.Y += dy;
-                    //ptPix2.Y -= dy;
-                    break;
-
-				case 5:
-					//_location.Height += dy;
-
-                    // calc new position
-                    ptPix2.Y += dy;
-                    break;
-
-				case 3:
-					//_location.Width += dx;
-
-                    // calc new position
-                    ptPix2.X += dx;
                     break;
 
 				case 7:
@@ -566,7 +561,6 @@ namespace ZedGraph
 
                     // calc new position
                     ptPix1.X += dx;
-                    //ptPix2.X -= dx;
                     break;
 			}
 
