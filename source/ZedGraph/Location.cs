@@ -472,27 +472,52 @@ namespace ZedGraph
 		{
 			return pane.TransformCoord( x, y, coord );
 		}
-		
-		/// <summary>
-		/// Transform this <see cref="Location"/> from the coordinate system
-		/// as specified by <see cref="CoordinateFrame"/> to the device coordinates
-		/// of the specified <see cref="PaneBase"/> object.
+
+        /// <summary>
+		/// Transform a data point from the specified coordinate type
+		/// (<see cref="CoordType"/>) to display device coordinates (pixels).
 		/// </summary>
 		/// <remarks>
-		/// The returned
-		/// <see cref="PointF"/> struct represents the top-left corner of the
-		/// object that honors the <see cref="Location"/> properties.
-		/// The <see cref="AlignH"/> and <see cref="AlignV"/> properties are honored in 
-		/// this transformation.
+		/// If <see paramref="pane"/> is not of type <see cref="GraphPane"/>, then
+		/// only the <see cref="CoordType.PaneFraction"/> transformation is available.
 		/// </remarks>
 		/// <param name="pane">
 		/// A reference to the <see cref="PaneBase"/> object that contains
 		/// the <see cref="Axis"/> classes which will be used for the transform.
 		/// </param>
-		/// <param name="width">The width of the object in device pixels</param>
-		/// <param name="height">The height of the object in device pixels</param>
-		/// <returns>The top-left corner of the object</returns>
-		public PointF TransformTopLeft( PaneBase pane, float width, float height )
+		/// <param name="x">The x coordinate that defines the point in user
+		/// space.</param>
+		/// <param name="y">The y coordinate that defines the point in user
+		/// space.</param>
+		/// <param name="coord">A <see cref="CoordType"/> type that defines the
+		/// coordinate system in which the X,Y pair is defined.</param>
+		/// <returns>A point in display device coordinates that corresponds to the
+		/// specified user point.</returns>
+		public static PointD ReverseTransform(PaneBase pane, float x, float y, CoordType coord)
+        {
+            return pane.ReverseTransformCoord(x, y, coord);
+        }
+
+        /// <summary>
+        /// Transform this <see cref="Location"/> from the coordinate system
+        /// as specified by <see cref="CoordinateFrame"/> to the device coordinates
+        /// of the specified <see cref="PaneBase"/> object.
+        /// </summary>
+        /// <remarks>
+        /// The returned
+        /// <see cref="PointF"/> struct represents the top-left corner of the
+        /// object that honors the <see cref="Location"/> properties.
+        /// The <see cref="AlignH"/> and <see cref="AlignV"/> properties are honored in 
+        /// this transformation.
+        /// </remarks>
+        /// <param name="pane">
+        /// A reference to the <see cref="PaneBase"/> object that contains
+        /// the <see cref="Axis"/> classes which will be used for the transform.
+        /// </param>
+        /// <param name="width">The width of the object in device pixels</param>
+        /// <param name="height">The height of the object in device pixels</param>
+        /// <returns>The top-left corner of the object</returns>
+        public PointF TransformTopLeft( PaneBase pane, float width, float height )
 		{
 			PointF pt = Transform( pane );
 			
