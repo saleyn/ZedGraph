@@ -1046,8 +1046,8 @@ namespace ZedGraph
 			}
 		}
 
-		/*
-		         System.Drawing.Imaging.Metafile metafile = null; 
+        /*
+		       System.Drawing.Imaging.Metafile metafile = null; 
    
                // create a Metafile object that is compatible with the surface of this 
                // form
@@ -1091,131 +1091,136 @@ namespace ZedGraph
          }
 		 */
 
-		
+
 /*
-				/// <summary>
-				/// Function to export the Diagram as WMF file
-				/// see http://www.codeproject.com/showcase/pdfrasterizer.asp?print=true
-				/// </summary>
-				/// <param name="filename">
-				/// filename is the name to export to
-				/// </param>
-				public bool ExporttoWmf( string filename )
-				{
-					string p;
+        /// <summary>
+        /// Function to export the Diagram as WMF file
+        /// see http://www.codeproject.com/showcase/pdfrasterizer.asp?print=true
+        /// </summary>
+        /// <param name="filename">
+        /// filename is the name to export to
+        /// </param>
+        public bool ExporttoWmf( string filename )
+        {
+            string p;
 
-					//FileInfo TheFile = new FileInfo(filename);
-					p = Path.GetDirectoryName( filename );
-					if ( p != "" )
-					{
-						DirectoryInfo TheDir = new DirectoryInfo( p );
-						if ( TheDir.Exists )
-						{
-							System.Drawing.Imaging.Metafile metafile = null;
+            //FileInfo TheFile = new FileInfo(filename);
+            p = Path.GetDirectoryName( filename );
+            if ( p != "" )
+            {
+                DirectoryInfo TheDir = new DirectoryInfo( p );
+                if ( TheDir.Exists )
+                {
+                    System.Drawing.Imaging.Metafile metafile = null;
 
-							// create a Metafile object that is compatible with the surface of this 
-							// form
-							using ( Graphics graphics = this.CreateGraphics() )
-							{
-								System.IntPtr hdc = graphics.GetHdc();
-								metafile = new Metafile( filename, hdc, new Rectangle( 0, 0,
-									( ( (int)this.ClientRectangle.Width ) ),
-									( ( (int)this.ClientRectangle.Height ) ) ),
-									MetafileFrameUnit.Point );
-								graphics.ReleaseHdc( hdc );
-							}
+                    // create a Metafile object that is compatible with the surface of this 
+                    // form
+                    using ( Graphics graphics = this.CreateGraphics() )
+                    {
+                        System.IntPtr hdc = graphics.GetHdc();
+                        metafile = new Metafile( filename, hdc, new Rectangle( 0, 0,
+                            ( ( (int)this.ClientRectangle.Width ) ),
+                            ( ( (int)this.ClientRectangle.Height ) ) ),
+                            MetafileFrameUnit.Point );
+                        graphics.ReleaseHdc( hdc );
+                    }
 
-							// draw to the metafile
-							using ( Graphics metafileGraphics = Graphics.FromImage( metafile ) )
-							{
-								metafileGraphics.PageUnit = System.Drawing.GraphicsUnit.Point;
-								PointF P = new Point( this.ClientRectangle.Width, this.ClientRectangle.Height );
-								PointF[] PA = new PointF[] { P };
-								metafileGraphics.TransformPoints( CoordinateSpace.Page, CoordinateSpace.Device, PA );
-								metafileGraphics.PageScale = 1f;
-								metafileGraphics.SmoothingMode = SmoothingMode.AntiAlias; // smooth the 
-								// output
-								this.masterPane.Draw( metafileGraphics );
-								metafileGraphics.DrawRectangle( new System.Drawing.Pen( Color.Gray ), this.ClientRectangle );
-								metafile.Dispose();
+                    // draw to the metafile
+                    using ( Graphics metafileGraphics = Graphics.FromImage( metafile ) )
+                    {
+                        metafileGraphics.PageUnit = System.Drawing.GraphicsUnit.Point;
+                        PointF P = new Point( this.ClientRectangle.Width, this.ClientRectangle.Height );
+                        PointF[] PA = new PointF[] { P };
+                        metafileGraphics.TransformPoints( CoordinateSpace.Page, CoordinateSpace.Device, PA );
+                        metafileGraphics.PageScale = 1f;
+                        metafileGraphics.SmoothingMode = SmoothingMode.AntiAlias; // smooth the 
+                        // output
+                        this.masterPane.Draw( metafileGraphics );
+                        metafileGraphics.DrawRectangle( new System.Drawing.Pen( Color.Gray ), this.ClientRectangle );
+                        metafile.Dispose();
 
-							}
+                    }
 
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-					else
-					{
-						//no directory given
-						return false;
-					}
-				}
-		*/
-		internal PointF TransformCoord( double x, double y, CoordType coord )
-		{
-			// If the Transformation is an illegal type, just stick it in the middle
-			if ( !( this is GraphPane ) && !( coord == CoordType.PaneFraction ) )
-			{
-				coord = CoordType.PaneFraction;
-				x = 0.5;
-				y = 0.5;
-			}
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                //no directory given
+                return false;
+            }
+        }
+*/
+        internal PointF TransformCoord(double x, double y, CoordType coord)
+        {
+            // If the Transformation is an illegal type, just stick it in the middle
+            if (!(this is GraphPane) && !(coord == CoordType.PaneFraction))
+            {
+                coord = CoordType.PaneFraction;
+                x = 0.5;
+                y = 0.5;
+            }
 
-			// Just to save some casts
-			GraphPane gPane = null;
-			RectangleF chartRect = new RectangleF( 0, 0, 1, 1 );
-			if ( this is GraphPane )
-			{
-				gPane = this as GraphPane;
-				chartRect = gPane.Chart._rect;
-			}
+            // Just to save some casts
+            GraphPane gPane = null;
+            RectangleF chartRect = new RectangleF(0, 0, 1, 1);
+            if (this is GraphPane)
+            {
+                gPane = this as GraphPane;
+                chartRect = gPane.Chart._rect;
+            }
 
-			PointF ptPix = new PointF();
+            PointF ptPix = new PointF();
 
-			if ( coord == CoordType.ChartFraction )
-			{
-				ptPix.X = (float)( chartRect.Left + x * chartRect.Width );
-				ptPix.Y = (float)( chartRect.Top + y * chartRect.Height );
-			}
-			else if ( coord == CoordType.AxisXYScale )
-			{
-				ptPix.X = gPane.XAxis.Scale.Transform( x );
-				ptPix.Y = gPane.YAxis.Scale.Transform( y );
-			}
-			else if ( coord == CoordType.AxisXY2Scale )
-			{
-				ptPix.X = gPane.XAxis.Scale.Transform( x );
-				ptPix.Y = gPane.Y2Axis.Scale.Transform( y );
-			}
-			else if ( coord == CoordType.XScaleYChartFraction )
-			{
-				ptPix.X = gPane.XAxis.Scale.Transform( x );
-				ptPix.Y = (float)( chartRect.Top + y * chartRect.Height );
-			}
-			else if ( coord == CoordType.XChartFractionYScale )
-			{
-				ptPix.X = (float)( chartRect.Left + x * chartRect.Width );
-				ptPix.Y = gPane.YAxis.Scale.Transform( y );
-			}
-			else if ( coord == CoordType.XChartFractionY2Scale )
-			{
-				ptPix.X = (float)( chartRect.Left + x * chartRect.Width );
-				ptPix.Y = gPane.Y2Axis.Scale.Transform( y );
-			}
-			else if ( coord == CoordType.XChartFractionYPaneFraction )
-			{
-				ptPix.X = (float)( chartRect.Left + x * chartRect.Width );
-				ptPix.Y = (float)( this.Rect.Top + y * _rect.Height );
-			}
-			else if ( coord == CoordType.XPaneFractionYChartFraction )
-			{
-				ptPix.X = (float)( this.Rect.Left + x * _rect.Width );
-				ptPix.Y = (float)( chartRect.Top + y * chartRect.Height );
-			}
+            if (coord == CoordType.ChartFraction)
+            {
+                ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+                ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
+            }
+            else if (coord == CoordType.AxisXYScale)
+            {
+                ptPix.X = gPane.XAxis.Scale.Transform(x);
+                ptPix.Y = gPane.YAxis.Scale.Transform(y);
+            }
+            else if (coord == CoordType.AxisXY2Scale)
+            {
+                ptPix.X = gPane.XAxis.Scale.Transform(x);
+                ptPix.Y = gPane.Y2Axis.Scale.Transform(y);
+            }
+            else if (coord == CoordType.XScaleYChartFraction)
+            {
+                ptPix.X = gPane.XAxis.Scale.Transform(x);
+                ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
+            }
+            else if (coord == CoordType.XChartFractionYScale)
+            {
+                ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+                ptPix.Y = gPane.YAxis.Scale.Transform(y);
+            }
+            else if (coord == CoordType.XChartFractionY2Scale)
+            {
+                ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+                ptPix.Y = gPane.Y2Axis.Scale.Transform(y);
+            }
+            else if (coord == CoordType.XChartFractionYPaneFraction)
+            {
+                ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+                ptPix.Y = (float)(_rect.Top + y * _rect.Height);
+            }
+            else if (coord == CoordType.XPaneFractionYChartFraction)
+            {
+                ptPix.X = (float)(_rect.Left + x * _rect.Width);
+                ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
+            }
+            else if (coord == CoordType.PaneRelative)
+            {
+                ptPix.X = (float)(_rect.Left + x);
+                ptPix.Y = (float)(_rect.Top + y);
+            }
 			else	// PaneFraction
 			{
 				ptPix.X = (float)( _rect.Left + x * _rect.Width );
@@ -1225,7 +1230,120 @@ namespace ZedGraph
 			return ptPix;
 		}
 
-	#endregion
+        internal PointD ReverseTransformCoord(float x, float y, CoordType coord)
+        {
+            // If the Transformation is an illegal type, just stick it in the middle
+            if (!(this is GraphPane) && !(coord == CoordType.PaneFraction))
+            {
+                coord = CoordType.PaneFraction;
+                x = 0.5f;
+                y = 0.5f;
+            }
 
-	}
+            // Just to save some casts
+            GraphPane gPane = null;
+            RectangleF chartRect = new RectangleF(0, 0, 1, 1);
+            if (this is GraphPane)
+            {
+                gPane = this as GraphPane;
+                chartRect = gPane.Chart._rect;
+            }
+
+            PointD pt = new PointD();
+
+            if (coord == CoordType.ChartFraction)
+            {
+                //ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+                //ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
+
+                pt.X = (x - chartRect.Left) / chartRect.Width;
+                pt.Y = (y - chartRect.Top) / chartRect.Height;
+            }
+            else if (coord == CoordType.AxisXYScale)
+            {
+                //ptPix.X = gPane.XAxis.Scale.Transform(x);
+                //ptPix.Y = gPane.YAxis.Scale.Transform(y);
+
+                pt.X = gPane.XAxis.Scale.ReverseTransform(x);
+                pt.Y = gPane.YAxis.Scale.ReverseTransform(y);
+            }
+            else if (coord == CoordType.AxisXY2Scale)
+            {
+                //pt.X = gPane.XAxis.Scale.Transform(x);
+                //pt.Y = gPane.Y2Axis.Scale.Transform(y);
+
+                pt.X = gPane.XAxis.Scale.ReverseTransform(x);
+                pt.Y = gPane.Y2Axis.Scale.ReverseTransform(y);
+            }
+            else if (coord == CoordType.XScaleYChartFraction)
+            {
+                //pt.X = gPane.XAxis.Scale.Transform(x);
+                //pt.Y = (float)(chartRect.Top + y * chartRect.Height);
+
+                pt.X = gPane.XAxis.Scale.ReverseTransform(x);
+                pt.Y = (y - chartRect.Top) / chartRect.Height;
+            }
+            else if (coord == CoordType.XChartFractionYScale)
+            {
+                //pt.X = (float)(chartRect.Left + x * chartRect.Width);
+                //pt.Y = gPane.YAxis.Scale.Transform(y);
+
+                pt.X = (x - chartRect.Left) / chartRect.Width;
+                pt.Y = gPane.YAxis.Scale.ReverseTransform(y);
+            }
+            else if (coord == CoordType.XChartFractionY2Scale)
+            {
+                //pt.X = (float)(chartRect.Left + x * chartRect.Width);
+                //pt.Y = gPane.Y2Axis.Scale.Transform(y);
+
+                pt.X = (x - chartRect.Left) / chartRect.Width;
+                pt.Y = gPane.Y2Axis.Scale.ReverseTransform(y);
+            }
+            else if (coord == CoordType.XChartFractionYPaneFraction)
+            {
+                //pt.X = (float)(chartRect.Left + x * chartRect.Width);
+                //pt.Y = (float)(_rect.Top + y * _rect.Height);
+
+                pt.X = (x - chartRect.Left) / chartRect.Width;
+                pt.Y = (y - _rect.Top) / _rect.Height;
+            }
+            else if (coord == CoordType.XPaneFractionYChartFraction)
+            {
+                //pt.X = (float)(_rect.Left + x * _rect.Width);
+                //pt.Y = (float)(chartRect.Top + y * chartRect.Height);
+
+                pt.X = (x - _rect.Left) / _rect.Width;
+                pt.Y = (y - chartRect.Top) / chartRect.Height;
+            }
+            else if (coord == CoordType.PaneRelative)
+            {
+                //pt.X = (float)(_rect.Left + x);
+                //pt.Y = (float)(_rect.Top + y);
+
+                pt.X = (float)(x - _rect.Left);
+                pt.Y = (float)(y - _rect.Top);
+            }
+            else    // PaneFraction
+            {
+                pt.X = (float)(_rect.Left + x * _rect.Width);
+                pt.Y = (float)(_rect.Top + y * _rect.Height);
+
+                pt.X = (x - _rect.Left) / _rect.Width;
+                pt.Y = (y - _rect.Top) / _rect.Height;
+            }
+
+            // check if result is matched with TransformCoord
+#if false
+            {
+                PointF ptPix = TransformCoord(pt.X, pt.Y, coord);
+
+                System.Diagnostics.Trace.WriteLine(string.Format("Coord {4} COMP: {0} {1} - {2} {3}  ", x, ptPix.X, y, ptPix.Y, coord));
+            }
+#endif
+            return pt;
+        }
+
+#endregion
+
+    }
 }
