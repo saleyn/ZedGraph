@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2004  John Champion
+//Copyright ?2004  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -1560,22 +1560,78 @@ namespace ZedGraph
 			return this.TransformCoord( x, y, coord );
 		}
 
-		/// <summary>
-		/// Return the user scale values that correspond to the specified screen
-		/// coordinate position (pixels).  This overload assumes the default
-		/// <see cref="XAxis" /> and <see cref="YAxis" />.
+        /// <summary>
+		/// Transform a data point from screen coordinates (pixels) to
+		/// the specified coordinate type  (<see cref="CoordType"/>).
 		/// </summary>
 		/// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
 		/// has already been calculated via <see cref="AxisChange()"/> or
 		/// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
 		/// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
-		/// <param name="ptF">The X,Y pair that defines the screen coordinate
-		/// point of interest</param>
-		/// <param name="x">The resultant value in user coordinates from the
-		/// <see cref="XAxis"/></param>
-		/// <param name="y">The resultant value in user coordinates from the
-		/// primary <see cref="YAxis"/></param>
-		public void ReverseTransform( PointF ptF, out double x, out double y )
+		/// <param name="ptF">The X,Y pair that defines the point in 
+		/// screen.</param>
+		/// <param name="coord">A <see cref="CoordType"/> type that defines the
+		/// coordinate system in which the output pair is defined.</param>
+		/// <returns>A point in user coordinates that corresponds to the
+		/// specified screen point.</returns>
+		public PointD GeneralReverseTransform(PointF ptF, CoordType coord)
+        {
+            // Setup the scaling data based on the chart rect
+            _xAxis.Scale.SetupScaleData(this, _xAxis);
+            foreach (Axis axis in _yAxisList)
+                axis.Scale.SetupScaleData(this, axis);
+            foreach (Axis axis in _y2AxisList)
+                axis.Scale.SetupScaleData(this, axis);
+
+            return this.ReverseTransformCoord(ptF.X, ptF.Y, coord);
+        }
+
+        /// <summary>
+		/// Transform a data point from screen coordinates (pixels) to
+		/// the specified coordinate type  (<see cref="CoordType"/>).
+		/// </summary>
+		/// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+		/// has already been calculated via <see cref="AxisChange()"/> or
+		/// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+		/// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).
+		/// Note that this method is more accurate than the <see cref="GeneralReverseTransform(PointF, CoordType)" />
+		/// overload, since it uses double types.  This would typically only be significant for
+		/// <see cref="AxisType.Date" /> coordinates.
+		/// </remarks>
+		/// <param name="x">The x coordinate that defines the location in screen</param>
+		/// <param name="y">The y coordinate that defines the location in screen</param>
+		/// <param name="coord">A <see cref="CoordType"/> type that defines the
+		/// coordinate system in which the output pair is defined.</param>
+		/// <returns>A point in user coordinates that corresponds to the
+		/// specified screen point.</returns>
+		public PointD GeneralReverseTransform(float x, float y, CoordType coord)
+        {
+            // Setup the scaling data based on the chart rect
+            _xAxis.Scale.SetupScaleData(this, _xAxis);
+            foreach (Axis axis in _yAxisList)
+                axis.Scale.SetupScaleData(this, axis);
+            foreach (Axis axis in _y2AxisList)
+                axis.Scale.SetupScaleData(this, axis);
+
+            return this.ReverseTransformCoord(x, y, coord);
+        }
+
+        /// <summary>
+        /// Return the user scale values that correspond to the specified screen
+        /// coordinate position (pixels).  This overload assumes the default
+        /// <see cref="XAxis" /> and <see cref="YAxis" />.
+        /// </summary>
+        /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+        /// has already been calculated via <see cref="AxisChange()"/> or
+        /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+        /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
+        /// <param name="ptF">The X,Y pair that defines the screen coordinate
+        /// point of interest</param>
+        /// <param name="x">The resultant value in user coordinates from the
+        /// <see cref="XAxis"/></param>
+        /// <param name="y">The resultant value in user coordinates from the
+        /// primary <see cref="YAxis"/></param>
+        public void ReverseTransform( PointF ptF, out double x, out double y )
 		{
 			// Setup the scaling data based on the chart rect
 			_xAxis.Scale.SetupScaleData( this, _xAxis );
