@@ -320,13 +320,17 @@ namespace ZedGraph
 			bool first = true;
 			PointF lastPt = new PointF();
 
-			foreach( PointD pt in _points )
+            GraphPane gPane = pane as GraphPane;
+
+            foreach ( PointD pt in _points )
 			{
 				// Convert the coordinates from the user coordinate system
 				// to the screen coordinate system
 				// Offset the points by the location value
-				PointF pixPt = Location.Transform( pane, pt.X + _location.X, pt.Y + _location.Y,
-						_location.CoordinateFrame );
+				PointF pixPt = gPane.GeneralTransform(pt.X, pt.Y, _location.CoordinateFrame );
+
+                pixPt.X += (float)_location.X;
+                pixPt.Y += (float)_location.Y;
 
 				if (	Math.Abs( pixPt.X ) < 100000 &&
 						Math.Abs( pixPt.Y ) < 100000 )
@@ -351,13 +355,13 @@ namespace ZedGraph
 		{
 			RectangleF[] rects = new RectangleF[_points.Count];
 
-			for (int i = 0; i < rects.Length; i++)
-			{
-				PointF pixPt = Location.Transform(pane, 
-						_points[i].X + _location.X, _points[i].Y + _location.Y,
-						_location.CoordinateFrame);
+            GraphPane gPane = pane as GraphPane;
 
-				rects[i] = new RectangleF(pixPt.X - 2, pixPt.Y - 2, 4, 4);
+            for (int i = 0; i < rects.Length; i++)
+			{
+                PointF pixPt = gPane.GeneralTransform(_points[i].X, _points[i].Y, _location.CoordinateFrame);
+
+				rects[i] = new RectangleF(pixPt.X + (float)_location.X - 2, pixPt.Y + (float)_location.Y - 2, 4, 4);
 			}
 
 			return rects;
@@ -391,9 +395,14 @@ namespace ZedGraph
 			if (edge < 0 && edge >= _points.Count)
 				return;
 
-			_points[edge] = new PointD(pt.X / pane.Rect.Width - _location.X,  
-									   pt.Y / pane.Rect.Height - _location.Y);
-		}
+            GraphPane gPane = pane as GraphPane;
+
+            PointD ptPix = gPane.GeneralReverseTransform(
+                                (float)(pt.X - _location.X),
+                                (float)(pt.Y - _location.Y), _location.CoordinateFrame);
+
+            _points[edge] = ptPix;
+        }
 
 		/// <summary>
 		/// Determine if the specified screen point lies inside the bounding box of this
@@ -419,8 +428,8 @@ namespace ZedGraph
 		{
 			if ( _points != null && _points.Count > 1 )
 			{
-				if ( ! base.PointInBox(pt, pane, g, scaleFactor ) )
-					return false;
+				//if ( ! base.PointInBox(pt, pane, g, scaleFactor ) )
+				//	return false;
 
 				using ( GraphicsPath path = MakePath( pane ) )
 					return path.IsVisible( pt );
@@ -441,9 +450,9 @@ namespace ZedGraph
 		{
 			AddPoint(new PointD(x, y));
 
-			//System.Diagnostics.Trace.WriteLine(String.Format("points {0}  {1} {2}",
-			//	_points.Count, _lastPoint.X, _lastPoint.Y));
-		}
+            //System.Diagnostics.Trace.WriteLine(String.Format("points {0}  {1} {2}",
+            //    _points.Count, x, y));
+        }
 
 		public PointD LastPoint
 		{
