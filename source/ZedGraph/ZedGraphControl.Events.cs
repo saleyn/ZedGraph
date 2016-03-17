@@ -1623,9 +1623,10 @@ namespace ZedGraph
 				{
                     //obj.Location.X += (mousePt.X - _dragStartPt.X) / _graphDragState.Pane.Rect.Width;
                     //obj.Location.Y += (mousePt.Y - _dragStartPt.Y) / _graphDragState.Pane.Rect.Height;
-
+                    obj.UpdateLocation(pane, mousePt.X - _dragStartPt.X, mousePt.Y - _dragStartPt.Y);
+#if false
                     // hack for no width/height polygon
-                    if (obj.Location.Width != 1)
+                    if (true || obj.Location.Width != 1)
                     {
                         // convert location to screen coordinate
                         PointF ptPix1 = pane.GeneralTransform(obj.Location.X1, obj.Location.Y1,
@@ -1655,7 +1656,7 @@ namespace ZedGraph
                         obj.Location.X += mousePt.X - _dragStartPt.X;
                         obj.Location.Y += mousePt.Y - _dragStartPt.Y;
                     }
-
+#endif
                     //_graphDragState.startPt = e.Location;
                     _dragStartPt = mousePt;
 
@@ -1718,6 +1719,6 @@ namespace ZedGraph
 			}
 		}
 
-	#endregion
+#endregion
 	}
 }

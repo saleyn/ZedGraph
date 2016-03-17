@@ -48,7 +48,6 @@ namespace ZedGraph
 		/// <see cref="IsClosedFigure" /> to access this value.
 		/// </summary>
 		private bool _isClosedFigure = true;
-
 	#endregion
 
 	#region Properties
@@ -83,32 +82,36 @@ namespace ZedGraph
 			set { _isClosedFigure = value; }
 		}
 
-	#endregion
-	
-	#region Constructors
-		/// <overloads>Constructors for the <see cref="PolyObj"/> object</overloads>
-		/// <summary>
-		/// A constructor that allows the position, border color, and solid fill color
-		/// of the <see cref="PolyObj"/> to be pre-specified.
-		/// </summary>
-		/// <param name="borderColor">An arbitrary <see cref="System.Drawing.Color"/> specification
-		/// for the box border</param>
-		/// <param name="fillColor">An arbitrary <see cref="System.Drawing.Color"/> specification
-		/// for the box fill (will be a solid color fill)</param>
-		/// <param name="points">The <see cref="PointD"/> array that defines
-		/// the polygon.  This will be in units determined by
-		/// <see cref="ZedGraph.Location.CoordinateFrame"/>.
-		/// </param>
-		public PolyObj( PointD[] points, Color borderColor, Color fillColor ) :
+    #endregion
+
+    #region Constructors
+        /// <overloads>Constructors for the <see cref="PolyObj"/> object</overloads>
+        /// <summary>
+        /// A constructor that allows the position, border color, and solid fill color
+        /// of the <see cref="PolyObj"/> to be pre-specified.
+        /// </summary>
+        /// <param name="borderColor">An arbitrary <see cref="System.Drawing.Color"/> specification
+        /// for the box border</param>
+        /// <param name="fillColor">An arbitrary <see cref="System.Drawing.Color"/> specification
+        /// for the box fill (will be a solid color fill)</param>
+        /// <param name="points">The <see cref="PointD"/> array that defines
+        /// the polygon.  This will be in units determined by
+        /// <see cref="ZedGraph.Location.CoordinateFrame"/>.
+        /// </param>
+        public PolyObj( PointD[] points, Color borderColor, Color fillColor ) :
 				base( 0, 0, 1, 1, borderColor, fillColor )
 		{
-			_points.AddRange(points);
+            if (points.Length > 0)
+            {
+                AddPoints(points);
+            }
 		}
 
 		public PolyObj(PointD point, Color borderColor, Color fillColor) :
 				base(0, 0, 1, 1, borderColor, fillColor)
 		{
-			_points.Add(point);
+            //_points.Add(point);
+            AddPoint(point);
 		}
 
 		/// <summary>
@@ -121,8 +124,11 @@ namespace ZedGraph
 		/// </param>
 		public PolyObj( PointD[] points ) : base( 0, 0, 1, 1 )
 		{
-			_points.AddRange(points);
-		}
+            if (points.Length > 0)
+            {
+                AddPoints(points);
+            }
+        }
 
 		/// <summary>
 		/// A default constructor that creates a <see cref="PolyObj"/> from an empty
@@ -151,8 +157,11 @@ namespace ZedGraph
 							Color fillColor1, Color fillColor2 ) :
 				base( 0, 0, 1, 1, borderColor, fillColor1, fillColor2 )
 		{
-			_points.AddRange(points);
-		}
+            if (points.Length > 0)
+            {
+                AddPoints(points);
+            }
+        }
 
 		/// <summary>
 		/// The Copy Constructor
@@ -314,6 +323,38 @@ namespace ZedGraph
 			}
 		}
 
+        internal PointF SafeTransform(PointD pt, GraphPane pane, CoordType coord)
+        {
+            PointF pixPt = new PointF();
+
+            if (pt.X != 0) // for first point
+                pixPt = pane.GeneralTransform(pt.X, pt.Y, coord);
+
+            return pixPt;
+        }
+
+        public override void UpdateLocation(PaneBase _pane, double dx, double dy)
+        {
+            GraphPane pane = _pane as GraphPane;
+
+            // update each points
+            for (int i = 0; i < _points.Count; i++)
+            {
+                // convert location to screen coordinate
+                PointF ptPix1 = pane.GeneralTransform(_points[i].X, _points[i].Y,
+                        _location.CoordinateFrame);
+
+                // calc new position
+                ptPix1.X += (float)dx;
+                ptPix1.Y += (float)dy;
+
+                // convert to user coordinate
+                PointD pt1 = pane.GeneralReverseTransform(ptPix1, _location.CoordinateFrame);
+
+                _points[i] = pt1;
+            }
+        }
+
         override public GraphicsPath MakePath( PaneBase pane )
 		{
 			GraphicsPath path = new GraphicsPath();
@@ -324,15 +365,14 @@ namespace ZedGraph
 
             foreach ( PointD pt in _points )
 			{
-				// Convert the coordinates from the user coordinate system
-				// to the screen coordinate system
-				// Offset the points by the location value
-				PointF pixPt = gPane.GeneralTransform(pt.X, pt.Y, _location.CoordinateFrame );
+                // Convert the coordinates from the user coordinate system
+                // to the screen coordinate system
+                // Offset the points by the location value
+                //PointF pixPt = SafeTransform(pt, gPane, _location.CoordinateFrame);
 
-                pixPt.X += (float)_location.X;
-                pixPt.Y += (float)_location.Y;
+                PointF pixPt = gPane.GeneralTransform(pt.X, pt.Y, _location.CoordinateFrame);
 
-				if (	Math.Abs( pixPt.X ) < 100000 &&
+                if (	Math.Abs( pixPt.X ) < 100000 &&
 						Math.Abs( pixPt.Y ) < 100000 )
 				{
 					if ( first )
@@ -359,10 +399,10 @@ namespace ZedGraph
 
             for (int i = 0; i < rects.Length; i++)
 			{
+                //PointF pixPt = SafeTransform(_points[i], gPane, _location.CoordinateFrame);
                 PointF pixPt = gPane.GeneralTransform(_points[i].X, _points[i].Y, _location.CoordinateFrame);
-
-				rects[i] = new RectangleF(pixPt.X + (float)_location.X - 2, pixPt.Y + (float)_location.Y - 2, 4, 4);
-			}
+                rects[i] = new RectangleF(pixPt.X - 2, pixPt.Y - 2, 4, 4);
+            }
 
 			return rects;
 		}
@@ -398,8 +438,8 @@ namespace ZedGraph
             GraphPane gPane = pane as GraphPane;
 
             PointD ptPix = gPane.GeneralReverseTransform(
-                                (float)(pt.X - _location.X),
-                                (float)(pt.Y - _location.Y), _location.CoordinateFrame);
+                                pt.X,
+                                pt.Y, _location.CoordinateFrame);
 
             _points[edge] = ptPix;
         }
@@ -428,10 +468,10 @@ namespace ZedGraph
 		{
 			if ( _points != null && _points.Count > 1 )
 			{
-				//if ( ! base.PointInBox(pt, pane, g, scaleFactor ) )
-				//	return false;
+                //if (!base.PointInBox(pt, pane, g, scaleFactor))
+                //    return false;
 
-				using ( GraphicsPath path = MakePath( pane ) )
+                using ( GraphicsPath path = MakePath( pane ) )
 					return path.IsVisible( pt );
 			}
 			else
@@ -443,15 +483,25 @@ namespace ZedGraph
 	#region Point Related Method
 		public void AddPoint(PointD pt)
 		{
-			_points.Add(pt);
+            AddPoint(pt.X, pt.Y);
 		}
 
 		public void AddPoint(double x, double y)
 		{
-			AddPoint(new PointD(x, y));
+            //_points.Add(new PointD(x - _location.X, y - _location.Y));
+
+            _points.Add(new PointD(x, y));
 
             //System.Diagnostics.Trace.WriteLine(String.Format("points {0}  {1} {2}",
             //    _points.Count, x, y));
+        }
+
+        public void AddPoints(PointD[] points)
+        {
+            foreach (var pt in points) 
+            {
+                AddPoint(pt);
+            }
         }
 
 		public PointD LastPoint

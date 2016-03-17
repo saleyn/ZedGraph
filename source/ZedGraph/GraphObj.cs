@@ -625,6 +625,34 @@ namespace ZedGraph
         {
             return new RectangleF[0];
         }
+
+        virtual public void UpdateLocation(PaneBase _pane, double dx, double dy)
+        {
+            GraphPane pane = _pane as GraphPane;
+
+            // convert location to screen coordinate
+            PointF ptPix1 = pane.GeneralTransform(_location.X1, _location.Y1,
+                    _location.CoordinateFrame);
+
+            PointF ptPix2 = pane.GeneralTransform(_location.X2, _location.Y2,
+                    _location.CoordinateFrame);
+
+            // calc new position
+            ptPix1.X += (float)dx;
+            ptPix1.Y += (float)dy;
+
+            ptPix2.X += (float)dx;
+            ptPix2.Y += (float)dy;
+
+            // convert to user coordinate
+            PointD pt1 = pane.GeneralReverseTransform(ptPix1, _location.CoordinateFrame);
+            PointD pt2 = pane.GeneralReverseTransform(ptPix2, _location.CoordinateFrame);
+
+            _location.X = pt1.X;
+            _location.Y = pt1.Y;
+            _location.Width = pt2.X - pt1.X;
+            _location.Height = pt2.Y - pt1.Y;
+        }
     #endregion
 
     }
