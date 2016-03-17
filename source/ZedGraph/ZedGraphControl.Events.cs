@@ -1621,32 +1621,40 @@ namespace ZedGraph
 
 				if (_graphDragState.State == GraphDragState.DragState.Move)
 				{
-                    // convert location to screen coordinate
-                    PointF ptPix1 = pane.GeneralTransform(obj.Location.X1, obj.Location.Y1, 
-                            obj.Location.CoordinateFrame);
-
-                    PointF ptPix2 = pane.GeneralTransform(obj.Location.X2, obj.Location.Y2,
-                            obj.Location.CoordinateFrame);
-
-                    // calc new position
-                    ptPix1.X += (mousePt.X - _dragStartPt.X);
-                    ptPix1.Y += (mousePt.Y - _dragStartPt.Y);
-
-                    ptPix2.X += (mousePt.X - _dragStartPt.X);
-                    ptPix2.Y += (mousePt.Y - _dragStartPt.Y);
-
-                    // convert to user coordinate
-                    PointD pt1 = pane.GeneralReverseTransform(ptPix1, obj.Location.CoordinateFrame);
-                    PointD pt2 = pane.GeneralReverseTransform(ptPix2, obj.Location.CoordinateFrame);
-
-                    obj.Location.X = pt1.X;
-                    obj.Location.Y = pt1.Y;
-                    obj.Location.Width = pt2.X - pt1.X;
-                    obj.Location.Height = pt2.Y - pt1.Y;
-
-                    
                     //obj.Location.X += (mousePt.X - _dragStartPt.X) / _graphDragState.Pane.Rect.Width;
                     //obj.Location.Y += (mousePt.Y - _dragStartPt.Y) / _graphDragState.Pane.Rect.Height;
+
+                    // hack for no width/height polygon
+                    if (obj.Location.Width != 1)
+                    {
+                        // convert location to screen coordinate
+                        PointF ptPix1 = pane.GeneralTransform(obj.Location.X1, obj.Location.Y1,
+                                obj.Location.CoordinateFrame);
+
+                        PointF ptPix2 = pane.GeneralTransform(obj.Location.X2, obj.Location.Y2,
+                                obj.Location.CoordinateFrame);
+
+                        // calc new position
+                        ptPix1.X += (mousePt.X - _dragStartPt.X);
+                        ptPix1.Y += (mousePt.Y - _dragStartPt.Y);
+
+                        ptPix2.X += (mousePt.X - _dragStartPt.X);
+                        ptPix2.Y += (mousePt.Y - _dragStartPt.Y);
+
+                        // convert to user coordinate
+                        PointD pt1 = pane.GeneralReverseTransform(ptPix1, obj.Location.CoordinateFrame);
+                        PointD pt2 = pane.GeneralReverseTransform(ptPix2, obj.Location.CoordinateFrame);
+
+                        obj.Location.X = pt1.X;
+                        obj.Location.Y = pt1.Y;
+                        obj.Location.Width = pt2.X - pt1.X;
+                        obj.Location.Height = pt2.Y - pt1.Y;
+                    } 
+                    else
+                    {
+                        obj.Location.X += mousePt.X - _dragStartPt.X;
+                        obj.Location.Y += mousePt.Y - _dragStartPt.Y;
+                    }
 
                     //_graphDragState.startPt = e.Location;
                     _dragStartPt = mousePt;
