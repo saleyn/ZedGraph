@@ -552,6 +552,7 @@ namespace ZedGraph
         /// <param name="pane"></param>
         /// <param name="target"></param>
         /// <returns></returns>
+#if false
         virtual public List<PointPairList> FilterPoints(PaneBase pane, IPointList target)
         {
             List<PointPairList> lst = new List<PointPairList>(2);
@@ -585,7 +586,54 @@ namespace ZedGraph
 
             return lst;
         }
+#else
+        virtual public List<PointPairList> FilterPoints(PaneBase pane, IPointList target)
+        {
+            List<PointPairList> lst = new List<PointPairList>(2);
 
+            lst.Add(new PointPairList());
+            lst.Add(new PointPairList());
+
+            GraphicsPath path = MakePath(pane);
+
+            PointF[] points = path.PathPoints;
+
+            Axis yAxis = (pane as GraphPane).YAxis;
+            Axis xAxis = (pane as GraphPane).XAxis;
+            GraphPane gPane = pane as GraphPane;
+
+            //for (int i = 0; i < points.Length; i++)
+            //{
+            //    PointD pt = gPane.GeneralReverseTransform(points[i], _location.CoordinateFrame);
+
+            //    points[i].X = (float)pt.X;
+            //    points[i].Y = (float)pt.Y;
+            //}
+
+            for (int i = 0; i < target.Count; i++)
+            {
+                var pp = target[i];
+
+                float x = xAxis.Scale.Transform(pp.X);
+                float y = yAxis.Scale.Transform(pp.Y);
+
+                PointF pt = new PointF(x, y);
+
+                //if (path != null && path.IsVisible(pt))
+                if (path != null && Utils.PtInPolygon(points, pt))
+                //if (path != null && Utils.PtInPolygon(points, pp))
+                {
+                    lst[0].Add(pp.X, pp.Y, pp.Z);
+                }
+                else
+                {
+                    lst[1].Add(pp.X, pp.Y, pp.Z);
+                }
+            }
+
+            return lst;
+        }
+#endif
         /// <summary>
         /// Find the nearest edge for point which is used to resize graph
         /// </summary>
@@ -626,6 +674,12 @@ namespace ZedGraph
             return new RectangleF[0];
         }
 
+        /// <summary>
+        /// Update location of object according given x/y offset
+        /// </summary>
+        /// <param name="_pane"></param>
+        /// <param name="dx">x offset in screen</param>
+        /// <param name="dy">y offset in screen</param>
         virtual public void UpdateLocation(PaneBase _pane, double dx, double dy)
         {
             GraphPane pane = _pane as GraphPane;
@@ -653,7 +707,7 @@ namespace ZedGraph
             _location.Width = pt2.X - pt1.X;
             _location.Height = pt2.Y - pt1.Y;
         }
-    #endregion
+#endregion
 
     }
 
@@ -708,6 +762,39 @@ namespace ZedGraph
         public static double AngleInDegree(double x1, double y1, double x0, double y0)
         {
             return 180 * Math.Atan2(y1 - y0, x1 - x0) / Math.PI;
+        }
+
+        public static bool PtInPolygon(PointF[] points, PointF pt)
+        {
+            int i, j;
+            bool rc = false;
+
+            for (i = 0, j = points.Length - 1; i < points.Length; j = i++)
+            {
+                if (((points[i].Y > pt.Y) != (points[j].Y > pt.Y))
+                    && (pt.X < (points[j].X - points[i].X) * (pt.Y - points[i].Y) / (points[j].Y - points[i].Y) + points[i].X))
+                {
+                    rc = !rc;
+                }
+            }
+
+            return rc;
+        }
+
+        public static bool PtInPolygon2(PointF[] points, PointF p)
+        {
+            bool result = false;
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                if ( (  ( (points[i + 1].Y <= p.Y) && (p.Y < points[i].Y) ) 
+                      ||( (points[i].Y <= p.Y) && (p.Y < points[i + 1].Y) )  
+                     ) 
+                    && (p.X < (points[i].X - points[i + 1].X) * (p.Y - points[i + 1].Y) / (points[i].Y - points[i + 1].Y) + points[i + 1].X))
+                {
+                    result = !result;
+                }
+            }
+            return result;
         }
     }
 }
