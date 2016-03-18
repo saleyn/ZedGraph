@@ -511,7 +511,11 @@ namespace ZedGraph
 
 		override public void ResizeEdge(int edge, PointF pt, PaneBase pane)
 		{
-            /*
+            // set edget to right-bottom edge when edget is -1
+            if (edge == int.MaxValue)
+                edge = 1;
+
+            /** sample code
             // convert location to screen coordinate
             PointF ptPix1 = pane.GeneralTransform(obj.Location.X1, obj.Location.Y1,
                     obj.Location.CoordinateFrame);
