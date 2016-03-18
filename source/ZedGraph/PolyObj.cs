@@ -432,7 +432,7 @@ namespace ZedGraph
 				edge = _points.Count - 1;
 
 			// do nothing if edge is invalid
-			if (edge < 0 && edge >= _points.Count)
+			if (edge < 0 || edge >= _points.Count)
 				return;
 
             GraphPane gPane = pane as GraphPane;

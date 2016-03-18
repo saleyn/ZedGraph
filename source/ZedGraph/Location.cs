@@ -585,7 +585,7 @@ namespace ZedGraph
 			return new RectangleF( pix1.X, pix1.Y, Math.Abs(pix2.X - pix1.X), Math.Abs(pix2.Y - pix1.Y) );
 		}
 
-	#endregion
+    #endregion
 
-	}
+    }
 }
