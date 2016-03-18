@@ -441,8 +441,12 @@ namespace ZedGraph
 
 		override public void ResizeEdge(int edge, PointF pt, PaneBase pane)
 		{
-			// do nothing if edge is invalid
-			if (edge < 0 || edge > 8)
+            // set edget to right-bottom edge when edget is -1
+            if (edge == int.MaxValue)
+                edge = 4;
+
+            // do nothing if edge is invalid
+            if (edge < 0 || edge > 8)
 				return;
 
 			RectangleF[] edges = EdgeRects(pane);
