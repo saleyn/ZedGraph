@@ -477,11 +477,39 @@ namespace ZedGraph
 			else
 				return false;
 		}
-		
-	#endregion
-	
-	#region Point Related Method
-		public void AddPoint(PointD pt)
+
+        public override RectangleF BoundingRect(PaneBase pane)
+        {
+            GraphPane  gPane = pane as GraphPane;
+
+            float x1 = 100000;
+            float y1 = 100000;
+            float x2 = -100000;
+            float y2 = -100000;
+
+            foreach (PointD pt in _points)
+            {
+                // Convert the coordinates from the user coordinate system
+                // to the screen coordinate system
+                // Offset the points by the location value
+                //PointF pixPt = SafeTransform(pt, gPane, _location.CoordinateFrame);
+
+                PointF pixPt = gPane.GeneralTransform(pt.X, pt.Y, _location.CoordinateFrame);
+
+                x1 = Math.Min(x1, pixPt.X);
+                y1 = Math.Min(y1, pixPt.Y);
+
+                x2 = Math.Max(x2, pixPt.X);
+                y2 = Math.Max(y2, pixPt.Y);
+                
+            }
+
+            return new RectangleF(x1, y1, x2 - x1, y2 - y1);
+        }
+        #endregion
+
+        #region Point Related Method
+        public void AddPoint(PointD pt)
 		{
             AddPoint(pt.X, pt.Y);
 		}

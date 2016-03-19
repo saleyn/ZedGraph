@@ -707,6 +707,11 @@ namespace ZedGraph
             _location.Width = pt2.X - pt1.X;
             _location.Height = pt2.Y - pt1.Y;
         }
+
+        virtual public RectangleF BoundingRect(PaneBase pane)
+        {
+            return _location.TransformRect(pane);
+        }
 #endregion
 
     }
