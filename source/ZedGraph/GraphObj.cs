@@ -724,6 +724,16 @@ namespace ZedGraph
         {
             return _location.TransformRect(pane);
         }
+
+        virtual public PointF[] EdgetPoints(PaneBase pane)
+        {
+            PointF[] points = new PointF[2];
+
+            points[0] = _location.TransformTopLeft(pane);
+            points[1] = _location.TransformBottomRight(pane);
+
+            return points;
+        }
 #endregion
 
     }

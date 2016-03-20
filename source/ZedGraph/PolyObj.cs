@@ -550,7 +550,24 @@ namespace ZedGraph
 					_points[_points.Count - 1] = value;
 			}
 		}
-	#endregion
 
-	}
+        override public PointF[] EdgetPoints(PaneBase pane)
+        {
+            PointF[] points = new PointF[_points.Count];
+
+            GraphPane gPane = pane as GraphPane;
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                PointF pixPt = gPane.GeneralTransform(_points[i].X, _points[i].Y, _location.CoordinateFrame);
+
+                points[i] = pixPt;
+            }
+
+
+            return points;
+        }
+        #endregion
+
+    }
 }
