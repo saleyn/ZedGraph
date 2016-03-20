@@ -333,7 +333,7 @@ namespace ZedGraph
             return pixPt;
         }
 
-        public override void UpdateLocation(PaneBase _pane, double dx, double dy)
+        public override void UpdateLocation(PaneBase _pane, float dx, float dy)
         {
             GraphPane pane = _pane as GraphPane;
 
@@ -353,6 +353,8 @@ namespace ZedGraph
 
                 _points[i] = pt1;
             }
+
+            OnLocationChanged(pane, dx, dy);
         }
 
         override public GraphicsPath MakePath( PaneBase pane )

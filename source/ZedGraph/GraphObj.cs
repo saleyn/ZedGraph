@@ -92,6 +92,8 @@ namespace ZedGraph
         [CLSCompliant(false)]
         protected bool _isSelected;
 
+        public delegate void LocationEvent(GraphObj graph, PaneBase pan, float dx, float dy);
+        public event LocationEvent LocationChanged;
     #endregion
 
     #region Defaults
@@ -680,7 +682,7 @@ namespace ZedGraph
         /// <param name="_pane"></param>
         /// <param name="dx">x offset in screen</param>
         /// <param name="dy">y offset in screen</param>
-        virtual public void UpdateLocation(PaneBase _pane, double dx, double dy)
+        virtual public void UpdateLocation(PaneBase _pane, float dx, float dy)
         {
             GraphPane pane = _pane as GraphPane;
 
@@ -706,6 +708,16 @@ namespace ZedGraph
             _location.Y = pt1.Y;
             _location.Width = pt2.X - pt1.X;
             _location.Height = pt2.Y - pt1.Y;
+
+            OnLocationChanged(pane, dx, dy);
+        }
+
+        virtual protected void OnLocationChanged(PaneBase pane, float dx, float dy)
+        {
+            if (LocationChanged != null)
+            {
+                LocationChanged(this, pane, dx, dy);
+            }
         }
 
         virtual public RectangleF BoundingRect(PaneBase pane)
