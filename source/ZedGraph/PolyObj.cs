@@ -551,7 +551,7 @@ namespace ZedGraph
 			}
 		}
 
-        override public PointF[] EdgetPoints(PaneBase pane)
+        override public PointF[] ScreenPoints(PaneBase pane)
         {
             PointF[] points = new PointF[_points.Count];
 
@@ -564,6 +564,18 @@ namespace ZedGraph
                 points[i] = pixPt;
             }
 
+
+            return points;
+        }
+
+        override public PointD[] EdgePoints()
+        {
+            PointD[] points = new PointD[_points.Count];
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                points[i] = _points[i];
+            }
 
             return points;
         }

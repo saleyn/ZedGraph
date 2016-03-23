@@ -725,7 +725,12 @@ namespace ZedGraph
             return _location.TransformRect(pane);
         }
 
-        virtual public PointF[] EdgetPoints(PaneBase pane)
+        /// <summary>
+        /// Points of each data in screen coordinate
+        /// </summary>
+        /// <param name="pane"></param>
+        /// <returns></returns>
+        virtual public PointF[] ScreenPoints(PaneBase pane)
         {
             PointF[] points = new PointF[2];
 
@@ -734,7 +739,21 @@ namespace ZedGraph
 
             return points;
         }
-#endregion
+
+        /// <summary>
+        /// Points of each data in the graph object
+        /// </summary>
+        /// <returns></returns>
+        virtual public PointD[] EdgePoints()
+        {
+            PointD[] points = new PointD[2];
+
+            points[0] = new PointD(_location.X1, _location.Y1);
+            points[1] = new PointD(_location.X2, _location.Y2);
+
+            return points;
+        }
+        #endregion
 
     }
 
