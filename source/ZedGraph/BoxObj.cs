@@ -275,16 +275,23 @@ namespace ZedGraph
 		/// </param>
 		override public void Draw(Graphics g, PaneBase pane, float scaleFactor)
 		{
-			// Convert the arrow coordinates from the user coordinate system
-			// to the screen coordinate system
-			RectangleF pixRect = this.Location.TransformRect(pane);
+            // Convert the arrow coordinates from the user coordinate system
+            // to the screen coordinate system
+            PointF pix1 = this.Location.TransformTopLeft(pane);
+            PointF pix2 = this.Location.TransformBottomRight(pane);
 
-			// Clip the rect to just outside the PaneRect so we don't end up with wild coordinates.
-			RectangleF tmpRect = pane.Rect;
-			tmpRect.Inflate(20, 20);
-			pixRect.Intersect(tmpRect);
+            //RectangleF pixRect = this.Location.TransformRect(pane);
+            RectangleF pixRect = new RectangleF(Math.Min(pix1.X, pix2.X), Math.Min(pix1.Y, pix2.Y), 
+                            Math.Abs(pix2.X - pix1.X), Math.Abs(pix2.Y - pix1.Y));
 
-			if (Math.Abs(pixRect.Left) < 100000 &&
+            //System.Diagnostics.Debug.WriteLine(string.Format("box {0} {1}", pix1, pix2));
+
+            // Clip the rect to just outside the PaneRect so we don't end up with wild coordinates.
+            RectangleF tmpRect = pane.Rect;
+            tmpRect.Inflate(20, 20);
+            pixRect.Intersect(tmpRect);
+
+            if (Math.Abs(pixRect.Left) < 100000 &&
 				Math.Abs(pixRect.Top) < 100000 &&
 				Math.Abs(pixRect.Right) < 100000 &&
 				Math.Abs(pixRect.Bottom) < 100000)
@@ -389,12 +396,14 @@ namespace ZedGraph
 		{
 			RectangleF[] rects = new RectangleF[8];
 
-			RectangleF pixRect = _location.TransformRect(pane);
+            //RectangleF pixRect = _location.TransformRect(pane);
+            PointF pix1 = _location.TransformTopLeft(pane);
+            PointF pix2 = _location.TransformBottomRight(pane);
 
-			float left = pixRect.Left;
-			float top = pixRect.Top;
-			float right = pixRect.Right;
-			float bottom = pixRect.Bottom;
+            float left = pix1.X;
+			float top = pix1.Y;
+			float right = pix2.X;
+			float bottom = pix2.Y;
 
 			float h = (bottom - top) / 2;
 			float w = (right - left) / 2;
@@ -450,7 +459,7 @@ namespace ZedGraph
 				return;
 
 			RectangleF[] edges = EdgeRects(pane);
-			RectangleF s = edges[edge];
+			//RectangleF s = edges[edge];
 
             GraphPane gPane = pane as GraphPane;
 
@@ -482,8 +491,8 @@ namespace ZedGraph
             //float dx = (pt.X - s.X) / pane.Rect.Width;
 			//float dy = (pt.Y - s.Y) / pane.Rect.Height;
 
-            float dx = (pt.X - s.X) ;
-            float dy = (pt.Y - s.Y) ;
+            //float dx = (pt.X - s.X - 2) ;
+            //float dy = (pt.Y - s.Y - 2) ;
 
             /**
                0       1       2
@@ -504,8 +513,10 @@ namespace ZedGraph
                     //_location.Height -= dy;
 
                     // calc new position
-                    ptPix1.X += dx;
-                    ptPix1.Y += dy;
+                    //ptPix1.X += dx;
+                    //ptPix1.Y += dy;
+                    ptPix1.X = pt.X;
+                    ptPix1.Y = pt.Y;
                     break;
 
                 case 1:
@@ -513,7 +524,8 @@ namespace ZedGraph
                     //_location.Height -= dy;
 
                     // calc new position
-                    ptPix1.Y += dy;
+                    //ptPix1.Y += dy;
+                    ptPix1.Y = pt.Y;
                     break;
 
                 case 2:
@@ -522,15 +534,18 @@ namespace ZedGraph
                     //_location.Height -= dy;
 
                     // calc new position
-                    ptPix1.Y += dy;
-                    ptPix2.X += dx;
+                    //ptPix1.Y += dy;
+                    //ptPix2.X += dx;
+                    ptPix1.Y = pt.Y;
+                    ptPix2.X = pt.X;
                     break;
 
                 case 3:
                     //_location.Width += dx;
 
                     // calc new position
-                    ptPix2.X += dx;
+                    //ptPix2.X += dx;
+                    ptPix2.X = pt.X;
                     break;
 
                 case 4:
@@ -538,35 +553,44 @@ namespace ZedGraph
                     //_location.Height += dy;
 
                     // calc new position
-                    ptPix2.X += dx;
-                    ptPix2.Y += dy;
+                    //ptPix2.X += dx;
+                    //ptPix2.Y += dy;
+                    ptPix2.X = pt.X;
+                    ptPix2.Y = pt.Y;
                     break;
 
                 case 5:
                     //_location.Height += dy;
 
                     // calc new position
-                    ptPix2.Y += dy;
+                    //ptPix2.Y += dy;
+                    ptPix2.Y = pt.Y;
                     break;
 
                 case 6:
-					//_location.X += dx;
-					//_location.Width -= dx;
-					//_location.Height += dy;
+                    //_location.X += dx;
+                    //_location.Width -= dx;
+                    //_location.Height += dy;
 
                     // calc new position
-                    ptPix1.X += dx;
-                    ptPix2.Y += dy;
+                    //ptPix1.X += dx;
+                    //ptPix2.Y += dy;
+                    ptPix1.X = pt.X;
+                    ptPix2.Y = pt.Y;
                     break;
 
 				case 7:
-					//_location.X += dx;
-					//_location.Width -= dx;
+                    //_location.X += dx;
+                    //_location.Width -= dx;
 
                     // calc new position
-                    ptPix1.X += dx;
+                    //ptPix1.X += dx;
+                    ptPix1.X = pt.X;
                     break;
 			}
+
+            //System.Diagnostics.Debug.WriteLine(string.Format("resize edget {4} pt1 {0}  pt2 {1}  s {2}  pt {3}  ", 
+            //    ptPix1, ptPix2, s, pt, edge));
 
 
             // convert to user space coordinate

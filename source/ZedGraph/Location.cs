@@ -580,10 +580,12 @@ namespace ZedGraph
 		{
 			PointF pix1 = TransformTopLeft( pane );
 			PointF pix2 = TransformBottomRight( pane );
-			//PointF pix3 = TransformTopLeft( pane, pix2.X - pix1.X, pix2.Y - pix1.Y );
+            //PointF pix3 = TransformTopLeft( pane, pix2.X - pix1.X, pix2.Y - pix1.Y );
 
-			return new RectangleF( pix1.X, pix1.Y, Math.Abs(pix2.X - pix1.X), Math.Abs(pix2.Y - pix1.Y) );
-		}
+            //return new RectangleF( pix1.X, pix1.Y, Math.Abs(pix2.X - pix1.X), Math.Abs(pix2.Y - pix1.Y) );
+            //return new RectangleF(pix1.X, pix1.Y, (pix2.X - pix1.X), (pix2.Y - pix1.Y));
+            return new RectangleF(Math.Min(pix1.X, pix2.X), Math.Min(pix1.Y, pix2.Y), Math.Abs(pix2.X - pix1.X), Math.Abs(pix2.Y - pix1.Y));
+        }
 
     #endregion
 
