@@ -598,11 +598,14 @@ namespace ZedGraph
 
             GraphicsPath path = MakePath(pane);
 
+            if (path.PointCount <= 0)
+                return lst;
+
             PointF[] points = path.PathPoints;
 
-            Axis yAxis = (pane as GraphPane).YAxis;
-            Axis xAxis = (pane as GraphPane).XAxis;
-            GraphPane gPane = pane as GraphPane;
+            //Axis yAxis = (pane as GraphPane).YAxis;
+            //Axis xAxis = (pane as GraphPane).XAxis;
+            //GraphPane gPane = pane as GraphPane;
 
             //for (int i = 0; i < points.Length; i++)
             //{
@@ -616,14 +619,16 @@ namespace ZedGraph
             {
                 var pp = target[i];
 
-                float x = xAxis.Scale.Transform(pp.X);
-                float y = yAxis.Scale.Transform(pp.Y);
+                //float x = xAxis.Scale.Transform(pp.X);
+                //float y = yAxis.Scale.Transform(pp.Y);
+                //float x = (float)pp.X;
+                //float y = (float)pp.Y;
 
-                PointF pt = new PointF(x, y);
+                //PointF pt = new PointF(x, y);
 
                 //if (path != null && path.IsVisible(pt))
-                if (path != null && Utils.PtInPolygon(points, pt))
-                //if (path != null && Utils.PtInPolygon(points, pp))
+                //if (path != null && Utils.PtInPolygon(points, pt))
+                if (path != null && Utils.PtInPolygon(points, pp))
                 {
                     lst[0].Add(pp.X, pp.Y, pp.Z);
                 }

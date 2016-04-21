@@ -389,9 +389,29 @@ namespace ZedGraph
 						pixRect.Left, pixRect.Top, pixRect.Right, pixRect.Bottom);
 		}
 
-	#endregion
+        #endregion
 
-	#region Overwrite Methods
+        #region Overwrite Methods
+        override public GraphicsPath MakePath(PaneBase pane)
+        {
+            GraphicsPath path = new GraphicsPath();
+
+            //PointF pix1 = this.Location.TransformTopLeft(pane);
+            //PointF pix2 = this.Location.TransformBottomRight(pane);
+
+            GraphPane gPane = pane as GraphPane;
+
+            PointF pix1 = gPane.GeneralTransform(_location.TopLeft, _location.CoordinateFrame);
+            PointF pix2 = gPane.GeneralTransform(_location.BottomRight, _location.CoordinateFrame);
+
+            RectangleF pixRect = new RectangleF(Math.Min(pix1.X, pix2.X), Math.Min(pix1.Y, pix2.Y),
+                            Math.Abs(pix2.X - pix1.X), Math.Abs(pix2.Y - pix1.Y));
+
+            path.AddRectangle(pixRect);
+
+            return path;
+        }
+
         override public RectangleF[] EdgeRects(PaneBase pane)
 		{
 			RectangleF[] rects = new RectangleF[8];
