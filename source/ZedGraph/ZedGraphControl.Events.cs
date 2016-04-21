@@ -404,7 +404,6 @@ namespace ZedGraph
         [Bindable(true), Category("Events"),
             Description("Subscribe to be notifiied when graph object is changed")]
         public event GraphEventHandler GraphEvent;
-
 	#endregion
 
 	#region Mouse Events
@@ -490,8 +489,9 @@ namespace ZedGraph
 					&& _graphDragState.Obj.FindNearestEdge(mousePt, pane, out index))
 				{
 					_graphDragState.State = GraphDragState.DragState.Resize;
-					_dragStartPt = mousePt;
-					_dragIndex = index;
+                    _dragStartPt = mousePt;
+                    _dragEndPt = mousePt;
+                    _dragIndex = index;
 					_graphDragState.Pane = pane;
 				}
 				else
@@ -515,6 +515,7 @@ namespace ZedGraph
 
                         _graphDragState.State = GraphDragState.DragState.Select;
                         _dragStartPt = mousePt;
+                        _dragEndPt = mousePt;
                         _dragIndex = 0;
                         _graphDragState.Pane = pane;
                     }
@@ -713,7 +714,7 @@ namespace ZedGraph
 			}
 
 			if (_isGraphDragging)
-				HandleGraphDragFinish();
+				HandleGraphDragFinish(e);
 
 			// Reset the rectangle.
 			//dragStartPt = new Rectangle( 0, 0, 0, 0 );
@@ -722,8 +723,10 @@ namespace ZedGraph
 			_isPanning = false;
 			_isEditing = false;
 			_isSelecting = false;
+            _isGraphDragging = false;
 
-			Cursor.Current = Cursors.Default;
+
+            Cursor.Current = Cursors.Default;
 		}
 
 		/// <summary>
@@ -1621,9 +1624,9 @@ namespace ZedGraph
 
 				if (_graphDragState.State == GraphDragState.DragState.Move)
 				{
-                    //obj.Location.X += (mousePt.X - _dragStartPt.X) / _graphDragState.Pane.Rect.Width;
-                    //obj.Location.Y += (mousePt.Y - _dragStartPt.Y) / _graphDragState.Pane.Rect.Height;
-                    obj.UpdateLocation(pane, mousePt.X - _dragStartPt.X, mousePt.Y - _dragStartPt.Y);
+                    //obj.Location.X += (mousePt.X - _dragEndPt.X) / _graphDragState.Pane.Rect.Width;
+                    //obj.Location.Y += (mousePt.Y - _dragEndPt.Y) / _graphDragState.Pane.Rect.Height;
+                    obj.UpdateLocation(pane, mousePt.X - _dragEndPt.X, mousePt.Y - _dragEndPt.Y);
 #if false
                     // hack for no width/height polygon
                     if (true || obj.Location.Width != 1)
@@ -1636,11 +1639,11 @@ namespace ZedGraph
                                 obj.Location.CoordinateFrame);
 
                         // calc new position
-                        ptPix1.X += (mousePt.X - _dragStartPt.X);
-                        ptPix1.Y += (mousePt.Y - _dragStartPt.Y);
+                        ptPix1.X += (mousePt.X - _dragEndPt.X);
+                        ptPix1.Y += (mousePt.Y - _dragEndPt.Y);
 
-                        ptPix2.X += (mousePt.X - _dragStartPt.X);
-                        ptPix2.Y += (mousePt.Y - _dragStartPt.Y);
+                        ptPix2.X += (mousePt.X - _dragEndPt.X);
+                        ptPix2.Y += (mousePt.Y - _dragEndPt.Y);
 
                         // convert to user coordinate
                         PointD pt1 = pane.GeneralReverseTransform(ptPix1, obj.Location.CoordinateFrame);
@@ -1653,12 +1656,12 @@ namespace ZedGraph
                     } 
                     else
                     {
-                        obj.Location.X += mousePt.X - _dragStartPt.X;
-                        obj.Location.Y += mousePt.Y - _dragStartPt.Y;
+                        obj.Location.X += mousePt.X - _dragEndPt.X;
+                        obj.Location.Y += mousePt.Y - _dragEndPt.Y;
                     }
 #endif
                     //_graphDragState.startPt = e.Location;
-                    _dragStartPt = mousePt;
+                    _dragEndPt = mousePt;
 
                     //this.Text = String.Format("{0} {1} -- {2} {3}",
                     //    drag.obj.Location.X, selectedLocation.Y,
@@ -1700,7 +1703,7 @@ namespace ZedGraph
 			}
 		}
 
-		private void HandleGraphDragFinish()
+		private void HandleGraphDragFinish(MouseEventArgs e)
 		{
 			if (_graphDragState.Obj != null)
 			{
@@ -1708,7 +1711,8 @@ namespace ZedGraph
 				_graphDragState.Obj.IsMoving = false;
 				_graphDragState.State = GraphDragState.DragState.None;
 
-                if (this.GraphEvent != null)
+                if ((e.X != _dragStartPt.X || e.Y != _dragStartPt.Y) 
+                    && this.GraphEvent != null)
                 {
                     this.GraphEvent(this, _graphDragState.Pane, _graphDragState.Obj,
                         GraphEventArg.End);
