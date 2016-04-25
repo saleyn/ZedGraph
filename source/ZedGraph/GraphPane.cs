@@ -1530,25 +1530,51 @@ namespace ZedGraph
 			return this.TransformCoord( ptF.X, ptF.Y, coord );
 		}
 
-		/// <summary>
-		/// Transform a data point from the specified coordinate type
-		/// (<see cref="CoordType"/>) to screen coordinates (pixels).
-		/// </summary>
-		/// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
-		/// has already been calculated via <see cref="AxisChange()"/> or
-		/// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
-		/// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).
-		/// Note that this method is more accurate than the <see cref="GeneralTransform(PointF,CoordType)" />
-		/// overload, since it uses double types.  This would typically only be significant for
-		/// <see cref="AxisType.Date" /> coordinates.
-		/// </remarks>
-		/// <param name="x">The x coordinate that defines the location in user space</param>
-		/// <param name="y">The y coordinate that defines the location in user space</param>
-		/// <param name="coord">A <see cref="CoordType"/> type that defines the
-		/// coordinate system in which the X,Y pair is defined.</param>
-		/// <returns>A point in screen coordinates that corresponds to the
-		/// specified user point.</returns>
-		public PointF GeneralTransform( double x, double y, CoordType coord )
+        /// <summary>
+        /// Transform a data point from the specified coordinate type
+        /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+        /// </summary>
+        /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+        /// has already been calculated via <see cref="AxisChange()"/> or
+        /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+        /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
+        /// <param name="pt">The X,Y pair that defines the point in user
+        /// coordinates.</param>
+        /// <param name="coord">A <see cref="CoordType"/> type that defines the
+        /// coordinate system in which the X,Y pair is defined.</param>
+        /// <returns>A point in screen coordinates that corresponds to the
+        /// specified user point.</returns>
+        public PointF GeneralTransform(PointD pt, CoordType coord)
+        {
+            // Setup the scaling data based on the chart rect
+            _xAxis.Scale.SetupScaleData(this, _xAxis);
+            foreach (Axis axis in _yAxisList)
+                axis.Scale.SetupScaleData(this, axis);
+            foreach (Axis axis in _y2AxisList)
+                axis.Scale.SetupScaleData(this, axis);
+
+            return this.TransformCoord(pt.X, pt.Y, coord);
+        }
+
+        /// <summary>
+        /// Transform a data point from the specified coordinate type
+        /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+        /// </summary>
+        /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+        /// has already been calculated via <see cref="AxisChange()"/> or
+        /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+        /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).
+        /// Note that this method is more accurate than the <see cref="GeneralTransform(PointF,CoordType)" />
+        /// overload, since it uses double types.  This would typically only be significant for
+        /// <see cref="AxisType.Date" /> coordinates.
+        /// </remarks>
+        /// <param name="x">The x coordinate that defines the location in user space</param>
+        /// <param name="y">The y coordinate that defines the location in user space</param>
+        /// <param name="coord">A <see cref="CoordType"/> type that defines the
+        /// coordinate system in which the X,Y pair is defined.</param>
+        /// <returns>A point in screen coordinates that corresponds to the
+        /// specified user point.</returns>
+        public PointF GeneralTransform( double x, double y, CoordType coord )
 		{
 			// Setup the scaling data based on the chart rect
 			_xAxis.Scale.SetupScaleData( this, _xAxis );
