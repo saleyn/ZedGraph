@@ -630,11 +630,11 @@ namespace ZedGraph
                 //if (path != null && Utils.PtInPolygon(points, pt))
                 if (path != null && Utils.PtInPolygon(points, pp))
                 {
-                    lst[0].Add(pp.X, pp.Y, pp.Z);
+                    lst[0].Add(pp.X, pp.Y, pp.Tag);
                 }
                 else
                 {
-                    lst[1].Add(pp.X, pp.Y, pp.Z);
+                    lst[1].Add(pp.X, pp.Y, pp.Tag);
                 }
             }
 
@@ -737,7 +737,16 @@ namespace ZedGraph
         /// <returns></returns>
         virtual public PointF[] ScreenPoints(PaneBase pane)
         {
-            PointF[] points = new PointF[2];
+            //PointF[] points = new PointF[4];
+
+            //points[0] = _location.TransformTopLeft(pane);
+            //points[2] = _location.TransformBottomRight(pane);
+            //points[1].X = points[2].X;
+            //points[1].Y = points[0].Y;
+            //points[3].X = points[0].X;
+            //points[3].Y = points[2].Y;
+
+            PointF[] points = new PointF[4];
 
             points[0] = _location.TransformTopLeft(pane);
             points[1] = _location.TransformBottomRight(pane);
@@ -789,6 +798,17 @@ namespace ZedGraph
         public static double Distance(double x0, double y0, double x1, double y1)
         {
             return Distance(x0 - x1, y0 - y1);
+        }
+
+        /// <summary>
+        /// Distance between two points
+        /// </summary>
+        /// <param name="dx"></param>
+        /// <param name="dy"></param>
+        /// <returns></returns>
+        public static double Distance(PointF p1, PointF p2)
+        {
+            return Distance(p1.X - p2.X, p1.Y - p2.Y);
         }
 
         /// <summary>
