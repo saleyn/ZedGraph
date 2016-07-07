@@ -600,10 +600,10 @@ namespace ZedGraph
 
                 Cursor cursor = null;
 
-				if (pane != null && _isEnableGraphEdit && _isGraphDragging)
+				if (pane != null && _isEnableGraphEdit /*&& _isGraphDragging*/)
 				{
 					int index;
-					Object obj;
+					object obj;
 
                     if ( // current obj is resizing or edge is selected
                         _graphDragState.Obj != null
@@ -997,14 +997,17 @@ namespace ZedGraph
 			double[] y;
 			double[] y2;
 
-			pane.ReverseTransform( centerPt, out x, out x2, out y, out y2 );
+            ZoomStateSave(pane, ZoomState.StateType.Zoom);
+            ZoomStatePush(pane);
 
-			if ( _isEnableHZoom )
+            pane.ReverseTransform( centerPt, out x, out x2, out y, out y2 );
+
+			//if ( _isEnableHZoom )
 			{
 				ZoomScale( pane.XAxis, zoomFraction, x, isZoomOnCenter );
 				ZoomScale( pane.X2Axis, zoomFraction, x2, isZoomOnCenter );
 			}
-			if ( _isEnableVZoom )
+			//if ( _isEnableVZoom )
 			{
 				for ( int i = 0; i < pane.YAxisList.Count; i++ )
 					ZoomScale( pane.YAxisList[i], zoomFraction, y[i], isZoomOnCenter );
@@ -1073,18 +1076,18 @@ namespace ZedGraph
 			{
 				Scale scale = axis._scale;
 				/*
-								if ( axis.Scale.IsLog )
-								{
-									double ratio = Math.Sqrt( axis._scale._max / axis._scale._min * zoomFraction );
+				if ( axis.Scale.IsLog )
+				{
+					double ratio = Math.Sqrt( axis._scale._max / axis._scale._min * zoomFraction );
 
-									if ( !isZoomOnCenter )
-										centerVal = Math.Sqrt( axis._scale._max * axis._scale._min );
+					if ( !isZoomOnCenter )
+						centerVal = Math.Sqrt( axis._scale._max * axis._scale._min );
 
-									axis._scale._min = centerVal / ratio;
-									axis._scale._max = centerVal * ratio;
-								}
-								else
-								{
+					axis._scale._min = centerVal / ratio;
+					axis._scale._max = centerVal * ratio;
+				}
+				else
+				{
 				*/
 				double minLin = axis._scale._minLinearized;
 				double maxLin = axis._scale._maxLinearized;
@@ -1093,9 +1096,16 @@ namespace ZedGraph
 				if ( !isZoomOnCenter )
 					centerVal = ( maxLin + minLin ) / 2.0;
 
-				axis._scale._minLinearized = centerVal - range;
+                //if (scale.IsLog)
+                //{
+                //    // do not zoom in when limit is reached
+                //    if (range > 4 && zoomFraction > 1.0)
+                //        return;
+                //}
+
+                axis._scale._minLinearized = centerVal - range;
 				axis._scale._maxLinearized = centerVal + range;
-				//				}
+				//	}
 
 				axis._scale._minAuto = false;
 				axis._scale._maxAuto = false;
@@ -1410,10 +1420,11 @@ namespace ZedGraph
 						}
 					}
 				}
-
-				Refresh();
 			}
-		}
+
+            // refresh anyway
+            Refresh();
+        }
 
 		private void HandleZoomCancel()
 		{
@@ -1719,7 +1730,7 @@ namespace ZedGraph
                 }
 
 				// force a redraw
-				Refresh();
+				//Refresh();
 			}
 		}
 
