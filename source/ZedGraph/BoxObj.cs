@@ -428,7 +428,7 @@ namespace ZedGraph
 			float h = (bottom - top) / 2;
 			float w = (right - left) / 2;
 
-            /**
+            /*
                0       1       2
                +---------------+
                |               |
@@ -438,14 +438,14 @@ namespace ZedGraph
                6       5       4
             */
 
-			rects[0] = new RectangleF(left - 2, top - 2, 4, 4);
-			rects[1] = new RectangleF(left + w - 2, top - 2, 4, 4);
-			rects[2] = new RectangleF(right - 2, top - 2, 4, 4);
-			rects[3] = new RectangleF(right - 2, top + h - 2, 4, 4);
-			rects[4] = new RectangleF(right - 2, bottom - 2, 4, 4);
-			rects[5] = new RectangleF(left + w - 2, bottom - 2, 4, 4);
-			rects[6] = new RectangleF(left - 2, bottom - 2, 4, 4);
-			rects[7] = new RectangleF(left - 2, top + h - 2, 4, 4);
+			rects[0] = new RectangleF(left - 4,     top - 4,     8, 8);
+			rects[1] = new RectangleF(left + w - 4, top - 4,     8, 8);
+			rects[2] = new RectangleF(right - 4,    top - 4,     8, 8);
+			rects[3] = new RectangleF(right - 4,    top + h - 4, 8, 8);
+			rects[4] = new RectangleF(right - 4,    bottom - 4,  8, 8);
+			rects[5] = new RectangleF(left + w - 4, bottom - 4,  8, 8);
+			rects[6] = new RectangleF(left - 4,     bottom - 4,  8, 8);
+			rects[7] = new RectangleF(left - 4,     top + h - 4, 8, 8);
 
 			return rects;
 		}
@@ -514,7 +514,7 @@ namespace ZedGraph
             //float dx = (pt.X - s.X - 2) ;
             //float dy = (pt.Y - s.Y - 2) ;
 
-            /**
+            /*
                0       1       2
                +---------------+
                |               |

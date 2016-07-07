@@ -403,7 +403,7 @@ namespace ZedGraph
 			{
                 //PointF pixPt = SafeTransform(_points[i], gPane, _location.CoordinateFrame);
                 PointF pixPt = gPane.GeneralTransform(_points[i].X, _points[i].Y, _location.CoordinateFrame);
-                rects[i] = new RectangleF(pixPt.X - 2, pixPt.Y - 2, 4, 4);
+                rects[i] = new RectangleF(pixPt.X - 4, pixPt.Y - 4, 8, 8);
             }
 
 			return rects;
@@ -473,8 +473,11 @@ namespace ZedGraph
                 //if (!base.PointInBox(pt, pane, g, scaleFactor))
                 //    return false;
 
-                using ( GraphicsPath path = MakePath( pane ) )
-					return path.IsVisible( pt );
+                using (GraphicsPath path = MakePath(pane))
+                {
+                    return path.IsVisible(pt) || path.IsOutlineVisible(pt, new Pen(Color.AliceBlue, 2)) ;
+                }
+                    
 			}
 			else
 				return false;
@@ -510,7 +513,7 @@ namespace ZedGraph
         }
         #endregion
 
-        #region Point Related Method
+    #region Point Related Method
         public void AddPoint(PointD pt)
 		{
             AddPoint(pt.X, pt.Y);
