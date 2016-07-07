@@ -119,7 +119,64 @@ namespace ZedGraph
 				{
 					string menuStr = string.Empty;
 
-					ToolStripMenuItem item = new ToolStripMenuItem();
+                    ToolStripMenuItem item = new ToolStripMenuItem();
+                    item.Name = "unzoom";
+                    item.Tag = "unzoom";
+
+                    if (pane == null || pane.ZoomStack.IsEmpty)
+                    {
+                        menuStr = ZedGraphLocale.unzoom;
+                    }
+                    else
+                    {
+                        switch (pane.ZoomStack.Top.Type)
+                        {
+                            case ZoomState.StateType.Zoom:
+                            case ZoomState.StateType.WheelZoom:
+                                menuStr = ZedGraphLocale.unzoom;
+                                break;
+                            case ZoomState.StateType.Pan:
+                                menuStr = ZedGraphLocale.unpan;
+                                break;
+                            case ZoomState.StateType.Scroll:
+                                menuStr = ZedGraphLocale.unscroll;
+                                break;
+                        }
+                    }
+
+                    //menuItem.Text = "Un-" + ( ( pane == null || pane.zoomStack.IsEmpty ) ?
+                    //	"Zoom" : pane.zoomStack.Top.TypeString );
+                    item.Text = menuStr;
+                    item.Click += new EventHandler(this.MenuClick_ZoomOut);
+                    if (pane == null || pane.ZoomStack.IsEmpty)
+                        item.Enabled = false;
+                    menuStrip.Items.Add(item);
+
+                    item = new ToolStripMenuItem();
+                    item.Name = "undo_all";
+                    item.Tag = "undo_all";
+                    menuStr = ZedGraphLocale.undo_all;
+                    item.Text = menuStr;
+                    item.Click += new EventHandler(this.MenuClick_ZoomOutAll);
+                    if (pane == null || pane.ZoomStack.IsEmpty)
+                        item.Enabled = false;
+                    menuStrip.Items.Add(item);
+
+                    item = new ToolStripMenuItem();
+                    item.Name = "set_default";
+                    item.Tag = "set_default";
+                    menuStr = ZedGraphLocale.set_default;
+                    item.Text = menuStr;
+                    item.Click += new EventHandler(this.MenuClick_RestoreScale);
+                    if (pane == null)
+                        item.Enabled = false;
+                    menuStrip.Items.Add(item);
+
+                    // separator
+                    menuStrip.Items.Add(new ToolStripSeparator());
+
+
+                    item = new ToolStripMenuItem();
 					item.Name = "copy";
 					item.Tag = "copy";
 					item.Text = ZedGraphLocale.copy;
@@ -147,7 +204,10 @@ namespace ZedGraph
 					item.Click += new System.EventHandler( this.MenuClick_Print );
 					menuStrip.Items.Add( item );
 
-					item = new ToolStripMenuItem();
+                    // separator
+                    menuStrip.Items.Add(new ToolStripSeparator());
+
+                    item = new ToolStripMenuItem();
 					item.Name = "show_val";
 					item.Tag = "show_val";
 					item.Text = ZedGraphLocale.show_val;
@@ -155,58 +215,6 @@ namespace ZedGraph
 					item.Checked = this.IsShowPointValues;
 					menuStrip.Items.Add( item );
 
-					item = new ToolStripMenuItem();
-					item.Name = "unzoom";
-					item.Tag = "unzoom";
-
-					if (pane == null || pane.ZoomStack.IsEmpty)
-					{
-					    menuStr = ZedGraphLocale.unzoom;
-					}
-					else
-					{
-						switch ( pane.ZoomStack.Top.Type )
-						{
-							case ZoomState.StateType.Zoom:
-							case ZoomState.StateType.WheelZoom:
-								menuStr = ZedGraphLocale.unzoom;
-								break;
-							case ZoomState.StateType.Pan:
-								menuStr = ZedGraphLocale.unpan;
-								break;
-							case ZoomState.StateType.Scroll:
-								menuStr = ZedGraphLocale.unscroll;
-								break;
-						}
-					}
-
-					//menuItem.Text = "Un-" + ( ( pane == null || pane.zoomStack.IsEmpty ) ?
-					//	"Zoom" : pane.zoomStack.Top.TypeString );
-					item.Text = menuStr;
-					item.Click += new EventHandler( this.MenuClick_ZoomOut );
-					if ( pane == null || pane.ZoomStack.IsEmpty )
-						item.Enabled = false;
-					menuStrip.Items.Add( item );
-
-					item = new ToolStripMenuItem();
-					item.Name = "undo_all";
-					item.Tag = "undo_all";
-					menuStr = ZedGraphLocale.undo_all;
-					item.Text = menuStr;
-					item.Click += new EventHandler( this.MenuClick_ZoomOutAll );
-					if ( pane == null || pane.ZoomStack.IsEmpty )
-						item.Enabled = false;
-					menuStrip.Items.Add( item );
-
-					item = new ToolStripMenuItem();
-					item.Name = "set_default";
-					item.Tag = "set_default";
-					menuStr = ZedGraphLocale.set_default;
-					item.Text = menuStr;
-					item.Click += new EventHandler( this.MenuClick_RestoreScale );
-					if ( pane == null )
-						item.Enabled = false;
-					menuStrip.Items.Add( item );
 
 					// if e.Cancel is set to false, the context menu does not display
 					// it is initially set to false because the context menu has no items

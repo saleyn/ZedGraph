@@ -136,13 +136,13 @@
     <value>标题</value>
   </data>
   <data name="undo_all" xml:space="preserve">
-    <value>还原缩放/移动</value>
+    <value>撤销缩放/移动</value>
   </data>
   <data name="unpan" xml:space="preserve">
     <value>还原移动</value>
   </data>
   <data name="unzoom" xml:space="preserve">
-    <value>还原缩放</value>
+    <value>撤销缩放</value>
   </data>
   <data name="x_title_def" xml:space="preserve">
     <value>X 轴</value>
