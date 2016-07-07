@@ -1899,12 +1899,12 @@ namespace ZedGraph
 					string tmpStr = _ownerAxis.MakeLabelEventWorks( pane, i, dVal );
 
 					SizeF sizeF;
-					if ( this.IsLog && _isUseTenPower )
+					//if ( this.IsLog && _isUseTenPower )
 						sizeF = _fontSpec.BoundingBoxTenPower( g, tmpStr,
 							scaleFactor );
-					else
-						sizeF = _fontSpec.BoundingBox( g, tmpStr,
-							scaleFactor );
+					//else
+					//	sizeF = _fontSpec.BoundingBox( g, tmpStr,
+					//		scaleFactor );
 
 					if ( sizeF.Height > maxSpace.Height )
 						maxSpace.Height = sizeF.Height;
@@ -2240,10 +2240,10 @@ namespace ZedGraph
 			string tmpStr = _ownerAxis.MakeLabelEventWorks( pane, i, dVal );
 
 			float height;
-			if ( this.IsLog && _isUseTenPower )
+			//if ( this.IsLog && _isUseTenPower )
 				height = _fontSpec.BoundingBoxTenPower( g, tmpStr, scaleFactor ).Height;
-			else
-				height = _fontSpec.BoundingBox( g, tmpStr, scaleFactor ).Height;
+			//else
+			//	height = _fontSpec.BoundingBox( g, tmpStr, scaleFactor ).Height;
 
 			if ( _align == AlignP.Center )
 				textCenter = textTop + maxSpace / 2.0F;
