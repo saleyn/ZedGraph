@@ -953,16 +953,16 @@ namespace ZedGraph
 
 				minSpaceL += fixedSpace;
 			}
-			foreach ( Axis axis in _y2AxisList )
-			{
-				float fixedSpace;
-				float tmp = axis.CalcSpace( g, this, scaleFactor, out fixedSpace );
-				//if ( !axis.CrossAuto || axis.Cross < _xAxis.Min )
-				if ( axis.IsCrossShifted( this ) )
-					totSpaceY += tmp;
+			//foreach ( Axis axis in _y2AxisList )
+			//{
+			//	float fixedSpace;
+			//	float tmp = axis.CalcSpace( g, this, scaleFactor, out fixedSpace );
+			//	//if ( !axis.CrossAuto || axis.Cross < _xAxis.Min )
+			//	if ( axis.IsCrossShifted( this ) )
+			//		totSpaceY += tmp;
 
-				minSpaceR += fixedSpace;
-			}
+			//	minSpaceR += fixedSpace;
+			//}
 
 			float spaceB = 0, spaceT = 0, spaceL = 0, spaceR = 0;
 
@@ -982,13 +982,13 @@ namespace ZedGraph
 				totSpaceL += spaceL;
 				axis._tmpSpace = spaceL;
 			}
-			foreach ( Axis axis in _y2AxisList )
-			{
-				SetSpace( axis, clientRect.Width - totSpaceY, ref spaceR, ref spaceL );
-				minSpaceL = Math.Max( minSpaceL, spaceL );
-				totSpaceR += spaceR;
-				axis._tmpSpace = spaceR;
-			}
+			//foreach ( Axis axis in _y2AxisList )
+			//{
+			//	SetSpace( axis, clientRect.Width - totSpaceY, ref spaceR, ref spaceL );
+			//	minSpaceL = Math.Max( minSpaceL, spaceL );
+			//	totSpaceR += spaceR;
+			//	axis._tmpSpace = spaceR;
+			//}
 
 			RectangleF tmpRect = clientRect;
 
