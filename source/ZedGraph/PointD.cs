@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2005  John Champion
+//Copyright ?2005  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -54,6 +54,22 @@ namespace ZedGraph
 			X = x;
 			Y = y;
 		}
-	}
+
+        public PointD(PointF pt)
+        {
+            X = pt.X;
+            Y = pt.Y;
+        }
+
+        static public implicit operator PointF(PointD pt)
+        {
+            return new PointF((float)pt.X, (float)pt.Y);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("({0:N2},{1:N2})", X, Y);
+        }
+    }
 }
 
