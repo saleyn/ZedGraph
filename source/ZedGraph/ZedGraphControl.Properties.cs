@@ -1243,6 +1243,23 @@ namespace ZedGraph
             set { _isEnableGraphEdit = value; }
         }
 
+        /// <summary>
+        /// Readonly property to get selected graph
+        /// </summary>
+        public GraphObj SelectedGraph
+        {
+            get
+            {
+                if (_graphDragState.Obj != null && _graphDragState.Obj.IsSelected)
+                    return _graphDragState.Obj;
+                return null;
+            }
+        }
+
+        public void ResetSelectedGraph()
+        {
+            _graphDragState.Reset();
+        }
 	#endregion
     }
 }
