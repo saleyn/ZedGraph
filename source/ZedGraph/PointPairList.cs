@@ -1,6 +1,6 @@
 //============================================================================
 //PointPairList Class
-//Copyright © 2004  Jerry Vos
+//Copyright ?2004  Jerry Vos
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -298,15 +298,22 @@ namespace ZedGraph
 			base.Add( point );
 		}
 
-		/// <summary>
-		/// Add a single point to the <see cref="PointPairList"/> from values of type double.
-		/// </summary>
-		/// <param name="x">The X value</param>
-		/// <param name="y">The Y value</param>
-		/// <param name="z">The Z or lower dependent axis value</param>
-		/// <returns>The zero-based ordinal index where the point was added
-		/// in the list.</returns>
-		public void Add( double x, double y, double z )
+        public void Add(double x, double y, object tag)
+        {
+            _sorted = false;
+            PointPair point = new PointPair(x, y, 0, tag);
+            base.Add(point);
+        }
+
+        /// <summary>
+        /// Add a single point to the <see cref="PointPairList"/> from values of type double.
+        /// </summary>
+        /// <param name="x">The X value</param>
+        /// <param name="y">The Y value</param>
+        /// <param name="z">The Z or lower dependent axis value</param>
+        /// <returns>The zero-based ordinal index where the point was added
+        /// in the list.</returns>
+        public void Add( double x, double y, double z )
 		{
 			_sorted = false;
 			PointPair point = new PointPair( x, y, z );
