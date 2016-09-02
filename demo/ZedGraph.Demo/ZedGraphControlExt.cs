@@ -103,7 +103,7 @@ namespace ZedGraph.Demo
                Control.ModifierKeys == PanModifierKeys   ||
                (PanModifierKeys2  != Keys.None && Control.ModifierKeys == PanModifierKeys2))
       {
-        var foundObject = findZedGraphObject(null);
+        var foundObject = findZedGraphObject(new Point(e.X, e.Y));
         m_HoveredYAxis = foundObject as YAxis ?? (object)(foundObject as Y2Axis);
 
         if (m_HoveredYAxis != null)
@@ -170,12 +170,8 @@ namespace ZedGraph.Demo
       m_MovedYAxisMax = scale.Max;
     }
 
-    private object findZedGraphObject(GraphPane pane = null)
+    private object findZedGraphObject(Point pt)
     {
-      var pt = PointToClient(Control.MousePosition);
-
-      if (pane != null) return null;
-
       m_FoundPane = MasterPane.FindPane(pt);
       if (m_FoundPane == null) return null;
       object foundObject;
