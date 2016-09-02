@@ -4,8 +4,8 @@ This is a fork of https://github.com/discomurray/ZedGraph.
 
 The original project is LGPL copyrighted 2004-2009 by John Champion.
 
-In this fork we try to bring this project up to date take
-advandate of modern C# features as well as add functionality
+In this fork we try to bring this project up to date to take
+advandage of modern C# features as well as add functionality
 to make it more usable for financial charting.
 
 ## Added features ##
