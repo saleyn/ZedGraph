@@ -150,16 +150,22 @@ namespace ZedGraph.Demo
 			}
 		}
 
-		/// <summary>
-		/// Loads a demo into the frame
-		/// </summary>
-		/// <param name="key">The key the demo is stored in demos under</param>
-		private void Init( object key )
+    private ZedGraphDemo _lastDemo = null;
+
+    /// <summary>
+    /// Loads a demo into the frame
+    /// </summary>
+    /// <param name="key">The key the demo is stored in demos under</param>
+    private void Init( object key )
 		{
 			ZedGraphDemo demo = (ZedGraphDemo)this.demos[key];
 
 			if ( demo == null )
 				return;
+
+      _lastDemo?.Deactivate();
+      demo.Activate();
+      _lastDemo = demo;
 
 			this.tabDemo.Controls.Clear();
 			this.tabDemo.Controls.Add( demo.ZedGraphControl );

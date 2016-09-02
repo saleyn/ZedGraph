@@ -80,6 +80,7 @@ namespace ZedGraph.Demo
 			loadDemo( new SynchronizedPanes() );
 			loadDemo( new JapaneseCandleStickDemo() );
 			loadDemo( new OHLCBarDemo() );
+			loadDemo( new OHLCBarRealTimeDemo() );
 			loadDemo( new ImageForSymbolDemo() );
 			loadDemo( new MasterPaneLayout() );
 			

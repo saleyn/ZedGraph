@@ -625,7 +625,9 @@ namespace ZedGraph
                 {
                     // do nothing, just for ...
                 }
-                else if ( ( _isEnableHPan || _isEnableVPan ) && ( Control.ModifierKeys == Keys.Shift || _isPanning ) &&
+                else if ( ( _isEnableHPan || _isEnableVPan ) &&
+                          ( Control.ModifierKeys == _panModifierKeys || 
+                          (_panModifierKeys2 != Keys.None && Control.ModifierKeys == _panModifierKeys2) || _isPanning ) &&
 					( pane != null || _isPanning ) )
                     cursor = Cursors.Hand;
 				else if ( ( _isEnableVZoom || _isEnableHZoom ) && ( pane != null || _isZooming ) )
@@ -930,7 +932,8 @@ namespace ZedGraph
 		/// <param name="e">A <see cref="MouseEventArgs" /> instance</param>
 		protected void ZedGraphControl_MouseWheel( object sender, MouseEventArgs e )
 		{
-			if ( ( _isEnableVZoom || _isEnableHZoom ) && _isEnableWheelZoom && _masterPane != null )
+			if ( ( _isEnableVZoom || _isEnableHZoom ) && _isEnableWheelZoom && _masterPane != null &&
+        Control.ModifierKeys == _zoomModifierKeys)
 			{
 				GraphPane pane = this.MasterPane.FindChartRect( new PointF( e.X, e.Y ) );
 				if ( pane != null && e.Delta != 0 )
