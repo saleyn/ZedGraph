@@ -264,7 +264,7 @@ namespace ZedGraph.Demo
 
 		private void ChartTabForm_Load( object sender, System.EventArgs e )
 		{
-			Init( "Combo Demo" );
+			Init("OHLCBar Real-Time Demo");
 		}
 
 		private void menuFileExit_Click( object sender, EventArgs e )
@@ -289,11 +289,6 @@ namespace ZedGraph.Demo
 		private void menuHelpWebPage_Click( object sender, EventArgs e )
 		{
 			Help.ShowHelp( this, "http://zedgraph.sourceforge.net" );
-		}
-
-		private void ChartTabForm_Load_1( object sender, EventArgs e )
-		{
-			Init( "Combo Demo" );
 		}
 	}
 }

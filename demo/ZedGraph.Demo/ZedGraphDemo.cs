@@ -19,11 +19,11 @@
 namespace ZedGraph.Demo
 {
 	/// <summary>
-	/// Interface for demos.  This allows the demos to be self-contained, 
-	/// simplifying reading their code and allowing for quick switches 
+	/// Interface for demos.  This allows the demos to be self-contained,
+	/// simplifying reading their code and allowing for quick switches
 	/// between demos.
 	/// </summary>
-	/// 
+	///
 	/// <author> Jerry Vos </author>
 	/// <version> $Revision: 1.2 $ $Date: 2005-03-02 19:18:44 $ </version>
 	public interface ZedGraphDemo

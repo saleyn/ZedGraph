@@ -40,10 +40,10 @@ namespace ZedGraph.Demo
       myPane.XAxis.Title.IsVisible = false;
       myPane.YAxis.Title.IsVisible = false;
       myPane.Legend.IsVisible = false;
-      myPane.Margin.Top = 5;
-      myPane.Margin.Left = 0;
-      myPane.Margin.Right = 0;
-      myPane.Margin.Bottom = 0;
+      //myPane.Margin.Top = 5;
+      //myPane.Margin.Left = 0;
+      //myPane.Margin.Right = 0;
+      //myPane.Margin.Bottom = 0;
       myPane.Legend.Gap = 0;
       //myPane.Fill.Color = Color.SlateGray;
       myPane.Fill = new Fill(Color.SlateGray);

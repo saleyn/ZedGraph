@@ -34,63 +34,80 @@ namespace ZedGraph.Demo
       : base("Demonstration of the OHLCBar Chart Type",
              "OHLCBar Real-Time Demo", DemoType.Bar)
     {
-      m_Pane = base.GraphPane;
-
-      m_Pane.Title.Text = "Open-High-Low-Close Bar Chart Demo";
-      //m_Pane.XAxis.Title.Text = "Trading Date";
-      //m_Pane.Y2Axis.Title.Text = "Share Price, $US";
-      m_Pane.XAxis.Title.IsVisible = false;
-      m_Pane.Y2Axis.Title.IsVisible = false;
-
       m_Timer = new Timer { Interval = 500, Enabled = false };
       m_Data = new StockPointList();
+      m_EMAData = new PointPairList();
       m_Rand = new Random();
 
-      // First day is jan 1st
-      var now = DateTime.Now;
-      m_Now = new XDate(now - TimeSpan.FromSeconds(60*15));
-      m_Open = 50.0;
+      var now = fillSampleData();
 
-      for (int i = 0; i < 60*15; i += 5)
-      {
-        m_Now.AddSeconds(5);
-        calc(m_Now, false);
-      }
+      m_Pane = base.GraphPane;
 
+      m_Pane.Title.Text = "OHLC Real-Time Bar Chart Demo";
+      //m_Pane.XAxis.Title.Text = "Trading Date";
+      //m_Pane.Y2Axis.Title.Text = "Share Price, $US";
+      m_Pane.Title.IsVisible = false;
+      m_Pane.Legend.IsVisible = false;
+      m_Pane.Margin.Top = 5;
+      m_Pane.Margin.Left = 0;
+      m_Pane.Margin.Right = 50;
+      m_Pane.Margin.Bottom = 0;
+      m_Pane.Legend.Gap = 0;
+      m_Pane.XAxis.Title.IsVisible = false;
+      m_Pane.YAxis.Title.IsVisible = false;
+      m_Pane.YAxis.MinSpace = 0;
+      m_Pane.Y2Axis.Title.IsVisible = false;
+      //m_Pane.Y2Axis.MinSpace = 50;
+      //m_Pane.Y2Axis.AxisGap = 10;
+
+      // Add OHLC bars
       OHLCBarItem myCurve = m_Pane.AddOHLCBar("trades", m_Data, Color.Black);
       myCurve.Bar.IsAutoSize = true;
-      myCurve.Bar.Color = Color.Blue;
+      myCurve.Bar.Color = Color.DodgerBlue;
+
+      // Cardinal spline smoothing function
+      LineItem curve = m_Pane.AddCurve("EMA(0.9)", m_EMAData, Color.LightCoral, SymbolType.None);
+      curve.Line.IsSmooth = true;
+      curve.Line.SmoothTension = 0.5F;
 
       // Enable the Y2 axis display
-      m_Pane.YAxis.IsVisible  = false;
-      m_Pane.Y2Axis.IsVisible = true;
+      m_Pane.YAxis.IsVisible                   = false;
+      m_Pane.Y2Axis.IsVisible                  = true;
 
-      m_Pane.XAxis.MajorGrid.IsVisible = true;
-      m_Pane.XAxis.MajorGrid.DashOff   = 1;
-      m_Pane.Y2Axis.MajorGrid.IsVisible = true;
-      m_Pane.Y2Axis.MajorGrid.DashOff   = 1;
+      m_Pane.XAxis.MajorGrid.IsVisible         = true;
+      m_Pane.XAxis.MajorGrid.DashOff           = 7;
+      m_Pane.XAxis.MajorGrid.DashOn            = 1;
+      m_Pane.Y2Axis.MajorGrid.IsVisible        = true;
+      m_Pane.Y2Axis.MajorGrid.DashOff          = 7;
+      m_Pane.Y2Axis.MajorGrid.DashOn           = 1;
+      m_Pane.XAxis.MajorGrid.Color             = Color.SlateGray;
+      m_Pane.Y2Axis.MajorGrid.Color            = Color.SlateGray;
 
       // Use DateAsOrdinal to skip weekend gaps
-      m_Pane.XAxis.Type = AxisType.Date;
-      m_Pane.XAxis.Scale.MajorUnit = DateUnit.Minute;
-      m_Pane.XAxis.Scale.MinorUnit = DateUnit.Second;
-      m_Pane.XAxis.Scale.Format    = "yyyy-MM-dd\nHH:mm:ss";
-      m_Pane.XAxis.Scale.Max       = new XDate(now);
-      m_Pane.XAxis.Scale.Min       = new XDate(now - TimeSpan.FromSeconds(60 * 15));
-      m_Pane.XAxis.MajorTic.IsBetweenLabels = true;
-      m_Pane.XAxis.MinorTic.Size      = 0;
-      m_Pane.XAxis.MinorTic.IsInside  = false;
-      m_Pane.XAxis.MajorTic.IsInside  = false;
-      m_Pane.XAxis.MinorTic.IsOutside = true;
+      m_Pane.XAxis.Type                        = AxisType.Date;
+      m_Pane.XAxis.Scale.MajorUnit             = DateUnit.Minute;
+      m_Pane.XAxis.Scale.MinorUnit             = DateUnit.Second;
+      m_Pane.XAxis.Scale.Format                = "yyyy-MM-dd\nHH:mm:ss";
+      m_Pane.XAxis.Scale.FontSpec.Size         = 9;
+      m_Pane.XAxis.Scale.FontSpec.ScaleFactor  = 1.0f;
+      m_Pane.XAxis.Scale.Max                   = new XDate(now);
+      m_Pane.XAxis.Scale.Min                   = new XDate(now - TimeSpan.FromSeconds(60 * 15));
+      m_Pane.XAxis.MajorTic.IsBetweenLabels    = true;
+      m_Pane.XAxis.MinorTic.Size               = 0;
+      m_Pane.XAxis.MinorTic.IsInside           = false;
+      m_Pane.XAxis.MajorTic.IsInside           = false;
+      m_Pane.XAxis.MinorTic.IsOutside          = true;
 
-      m_Pane.Y2Axis.MinorTic.IsInside  = false;
-      m_Pane.Y2Axis.MajorTic.IsInside  = false;
-      m_Pane.Y2Axis.MinorTic.IsOutside = true;
-      m_Pane.Y2Axis.MajorTic.IsOutside = true;
+      m_Pane.Y2Axis.MinorTic.IsInside          = false;
+      m_Pane.Y2Axis.MajorTic.IsInside          = false;
+      m_Pane.Y2Axis.MinorTic.IsOutside         = true;
+      m_Pane.Y2Axis.MajorTic.IsOutside         = true;
+      m_Pane.Y2Axis.Scale.FontSpec.Size        = 11;
+      m_Pane.Y2Axis.Scale.FontSpec.ScaleFactor = 1.0f;
 
       // pretty it up a little
-      m_Pane.Chart.Fill = new Fill(Color.White, Color.LightGoldenrodYellow, 45.0f);
-      m_Pane.Fill = new Fill(Color.White, Color.FromArgb(220, 220, 255), 45.0f);
+      m_Pane.Chart.Fill = new Fill(Color.Black);
+      m_Pane.Fill = new Fill(Color.SlateGray, Color.FromArgb(220, 220, 255), 45.0f);
 
       // Add a BoxObj to show a colored band behind the graph data
       m_Line = new LineObj(Color.Silver, 0, LastPoint.Y, m_Pane.Rect.Width, LastPoint.Y);
@@ -145,7 +162,23 @@ namespace ZedGraph.Demo
       m_Timer.Enabled = true;
     }
 
-	  public override void Activate()
+	  private DateTime fillSampleData()
+	  {
+      // First day is jan 1st
+      var now = DateTime.Now;
+      m_Now = new XDate(now - TimeSpan.FromSeconds(60 * 15));
+      m_Open = 50.0;
+
+      for (var i = 0; i < 60 * 15; i += 5)
+      {
+        m_Now.AddSeconds(5);
+        calc(m_Now, false);
+      }
+
+      return now;
+    }
+
+    public override void Activate()
 	  {
       ZedGraphControl.CrossHair = false;
       //ZedGraphControl.IsShowHScrollBar = true;
@@ -165,6 +198,8 @@ namespace ZedGraph.Demo
 
     private readonly Timer m_Timer;
     private readonly StockPointList m_Data;
+    private readonly PointPairList  m_EMAData;
+
     private XDate  m_Now;
     private double m_Open;
     private readonly Random m_Rand;
@@ -174,7 +209,11 @@ namespace ZedGraph.Demo
     private readonly LineObj m_XHair;
     private readonly LineObj m_YHair;
 
-    private StockPt LastPoint => m_Data.Count > 0 ? ((StockPt)m_Data[m_Data.Count - 1]) : new StockPt();
+    private const double EMA_ALPHA = 0.9;
+    private double       m_EMA     = 0;
+
+    private StockPt   LastPoint    => m_Data.Count    > 0 ? ((StockPt)m_Data[m_Data.Count - 1]) : new StockPt();
+    private PointPair LastEMAPoint => m_EMAData.Count > 0 ? m_EMAData[m_EMAData.Count - 1] : new PointPair();
 
 	  //private static readonly double s_Interval = ;
 
@@ -198,6 +237,9 @@ namespace ZedGraph.Demo
 
         m_Data.Add(pt);
         m_Open = close;
+
+        m_EMA = EMA_ALPHA * close + (1.0 - EMA_ALPHA) * m_EMA;
+        m_EMAData.Add(x, m_EMA);
       }
       else if (m_Data.Count > 0)
       {
