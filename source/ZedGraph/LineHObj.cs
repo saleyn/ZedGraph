@@ -34,20 +34,24 @@ namespace ZedGraph
   public class LineHObj : LineBase, ICloneable, ISerializable
   {
   #region Constructors
-    public LineHObj() : this(Color.Empty) {}
-
-    public LineHObj(Color color, int yAxisIndex=0, object tag = null) : base(color)
+    public LineHObj(Axis axis, Color color, object tag = null) : base(color)
     {
-      Value      = 0.0;
-      YAxisIndex = yAxisIndex;
-      Tag        = tag;
+      Value    = 0.0;
+      Tag      = tag;
+      FontSpec = axis.Scale.FontSpec.Clone();
+      FontSpec.Fill.Color       = color;
+      FontSpec.Fill.Brush       = new SolidBrush(color);
+      FontSpec.Fill.IsVisible   = false;
+      FontSpec.Border.Color     = color;
+      FontSpec.Border.IsVisible = false;
+      FontSpec.StringAlignment  = StringAlignment.Near; 
     }
 
     public LineHObj(LineHObj rhs) : base(rhs)
     {
-      this.Value      = rhs.Value;
-      this.YAxisIndex = rhs.YAxisIndex;
-      this.Tag        = rhs.Tag;
+      this.Value    = rhs.Value;
+      this.Tag      = rhs.Tag;
+      this.FontSpec = rhs.FontSpec;
     }
   #endregion
 
@@ -73,8 +77,8 @@ namespace ZedGraph
         throw new SerializationException($"Invalid schema version when reading {nameof(LineHObj)}: {sch}");
 
       Value      = info.GetDouble("Value");
-      YAxisIndex = info.GetInt32("YAxisIndex");
       Tag        = info.GetValue("Tag", typeof(object));
+      FontSpec   = (FontSpec)info.GetValue("FontSpec", typeof(FontSpec));
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -86,8 +90,8 @@ namespace ZedGraph
     {
       info.AddValue("schema",     schema);
       info.AddValue("Value",      Value);
-      info.AddValue("YAxisIndex", YAxisIndex);
       info.AddValue("Tag",        Tag);
+      info.AddValue("FontSpec",   FontSpec);
     }
   #endregion
 
@@ -96,11 +100,6 @@ namespace ZedGraph
     /// Value associated with Y coordinate
     /// </summary>
     public double Value { get; set; }
-
-    /// <summary>
-    /// Index of YAxis that this line corresponds to
-    /// </summary>
-    public int YAxisIndex { get; set; }
 
     /// <summary>
     /// A tag object for use by the user.  This can be used to store additional
@@ -112,7 +111,14 @@ namespace ZedGraph
     /// that you store in <see cref="Tag"/> must be a serializable type (or
     /// it will cause an exception).
     /// </remarks>
-    public object Tag { get; set; }
+    public object   Tag      { get; set; }
+
+    /// <summary>
+    /// Custom fontspec to be used for drawing text labels.
+    /// The value can be null if using default font specification.
+    /// </summary>
+    public FontSpec FontSpec { get; set; }
+
   #endregion
 
   #region Methods
@@ -152,35 +158,44 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    public void Draw(Graphics g, PaneBase pn, float scaleFactor)
+    public void Draw(Graphics g, PaneBase pn, Axis axis, Matrix transform, float scaleFactor, float shift)
     {
       var pane = pn as GraphPane;
       if (pane == null) return;
 
-      // Convert the arrow coordinates from the user coordinate system
-      // to the screen coordinate system
-      if (YAxisIndex < 0 || YAxisIndex >= pane.Y2AxisList.Count) return;
-
-      var y = pane.Y2AxisList[YAxisIndex].Scale.Transform(Value);
+      var ylab = axis.Scale.LocalTransform(Value);
+      var y    = axis.Scale.Transform(Value);
 
       if (y < pane.Chart._rect.Top || y >= pane.Chart._rect.Bottom) return;
 
-      // Save the old transform matrix
-      //Matrix transform = g.Transform;
-      // Move the coordinate system so it is located at the starting point
-      // of this arrow
-      //g.TranslateTransform(0, y);
+      var charHeight   = axis.Scale.FontSpec.GetHeight(scaleFactor);
+      var maxLabelSize = axis.Scale.GetScaleMaxSpace(g, pane, scaleFactor, true);
+      var maxSpace     = maxLabelSize.Height;
+      var scaledTic    = axis.MajorTic.ScaledTic(scaleFactor);
 
-      var smode = g.SmoothingMode;
-      g.SmoothingMode = SmoothingMode.None;
+      PointF[] tri =
+      {
+        new PointF(ylab,  1.0f),
+        new PointF(ylab + charHeight/2.0f, scaledTic+3.0f),
+        new PointF(ylab + charHeight/2.0f, scaledTic+maxSpace-1.0f),
+        new PointF(ylab - charHeight/2.0f, scaledTic+maxSpace-1.0f),
+        new PointF(ylab - charHeight/2.0f, scaledTic+3.0f)
+      };
+
+      g.FillPolygon(FontSpec.Fill.Brush, tri, FillMode.Winding);
+
+      axis.Scale.DrawLabel(g, pane, 0, Value, ylab-1.0f, shift, maxSpace, scaledTic,
+                           charHeight, scaleFactor, FontSpec, true);
+      var old = g.Transform;
+      g.Transform = transform;
 
       // get a pen according to this arrow properties
       using (var pen = GetPen(pane, scaleFactor))
         g.DrawLine(pen, pane.Chart._rect.Left, y, pane.Chart._rect.Right, y);
 
-      g.SmoothingMode = smode;
+      g.Transform = old;
     }
-  #endregion
+    #endregion
   }
 
   [Serializable]
@@ -236,11 +251,8 @@ namespace ZedGraph
     {
       get
       {
-        int index = IndexOfTag(tag);
-        if (index >= 0)
-          return (this[index]);
-        else
-          return null;
+        var    index = IndexOfTag(tag);
+        return index >= 0 ? (this[index]) : null;
       }
     }
 
@@ -268,7 +280,7 @@ namespace ZedGraph
       return -1;
     }
 
-  #endregion
+    #endregion
 
     #region Render Methods
     /// <summary>
@@ -298,7 +310,7 @@ namespace ZedGraph
     /// graphic objects.  The order of <see cref="GraphObj"/>'s with the
     /// same <see cref="ZOrder"/> value is control by their order in
     /// this <see cref="GraphObjList"/>.</param>
-    public void Draw(Graphics g, PaneBase pane, float scaleFactor)
+    internal void Draw(Graphics g, PaneBase pane, Axis axis, Matrix transform, float scaleFactor, float shift)
     {
       // Draw the items in reverse order, so the last items in the
       // list appear behind the first items (consistent with CurveList)
@@ -307,7 +319,7 @@ namespace ZedGraph
         var item = this[i];
         if (!item.IsVisible) continue;
 
-        item.Draw(g, (GraphPane)pane, scaleFactor);
+        item.Draw(g, (GraphPane)pane, axis, transform, scaleFactor, shift);
       }
     }
 
@@ -337,23 +349,14 @@ namespace ZedGraph
     /// <returns>true if the mouse point is within a <see cref="GraphObj"/> bounding
     /// box, false otherwise.</returns>
     /// <seealso cref="GraphPane.FindNearestObject"/>
-    public bool FindPoint(PointF mousePt, PaneBase pane, Graphics g, float scaleFactor, out int index)
+    public bool FindPoint(PointF mousePt, Axis axis, Graphics g, float scaleFactor, out int index)
     {
       index = -1;
-      var gPane = pane as GraphPane;
-
-      if (gPane == null || !gPane.Chart.Rect.Contains(mousePt)) return false;
 
       // Search in reverse direction to honor the Z-order
       for (int i = Count - 1; i >= 0; i--)
       {
-        var idx = this[i].YAxisIndex;
-
-        // Convert the arrow coordinates from the user coordinate system
-        // to the screen coordinate system
-        if (idx < 0 || idx >= gPane.Y2AxisList.Count) continue;
-
-        var y = gPane.Y2AxisList[idx].Scale.Transform(this[i].Value);
+        var y = axis.Scale.Transform(this[i].Value);
         var w = this[i].Width / 2;
 
         if (mousePt.Y >= y - w && mousePt.Y <= y + w)

@@ -321,9 +321,7 @@ namespace ZedGraph
 
       _title.FontSpec.Border.IsVisible = false;
 
-
       _color = Default.Color;
-
     }
 
     /// <summary>
@@ -332,8 +330,7 @@ namespace ZedGraph
     /// except for the <see cref="Title"/>.
     /// </summary>
     /// <param name="title">A string containing the axis title</param>
-    public Axis( string title )
-      : this()
+    public Axis( string title ) : this()
     {
       _title._text = title;
     }
@@ -367,6 +364,9 @@ namespace ZedGraph
       _minSpace = rhs.MinSpace;
 
       _color = rhs.Color;
+
+      if (rhs.LineHObjs != null)
+        LineHObjs = rhs.LineHObjs.Clone();
     }
 
     /// <summary>
@@ -398,7 +398,7 @@ namespace ZedGraph
     /// <summary>
     /// Current schema value that defines the version of the serialized file
     /// </summary>
-    public const int schema = 10;
+    public const int schema = 11;
 
     /// <summary>
     /// Constructor for deserializing objects
@@ -437,6 +437,7 @@ namespace ZedGraph
       _scale = (Scale)info.GetValue( "scale", typeof( Scale ) );
       _scale._ownerAxis = this;
 
+      LineHObjs = (LineHObjList)info.GetValue("LineHObjs", typeof(LineHObjList));
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -470,6 +471,7 @@ namespace ZedGraph
 
       info.AddValue( "scale", _scale );
 
+      info.AddValue( "LineHObjs", LineHObjs);
     }
 
   #endregion
@@ -537,6 +539,12 @@ namespace ZedGraph
       get { return _minSpace; }
       set { _minSpace = value; }
     }
+
+    /// <summary>
+    /// Gets or sets the list of <see cref="LineHObj"/> items for this <see cref="GraphPane"/>
+    /// </summary>
+    /// <value>A reference to a <see cref="LineHObjList"/> collection object</value>
+    protected LineHObjList LineHObjs { get; set; }
 
   #endregion
 
@@ -777,7 +785,11 @@ namespace ZedGraph
 
         //DrawTitle( g, pane, scaleFactor );
 
+        // Draw horizontal lines and label
+        LineHObjs?.Draw(g, pane, this, saveMatrix, scaleFactor, shiftPos);
+
         g.Transform = saveMatrix;
+
         g.SmoothingMode = smode;
       }
     }

@@ -83,16 +83,16 @@ namespace ZedGraph
       _isVisible = Default.IsVisible;
       _majorGrid._isZeroLine = Default.IsZeroLine;
       _scale._fontSpec.Angle = -90.0F;
+
+      base.LineHObjs = new LineHObjList();
     }
 
     /// <summary>
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The Y2Axis object from which to copy</param>
-    public Y2Axis( Y2Axis rhs )
-      : base( rhs )
-    {
-    }
+    public Y2Axis( Y2Axis rhs ) : base( rhs )
+    {}
 
     /// <summary>
     /// Implement the <see cref="ICloneable" /> interface in a typesafe manner by just
@@ -147,6 +147,16 @@ namespace ZedGraph
       base.GetObjectData( info, context );
       info.AddValue( "schema2", schema2 );
     }
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Gets or sets the list of <see cref="LineHObj"/> items for this <see cref="Y2Axis"/>
+    /// </summary>
+    /// <value>A reference to a <see cref="LineHObjList"/> collection object</value>
+    public new LineHObjList LineHObjs => base.LineHObjs;
+
     #endregion
 
     #region Methods
@@ -243,12 +253,22 @@ namespace ZedGraph
       return pane.XAxis;
     }
 
-//    override internal float GetMinPix( GraphPane pane )
-//    {
-//      return pane.Chart._rect.Top;
-//    }
+    //    override internal float GetMinPix( GraphPane pane )
+    //    {
+    //      return pane.Chart._rect.Top;
+    //    }
 
-    #endregion
+    /// <summary>
+    /// Add a horizontal line object to given collection
+    /// </summary>
+    public LineHObj AddHLine(Color color, object tag = null)
+    {
+      var line = new LineHObj(this, color, tag);
+      LineHObjs.Add(line);
+      return line;
+    }
+
+  #endregion
 
   }
 }

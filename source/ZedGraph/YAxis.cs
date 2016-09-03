@@ -84,6 +84,7 @@ namespace ZedGraph
       _majorGrid._isZeroLine = Default.IsZeroLine;
       _scale._fontSpec.Angle = 90.0F;
       _title._fontSpec.Angle = -180F;
+      base.LineHObjs = new LineHObjList();
     }
 
     /// <summary>
@@ -148,6 +149,16 @@ namespace ZedGraph
       base.GetObjectData( info, context );
       info.AddValue( "schema2", schema2 );
     }
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Gets or sets the list of <see cref="LineHObj"/> items for this <see cref="Y2Axis"/>
+    /// </summary>
+    /// <value>A reference to a <see cref="LineHObjList"/> collection object</value>
+    public new LineHObjList LineHObjs => base.LineHObjs;
+
     #endregion
 
     #region Methods
@@ -248,6 +259,15 @@ namespace ZedGraph
     //      return pane.Chart._rect.Top;
     //    }
 
+    /// <summary>
+    /// Add a horizontal line object to given collection
+    /// </summary>
+    public LineHObj AddHLine(Color color, object tag = null)
+    {
+      var line = new LineHObj(this, color, tag);
+      LineHObjs.Add(line);
+      return line;
+    }
 
     #endregion
   }

@@ -2227,7 +2227,8 @@ namespace ZedGraph
     }
 
     internal void DrawLabel( Graphics g, GraphPane pane, int i, double dVal, float pixVal,
-            float shift, float maxSpace, float scaledTic, float charHeight, float scaleFactor )
+            float shift, float maxSpace, float scaledTic, float charHeight, float scaleFactor,
+            FontSpec fontSpec = null, bool useMaxSpace = false)
     {
       float textTop, textCenter;
       if ( _ownerAxis.MajorTic.IsOutside )
@@ -2235,46 +2236,46 @@ namespace ZedGraph
       else
         textTop = charHeight * _labelGap;
 
+      if (fontSpec == null)
+        fontSpec = _fontSpec;
+
       // draw the label
       //string tmpStr = MakeLabel( pane, i, dVal );
-      string tmpStr = _ownerAxis.MakeLabelEventWorks( pane, i, dVal );
+      var tmpStr = _ownerAxis.MakeLabelEventWorks( pane, i, dVal );
 
-      float height;
-      //if ( this.IsLog && _isUseTenPower )
-        height = _fontSpec.BoundingBoxTenPower( g, tmpStr, scaleFactor ).Height;
-      //else
-      //  height = _fontSpec.BoundingBox( g, tmpStr, scaleFactor ).Height;
+      var height = ( this.IsLog && _isUseTenPower )
+                 ? fontSpec.BoundingBoxTenPower( g, tmpStr, scaleFactor ).Height
+                 : fontSpec.BoundingBox( g, tmpStr, scaleFactor ).Height;
 
-      if ( _align == AlignP.Center )
-        textCenter = textTop + maxSpace / 2.0F;
-      else if ( _align == AlignP.Outside )
-        textCenter = textTop + maxSpace - height / 2.0F;
-      else  // inside
-        textCenter = textTop + height / 2.0F;
+      switch (_align)
+      {
+        case AlignP.Center:
+          textCenter = textTop + maxSpace / 2.0F;
+          break;
+        case AlignP.Outside:
+          textCenter = textTop + maxSpace - height / 2.0F;
+          break;
+        default:
+          textCenter = textTop + height / 2.0F;
+          break;
+      }
 
-      if ( _isLabelsInside )
-        textCenter = shift - textCenter;
-      else
-        textCenter = shift + textCenter;
-
-      AlignV av = AlignV.Center;
-      AlignH ah = AlignH.Center;
+      textCenter = _isLabelsInside ? shift - textCenter
+                                   : shift + textCenter;
+      var av = AlignV.Center;
+      var ah = AlignH.Center;
 
       if ( _ownerAxis is XAxis || _ownerAxis is X2Axis )
         ah = _alignH;
       else
         av = _alignH == AlignH.Left ? AlignV.Top : ( _alignH == AlignH.Right ? AlignV.Bottom : AlignV.Center );
 
-      if ( this.IsLog && _isUseTenPower )
-        _fontSpec.DrawTenPower( g, pane, tmpStr,
-          pixVal, textCenter,
-          ah, av,
-          scaleFactor );
+      if (this.IsLog && _isUseTenPower)
+        fontSpec.DrawTenPower(g, pane, tmpStr,
+          pixVal, textCenter, ah, av, scaleFactor);
       else
-        _fontSpec.Draw( g, pane, tmpStr,
-          pixVal, textCenter,
-          ah, av,
-          scaleFactor );
+        fontSpec.Draw(g, pane, tmpStr,
+          pixVal, textCenter, ah, av, scaleFactor, useMaxSpace ? maxSpace : 0.0f);
     }
 
     /// <summary>

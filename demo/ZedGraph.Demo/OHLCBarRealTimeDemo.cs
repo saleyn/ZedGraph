@@ -69,7 +69,10 @@ namespace ZedGraph.Demo
       m_Pane.YAxis.MinSpace         = 0;
       m_Pane.Y2Axis.Title.IsVisible = false;
       //m_Pane.Y2Axis.MinSpace      = 50;
-      //m_Pane.Y2Axis.AxisGap       = 10;
+      m_Pane.XAxis.AxisGap          = 5;
+      m_Pane.XAxis.Scale.LabelGap   = 0.2f;
+      m_Pane.Y2Axis.AxisGap         = 5;
+      m_Pane.Y2Axis.Scale.LabelGap  = 0;
 
       // Enable the Y2 axis display
       m_Pane.YAxis.IsVisible                   = false;
@@ -83,6 +86,10 @@ namespace ZedGraph.Demo
       m_Pane.Y2Axis.MajorGrid.DashOn           = 1;
       m_Pane.XAxis.MajorGrid.Color             = Color.DarkGray;
       m_Pane.Y2Axis.MajorGrid.Color            = Color.DarkGray;
+      m_Pane.XAxis.MajorTic.Size               = 3;
+      m_Pane.XAxis.MinorTic.Size               = 1;
+      m_Pane.Y2Axis.MajorTic.Size              = 3;
+      m_Pane.Y2Axis.MinorTic.Size              = 1;
 
       // Use DateAsOrdinal to skip weekend gaps
       m_Pane.XAxis.Type                        = AxisType.Date;
@@ -90,6 +97,7 @@ namespace ZedGraph.Demo
       m_Pane.XAxis.Scale.MinorUnit             = DateUnit.Second;
       m_Pane.XAxis.Scale.Format                = "yyyy-MM-dd\nHH:mm:ss";
       m_Pane.XAxis.Scale.FontSpec.Size         = 9;
+      m_Pane.XAxis.Scale.MajorStepAuto         = true;
 //      m_Pane.XAxis.Scale.FontSpec.ScaleFactor  = 1.0f;
 //      m_Pane.XAxis.Scale.MinAuto               = true;
 //      m_Pane.XAxis.Scale.MaxAuto               = true;
@@ -106,9 +114,10 @@ namespace ZedGraph.Demo
       m_Pane.XAxis.MinorTic.IsInside           = false;
       m_Pane.XAxis.MajorTic.IsInside           = false;
       m_Pane.XAxis.MinorTic.IsOutside          = true;
+//      m_Pane.XAxis.Scale.MajorStep             = new XDate(now - TimeSpan.FromSeconds(15));
 
-//      m_Pane.Y2Axis.Scale.AlignH               = AlignH.Center;
-      //m_Pane.Y2Axis.Scale.Align                = AlignP.Outside;
+      //m_Pane.Y2Axis.Scale.AlignH               = AlignH.Right;
+      m_Pane.Y2Axis.Scale.Align                = AlignP.Outside;
       m_Pane.Y2Axis.Scale.MinAuto              = true;
       m_Pane.Y2Axis.Scale.MaxAuto              = true;
       m_Pane.Y2Axis.Scale.Format               = "0.00000";
@@ -116,7 +125,7 @@ namespace ZedGraph.Demo
       m_Pane.Y2Axis.MajorTic.IsInside          = false;
       m_Pane.Y2Axis.MinorTic.IsOutside         = true;
       m_Pane.Y2Axis.MajorTic.IsOutside         = true;
-      m_Pane.Y2Axis.Scale.FontSpec.Size        = 11;
+      m_Pane.Y2Axis.Scale.FontSpec.Size        = 9;
 //      m_Pane.Y2Axis.Scale.FontSpec.ScaleFactor = 1.0f;
 
       m_Pane.Chart.Fill                        = new Fill(Color.Black);
@@ -157,7 +166,7 @@ namespace ZedGraph.Demo
       m_Line.IsClippedToChartRect = true;
       m_Pane.GraphObjList.Add(m_Line);
       */
-      m_Line = m_Pane.AddHLine(Color.Red, 0, "close-price");
+      m_Line = m_Pane.Y2Axis.AddHLine(Color.Red, "close-price");
 
       base.ZedGraphControl.AxisChange();
 

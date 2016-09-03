@@ -782,11 +782,10 @@ namespace ZedGraph
         /// font sizes, etc. according to the actual size of the graph.
         /// </param>
         public void Draw( Graphics g, PaneBase pane, string text, float x,
-            float y, AlignH alignH, AlignV alignV,
-            float scaleFactor )
+            float y, AlignH alignH, AlignV alignV, float scaleFactor, float maxSpace = 0.0f)
         {
             this.Draw( g, pane, text, x, y, alignH, alignV,
-                        scaleFactor, new SizeF() );
+                        scaleFactor, new SizeF(), maxSpace );
         }
 
         /// <summary>
@@ -826,7 +825,7 @@ namespace ZedGraph
         /// to accomodate the area.</param>
         public void Draw( Graphics g, PaneBase pane, string text, float x,
             float y, AlignH alignH, AlignV alignV,
-            float scaleFactor, SizeF layoutArea )
+            float scaleFactor, SizeF layoutArea, float maxSpace )
         {
             // make sure the font size is properly scaled
             //Remake( scaleFactor, this.Size, ref this.scaledSize, ref this.font );
@@ -856,17 +855,21 @@ namespace ZedGraph
             // width/2 to the left to align it properly
             RectangleF rectF = new RectangleF( -sizeF.Width / 2.0F, 0.0F,
                                 sizeF.Width, sizeF.Height );
+            RectangleF rectFill = maxSpace == 0.0f ? rectF 
+                                : new RectangleF( -maxSpace / 2.0F, 0.0F, maxSpace, sizeF.Height );
 
             // If the background is to be filled, fill it
-            _fill.Draw( g, rectF );
+            _fill.Draw( g, rectFill);
 
             // Draw the border around the text if required
-            _border.Draw( g, pane, scaleFactor, rectF );
+            _border.Draw( g, pane, scaleFactor, rectFill);
 
             // make a center justified StringFormat alignment
             // for drawing the text
-            StringFormat strFormat = new StringFormat();
-            strFormat.Alignment = _stringAlignment;
+            var strFormat = new StringFormat
+            {
+              Alignment = _stringAlignment, LineAlignment = StringAlignment.Center
+            };
             //          if ( this.stringAlignment == StringAlignment.Far )
             //              g.TranslateTransform( sizeF.Width / 2.0F, 0F, MatrixOrder.Prepend );
             //          else if ( this.stringAlignment == StringAlignment.Near )

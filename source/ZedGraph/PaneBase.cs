@@ -337,12 +337,6 @@ namespace ZedGraph
     }
 
     /// <summary>
-    /// Gets or sets the list of <see cref="LineHObj"/> items for this <see cref="GraphPane"/>
-    /// </summary>
-    /// <value>A reference to a <see cref="LineHObjList"/> collection object</value>
-    public LineHObjList LineHObjs { get; }
-
-    /// <summary>
     /// Gets or sets the <see cref="ZedGraph.Margin" /> instance that controls the space between
     /// the edge of the <see cref="PaneBase.Rect" /> and the rendered content of the graph.
     /// </summary>
@@ -464,7 +458,6 @@ namespace ZedGraph
       _title._fontSpec.Border.IsVisible = false;
 
       _graphObjList = new GraphObjList();
-      LineHObjs     = new LineHObjList();
 
       _tag = null;
     }
@@ -492,7 +485,6 @@ namespace ZedGraph
       _legend = rhs.Legend.Clone();
       _title = rhs._title.Clone();
       _graphObjList = rhs._graphObjList.Clone();
-      LineHObjs     = rhs.LineHObjs.Clone();
       
       if ( rhs._tag is ICloneable )
         _tag = ((ICloneable) rhs._tag).Clone();

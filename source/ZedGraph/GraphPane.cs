@@ -795,18 +795,18 @@ namespace ZedGraph
         _xAxis.Draw( g, this, scaleFactor, 0.0f );
         _x2Axis.Draw( g, this, scaleFactor, 0.0f );
 
-        float yPos = 0;
+        float shift = 0;
         foreach ( Axis axis in _yAxisList )
         {
-          axis.Draw( g, this, scaleFactor, yPos );
-          yPos += axis._tmpSpace;
+          axis.Draw( g, this, scaleFactor, shift );
+          shift += axis._tmpSpace;
         }
 
-        yPos = 0;
+        shift = 0;
         foreach ( Axis axis in _y2AxisList )
         {
-          axis.Draw( g, this, scaleFactor, yPos );
-          yPos += axis._tmpSpace;
+          axis.Draw( g, this, scaleFactor, shift );
+          shift += axis._tmpSpace;
         }
 
         // Draw the GraphItems that are behind the Axis border
@@ -825,9 +825,6 @@ namespace ZedGraph
 
         // Draw the GraphItems that are in front of all other items
         _graphObjList.Draw( g, this, scaleFactor, ZOrder.A_InFront );
-
-        // Draw horizontal lines
-        LineHObjs.Draw(g, this, scaleFactor);
       }
 
       // Reset the clipping
@@ -1501,20 +1498,6 @@ namespace ZedGraph
         this.CurveList.Add( slices[x] );
       }
       return slices;
-    }
-
-    /// <summary>
-    /// Add a horizontal line object to given collection
-    /// </summary>
-    public LineHObj AddHLine(Color color, int yAxisIndex, object tag = null)
-    {
-      if (yAxisIndex < 0 || yAxisIndex >= Y2AxisList.Count)
-        throw new ArgumentException
-          ($"Invalid yAxisIndex value: {yAxisIndex} (max: {Y2AxisList.Count})");
-
-      var line = new LineHObj(color, yAxisIndex, tag);
-      LineHObjs.Add(line);
-      return line;
     }
 
   #endregion
