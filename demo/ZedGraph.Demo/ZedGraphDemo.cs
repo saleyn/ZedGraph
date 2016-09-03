@@ -16,19 +16,14 @@
 //License along with this library; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================
-using System;
-using Panel	= System.Windows.Forms;
-
-using ZedGraphControl = ZedGraph.ZedGraphControl;
-
 namespace ZedGraph.Demo
 {
 	/// <summary>
-	/// Interface for demos.  This allows the demos to be self-contained, 
-	/// simplifying reading their code and allowing for quick switches 
+	/// Interface for demos.  This allows the demos to be self-contained,
+	/// simplifying reading their code and allowing for quick switches
 	/// between demos.
 	/// </summary>
-	/// 
+	///
 	/// <author> Jerry Vos </author>
 	/// <version> $Revision: 1.2 $ $Date: 2005-03-02 19:18:44 $ </version>
 	public interface ZedGraphDemo
@@ -43,16 +38,19 @@ namespace ZedGraph.Demo
 		/// </summary>
 		string Title { get; }
 
-		/// <summary>
-		/// The control used to display this demo.
-		/// </summary>
-		ZedGraphControl ZedGraphControl { get; }
+    /// <summary>
+    /// The control used to display this demo.
+    /// </summary>
+    ZedGraphControlExt ZedGraphControl { get; }
 
 		/// <summary>
 		/// A collection of DemoType objects that this demo applies to.
 		/// </summary>
 		System.Collections.ICollection Types { get; }
-		// string Source { get; }
-		// string SourceFileName { get; }
-	}
+    // string Source { get; }
+    // string SourceFileName { get; }
+
+    void Activate();
+    void Deactivate();
+  }
 }

@@ -33,7 +33,7 @@ namespace ZedGraph.Demo
 		protected string title;
 		protected ICollection types;
 		
-		private ZedGraphControl control;
+		private ZedGraphControlExt control;
 
 		public DemoBase( string description, string title, DemoType type )
 		{
@@ -63,11 +63,14 @@ namespace ZedGraph.Demo
 			this.title = title;
 			this.types = types;
 
-			control = new ZedGraphControl();
-		    control.IsAntiAlias = true;
+			control = new ZedGraphControlExt();
+		  control.IsAntiAlias = true;
 		}
 
-	#region ZedGraphDemo Members
+	  public virtual void Activate()   {}
+	  public virtual void Deactivate() {}
+
+	  #region ZedGraphDemo Members
 
 		/// <summary>
 		/// The graph pane the chart is show in.
@@ -93,7 +96,7 @@ namespace ZedGraph.Demo
 		/// <summary>
 		/// The control the graph pane is in.
 		/// </summary>
-		public ZedGraphControl ZedGraphControl
+		public ZedGraphControlExt ZedGraphControl
 		{
 			get { return control; }
 		}

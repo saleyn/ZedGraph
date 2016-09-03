@@ -72,7 +72,7 @@ namespace ZedGraph.Demo
 			myPane.YAxis.MajorGrid.Color = Color.LightGray;
 
 			// Move the legend location
-			base.Pane.Legend.Position = ZedGraph.LegendPos.Bottom;
+			base.Pane.Legend.Position = LegendPos.Bottom;
 
 			// Make both curves thicker
 			myCurve.Line.Width = 2.0F;

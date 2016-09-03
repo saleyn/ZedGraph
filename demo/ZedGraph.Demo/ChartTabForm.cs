@@ -150,16 +150,22 @@ namespace ZedGraph.Demo
 			}
 		}
 
-		/// <summary>
-		/// Loads a demo into the frame
-		/// </summary>
-		/// <param name="key">The key the demo is stored in demos under</param>
-		private void Init( object key )
+    private ZedGraphDemo _lastDemo = null;
+
+    /// <summary>
+    /// Loads a demo into the frame
+    /// </summary>
+    /// <param name="key">The key the demo is stored in demos under</param>
+    private void Init( object key )
 		{
 			ZedGraphDemo demo = (ZedGraphDemo)this.demos[key];
 
 			if ( demo == null )
 				return;
+
+      _lastDemo?.Deactivate();
+      demo.Activate();
+      _lastDemo = demo;
 
 			this.tabDemo.Controls.Clear();
 			this.tabDemo.Controls.Add( demo.ZedGraphControl );
@@ -168,7 +174,7 @@ namespace ZedGraph.Demo
 			demo.ZedGraphControl.Height = tabDemo.Height;
 
 			demo.ZedGraphControl.Anchor = AnchorStyles.Left | AnchorStyles.Top
-												| AnchorStyles.Right | AnchorStyles.Bottom;
+											            | AnchorStyles.Right | AnchorStyles.Bottom;
 
 			this.Text = TitlePrefix + demo.Title;
 
@@ -177,8 +183,10 @@ namespace ZedGraph.Demo
 			// tell the control to rescale itself
 			demo.ZedGraphControl.AxisChange();
 
-			// redraw the entire form
-			this.Invalidate();
+      propGrid.SelectedObject = demo.ZedGraphControl;
+
+      // redraw the entire form
+      this.Invalidate();
 		}
 	#endregion
 
@@ -258,7 +266,7 @@ namespace ZedGraph.Demo
 
 		private void ChartTabForm_Load( object sender, System.EventArgs e )
 		{
-			Init( "Combo Demo" );
+			Init("OHLCBar Real-Time Demo");
 		}
 
 		private void menuFileExit_Click( object sender, EventArgs e )
@@ -283,11 +291,6 @@ namespace ZedGraph.Demo
 		private void menuHelpWebPage_Click( object sender, EventArgs e )
 		{
 			Help.ShowHelp( this, "http://zedgraph.sourceforge.net" );
-		}
-
-		private void ChartTabForm_Load_1( object sender, EventArgs e )
-		{
-			Init( "Combo Demo" );
 		}
 	}
 }

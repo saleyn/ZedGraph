@@ -1,6 +1,6 @@
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
-//Copyright © 2005  John Champion
+//Copyright ?2005  John Champion
 //
 //This library is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -26,34 +26,50 @@ using System.Security.Permissions;
 
 namespace ZedGraph
 {
-	/// <summary>
-	/// Simple struct that stores X and Y coordinates as doubles.
-	/// </summary>
-	/// 
-	/// <author> John Champion </author>
-	/// <version> $Revision: 3.1 $ $Date: 2006-06-24 20:26:44 $ </version>
-	[Serializable]
-	public struct PointD
-	{
-		/// <summary>
-		/// The X coordinate
-		/// </summary>
-		public double X;
-		/// <summary>
-		/// The Y coordinate
-		/// </summary>
-		public double Y;
+  /// <summary>
+  /// Simple struct that stores X and Y coordinates as doubles.
+  /// </summary>
+  /// 
+  /// <author> John Champion </author>
+  /// <version> $Revision: 3.1 $ $Date: 2006-06-24 20:26:44 $ </version>
+  [Serializable]
+  public struct PointD
+  {
+    /// <summary>
+    /// The X coordinate
+    /// </summary>
+    public double X;
+    /// <summary>
+    /// The Y coordinate
+    /// </summary>
+    public double Y;
 
-		/// <summary>
-		/// Construct a <see cref="PointD" /> object from two double values.
-		/// </summary>
-		/// <param name="x">The X coordinate</param>
-		/// <param name="y">The Y coordinate</param>
-		public PointD( double x, double y )
-		{
-			X = x;
-			Y = y;
-		}
-	}
+    /// <summary>
+    /// Construct a <see cref="PointD" /> object from two double values.
+    /// </summary>
+    /// <param name="x">The X coordinate</param>
+    /// <param name="y">The Y coordinate</param>
+    public PointD( double x, double y )
+    {
+      X = x;
+      Y = y;
+    }
+
+        public PointD(PointF pt)
+        {
+            X = pt.X;
+            Y = pt.Y;
+        }
+
+        static public implicit operator PointF(PointD pt)
+        {
+            return new PointF((float)pt.X, (float)pt.Y);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("({0:N2},{1:N2})", X, Y);
+        }
+    }
 }
 

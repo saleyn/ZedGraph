@@ -35,12 +35,25 @@ namespace ZedGraph.Demo
 		{
 			GraphPane myPane = base.GraphPane;
 
-			// Set the titles and axis labels
-			myPane.Title.Text = "Wacky Widget Company\nProduction Report";
-			myPane.XAxis.Title.Text = "Time, Days\n(Since Plant Construction Startup)";
-			myPane.YAxis.Title.Text = "Widget Production\n(units/hour)";
-			
-			LineItem curve;
+      // Set the titles and axis labels
+      myPane.Title.IsVisible = false;
+      myPane.XAxis.Title.IsVisible = false;
+      myPane.YAxis.Title.IsVisible = false;
+      myPane.Legend.IsVisible = false;
+      //myPane.Margin.Top = 5;
+      //myPane.Margin.Left = 0;
+      //myPane.Margin.Right = 0;
+      //myPane.Margin.Bottom = 0;
+      myPane.Legend.Gap = 0;
+      //myPane.Fill.Color = Color.SlateGray;
+      myPane.Fill = new Fill(Color.SlateGray);
+
+
+      //myPane.Title.Text = "Wacky Widget Company\nProduction Report";
+      //myPane.XAxis.Title.Text = "Time, Days\n(Since Plant Construction Startup)";
+      //myPane.YAxis.Title.Text = "Widget Production\n(units/hour)";
+
+      LineItem curve;
 
 			// Set up curve "Larry"
 			double[] x = { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 };
@@ -84,11 +97,11 @@ namespace ZedGraph.Demo
 			bar.Bar.Fill = new Fill( Color.RoyalBlue, Color.White, Color.RoyalBlue );
 			
 			// Fill the pane background with a gradient
-			myPane.Fill = new Fill( Color.WhiteSmoke, Color.Lavender, 0F );
+			//myPane.Fill = new Fill( Color.WhiteSmoke, Color.Lavender, 0F );
 			// Fill the axis background with a gradient
-			myPane.Chart.Fill = new Fill( Color.FromArgb( 255, 255, 245),
-						Color.FromArgb( 255, 255, 190), 90F );
-			
+			myPane.Chart.Fill = new Fill(Color.Black);
+//        new Fill( Color.FromArgb( 255, 255, 245),
+//				        	Color.FromArgb( 255, 255, 190), 90F );
 
 			// Make each cluster 100 user scale units wide.  This is needed because the X Axis
 			// type is Linear rather than Text or Ordinal
@@ -99,6 +112,9 @@ namespace ZedGraph.Demo
 			// Enable the X and Y axis grids
 			myPane.XAxis.MajorGrid.IsVisible = true;
 			myPane.YAxis.MajorGrid.IsVisible = true;
+
+      myPane.XAxis.MajorGrid.Color = Color.SlateGray;
+      myPane.YAxis.MajorGrid.Color = Color.SlateGray;
 
 			// Manually set the scale maximums according to user preference
 			myPane.XAxis.Scale.Max = 1200;
@@ -111,12 +127,15 @@ namespace ZedGraph.Demo
 			text.Location.AlignV = AlignV.Bottom;
 			text.FontSpec.Fill = new Fill( Color.White, Color.PowderBlue, 45F );
 			text.FontSpec.StringAlignment = StringAlignment.Near;
+      text.IsClippedToChartRect = true;
 			myPane.GraphObjList.Add( text );
 
 			// Add an arrow pointer for the above text item
 			ArrowObj arrow = new ArrowObj( Color.Black, 12F, 175F, 77F, 100F, 45F );
 			arrow.Location.CoordinateFrame = CoordType.AxisXYScale;
-			myPane.GraphObjList.Add( arrow );
+      arrow.Line.Color = Color.AliceBlue;
+      arrow.IsClippedToChartRect = true;
+      myPane.GraphObjList.Add( arrow );
 
 			// Add a another text item to to point out a graph feature
 			text = new TextObj("Upgrade", 700F, 50.0F );
@@ -163,7 +182,8 @@ namespace ZedGraph.Demo
 			box.Location.AlignV = AlignV.Top;
 			// place the box behind the axis items, so the grid is drawn on top of it
 			box.ZOrder = ZOrder.F_BehindGrid;
-			myPane.GraphObjList.Add( box );
+      box.IsClippedToChartRect = true;
+      myPane.GraphObjList.Add( box );
 			
 			// Add some text inside the above box to indicate "Peak Range"
 			TextObj myText = new TextObj( "Peak Range", 1170, 105 );
@@ -174,7 +194,8 @@ namespace ZedGraph.Demo
 			myText.FontSpec.IsBold = false;
 			myText.FontSpec.Fill.IsVisible = false;
 			myText.FontSpec.Border.IsVisible = false;
-			myPane.GraphObjList.Add( myText );
+      myText.IsClippedToChartRect = true;
+      myPane.GraphObjList.Add( myText );
 			
 			base.ZedGraphControl.AxisChange();
 		}
