@@ -36,30 +36,24 @@ namespace ZedGraph
   #region Constructors
     public LineHObj(Axis axis, Color color, object tag = null) : base(color)
     {
-      Value    = 0.0;
-      Tag      = tag;
-      FontSpec = axis.Scale.FontSpec.Clone();
-      FontSpec.Fill.Color       = color;
-      FontSpec.Fill.Brush       = new SolidBrush(color);
-      FontSpec.Fill.IsVisible   = false;
-      FontSpec.Border.Color     = color;
-      FontSpec.Border.IsVisible = false;
-      FontSpec.StringAlignment  = StringAlignment.Near; 
+      Value  = 0.0;
+      Tag    = tag;
+      _brush = new SolidBrush(color);
     }
 
     public LineHObj(LineHObj rhs) : base(rhs)
     {
-      this.Value    = rhs.Value;
-      this.Tag      = rhs.Tag;
-      this.FontSpec = rhs.FontSpec;
+      Value  = rhs.Value;
+      Tag    = rhs.Tag;
+      _brush = new SolidBrush(Color);
     }
-  #endregion
+    #endregion
 
-  #region Serialization
+    #region Serialization
     /// <summary>
     /// Current schema value that defines the version of the serialized file
     /// </summary>
-    public const int schema = 10;
+    public const int Schema = 10;
 
     /// <summary>
     /// Constructor for deserializing objects
@@ -69,16 +63,11 @@ namespace ZedGraph
     /// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data
     /// </param>
     protected LineHObj(SerializationInfo info, StreamingContext context)
+      : base(info, context)
     {
-      // The schema value is just a file version parameter.  You can use it to make future versions
-      // backwards compatible as new member variables are added to classes
-      var sch    = info.GetInt32("schema");
-      if (sch   <= schema)
-        throw new SerializationException($"Invalid schema version when reading {nameof(LineHObj)}: {sch}");
-
-      Value      = info.GetDouble("Value");
-      Tag        = info.GetValue("Tag", typeof(object));
-      FontSpec   = (FontSpec)info.GetValue("FontSpec", typeof(FontSpec));
+      Value  = info.GetDouble("Value");
+      Tag    = info.GetValue("Tag", typeof(object));
+      _brush = new SolidBrush(Color);
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -86,13 +75,16 @@ namespace ZedGraph
     /// <param name="info">A <see cref="SerializationInfo"/> instance that defines the serialized data</param>
     /// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data</param>
     [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-    public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-      info.AddValue("schema",     schema);
-      info.AddValue("Value",      Value);
-      info.AddValue("Tag",        Tag);
-      info.AddValue("FontSpec",   FontSpec);
+      base.GetObjectData(info, context);
+      info.AddValue("Value",   Value);
+      info.AddValue("Tag",     Tag);
     }
+  #endregion
+
+  #region Fields
+    private readonly SolidBrush _brush;
   #endregion
 
   #region Properties
@@ -111,13 +103,7 @@ namespace ZedGraph
     /// that you store in <see cref="Tag"/> must be a serializable type (or
     /// it will cause an exception).
     /// </remarks>
-    public object   Tag      { get; set; }
-
-    /// <summary>
-    /// Custom fontspec to be used for drawing text labels.
-    /// The value can be null if using default font specification.
-    /// </summary>
-    public FontSpec FontSpec { get; set; }
+    public object Tag { get; set; }
 
   #endregion
 
@@ -182,10 +168,10 @@ namespace ZedGraph
         new PointF(ylab - charHeight/2.0f, scaledTic+3.0f)
       };
 
-      g.FillPolygon(FontSpec.Fill.Brush, tri, FillMode.Winding);
+      g.FillPolygon(_brush, tri, FillMode.Winding);
 
       axis.Scale.DrawLabel(g, pane, 0, Value, ylab-1.0f, shift, maxSpace, scaledTic,
-                           charHeight, scaleFactor, FontSpec, true);
+                           charHeight, scaleFactor);
       var old = g.Transform;
       g.Transform = transform;
 

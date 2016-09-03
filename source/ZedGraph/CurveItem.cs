@@ -365,33 +365,32 @@ namespace ZedGraph
       {
         if ( this is BarItem )
           return ((BarItem) this).Bar.Fill.Color;
-        else if ( this is LineItem && ((LineItem) this).Line.IsVisible )
+        if ( this is LineItem && ((LineItem) this).Line.IsVisible )
           return ((LineItem) this).Line.Color;
-        else if ( this is LineItem )
+        if ( this is LineItem )
           return ((LineItem) this).Symbol.Border.Color;
-        else if ( this is ErrorBarItem )
+        if ( this is ErrorBarItem )
           return ((ErrorBarItem) this).Bar.Color;
-        else if ( this is HiLowBarItem )
+        if ( this is HiLowBarItem )
           return ((HiLowBarItem) this).Bar.Fill.Color;
-        else
-          return Color.Empty;
+        return Color.Empty;
       }
       set 
       {
         if ( this is BarItem )
         {
-          ((BarItem) this).Bar.Fill.Color = value;
+          ((BarItem) this).Bar.Fill.Color        = value;
         }
         else if ( this is LineItem )
         {
-          ((LineItem) this).Line.Color      = value;
+          ((LineItem) this).Line.Color           = value;
           ((LineItem) this).Symbol.Border.Color  = value;
           ((LineItem) this).Symbol.Fill.Color    = value;
         }
         else if ( this is ErrorBarItem )
-          ((ErrorBarItem) this).Bar.Color = value;
+          ((ErrorBarItem) this).Bar.Color        = value;
         else if ( this is HiLowBarItem )
-          ((HiLowBarItem) this).Bar.Fill.Color = value;
+          ((HiLowBarItem) this).Bar.Fill.Color   = value;
       }
     }
 

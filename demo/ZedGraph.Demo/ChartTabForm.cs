@@ -174,7 +174,7 @@ namespace ZedGraph.Demo
 			demo.ZedGraphControl.Height = tabDemo.Height;
 
 			demo.ZedGraphControl.Anchor = AnchorStyles.Left | AnchorStyles.Top
-												| AnchorStyles.Right | AnchorStyles.Bottom;
+											            | AnchorStyles.Right | AnchorStyles.Bottom;
 
 			this.Text = TitlePrefix + demo.Title;
 
@@ -183,8 +183,10 @@ namespace ZedGraph.Demo
 			// tell the control to rescale itself
 			demo.ZedGraphControl.AxisChange();
 
-			// redraw the entire form
-			this.Invalidate();
+      propGrid.SelectedObject = demo.ZedGraphControl;
+
+      // redraw the entire form
+      this.Invalidate();
 		}
 	#endregion
 

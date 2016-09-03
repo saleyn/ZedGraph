@@ -63,41 +63,31 @@ namespace ZedGraph.Demo
       m_Pane.IsBoundedRanges        = true;
       m_Pane.IsIgnoreMissing        = true;
       m_Pane.IsAlignGrids           = true;
-
-      m_Pane.XAxis.Title.IsVisible  = false;
-      m_Pane.YAxis.Title.IsVisible  = false;
-      m_Pane.YAxis.MinSpace         = 0;
-      m_Pane.Y2Axis.Title.IsVisible = false;
-      //m_Pane.Y2Axis.MinSpace      = 50;
-      m_Pane.XAxis.AxisGap          = 5;
-      m_Pane.XAxis.Scale.LabelGap   = 0.2f;
-      m_Pane.Y2Axis.AxisGap         = 5;
-      m_Pane.Y2Axis.Scale.LabelGap  = 0;
-
-      // Enable the Y2 axis display
-      m_Pane.YAxis.IsVisible                   = false;
-      m_Pane.Y2Axis.IsVisible                  = true;
-
+      
+      // Customize X axis
+      m_Pane.XAxis.Title.IsVisible             = false;
+      m_Pane.XAxis.AxisGap                     = 5;
+      m_Pane.XAxis.Scale.LabelGap              = 0.2f;
       m_Pane.XAxis.MajorGrid.IsVisible         = true;
+      m_Pane.XAxis.MajorGrid.Color             = Color.DarkGray;
       m_Pane.XAxis.MajorGrid.DashOff           = 7;
       m_Pane.XAxis.MajorGrid.DashOn            = 1;
-      m_Pane.Y2Axis.MajorGrid.IsVisible        = true;
-      m_Pane.Y2Axis.MajorGrid.DashOff          = 7;
-      m_Pane.Y2Axis.MajorGrid.DashOn           = 1;
-      m_Pane.XAxis.MajorGrid.Color             = Color.DarkGray;
-      m_Pane.Y2Axis.MajorGrid.Color            = Color.DarkGray;
       m_Pane.XAxis.MajorTic.Size               = 3;
       m_Pane.XAxis.MinorTic.Size               = 1;
-      m_Pane.Y2Axis.MajorTic.Size              = 3;
-      m_Pane.Y2Axis.MinorTic.Size              = 1;
-
-      // Use DateAsOrdinal to skip weekend gaps
       m_Pane.XAxis.Type                        = AxisType.Date;
       m_Pane.XAxis.Scale.MajorUnit             = DateUnit.Minute;
       m_Pane.XAxis.Scale.MinorUnit             = DateUnit.Second;
       m_Pane.XAxis.Scale.Format                = "yyyy-MM-dd\nHH:mm:ss";
       m_Pane.XAxis.Scale.FontSpec.Size         = 9;
       m_Pane.XAxis.Scale.MajorStepAuto         = true;
+      m_Pane.XAxis.Scale.MinorStepAuto         = true;
+//      m_Pane.XAxis.Scale.MajorStep             = new XDate(0, 0, 0, 0, 2, 0).XLDate;
+//      m_Pane.XAxis.Scale.MinorStep             = new XDate(0, 0, 0, 0, 0,15).XLDate;
+//
+//      m_Pane.XAxis.Scale.MajorStep             = 120.0f / XDate.SecondsPerDay; // 120s
+//      m_Pane.XAxis.Scale.MinorStep             = 15.0f  / XDate.SecondsPerDay; // 15s
+
+//      m_Pane.XAxis.Scale.BaseTic               = new XDate(0, 0, 0, 0, 0, 5);
 //      m_Pane.XAxis.Scale.FontSpec.ScaleFactor  = 1.0f;
 //      m_Pane.XAxis.Scale.MinAuto               = true;
 //      m_Pane.XAxis.Scale.MaxAuto               = true;
@@ -106,7 +96,7 @@ namespace ZedGraph.Demo
       m_Pane.XAxis.Scale.IsSkipFirstLabel      = true;
       m_Pane.XAxis.Scale.IsSkipLastLabel       = false;
       m_Pane.XAxis.Scale.Max                   = new XDate(now);
-      m_Pane.XAxis.Scale.Min                   = new XDate(now - TimeSpan.FromSeconds(60 * 15));
+      m_Pane.XAxis.Scale.Min                   = new XDate(now) - 15.0f/XDate.MinutesPerDay;
 //      m_Pane.XAxis.Scale.AlignH                = AlignH.Center;
 //      m_Pane.XAxis.Scale.Align                 = AlignP.Inside;
       m_Pane.XAxis.MajorTic.IsBetweenLabels    = true;
@@ -116,6 +106,23 @@ namespace ZedGraph.Demo
       m_Pane.XAxis.MinorTic.IsOutside          = true;
 //      m_Pane.XAxis.Scale.MajorStep             = new XDate(now - TimeSpan.FromSeconds(15));
 
+      // Disable left-side Y axis
+      m_Pane.YAxis.IsVisible                   = false;
+      m_Pane.YAxis.Title.IsVisible             = false;
+      m_Pane.YAxis.MinSpace                    = 0;
+
+      // Enable the Y2 axis display
+      m_Pane.Y2Axis.IsVisible                  = true;
+      m_Pane.Y2Axis.Title.IsVisible            = false;
+      //m_Pane.Y2Axis.MinSpace                 = 50;
+      m_Pane.Y2Axis.AxisGap                    = 5;
+      m_Pane.Y2Axis.Scale.LabelGap             = 0;
+      m_Pane.Y2Axis.MajorGrid.IsVisible        = true;
+      m_Pane.Y2Axis.MajorGrid.DashOff          = 7;
+      m_Pane.Y2Axis.MajorGrid.DashOn           = 1;
+      m_Pane.Y2Axis.MajorGrid.Color            = Color.DarkGray;
+      m_Pane.Y2Axis.MajorTic.Size              = 3;
+      m_Pane.Y2Axis.MinorTic.Size              = 1;
       //m_Pane.Y2Axis.Scale.AlignH               = AlignH.Right;
       m_Pane.Y2Axis.Scale.Align                = AlignP.Outside;
       m_Pane.Y2Axis.Scale.MinAuto              = true;
@@ -139,15 +146,20 @@ namespace ZedGraph.Demo
       curve.Line.SmoothTension      = 0.5F;
       curve.IsY2Axis                = true; // Associate this curve with the Y2 axis
       curve.YAxisIndex              = 0;    // Associate this curve with the first Y2 axis
+      curve.IsSelectable            = true;
+      curve.IsSelected              = true;
 
       //------------------------------------------------------------------------
       // Add OHCL time series
       //------------------------------------------------------------------------
       OHLCBarItem myCurve           = m_Pane.AddOHLCBar("trades", m_Data, Color.Black);
+      myCurve.Bar.Width             = 2;
       myCurve.Bar.IsAutoSize        = true;
       myCurve.Bar.Color             = Color.DodgerBlue;
       myCurve.IsY2Axis              = true; // Associate this curve with the Y2 axis
-      myCurve.YAxisIndex            = 0;    // Associate this curve with the first Y2 axis
+      myCurve.YAxisIndex            = 0;    // Associate this curve with the first Y2 axis (this is actually default)
+      myCurve.IsSelectable          = true;
+      curve.IsSelected              = true;
 
       m_Pane.IsAlignGrids           = true;
       m_Pane.IsFontsScaled          = false;
@@ -155,19 +167,11 @@ namespace ZedGraph.Demo
       //------------------------------------------------------------------------
       // Add a line to track last close
       //------------------------------------------------------------------------
-      /*
-      m_Line = new LineObj(Color.Silver, 0, LastPoint.Y, m_Pane.Rect.Width, LastPoint.Y);
-      m_Line.Location.CoordinateFrame = CoordType.AxisXYScale;
-      // Align the left-top of the box to (0, 110)
-      m_Line.Location.AlignH = AlignH.Left;
-      //m_Line.Location.AlignV = AlignV.Top;
-      // place the box behind the axis items, so the grid is drawn on top of it
-      m_Line.ZOrder = ZOrder.A_InFront;
-      m_Line.IsClippedToChartRect = true;
-      m_Pane.GraphObjList.Add(m_Line);
-      */
       m_Line = m_Pane.Y2Axis.AddHLine(Color.Red, "close-price");
-
+      m_Line.Style   = DashStyle.Custom;
+      m_Line.DashOn  = 1;
+      m_Line.DashOff = 3;
+      m_Line.Width   = 1;
       base.ZedGraphControl.AxisChange();
 
       m_Timer.Elapsed += (o, args) =>
@@ -177,6 +181,7 @@ namespace ZedGraph.Demo
         base.ZedGraphControl.Invalidate();
       };
 
+      /*
       m_XHair = new LineObj(Color.SlateGray, 0, 0, m_Pane.Rect.Width, 0)
       {
         IsClippedToChartRect = true,
@@ -207,6 +212,8 @@ namespace ZedGraph.Demo
 
       ZedGraphControl.MouseMove += ZedGraphControl_MouseMove;
       ZedGraphControl.MouseLeave += ZedGraphControl_MouseLeave;
+      */
+
       m_Timer.Enabled = true;
     }
 
@@ -214,7 +221,7 @@ namespace ZedGraph.Demo
 	  {
       // First day is jan 1st
       var now = DateTime.Now;
-      m_Now = new XDate(now - TimeSpan.FromSeconds(60 * 15));
+      m_Now = new XDate(now) - 15.0f/XDate.MinutesPerDay;
       m_Open = 50.0;
 
       for (var i = 0; i < 60 * 15; i += 5)
@@ -229,7 +236,7 @@ namespace ZedGraph.Demo
     public override void Activate()
 	  {
       ZedGraphControl.CrossHair = false;
-      //ZedGraphControl.IsEnableGraphEdit   = true;
+      ZedGraphControl.IsEnableGraphEdit = true;
       //ZedGraphControl.IsShowHScrollBar = true;
       //ZedGraphControl.IsEnableHZoom = false;
       //ZedGraphControl.IsEnableVZoom = true;
@@ -264,14 +271,14 @@ namespace ZedGraph.Demo
 
     private StockPt   LastPoint    => m_Data.Count    > 0 ? ((StockPt)m_Data[m_Data.Count - 1]) : new StockPt();
 
-	  //private static readonly double s_Interval = ;
-
+    //------------------------------------------------------------------------
+    // Update data on initialization or on timer
+    //------------------------------------------------------------------------
     private void calc(XDate now, bool timer)
 	  {
       m_Timer.Enabled = false;
-      var tm = new XDate(now);
-      tm.AddSeconds(-5);
-      var diff = (now - tm);
+      const double diff = 5.0f / XDate.SecondsPerDay;
+      var tm = now - 5;
       var add = !timer || (m_Data.Count > 0 && ((now.XLDate - LastPoint.Date) > diff));
       StockPt pt = null;
 
@@ -289,6 +296,12 @@ namespace ZedGraph.Demo
 
         m_EMA = EMA_ALPHA * close + (1.0 - EMA_ALPHA) * m_EMA;
         m_EMAData.Add(x, m_EMA);
+
+        if (timer)
+        {
+          m_Pane.XAxis.Scale.Max = now + 5;
+          m_Pane.XAxis.Scale.Min += diff;
+        }
       }
       else if (m_Data.Count > 0)
       {

@@ -133,7 +133,7 @@ namespace ZedGraph
     {
       _xlDate = xlDate;
     }
-    
+
     /// <summary>
     /// Construct a date class from a <see cref="DateTime"/> struct.
     /// </summary>
@@ -1319,7 +1319,47 @@ namespace ZedGraph
       lhs._xlDate += rhs;
       return lhs;
     }
-    
+
+    /// <summary>
+    /// '+' operator overload.  When an int value is added to an XDate, the result is a
+    /// new XDate with the number of seconds subtracted.
+    /// </summary>
+    public static XDate operator +(XDate lhs, int seconds)
+    {
+      lhs._xlDate += seconds / SecondsPerDay;
+      return lhs;
+    }
+
+    /// <summary>
+    /// '+' operator overload.  When a long value is added to an XDate, the result is a
+    /// new XDate with the number of seconds subtracted.
+    /// </summary>
+    public static XDate operator +(XDate lhs, long seconds)
+    {
+      lhs._xlDate += seconds / SecondsPerDay;
+      return lhs;
+    }
+
+    /// <summary>
+    /// '-' operator overload.  When an int value is subtracted to an XDate, the result is a
+    /// new XDate with the number of seconds subtracted.
+    /// </summary>
+    public static XDate operator -(XDate lhs, int seconds)
+    {
+      lhs._xlDate -= seconds / SecondsPerDay;
+      return lhs;
+    }
+
+    /// <summary>
+    /// '-' operator overload.  When a long value is subtracted to an XDate, the result is a
+    /// new XDate with the number of seconds subtracted.
+    /// </summary>
+    public static XDate operator -(XDate lhs, long seconds)
+    {
+      lhs._xlDate -= seconds / SecondsPerDay;
+      return lhs;
+    }
+
     /// <summary>
     /// '++' operator overload.  Increment the date by one day.
     /// </summary>

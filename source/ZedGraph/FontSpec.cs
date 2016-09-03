@@ -782,10 +782,10 @@ namespace ZedGraph
         /// font sizes, etc. according to the actual size of the graph.
         /// </param>
         public void Draw( Graphics g, PaneBase pane, string text, float x,
-            float y, AlignH alignH, AlignV alignV, float scaleFactor, float maxSpace = 0.0f)
+            float y, AlignH alignH, AlignV alignV, float scaleFactor)
         {
             this.Draw( g, pane, text, x, y, alignH, alignV,
-                        scaleFactor, new SizeF(), maxSpace );
+                        scaleFactor, new SizeF());
         }
 
         /// <summary>
@@ -825,7 +825,7 @@ namespace ZedGraph
         /// to accomodate the area.</param>
         public void Draw( Graphics g, PaneBase pane, string text, float x,
             float y, AlignH alignH, AlignV alignV,
-            float scaleFactor, SizeF layoutArea, float maxSpace )
+            float scaleFactor, SizeF layoutArea )
         {
             // make sure the font size is properly scaled
             //Remake( scaleFactor, this.Size, ref this.scaledSize, ref this.font );
@@ -838,11 +838,9 @@ namespace ZedGraph
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
             }
 
-            SizeF sizeF;
-            if ( layoutArea.IsEmpty )
-                sizeF = MeasureString( g, text, scaleFactor );
-            else
-                sizeF = MeasureString( g, text, scaleFactor, layoutArea );
+            var sizeF = layoutArea.IsEmpty
+                      ? MeasureString( g, text, scaleFactor ) 
+                      : MeasureString( g, text, scaleFactor, layoutArea );
 
             // Save the old transform matrix for later restoration
             Matrix saveMatrix = g.Transform;
@@ -853,16 +851,14 @@ namespace ZedGraph
             // TopCenter position, the rectangle is drawn based on
             // the TopLeft position.  Therefore, move the rectangle
             // width/2 to the left to align it properly
-            RectangleF rectF = new RectangleF( -sizeF.Width / 2.0F, 0.0F,
-                                sizeF.Width, sizeF.Height );
-            RectangleF rectFill = maxSpace == 0.0f ? rectF 
-                                : new RectangleF( -maxSpace / 2.0F, 0.0F, maxSpace, sizeF.Height );
+            var rectF = new RectangleF( -sizeF.Width / 2.0F, 0.0F,
+                                         sizeF.Width, sizeF.Height );
 
             // If the background is to be filled, fill it
-            _fill.Draw( g, rectFill);
+            _fill.Draw( g, rectF);
 
             // Draw the border around the text if required
-            _border.Draw( g, pane, scaleFactor, rectFill);
+            _border.Draw( g, pane, scaleFactor, rectF);
 
             // make a center justified StringFormat alignment
             // for drawing the text

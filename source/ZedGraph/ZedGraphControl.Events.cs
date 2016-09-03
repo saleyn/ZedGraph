@@ -497,7 +497,7 @@ namespace ZedGraph
           // select object
           object obj;
 
-          bool found = pane.FindNearestObject(
+          var found = pane.FindNearestObject(
             mousePt, this.CreateGraphics(), out obj, out index);
 
           if (_graphDragState.Obj != obj)
@@ -506,19 +506,40 @@ namespace ZedGraph
             Refresh();
           }
 
-          if (found && (obj is GraphObj))
+          if (found)
           {
-            _graphDragState.Obj   = obj as GraphObj;
-            _graphDragState.Obj.IsSelected = true;
+            if (obj is GraphObj)
+            {
+              _graphDragState.Obj = obj as GraphObj;
+              _graphDragState.Obj.IsSelected = true;
+              _graphDragState.State = GraphDragState.DragState.Select;
+              _dragStartPt          = mousePt;
+              _dragEndPt            = mousePt;
+              _dragIndex            = 0;
+              _graphDragState.Pane  = pane;
+            }
+            else if (obj is CurveItem && ((CurveItem)obj).IsSelectable &&
+                     _selectButtons == e.Button &&
+                     _selectModifierKeys == Keys.None || _selectModifierKeys == Control.ModifierKeys)
+            {
+              var o = obj as LineItem;
+              if (o != null) // It could be some other curve item type (e.g. OHLCBarItem)
+              {
+                o.IsSelected = !o.IsSelected;
 
-            _graphDragState.State = GraphDragState.DragState.Select;
-            _dragStartPt          = mousePt;
-            _dragEndPt            = mousePt;
-            _dragIndex            = 0;
-            _graphDragState.Pane  = pane;
+                if (o.IsSelected)
+                {
+                  o.Symbol.Type = SymbolType.Circle;
+                  o.Symbol.Size = 10;
+                }
+                else
+                {
+                  o.Symbol.Type = SymbolType.None;
+                }
+              }
+            }
           }
         }
-
         _isGraphDragging = _graphDragState.Obj != null;
 
         // skip below if graph dragging is going
@@ -967,7 +988,7 @@ namespace ZedGraph
 
   #region Pan Events
 
-    private Point HandlePanDrag( Point mousePt )
+    private void HandlePanDrag( Point mousePt )
     {
       double x1, x2, xx1, xx2;
       double[] y1, y2, yy1, yy2;
@@ -998,8 +1019,6 @@ namespace ZedGraph
       Refresh();
 
       _dragStartPt = mousePt;
-
-      return mousePt;
     }
 
     private void HandlePanFinish()

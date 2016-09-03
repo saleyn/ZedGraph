@@ -382,7 +382,7 @@ namespace ZedGraph
         //    this.location.AlignH, this.location.AlignV, scaleFactor );
         //else
           this.FontSpec.Draw( g, pane, _text, pix.X, pix.Y,
-            _location.AlignH, _location.AlignV, scaleFactor, _layoutArea, 0.0f );
+            _location.AlignH, _location.AlignV, scaleFactor, _layoutArea);
 
       }
     }

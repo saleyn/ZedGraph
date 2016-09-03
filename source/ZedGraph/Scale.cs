@@ -2275,7 +2275,7 @@ namespace ZedGraph
           pixVal, textCenter, ah, av, scaleFactor);
       else
         fontSpec.Draw(g, pane, tmpStr,
-          pixVal, textCenter, ah, av, scaleFactor, useMaxSpace ? maxSpace : 0.0f);
+          pixVal, textCenter, ah, av, scaleFactor);
     }
 
     /// <summary>

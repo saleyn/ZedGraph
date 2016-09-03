@@ -29,10 +29,14 @@ namespace ZedGraph.Demo
       this.displayTC = new System.Windows.Forms.TabControl();
       this.tabDemo = new System.Windows.Forms.TabPage();
       this.descriptionBox = new System.Windows.Forms.RichTextBox();
+      this.propGrid = new System.Windows.Forms.PropertyGrid();
+      this.splitter1 = new System.Windows.Forms.Splitter();
       this.menuStrip1.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
       this.splitContainer1.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
       this.splitContainer2.Panel1.SuspendLayout();
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
@@ -113,6 +117,8 @@ namespace ZedGraph.Demo
       // 
       // splitContainer1.Panel1
       // 
+      this.splitContainer1.Panel1.Controls.Add(this.splitter1);
+      this.splitContainer1.Panel1.Controls.Add(this.propGrid);
       this.splitContainer1.Panel1.Controls.Add(this.demoTree);
       // 
       // splitContainer1.Panel2
@@ -179,6 +185,24 @@ namespace ZedGraph.Demo
       this.descriptionBox.TabIndex = 0;
       this.descriptionBox.Text = "";
       // 
+      // propGrid
+      // 
+      this.propGrid.Dock = System.Windows.Forms.DockStyle.Bottom;
+      this.propGrid.Location = new System.Drawing.Point(0, 171);
+      this.propGrid.Name = "propGrid";
+      this.propGrid.Size = new System.Drawing.Size(181, 180);
+      this.propGrid.TabIndex = 4;
+      // 
+      // splitter1
+      // 
+      this.splitter1.Cursor = System.Windows.Forms.Cursors.HSplit;
+      this.splitter1.Dock = System.Windows.Forms.DockStyle.Bottom;
+      this.splitter1.Location = new System.Drawing.Point(0, 168);
+      this.splitter1.Name = "splitter1";
+      this.splitter1.Size = new System.Drawing.Size(181, 3);
+      this.splitter1.TabIndex = 5;
+      this.splitter1.TabStop = false;
+      // 
       // ChartTabForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -195,9 +219,11 @@ namespace ZedGraph.Demo
       this.menuStrip1.PerformLayout();
       this.splitContainer1.Panel1.ResumeLayout(false);
       this.splitContainer1.Panel2.ResumeLayout(false);
+      ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
       this.splitContainer1.ResumeLayout(false);
       this.splitContainer2.Panel1.ResumeLayout(false);
       this.splitContainer2.Panel2.ResumeLayout(false);
+      ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
       this.splitContainer2.ResumeLayout(false);
       this.displayTC.ResumeLayout(false);
       this.ResumeLayout(false);
@@ -221,5 +247,7 @@ namespace ZedGraph.Demo
 		private System.Windows.Forms.ToolStripMenuItem menuHelpWebPage;
 		private System.Windows.Forms.ToolStripMenuItem menuHelpAbout;
 		private System.Windows.Forms.ToolStripMenuItem menuHelpLicense;
-	}
+    private System.Windows.Forms.Splitter splitter1;
+    private System.Windows.Forms.PropertyGrid propGrid;
+  }
 }
