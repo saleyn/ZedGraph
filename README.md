@@ -16,6 +16,10 @@ to make it more usable for financial charting.
 * Controlling panning/zooming actions using chart's MouseWheelActions property
 * Chart panning/zooming/by using modifier keys and mouse wheel on the YAxis
 
+Example:
+
+![image](https://cloud.githubusercontent.com/assets/272543/18227320/ce021676-71ee-11e6-9e54-78b8bfe64e8d.png)
+
 ## TODO ##
 
 * Multi-pane crosshair
