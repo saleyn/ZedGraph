@@ -53,7 +53,7 @@ namespace ZedGraph
     /// <summary>
     /// Current schema value that defines the version of the serialized file
     /// </summary>
-    public const int Schema = 10;
+    internal const int Schema = 1;
 
     /// <summary>
     /// Constructor for deserializing objects
@@ -65,6 +65,9 @@ namespace ZedGraph
     protected LineHObj(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {
+      // The schema value is just a file version parameter.  You can use it to make future versions
+      // backwards compatible as new member variables are added to classes
+      int ss = info.GetInt32("Schema");
       Value  = info.GetDouble("Value");
       Tag    = info.GetValue("Tag", typeof(object));
       _brush = new SolidBrush(Color);
@@ -78,6 +81,7 @@ namespace ZedGraph
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
       base.GetObjectData(info, context);
+      info.AddValue("Schema",  Schema);
       info.AddValue("Value",   Value);
       info.AddValue("Tag",     Tag);
     }

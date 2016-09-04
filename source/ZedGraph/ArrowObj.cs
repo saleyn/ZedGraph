@@ -20,7 +20,6 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Collections;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -49,6 +48,13 @@ namespace ZedGraph
     /// <value> true if an arrowhead is to be drawn, false otherwise </value>
     private bool _isArrowHead;
 
+    /// <summary>
+    /// Private boolean field that stores the arrowhead width factor.
+    /// Use the public property <see cref="ArrowHeadFactor"/> to access this value.
+    /// </summary>
+    /// <value>The larger the value the more elongated the arrow head is. Default: 2.0</value>
+    private float _arrowHeadFactor;
+
     #endregion
 
     #region Defaults
@@ -69,6 +75,12 @@ namespace ZedGraph
       /// arrowhead, false to hide it.
       /// </summary>
       public static bool IsArrowHead = true;
+
+      /// <summary>
+      /// The default factor of arrow head's width. The larger the value, the more
+      /// elongated the arrow head is.
+      /// </summary>
+      public static float ArrowHeadFactor = 2.0f;
     }
     #endregion
 
@@ -97,6 +109,21 @@ namespace ZedGraph
       get { return _isArrowHead; }
       set { _isArrowHead = value; }
     }
+
+    /// <summary>
+    /// Parameter that controls the width of arrow head
+    /// </summary>
+    public float ArrowHeadFactor
+    {
+      get { return _arrowHeadFactor;                  }
+      set { _arrowHeadFactor = Math.Max(0.1f, value); }
+    }
+
+    /// <summary>
+    /// Fill of the arrow object that controlls how it is painted
+    /// </summary>
+    public Fill Fill => _line.GradientFill;
+
     #endregion
 
     #region Constructors
@@ -120,12 +147,17 @@ namespace ZedGraph
     /// <param name="y2">The y position of the ending point that defines the
     /// arrow.  The units of this position are specified by the
     /// <see cref="Location.CoordinateFrame"/> property.</param>
-    public ArrowObj( Color color, float size, double x1, double y1,
-          double x2, double y2 )
+    public ArrowObj( Color color, float size,
+                     double x1, double y1, double x2, double y2 )
       : base( color, x1, y1, x2, y2 )
     {
-      _isArrowHead = Default.IsArrowHead;
-      _size = size;
+      _isArrowHead     = Default.IsArrowHead;
+      _size            = size;
+      _arrowHeadFactor = Default.ArrowHeadFactor;
+      Fill.Type        = FillType.Solid;
+      Fill.Brush       = new SolidBrush(color);
+      Fill.Color       = color;
+      Fill.SecondaryValueGradientColor = color;
     }
 
     /// <summary>
@@ -147,28 +179,24 @@ namespace ZedGraph
     /// <see cref="Location.CoordinateFrame"/> property.</param>
     public ArrowObj( double x1, double y1, double x2, double y2 )
       : this( LineBase.Default.Color, Default.Size, x1, y1, x2, y2 )
-    {
-    }
+    {}
 
     /// <summary>
     /// Default constructor -- places the <see cref="ArrowObj"/> at location
     /// (0,0) to (1,1).  All other values are defaulted.
     /// </summary>
-    public ArrowObj()
-      :
-      this( LineBase.Default.Color, Default.Size, 0, 0, 1, 1 )
-    {
-    }
+    public ArrowObj() : this( LineBase.Default.Color, Default.Size, 0, 0, 1, 1 )
+    {}
 
     /// <summary>
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The <see cref="ArrowObj"/> object from which to copy</param>
-    public ArrowObj( ArrowObj rhs )
-      : base( rhs )
+    public ArrowObj( ArrowObj rhs ) : base( rhs )
     {
       _size = rhs.Size;
       _isArrowHead = rhs.IsArrowHead;
+      _arrowHeadFactor = rhs._arrowHeadFactor;
     }
 
     /// <summary>
@@ -224,7 +252,7 @@ namespace ZedGraph
     public override void GetObjectData( SerializationInfo info, StreamingContext context )
     {
       base.GetObjectData( info, context );
-      info.AddValue( "schema3", schema2 );
+      info.AddValue( "schema3", schema3 );
       info.AddValue( "size", _size );
       info.AddValue( "isArrowHead", _isArrowHead );
     }
@@ -254,67 +282,85 @@ namespace ZedGraph
     /// </param>
     override public void Draw( Graphics g, PaneBase pane, float scaleFactor )
     {
+      var pn = pane as GraphPane;
+      if (pn == null) return;
+
+      var yAxis = GetYAxis(pn);
+      var xAxis = GetXAxis(pn);
+
       // Convert the arrow coordinates from the user coordinate system
       // to the screen coordinate system
-      PointF pix1 = this.Location.TransformTopLeft( pane );
-      PointF pix2 = this.Location.TransformBottomRight( pane );
+      var pix1 = new PointF(xAxis.Scale.Transform(Location.X),
+                            yAxis.Scale.Transform(Location.Y));
+      var pix2 = new PointF(xAxis.Scale.Transform(Location.X2),
+                            yAxis.Scale.Transform(Location.Y2));
 
-      if ( pix1.X > -10000 && pix1.X < 100000 && pix1.Y > -100000 && pix1.Y < 100000 &&
-        pix2.X > -10000 && pix2.X < 100000 && pix2.Y > -100000 && pix2.Y < 100000 )
+      //PointF pix1 = this.Location.TransformTopLeft( pane );
+      //PointF pix2 = this.Location.TransformBottomRight( pane );
+
+      if (!(pix1.X > -10000)  || !(pix1.X < 100000) || !(pix1.Y > -100000) ||
+          !(pix1.Y <  100000) || !(pix2.X > -10000) || !(pix2.X < 100000) ||
+          !(pix2.Y > -100000) || !(pix2.Y < 100000)) return;
+
+      // get a scaled size for the arrowhead
+      var scaledSize = _size * scaleFactor;
+      var halfSize   = scaledSize / 2f;
+
+      // calculate the length and the angle of the arrow "vector"
+      var dy = pix2.Y - pix1.Y;
+      var dx = pix2.X - pix1.X;
+      var length = (float)(Math.Abs(dx) < float.Epsilon ? Math.Sqrt( dx * dx + dy * dy ) : dx);
+
+      // Save the old transform matrix
+      Matrix transform = g.Transform;
+      // Move the coordinate system so it is located at the starting point
+      // of this arrow
+      g.TranslateTransform( pix1.X, pix1.Y );
+
+      if (Math.Abs(dy) > float.Epsilon)
       {
-        // get a scaled size for the arrowhead
-        float scaledSize = (float)( _size * scaleFactor );
-
-        // calculate the length and the angle of the arrow "vector"
-        double dy = pix2.Y - pix1.Y;
-        double dx = pix2.X - pix1.X;
-        float angle = (float)Math.Atan2( dy, dx ) * 180.0F / (float)Math.PI;
-        float length = (float)Math.Sqrt( dx * dx + dy * dy );
-
-        // Save the old transform matrix
-        Matrix transform = g.Transform;
-        // Move the coordinate system so it is located at the starting point
-        // of this arrow
-        g.TranslateTransform( pix1.X, pix1.Y );
+        var angle = (float)Math.Atan2( dy, dx ) * 180.0F / (float)Math.PI;
         // Rotate the coordinate system according to the angle of this arrow
         // about the starting point
-        g.RotateTransform( angle );
-
-        // get a pen according to this arrow properties
-        using ( Pen pen = _line.GetPen( pane, scaleFactor ) )
-          //new Pen( _color, pane.ScaledPenWidth( _penWidth, scaleFactor ) ) )
-        {
-          //pen.DashStyle = _style;
-
-          // Only show the arrowhead if required
-          if ( _isArrowHead )
-          {
-            // Draw the line segment for this arrow
-            g.DrawLine( pen, 0, 0, length - scaledSize + 1, 0 );
-
-            // Create a polygon representing the arrowhead based on the scaled
-            // size
-            PointF[] polyPt = new PointF[4];
-            float hsize = scaledSize / 3.0F;
-            polyPt[0].X = length;
-            polyPt[0].Y = 0;
-            polyPt[1].X = length - scaledSize;
-            polyPt[1].Y = hsize;
-            polyPt[2].X = length - scaledSize;
-            polyPt[2].Y = -hsize;
-            polyPt[3] = polyPt[0];
-
-            using ( SolidBrush brush = new SolidBrush( _line._color ) )
-              // render the arrowhead
-              g.FillPolygon( brush, polyPt );
-          }
-          else
-            g.DrawLine( pen, 0, 0, length, 0 );
-        }
-
-        // Restore the transform matrix back to its original state
-        g.Transform = transform;
+        g.RotateTransform(angle);
       }
+
+      // Only show the arrowhead if required
+      if ( _isArrowHead )
+      {
+        // Create a polygon representing the arrowhead based on the scaled
+        // size
+        var hsize = scaledSize / _arrowHeadFactor;
+        var lenToHead = length - scaledSize;
+
+        PointF[] polyPt =
+        {
+          new PointF(length, 0), 
+          new PointF(lenToHead, halfSize+hsize), 
+          new PointF(lenToHead, halfSize), 
+          new PointF(0,         halfSize), 
+          new PointF(0,        -halfSize),
+          new PointF(lenToHead,-halfSize),
+          new PointF(lenToHead,-halfSize-hsize),
+          new PointF(length, 0)
+        };
+
+        // get a pen according to this arrow properties, and render the arrow
+        using (var pen = _line.GetPen(pane, scaleFactor))
+          if (Fill.Type == FillType.None)
+            g.DrawPolygon(pen, polyPt);
+          else
+            g.FillPolygon(Fill.Brush, polyPt);
+      }
+      else if (Fill.Type != FillType.None)
+        // get a pen according to this arrow properties, and render the body
+        using (var pen = _line.GetPen(pane, scaleFactor))
+          g.DrawRectangle(pen, 0, -halfSize, length, scaledSize);
+      else
+        g.FillRectangle(Fill.Brush, 0, -halfSize, length, scaledSize);
+
+      // Restore the transform matrix back to its original state
+      g.Transform = transform;
     }
 
     #endregion

@@ -229,14 +229,23 @@ namespace ZedGraph
       Init();
       _color = color2;
 
-      ColorBlend blend = new ColorBlend( 2 );
-      blend.Colors[0] = color1;
-      blend.Colors[1] = color2;
-      blend.Positions[0] = 0.0f;
-      blend.Positions[1] = 1.0f;
-      _type = FillType.Brush;
+      if (color1 == color2 || color2 == Color.Empty)
+      {
+        _type = color1 == Color.Empty ? FillType.None : FillType.Solid;
+        if (_type != FillType.None)
+          _brush = new SolidBrush(color1);
+      }
+      else
+      {
+        ColorBlend blend = new ColorBlend(2);
+        blend.Colors[0] = color1;
+        blend.Colors[1] = color2;
+        blend.Positions[0] = 0.0f;
+        blend.Positions[1] = 1.0f;
+        _type = FillType.Brush;
 
-      this.CreateBrushFromBlend( blend, angle );
+        this.CreateBrushFromBlend(blend, angle);
+      }
     }
     
     /// <summary>
@@ -540,7 +549,7 @@ namespace ZedGraph
       _positionList = (float[]) blend.Positions.Clone();
 
       _brush = new LinearGradientBrush( new Rectangle( 0, 0, 100, 100 ),
-        Color.Red, Color.White, angle );
+        blend.Colors[0], blend.Colors[1], angle );
       ((LinearGradientBrush)_brush).InterpolationColors = blend;
     }
 

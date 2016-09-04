@@ -369,25 +369,24 @@ namespace ZedGraph
     public void Draw( Graphics g, GraphPane pane, CurveItem curve, float scaleFactor )
     {
       // If the line is being shown, draw it
-      if ( this.IsVisible )
-      {
-        //How to handle fill vs nofill?
-        //if ( isSelected )
-        //  GraphPane.Default.SelectedLine.
+      if (!this.IsVisible) return;
 
-        SmoothingMode sModeSave = g.SmoothingMode;
-        if ( _isAntiAlias )
-          g.SmoothingMode = SmoothingMode.HighQuality;
+      //How to handle fill vs nofill?
+      //if ( isSelected )
+      //  GraphPane.Default.SelectedLine.
 
-        if ( curve is StickItem )
-          DrawSticks( g, pane, curve, scaleFactor );
-        else if ( this.IsSmooth || this.Fill.IsVisible )
-          DrawSmoothFilledCurve( g, pane, curve, scaleFactor );
-        else
-          DrawCurve( g, pane, curve, scaleFactor );
+      SmoothingMode sModeSave = g.SmoothingMode;
+      if ( _isAntiAlias )
+        g.SmoothingMode = SmoothingMode.HighQuality;
 
-        g.SmoothingMode = sModeSave;
-      }
+      if ( curve is StickItem )
+        DrawSticks( g, pane, curve, scaleFactor );
+      else if ( this.IsSmooth || this.Fill.IsVisible )
+        DrawSmoothFilledCurve( g, pane, curve, scaleFactor );
+      else
+        DrawCurve( g, pane, curve, scaleFactor );
+
+      g.SmoothingMode = sModeSave;
     }
 
     /// <summary>
@@ -707,10 +706,10 @@ namespace ZedGraph
             // Also, any value <= zero on a log scale is invalid
             if ( curX == PointPair.Missing ||
                 curY == PointPair.Missing ||
-                System.Double.IsNaN( curX ) ||
-                System.Double.IsNaN( curY ) ||
-                System.Double.IsInfinity( curX ) ||
-                System.Double.IsInfinity( curY ) ||
+                double.IsNaN( curX ) ||
+                double.IsNaN( curY ) ||
+                double.IsInfinity( curX ) ||
+                double.IsInfinity( curY ) ||
                 ( xIsLog && curX <= 0.0 ) ||
                 ( yIsLog && curY <= 0.0 ) )
             {

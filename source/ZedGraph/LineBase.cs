@@ -277,6 +277,16 @@ namespace ZedGraph
     /// </summary>
     /// <param name="color">The color to assign to this new Line object</param>
     public LineBase( Color color )
+      : this( color, Color.Empty )
+    {}
+
+    /// <summary>
+    /// Constructor that sets the color property to the specified value, and sets
+    /// the remaining <see cref="LineBase"/> properties to default
+    /// values as defined in the <see cref="Default"/> class.
+    /// </summary>
+    /// <param name="color">The color to assign to this new Line object</param>
+    public LineBase( Color color, Color color2 )
     {
       _width = Default.Width;
       _style = Default.Style;
@@ -285,7 +295,7 @@ namespace ZedGraph
       _isVisible = Default.IsVisible;
       _color = color.IsEmpty ? Default.Color : color;
       _isAntiAlias = Default.IsAntiAlias;
-      _gradientFill = new Fill( Color.Red, Color.White );
+      _gradientFill = new Fill( _color, color2 );
       _gradientFill.Type = FillType.None;
     }
 

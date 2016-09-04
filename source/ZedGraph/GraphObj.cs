@@ -20,7 +20,6 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -86,15 +85,20 @@ namespace ZedGraph
     /// </summary>
     internal Link _link;
 
-        [CLSCompliant(false)]
-        protected bool _isMoving;
+    /// <summary>
+    /// Private field that saves index of Y Axis that this <see cref="GraphObj"/> belongs.
+    /// </summary>
+    private int _yAxisIndex;
 
-        [CLSCompliant(false)]
-        protected bool _isSelected;
+    [CLSCompliant(false)]
+    protected bool _isMoving;
 
-        public delegate void LocationEvent(GraphObj graph, PaneBase pan, float dx, float dy);
-        public event LocationEvent LocationChanged;
-    #endregion
+    [CLSCompliant(false)]
+    protected bool _isSelected;
+
+    public delegate void LocationEvent(GraphObj graph, PaneBase pan, float dx, float dy);
+    public event LocationEvent LocationChanged;
+  #endregion
 
     #region Defaults
         /// <summary>
@@ -197,39 +201,83 @@ namespace ZedGraph
     /// true if the <see cref="ZOrder" /> of this object is set to put it in front
     /// of the <see cref="CurveItem" /> data points.
     /// </summary>
-    public bool IsInFrontOfData
+    public bool IsInFrontOfData => _zOrder == ZOrder.A_InFront ||
+                                   _zOrder == ZOrder.B_BehindLegend ||
+                                   _zOrder == ZOrder.C_BehindChartBorder;
+
+    public bool IsSelected
     {
-      get
+        get { return _isSelected; }
+        set { _isSelected = value; }
+    }
+
+    public bool IsMoving
+    {
+        get { return _isMoving; }
+        set { _isMoving = value; }
+    }
+
+    /// <summary>
+    /// Gets or sets a value that determines which X axis this <see cref="CurveItem"/>
+    /// is assigned to.
+    /// </summary>
+    /// <remarks>
+    /// The
+    /// <see cref="ZedGraph.XAxis"/> is on the bottom side of the graph and the
+    /// <see cref="ZedGraph.X2Axis"/> is on the top side.  Assignment to an axis
+    /// determines the scale that is used to draw the curve on the graph.
+    /// </remarks>
+    /// <value>true to assign the curve to the <see cref="ZedGraph.X2Axis"/>,
+    /// false to assign the curve to the <see cref="ZedGraph.XAxis"/></value>
+    public bool IsX2Axis { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value that determines which Y axis this <see cref="CurveItem"/>
+    /// is assigned to.
+    /// </summary>
+    /// <remarks>
+    /// The
+    /// <see cref="ZedGraph.YAxis"/> is on the left side of the graph and the
+    /// <see cref="ZedGraph.Y2Axis"/> is on the right side.  Assignment to an axis
+    /// determines the scale that is used to draw the curve on the graph.  Note that
+    /// this value is used in combination with the <see cref="YAxisIndex" /> to determine
+    /// which of the Y Axes (if there are multiples) this curve belongs to.
+    /// </remarks>
+    /// <value>true to assign the curve to the <see cref="ZedGraph.Y2Axis"/>,
+    /// false to assign the curve to the <see cref="ZedGraph.YAxis"/></value>
+    public bool IsY2Axis { get; set; }
+
+    /// <summary>
+    /// Gets or sets the index number of the Y Axis to which this
+    /// <see cref="CurveItem" /> belongs.
+    /// </summary>
+    /// <remarks>
+    /// This value is essentially an index number into the <see cref="GraphPane.YAxisList" />
+    /// or <see cref="GraphPane.Y2AxisList" />, depending on the setting of
+    /// <see cref="IsY2Axis" />.
+    /// </remarks>
+    public int YAxisIndex
+    {
+      get { return _yAxisIndex; }
+      set
       {
-        return  _zOrder == ZOrder.A_InFront ||
-              _zOrder == ZOrder.B_BehindLegend ||
-              _zOrder == ZOrder.C_BehindChartBorder;
+        if (value < 0) throw new ArgumentException($"Invalid YAxisIndex: {value}");
+        _yAxisIndex = value;
       }
     }
 
-        public bool IsSelected
-        {
-            get { return _isSelected; }
-            set { _isSelected = value; }
-        }
+  #endregion
 
-        public bool IsMoving
-        {
-            get { return _isMoving; }
-            set { _isMoving = value; }
-        }
-        #endregion
-
-    #region Constructors
-        /// <overloads>
-        /// Constructors for the <see cref="GraphObj"/> class.
-        /// </overloads>
-        /// <summary>
-        /// Default constructor that sets all <see cref="GraphObj"/> properties to default
-        /// values as defined in the <see cref="Default"/> class.
-        /// </summary>
-        public GraphObj() :
-      this( 0, 0, Default.CoordFrame, Default.AlignH, Default.AlignV )
+  #region Constructors
+    /// <overloads>
+    /// Constructors for the <see cref="GraphObj"/> class.
+    /// </overloads>
+    /// <summary>
+    /// Default constructor that sets all <see cref="GraphObj"/> properties to default
+    /// values as defined in the <see cref="Default"/> class.
+    /// </summary>
+    protected GraphObj() :
+      this( 0, 0, Default.CoordFrame, Default.AlignH, Default.AlignV)
     {
     }
 
@@ -247,8 +295,8 @@ namespace ZedGraph
     /// <see cref="ZedGraph.Location.CoordinateFrame"/> property.  The text will be
     /// aligned to this position based on the
     /// <see cref="AlignV"/> property.</param>
-    public GraphObj( double x, double y ) :
-      this( x, y, Default.CoordFrame, Default.AlignH, Default.AlignV )
+    protected GraphObj( double x, double y) :
+      this( x, y, Default.CoordFrame, Default.AlignH, Default.AlignV)
     {
     }
 
@@ -269,8 +317,8 @@ namespace ZedGraph
     /// <param name="y">The y position of the item.</param>
     /// <param name="x2">The x2 position of the item.</param>
     /// <param name="y2">The x2 position of the item.</param>
-    public GraphObj( double x, double y, double x2, double y2 ) :
-      this( x, y, x2, y2, Default.CoordFrame, Default.AlignH, Default.AlignV )
+    protected GraphObj( double x, double y, double x2, double y2) :
+      this( x, y, x2, y2, Default.CoordFrame, Default.AlignH, Default.AlignV)
     {
     }
 
@@ -293,8 +341,8 @@ namespace ZedGraph
     /// <param name="coordType">The <see cref="CoordType"/> enum value that
     /// indicates what type of coordinate system the x and y parameters are
     /// referenced to.</param>
-    public GraphObj( double x, double y, CoordType coordType ) :
-      this( x, y, coordType, Default.AlignH, Default.AlignV )
+    protected GraphObj( double x, double y, CoordType coordType) :
+      this( x, y, coordType, Default.AlignH, Default.AlignV)
     {
     }
     
@@ -323,16 +371,21 @@ namespace ZedGraph
     /// the horizontal alignment of the object with respect to the (x,y) location</param>
     /// <param name="alignV">The <see cref="ZedGraph.AlignV"/> enum that specifies
     /// the vertical alignment of the object with respect to the (x,y) location</param>
-    public GraphObj( double x, double y, CoordType coordType, AlignH alignH, AlignV alignV )
+    /// <param name="xAxisIndex">Index of the XAxis</param>
+    /// <param name="yAxisIndex">Index of the YAxis</param>
+    protected GraphObj( double x, double y, CoordType coordType, AlignH alignH, AlignV alignV)
     {
-      _isVisible = true;
+      _isVisible            = true;
       _isClippedToChartRect = Default.IsClippedToChartRect;
-      this.Tag = null;
-      _zOrder = ZOrder.A_InFront;
-      _location = new Location( x, y, coordType, alignH, alignV );
-      _link = new Link();
-            _isSelected = false;
-            _isMoving = false;
+      this.Tag              = null;
+      _zOrder               = ZOrder.A_InFront;
+      _location             = new Location( x, y, coordType, alignH, alignV );
+      _link                 = new Link();
+      _isSelected           = false;
+      _isMoving             = false;
+      IsX2Axis              = false;
+      IsY2Axis              = false;
+      YAxisIndex            = 0;
     }
 
     /// <summary>
@@ -359,42 +412,46 @@ namespace ZedGraph
     /// the horizontal alignment of the object with respect to the (x,y) location</param>
     /// <param name="alignV">The <see cref="ZedGraph.AlignV"/> enum that specifies
     /// the vertical alignment of the object with respect to the (x,y) location</param>
-    public GraphObj( double x, double y, double x2, double y2, CoordType coordType,
-          AlignH alignH, AlignV alignV )
+    protected GraphObj( double x, double y, double x2, double y2, CoordType coordType,
+          AlignH alignH, AlignV alignV)
     {
-      _isVisible = true;
+      _isVisible            = true;
       _isClippedToChartRect = Default.IsClippedToChartRect;
-      this.Tag = null;
-      _zOrder = ZOrder.A_InFront;
-      _location = new Location( x, y, x2, y2, coordType, alignH, alignV );
-      _link = new Link();
-            _isSelected = false;
-            _isMoving = false;
-        }
+      this.Tag              = null;
+      _zOrder               = ZOrder.A_InFront;
+      _location             = new Location( x, y, x2, y2, coordType, alignH, alignV );
+      _link                 = new Link();
+      _isSelected           = false;
+      _isMoving             = false;
+      IsX2Axis              = false;
+      IsY2Axis              = false;
+      _yAxisIndex           = 0;
+    }
 
     /// <summary>
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The <see cref="GraphObj"/> object from which to copy</param>
-    public GraphObj( GraphObj rhs )
+    protected GraphObj( GraphObj rhs)
     {
       // Copy value types
       _isVisible = rhs.IsVisible;
       _isClippedToChartRect = rhs._isClippedToChartRect;
       _zOrder = rhs.ZOrder;
 
-            // copy moving, selected property ?
-            _isMoving = rhs._isMoving;
-            _isSelected = rhs._isSelected;
+      // copy moving, selected property ?
+      _isMoving = rhs._isMoving;
+      _isSelected = rhs._isSelected;
 
       // copy reference types by cloning
-      if ( rhs.Tag is ICloneable )
-        this.Tag = ((ICloneable) rhs.Tag).Clone();
-      else
-        this.Tag = rhs.Tag;
+      this.Tag = ( rhs.Tag is ICloneable ) ? ((ICloneable) rhs.Tag).Clone() : rhs.Tag;
 
       _location = rhs.Location.Clone();
       _link = rhs._link.Clone();
+
+      IsX2Axis    = rhs.IsX2Axis;
+      IsY2Axis    = rhs.IsY2Axis;
+      _yAxisIndex = rhs._yAxisIndex;
     }
 
     /// <summary>
@@ -428,7 +485,7 @@ namespace ZedGraph
     /// <remarks>
     /// schema changed to 2 when isClippedToChartRect was added.
     /// </remarks>
-    public const int schema = 10;
+    public const int schema = 12;
 
     /// <summary>
     /// Constructor for deserializing objects
@@ -437,7 +494,7 @@ namespace ZedGraph
     /// </param>
     /// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data
     /// </param>
-    protected GraphObj( SerializationInfo info, StreamingContext context )
+    protected GraphObj( SerializationInfo info, StreamingContext context)
     {
       // The schema value is just a file version parameter.  You can use it to make future versions
       // backwards compatible as new member variables are added to classes
@@ -453,6 +510,12 @@ namespace ZedGraph
 
       _isSelected = info.GetBoolean("isSelected");
       _isMoving = info.GetBoolean("isMoving");
+      if (schema > 11)
+      {
+        IsX2Axis    = info.GetBoolean("isX2Axis");
+        IsY2Axis    = info.GetBoolean("isY2Axis");
+        _yAxisIndex = Math.Max(0, info.GetInt32("yAxisIndex"));
+      }
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -473,6 +536,10 @@ namespace ZedGraph
 
       info.AddValue( "isSelected", _isSelected );
       info.AddValue( "isMoving", _isMoving );
+
+      info.AddValue("isX2Axis",   IsX2Axis);
+      info.AddValue("isY2Axis",   IsY2Axis);
+      info.AddValue("yAxisIndex", YAxisIndex);
     }
   #endregion
 
@@ -522,38 +589,35 @@ namespace ZedGraph
     /// <returns>true if the point lies in the bounding box, false otherwise</returns>
     virtual public bool PointInBox( PointF pt, PaneBase pane, Graphics g, float scaleFactor )
     {
-      GraphPane gPane = pane as GraphPane;
+      var gPane = pane as GraphPane;
 
-      if ( gPane != null && _isClippedToChartRect && !gPane.Chart.Rect.Contains( pt ) )
-        return false;
-
-      return true;
+      return gPane == null || !_isClippedToChartRect || gPane.Chart.Rect.Contains( pt );
     }
 
-        /// <summary>
-        /// Get path of graph object which is used for PointInBox 
-        /// </summary>
-        /// <param name="pane"></param>
-        /// <returns></returns>
-        virtual public GraphicsPath MakePath(PaneBase pane)
-        {
-            GraphicsPath path = new GraphicsPath();
+    /// <summary>
+    /// Get path of graph object which is used for PointInBox 
+    /// </summary>
+    /// <param name="pane"></param>
+    /// <returns></returns>
+    virtual public GraphicsPath MakePath(PaneBase pane)
+    {
+      GraphicsPath path = new GraphicsPath();
 
-            // transform the x,y location from the user-defined
-            // coordinate frame to the screen pixel location
-            RectangleF pixRect = _location.TransformRect(pane);
+      // transform the x,y location from the user-defined
+      // coordinate frame to the screen pixel location
+      RectangleF pixRect = _location.TransformRect(pane);
 
-            path.AddRectangle(pixRect);
+      path.AddRectangle(pixRect);
 
-            return path;
-        }
+      return path;
+    }
 
-        /// <summary>
-        /// Filter points in curve list and build new point list
-        /// </summary>
-        /// <param name="pane"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
+    /// <summary>
+    /// Filter points in curve list and build new point list
+    /// </summary>
+    /// <param name="pane"></param>
+    /// <param name="target"></param>
+    /// <returns></returns>
 #if false
         virtual public List<PointPairList> FilterPoints(PaneBase pane, IPointList target)
         {
@@ -641,231 +705,261 @@ namespace ZedGraph
             return lst;
         }
 #endif
-        /// <summary>
-        /// Find the nearest edge for point which is used to resize graph
-        /// </summary>
-        /// <param name="pt"></param>
-        /// <param name="pane"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        virtual public bool FindNearestEdge(PointF pt, PaneBase pane, out int index)
-        {
-            index = -1;
-            return false;
-        }
-
-        /// <summary>
-        /// Resize the graph 
-        /// </summary>
-        /// <param name="edge"></param>
-        /// <param name="pt"></param>
-        /// <param name="pane"></param>
-        virtual public void ResizeEdge(int edge, PointF pt, PaneBase pane)
-        {
-            // do nothing
-        }
-
-        /// <summary>
-        /// Determines the shape type and Coords values for this GraphObj
-        /// </summary>
-        abstract public void GetCoords( PaneBase pane, Graphics g, float scaleFactor,
-        out string shape, out string coords );
-
-        /// <summary>
-        /// The rect list of each edge
-        /// </summary>
-        /// <param name="pane"></param>
-        /// <returns></returns>
-        virtual public RectangleF[] EdgeRects(PaneBase pane)
-        {
-            return new RectangleF[0];
-        }
-
-        /// <summary>
-        /// Update location of object according given x/y offset
-        /// </summary>
-        /// <param name="_pane"></param>
-        /// <param name="dx">x offset in screen</param>
-        /// <param name="dy">y offset in screen</param>
-        virtual public void UpdateLocation(PaneBase _pane, float dx, float dy)
-        {
-            GraphPane pane = _pane as GraphPane;
-
-            // convert location to screen coordinate
-            PointF ptPix1 = pane.GeneralTransform(_location.X1, _location.Y1,
-                    _location.CoordinateFrame);
-
-            PointF ptPix2 = pane.GeneralTransform(_location.X2, _location.Y2,
-                    _location.CoordinateFrame);
-
-            // calc new position
-            ptPix1.X += (float)dx;
-            ptPix1.Y += (float)dy;
-
-            ptPix2.X += (float)dx;
-            ptPix2.Y += (float)dy;
-
-            // convert to user coordinate
-            PointD pt1 = pane.GeneralReverseTransform(ptPix1, _location.CoordinateFrame);
-            PointD pt2 = pane.GeneralReverseTransform(ptPix2, _location.CoordinateFrame);
-
-            _location.X = pt1.X;
-            _location.Y = pt1.Y;
-            _location.Width = pt2.X - pt1.X;
-            _location.Height = pt2.Y - pt1.Y;
-
-            OnLocationChanged(pane, dx, dy);
-        }
-
-        virtual protected void OnLocationChanged(PaneBase pane, float dx, float dy)
-        {
-            if (LocationChanged != null)
-            {
-                LocationChanged(this, pane, dx, dy);
-            }
-        }
-
-        virtual public RectangleF BoundingRect(PaneBase pane)
-        {
-            return _location.TransformRect(pane);
-        }
-
-        /// <summary>
-        /// Points of each data in screen coordinate
-        /// </summary>
-        /// <param name="pane"></param>
-        /// <returns></returns>
-        virtual public PointF[] ScreenPoints(PaneBase pane)
-        {
-            //PointF[] points = new PointF[4];
-
-            //points[0] = _location.TransformTopLeft(pane);
-            //points[2] = _location.TransformBottomRight(pane);
-            //points[1].X = points[2].X;
-            //points[1].Y = points[0].Y;
-            //points[3].X = points[0].X;
-            //points[3].Y = points[2].Y;
-
-            PointF[] points = new PointF[4];
-
-            points[0] = _location.TransformTopLeft(pane);
-            points[1] = _location.TransformBottomRight(pane);
-
-            return points;
-        }
-
-        /// <summary>
-        /// Points of each data in the graph object
-        /// </summary>
-        /// <returns></returns>
-        virtual public PointD[] EdgePoints()
-        {
-            PointD[] points = new PointD[2];
-
-            points[0] = new PointD(_location.X1, _location.Y1);
-            points[1] = new PointD(_location.X2, _location.Y2);
-
-            return points;
-        }
-        #endregion
-
+    /// <summary>
+    /// Find the nearest edge for point which is used to resize graph
+    /// </summary>
+    /// <param name="pt"></param>
+    /// <param name="pane"></param>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    virtual public bool FindNearestEdge(PointF pt, PaneBase pane, out int index)
+    {
+        index = -1;
+        return false;
     }
 
     /// <summary>
-    /// Helper utils
+    /// Resize the graph 
     /// </summary>
-    public class Utils
+    /// <param name="edge"></param>
+    /// <param name="pt"></param>
+    /// <param name="pane"></param>
+    virtual public void ResizeEdge(int edge, PointF pt, PaneBase pane)
     {
-        /// <summary>
-        /// Distance between two points
-        /// </summary>
-        /// <param name="dx"></param>
-        /// <param name="dy"></param>
-        /// <returns></returns>
-        public static double Distance(double dx, double dy)
-        {
-            return Math.Sqrt(dx * dx + dy * dy);
-        }
-
-        /// <summary>
-        /// Angle between two points with O
-        /// </summary>
-        /// <param name="x0"></param>
-        /// <param name="y0"></param>
-        /// <param name="x1"></param>
-        /// <param name="y1"></param>
-        /// <returns></returns>
-        public static double Distance(double x0, double y0, double x1, double y1)
-        {
-            return Distance(x0 - x1, y0 - y1);
-        }
-
-        /// <summary>
-        /// Distance between two points
-        /// </summary>
-        /// <param name="dx"></param>
-        /// <param name="dy"></param>
-        /// <returns></returns>
-        public static double Distance(PointF p1, PointF p2)
-        {
-            return Distance(p1.X - p2.X, p1.Y - p2.Y);
-        }
-
-        /// <summary>
-        /// Angle for two lines
-        /// </summary>
-        /// <param name="dy"></param>
-        /// <param name="dx"></param>
-        /// <returns></returns>
-        public static double AngleInDegree(double dy, double dx)
-        {
-            return 180 * Math.Atan2(dy, dx) / Math.PI;
-        }
-
-        /// <summary>
-        /// Angle between two points with O
-        /// </summary>
-        /// <param name="x1"></param>
-        /// <param name="y1"></param>
-        /// <param name="x0"></param>
-        /// <param name="y0"></param>
-        /// <returns></returns>
-        public static double AngleInDegree(double x1, double y1, double x0, double y0)
-        {
-            return 180 * Math.Atan2(y1 - y0, x1 - x0) / Math.PI;
-        }
-
-        public static bool PtInPolygon(PointF[] points, PointF pt)
-        {
-            int i, j;
-            bool rc = false;
-
-            for (i = 0, j = points.Length - 1; i < points.Length; j = i++)
-            {
-                if (((points[i].Y > pt.Y) != (points[j].Y > pt.Y))
-                    && (pt.X < (points[j].X - points[i].X) * (pt.Y - points[i].Y) / (points[j].Y - points[i].Y) + points[i].X))
-                {
-                    rc = !rc;
-                }
-            }
-
-            return rc;
-        }
-
-        public static bool PtInPolygon2(PointF[] points, PointF p)
-        {
-            bool result = false;
-            for (int i = 0; i < points.Length - 1; i++)
-            {
-                if ( (  ( (points[i + 1].Y <= p.Y) && (p.Y < points[i].Y) ) 
-                      ||( (points[i].Y <= p.Y) && (p.Y < points[i + 1].Y) )  
-                     ) 
-                    && (p.X < (points[i].X - points[i + 1].X) * (p.Y - points[i + 1].Y) / (points[i].Y - points[i + 1].Y) + points[i + 1].X))
-                {
-                    result = !result;
-                }
-            }
-            return result;
-        }
+        // do nothing
     }
+
+    /// <summary>
+    /// Determines the shape type and Coords values for this GraphObj
+    /// </summary>
+    abstract public void GetCoords( PaneBase pane, Graphics g, float scaleFactor,
+    out string shape, out string coords );
+
+    /// <summary>
+    /// The rect list of each edge
+    /// </summary>
+    /// <param name="pane"></param>
+    /// <returns></returns>
+    virtual public RectangleF[] EdgeRects(PaneBase pane)
+    {
+        return new RectangleF[0];
+    }
+
+    /// <summary>
+    /// Get the X Axis instance (either <see cref="XAxis" /> or <see cref="X2Axis" />) to
+    /// which this <see cref="CurveItem" /> belongs.
+    /// </summary>
+    /// <param name="pane">The <see cref="GraphPane" /> object to which this curve belongs.</param>
+    /// <returns>Either a <see cref="XAxis" /> or <see cref="X2Axis" /> to which this
+    /// <see cref="CurveItem" /> belongs.
+    /// </returns>
+    public Axis GetXAxis(GraphPane pane)
+    {
+      return IsX2Axis ? (Axis)pane.X2Axis : pane.XAxis;
+    }
+
+    /// <summary>
+    /// Get the Y Axis instance (either <see cref="YAxis" /> or <see cref="Y2Axis" />) to
+    /// which this <see cref="CurveItem" /> belongs.
+    /// </summary>
+    /// <remarks>
+    /// This method safely retrieves a Y Axis instance from either the <see cref="GraphPane.YAxisList" />
+    /// or the <see cref="GraphPane.Y2AxisList" /> using the values of <see cref="YAxisIndex" /> and
+    /// <see cref="IsY2Axis" />.  If the value of <see cref="YAxisIndex" /> is out of bounds, the
+    /// default <see cref="YAxis" /> or <see cref="Y2Axis" /> is used.
+    /// </remarks>
+    /// <param name="pane">The <see cref="GraphPane" /> object to which this curve belongs.</param>
+    /// <returns>Either a <see cref="YAxis" /> or <see cref="Y2Axis" /> to which this
+    /// <see cref="CurveItem" /> belongs.
+    /// </returns>
+    public Axis GetYAxis(GraphPane pane)
+    {
+      return IsY2Axis ? (Axis)pane.Y2AxisList[_yAxisIndex < pane.Y2AxisList.Count ? _yAxisIndex : 0]
+                      :       pane.YAxisList [_yAxisIndex  < pane.YAxisList.Count  ? _yAxisIndex : 0];
+    }
+
+    /// <summary>
+    /// Update location of object according given x/y offset
+    /// </summary>
+    /// <param name="_pane"></param>
+    /// <param name="dx">x offset in screen</param>
+    /// <param name="dy">y offset in screen</param>
+    virtual public void UpdateLocation(PaneBase _pane, float dx, float dy)
+    {
+      GraphPane pane = _pane as GraphPane;
+
+      // convert location to screen coordinate
+      PointF ptPix1 = pane.GeneralTransform(_location.X1, _location.Y1,
+              _location.CoordinateFrame);
+
+      PointF ptPix2 = pane.GeneralTransform(_location.X2, _location.Y2,
+              _location.CoordinateFrame);
+
+      // calc new position
+      ptPix1.X += (float)dx;
+      ptPix1.Y += (float)dy;
+
+      ptPix2.X += (float)dx;
+      ptPix2.Y += (float)dy;
+
+      // convert to user coordinate
+      PointD pt1 = pane.GeneralReverseTransform(ptPix1, _location.CoordinateFrame);
+      PointD pt2 = pane.GeneralReverseTransform(ptPix2, _location.CoordinateFrame);
+
+      _location.X = pt1.X;
+      _location.Y = pt1.Y;
+      _location.Width = pt2.X - pt1.X;
+      _location.Height = pt2.Y - pt1.Y;
+
+      OnLocationChanged(pane, dx, dy);
+    }
+
+    virtual protected void OnLocationChanged(PaneBase pane, float dx, float dy)
+    {
+      LocationChanged?.Invoke(this, pane, dx, dy);
+    }
+
+    virtual public RectangleF BoundingRect(PaneBase pane)
+    {
+      return _location.TransformRect(pane);
+    }
+
+    /// <summary>
+    /// Points of each data in screen coordinate
+    /// </summary>
+    /// <param name="pane"></param>
+    /// <returns></returns>
+    virtual public PointF[] ScreenPoints(PaneBase pane)
+    {
+        //PointF[] points = new PointF[4];
+
+        //points[0] = _location.TransformTopLeft(pane);
+        //points[2] = _location.TransformBottomRight(pane);
+        //points[1].X = points[2].X;
+        //points[1].Y = points[0].Y;
+        //points[3].X = points[0].X;
+        //points[3].Y = points[2].Y;
+
+        PointF[] points = new PointF[4];
+
+        points[0] = _location.TransformTopLeft(pane);
+        points[1] = _location.TransformBottomRight(pane);
+
+        return points;
+    }
+
+    /// <summary>
+    /// Points of each data in the graph object
+    /// </summary>
+    /// <returns></returns>
+    virtual public PointD[] EdgePoints()
+    {
+        PointD[] points = new PointD[2];
+
+        points[0] = new PointD(_location.X1, _location.Y1);
+        points[1] = new PointD(_location.X2, _location.Y2);
+
+        return points;
+    }
+  #endregion
+
+  }
+
+  /// <summary>
+  /// Helper utils
+  /// </summary>
+  public class Utils
+  {
+    /// <summary>
+    /// Distance between two points
+    /// </summary>
+    /// <param name="dx"></param>
+    /// <param name="dy"></param>
+    /// <returns></returns>
+    public static double Distance(double dx, double dy)
+    {
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+
+    /// <summary>
+    /// Angle between two points with O
+    /// </summary>
+    /// <param name="x0"></param>
+    /// <param name="y0"></param>
+    /// <param name="x1"></param>
+    /// <param name="y1"></param>
+    /// <returns></returns>
+    public static double Distance(double x0, double y0, double x1, double y1)
+    {
+        return Distance(x0 - x1, y0 - y1);
+    }
+
+    /// <summary>
+    /// Distance between two points
+    /// </summary>
+    /// <param name="dx"></param>
+    /// <param name="dy"></param>
+    /// <returns></returns>
+    public static double Distance(PointF p1, PointF p2)
+    {
+        return Distance(p1.X - p2.X, p1.Y - p2.Y);
+    }
+
+    /// <summary>
+    /// Angle for two lines
+    /// </summary>
+    /// <param name="dy"></param>
+    /// <param name="dx"></param>
+    /// <returns></returns>
+    public static double AngleInDegree(double dy, double dx)
+    {
+        return 180 * Math.Atan2(dy, dx) / Math.PI;
+    }
+
+    /// <summary>
+    /// Angle between two points with O
+    /// </summary>
+    /// <param name="x1"></param>
+    /// <param name="y1"></param>
+    /// <param name="x0"></param>
+    /// <param name="y0"></param>
+    /// <returns></returns>
+    public static double AngleInDegree(double x1, double y1, double x0, double y0)
+    {
+      return 180 * Math.Atan2(y1 - y0, x1 - x0) / Math.PI;
+    }
+
+    public static bool PtInPolygon(PointF[] points, PointF pt)
+    {
+      int i, j;
+      bool rc = false;
+
+      for (i = 0, j = points.Length - 1; i < points.Length; j = i++)
+      {
+          if (((points[i].Y > pt.Y) != (points[j].Y > pt.Y))
+              && (pt.X < (points[j].X - points[i].X) * (pt.Y - points[i].Y) / (points[j].Y - points[i].Y) + points[i].X))
+          {
+              rc = !rc;
+          }
+      }
+
+      return rc;
+    }
+
+    public static bool PtInPolygon2(PointF[] points, PointF p)
+    {
+      bool result = false;
+      for (int i = 0; i < points.Length - 1; i++)
+      {
+          if ( (  ( (points[i + 1].Y <= p.Y) && (p.Y < points[i].Y) ) 
+                ||( (points[i].Y <= p.Y) && (p.Y < points[i + 1].Y) )  
+                ) 
+              && (p.X < (points[i].X - points[i + 1].X) * (p.Y - points[i + 1].Y) / (points[i].Y - points[i + 1].Y) + points[i + 1].X))
+          {
+              result = !result;
+          }
+      }
+      return result;
+    }
+  }
 }

@@ -301,6 +301,18 @@ namespace ZedGraph.Demo
         {
           m_Pane.XAxis.Scale.Max = now + 5;
           m_Pane.XAxis.Scale.Min += diff;
+          if (m_Data.Count%1 == 0)
+          {
+            var arrow = new ArrowObj(Color.Green, 10, now, LastPoint.Low - 8, now, LastPoint.Low - 3);
+            arrow.IsArrowHead = true;
+            arrow.IsY2Axis    = true;
+            arrow.YAxisIndex  = 0;
+            arrow.Fill.Type   = FillType.Solid;
+            //arrow.Line.Width = 1;
+            //arrow.Location.CoordinateFrame = CoordType.AxisXYScale;
+            arrow.IsClippedToChartRect = true;
+            m_Pane.GraphObjList.Add(arrow);
+          }
         }
       }
       else if (m_Data.Count > 0)

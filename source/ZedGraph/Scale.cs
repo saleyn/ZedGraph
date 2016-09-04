@@ -2833,12 +2833,8 @@ namespace ZedGraph
     public float Transform( double x )
     {
       // Must take into account Log, and Reverse Axes
-      double denom = ( _maxLinTemp - _minLinTemp );
-      double ratio;
-      if ( denom > 1e-100 )
-        ratio = ( Linearize( x ) - _minLinTemp ) / denom;
-      else
-        ratio = 0;
+      var denom = ( _maxLinTemp - _minLinTemp );
+      var ratio = denom > 1e-100 ? (Linearize(x) - _minLinTemp)/denom : 0;
 
       // _isReverse   axisType    Eqn
       //     T          XAxis     _maxPix - ...
@@ -2849,10 +2845,9 @@ namespace ZedGraph
       //     T          Y2Axis    _minPix + ...
       //     F          XAxis     _minPix + ...
 
-      if ( _isReverse == ( _ownerAxis is XAxis || _ownerAxis is X2Axis ) )
-        return (float) ( _maxPix - ( _maxPix - _minPix ) * ratio );
-      else
-        return (float) ( _minPix + ( _maxPix - _minPix ) * ratio );
+      return _isReverse == (_ownerAxis is XAxis || _ownerAxis is X2Axis)
+        ? (float)(_maxPix - (_maxPix - _minPix)*ratio)
+        : (float)(_minPix + (_maxPix - _minPix)*ratio);
     }
 
     /// <summary>

@@ -288,12 +288,10 @@ namespace ZedGraph
     /// </param>
     override public void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor  )
     {
-      if ( _isVisible )
-      {
-        Line.Draw( g, pane, this, scaleFactor );
-        
-        Symbol.Draw( g, pane, this, scaleFactor, IsSelected );
-      }
+      if (!_isVisible) return;
+
+      Line.Draw( g, pane, this, scaleFactor );
+      Symbol.Draw( g, pane, this, scaleFactor, IsSelected );
     }    
 
     /// <summary>

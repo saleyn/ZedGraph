@@ -444,8 +444,7 @@ namespace ZedGraph
     /// specified user point.</returns>
     public PointF Transform( PaneBase pane )
     {
-      return Transform( pane, _x, _y,
-            _coordinateFrame );
+      return Transform( pane, _x, _y, _coordinateFrame );
     }
     
     /// <summary>
@@ -494,42 +493,52 @@ namespace ZedGraph
     /// <returns>A point in display device coordinates that corresponds to the
     /// specified user point.</returns>
     public static PointD ReverseTransform(PaneBase pane, float x, float y, CoordType coord)
-        {
-            return pane.ReverseTransformCoord(x, y, coord);
-        }
+    {
+        return pane.ReverseTransformCoord(x, y, coord);
+    }
 
-        /// <summary>
-        /// Transform this <see cref="Location"/> from the coordinate system
-        /// as specified by <see cref="CoordinateFrame"/> to the device coordinates
-        /// of the specified <see cref="PaneBase"/> object.
-        /// </summary>
-        /// <remarks>
-        /// The returned
-        /// <see cref="PointF"/> struct represents the top-left corner of the
-        /// object that honors the <see cref="Location"/> properties.
-        /// The <see cref="AlignH"/> and <see cref="AlignV"/> properties are honored in 
-        /// this transformation.
-        /// </remarks>
-        /// <param name="pane">
-        /// A reference to the <see cref="PaneBase"/> object that contains
-        /// the <see cref="Axis"/> classes which will be used for the transform.
-        /// </param>
-        /// <param name="width">The width of the object in device pixels</param>
-        /// <param name="height">The height of the object in device pixels</param>
-        /// <returns>The top-left corner of the object</returns>
-        public PointF TransformTopLeft( PaneBase pane, float width, float height )
+    /// <summary>
+    /// Transform this <see cref="Location"/> from the coordinate system
+    /// as specified by <see cref="CoordinateFrame"/> to the device coordinates
+    /// of the specified <see cref="PaneBase"/> object.
+    /// </summary>
+    /// <remarks>
+    /// The returned
+    /// <see cref="PointF"/> struct represents the top-left corner of the
+    /// object that honors the <see cref="Location"/> properties.
+    /// The <see cref="AlignH"/> and <see cref="AlignV"/> properties are honored in 
+    /// this transformation.
+    /// </remarks>
+    /// <param name="pane">
+    /// A reference to the <see cref="PaneBase"/> object that contains
+    /// the <see cref="Axis"/> classes which will be used for the transform.
+    /// </param>
+    /// <param name="width">The width of the object in device pixels</param>
+    /// <param name="height">The height of the object in device pixels</param>
+    /// <returns>The top-left corner of the object</returns>
+    public PointF TransformTopLeft( PaneBase pane, float width, float height )
     {
       PointF pt = Transform( pane );
       
-      if ( _alignH == AlignH.Right )
-        pt.X -= width;
-      else if ( _alignH == AlignH.Center )
-        pt.X -= width / 2.0F;
+      switch (_alignH)
+      {
+        case AlignH.Right:
+          pt.X -= width;
+          break;
+        case AlignH.Center:
+          pt.X -= width / 2.0F;
+          break;
+      }
         
-      if ( _alignV == AlignV.Bottom )
-        pt.Y -= height;
-      else if ( _alignV == AlignV.Center )
-        pt.Y -= height / 2.0F;
+      switch (_alignV)
+      {
+        case AlignV.Bottom:
+          pt.Y -= height;
+          break;
+        case AlignV.Center:
+          pt.Y -= height / 2.0F;
+          break;
+      }
       
       return pt;
     }

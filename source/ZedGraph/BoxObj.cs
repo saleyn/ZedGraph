@@ -275,23 +275,23 @@ namespace ZedGraph
     /// </param>
     override public void Draw(Graphics g, PaneBase pane, float scaleFactor)
     {
-            // Convert the arrow coordinates from the user coordinate system
-            // to the screen coordinate system
-            PointF pix1 = this.Location.TransformTopLeft(pane);
-            PointF pix2 = this.Location.TransformBottomRight(pane);
+      // Convert the arrow coordinates from the user coordinate system
+      // to the screen coordinate system
+      PointF pix1 = this.Location.TransformTopLeft(pane);
+      PointF pix2 = this.Location.TransformBottomRight(pane);
 
-            //RectangleF pixRect = this.Location.TransformRect(pane);
-            RectangleF pixRect = new RectangleF(Math.Min(pix1.X, pix2.X), Math.Min(pix1.Y, pix2.Y), 
-                            Math.Abs(pix2.X - pix1.X), Math.Abs(pix2.Y - pix1.Y));
+      //RectangleF pixRect = this.Location.TransformRect(pane);
+      RectangleF pixRect = new RectangleF(Math.Min(pix1.X, pix2.X), Math.Min(pix1.Y, pix2.Y), 
+                      Math.Abs(pix2.X - pix1.X), Math.Abs(pix2.Y - pix1.Y));
 
-            //System.Diagnostics.Debug.WriteLine(string.Format("box {0} {1}", pix1, pix2));
+      //System.Diagnostics.Debug.WriteLine(string.Format("box {0} {1}", pix1, pix2));
 
-            // Clip the rect to just outside the PaneRect so we don't end up with wild coordinates.
-            RectangleF tmpRect = pane.Rect;
-            tmpRect.Inflate(20, 20);
-            pixRect.Intersect(tmpRect);
+      // Clip the rect to just outside the PaneRect so we don't end up with wild coordinates.
+      RectangleF tmpRect = pane.Rect;
+      tmpRect.Inflate(20, 20);
+      pixRect.Intersect(tmpRect);
 
-            if (Math.Abs(pixRect.Left) < 100000 &&
+      if (Math.Abs(pixRect.Left) < 100000 &&
         Math.Abs(pixRect.Top) < 100000 &&
         Math.Abs(pixRect.Right) < 100000 &&
         Math.Abs(pixRect.Bottom) < 100000)
