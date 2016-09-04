@@ -263,8 +263,8 @@ namespace ZedGraph.Demo
     private readonly GraphPane m_Pane;
     private readonly LineHObj  m_Line;
 
-    private readonly LineObj m_XHair;
-    private readonly LineObj m_YHair;
+    private readonly LineObj m_XHair = null;
+    private readonly LineObj m_YHair = null;
 
     private const double EMA_ALPHA = 0.8;
     private double       m_EMA     = 0;

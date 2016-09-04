@@ -27,8 +27,8 @@ namespace ZedGraph.LibTest
 		protected MasterPane master = null;
 		private Axis _crossAxis;
 		private bool isBinarySerialize = false;
-		private static bool isFirst = true;
-		private static PointF startPt;
+		//private static bool isFirst = true;
+		//private static PointF startPt;
 
 		public Form1()
 		{
@@ -2414,7 +2414,7 @@ namespace ZedGraph.LibTest
 			//image.Save( @"c:\zedgraph.png", ImageFormat.Png );
 			//master.Image.Save( @"c:\zedgraph.png", ImageFormat.Png );
 			return;
-
+/*
 			Serialize( myPane, @"c:\temp\myZedGraphFile" );
 			//DeSerialize( out master );
 			return;
@@ -2484,6 +2484,7 @@ namespace ZedGraph.LibTest
 				myText.Text = "none";
 			*/
 			//DoPrint();
+/*
 			CopyToPNG( master );
 			
 			//Bitmap image = myPane.ScaledImage( 3000, 2400, 600 );
@@ -2491,33 +2492,29 @@ namespace ZedGraph.LibTest
 			
 			//MultiImage( myPane, myPane2 );
 			
-			/*
-			myPane.Legend.Position = LegendPos.Float;
-			myPane.Legend.Location.CoordinateFrame = CoordType.PaneFraction;
-			myPane.Legend.Location.AlignH = AlignH.Right;
-			myPane.Legend.Location.AlignV = AlignV.Bottom;
-			myPane.AxisChange( this.CreateGraphics() );
-			
-			this.Refresh();
-			for ( float j=0; j<100; j++ )
-			{
-				for ( int k=0; k<1000000; k++ );
-				myPane.Legend.Location.X = j / 100F;
-				myPane.Legend.Location.Y = j / 100F;
-				this.Refresh();
-			}
-			*/
+//			myPane.Legend.Position = LegendPos.Float;
+//			myPane.Legend.Location.CoordinateFrame = CoordType.PaneFraction;
+//			myPane.Legend.Location.AlignH = AlignH.Right;
+//			myPane.Legend.Location.AlignV = AlignV.Bottom;
+//			myPane.AxisChange( this.CreateGraphics() );
+//			
+//			this.Refresh();
+//			for ( float j=0; j<100; j++ )
+//			{
+//				for ( int k=0; k<1000000; k++ );
+//				myPane.Legend.Location.X = j / 100F;
+//				myPane.Legend.Location.Y = j / 100F;
+//				this.Refresh();
+//			}
 			
 			
-			/*
-			const int NUMITER = 100;
-			long junk = Environment.TickCount;
-			for ( int i=0; i<NUMITER; i++ )
-				this.Refresh();
-			junk = Environment.TickCount - junk;
-			
-			MessageBox.Show( "Time = " + (double) junk / (double) NUMITER + " ms/refresh" );
-			*/
+//			const int NUMITER = 100;
+//			long junk = Environment.TickCount;
+//			for ( int i=0; i<NUMITER; i++ )
+//				this.Refresh();
+//			junk = Environment.TickCount - junk;
+//			
+//			MessageBox.Show( "Time = " + (double) junk / (double) NUMITER + " ms/refresh" );
 			
 			//myPane.XAxis.TitleFontSpec.Angle += 90;
 			//myPane.YAxis.TitleFontSpec.Angle += 90;
@@ -2535,7 +2532,7 @@ namespace ZedGraph.LibTest
 			//myPane.XAxis.Max = 20;
 
 			CopyToPNG( myPane );
-
+*/
 			/*
 						RectangleF tmpRect = myPane.ChartRect;
 						tmpRect.Inflate( -50, -50 );

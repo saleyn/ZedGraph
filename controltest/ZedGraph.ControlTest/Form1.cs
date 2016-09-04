@@ -1851,15 +1851,15 @@ namespace ZedGraph.ControlTest
 			else
 				return "Invalid Data";
 
-			PointPair pt = curve.Points[index];
-
-			box.IsVisible = true;
-			box.Location.Y = pt.Y + 5;
-
-			z1.Refresh();
-
-			return "Point #" + index.ToString() + "\n" + XDate.ToString( pt.X, "g" ) + "\n" +
-				pt.Y.ToString() + "Line 4\nLine 5\nLine 6\nLine 7";
+//			PointPair pt = curve.Points[index];
+//
+//			box.IsVisible = true;
+//			box.Location.Y = pt.Y + 5;
+//
+//			z1.Refresh();
+//
+//			return "Point #" + index.ToString() + "\n" + XDate.ToString( pt.X, "g" ) + "\n" +
+//				pt.Y.ToString() + "Line 4\nLine 5\nLine 6\nLine 7";
 		}
 
 		// Basic curve test - Linear Axis
@@ -3550,42 +3550,42 @@ namespace ZedGraph.ControlTest
 				"   y1 = " + yVal.ToString() + "  y2 = " + yVal2.ToString() );
 			return true;
 
-			if ( sender == zg1 )
-			{
-				GraphPane myPane = zg1.GraphPane;
-				// int x = MousePosition.X;
-				// int y = MousePosition.Y;
-				PointF point = new PointF( e.X, e.Y );
-				CurveItem nearestCurve = null;
-				int index = -1;
-				object obj = null;
-				Graphics grap = this.CreateGraphics();
-				myPane.FindNearestObject( point, grap, out obj, out index );
-
-				if ( obj != null && obj is Legend )
-				{
-					Legend legend = myPane.Legend;
-					if ( legend != null )
-					{
-						if ( index >= 0 )
-							nearestCurve = myPane.CurveList[index];
-					}
-				}
-				else if ( obj is CurveItem )
-					nearestCurve = (CurveItem) obj;
-
-				if ( nearestCurve != null )
-				{
-					nearestCurve.IsVisible = false;
-					//nearestCurve.Color = Color.Green;
-					//if ( nearestCurve is LineItem )
-					//	( (LineItem)nearestCurve ).Line.Width = 5;
-
-					zg1.Invalidate();
-				}
-			}
-
-			return false;
+//			if ( sender == zg1 )
+//			{
+//				GraphPane myPane = zg1.GraphPane;
+//				// int x = MousePosition.X;
+//				// int y = MousePosition.Y;
+//				PointF point = new PointF( e.X, e.Y );
+//				CurveItem nearestCurve = null;
+//				int index = -1;
+//				object obj = null;
+//				Graphics grap = this.CreateGraphics();
+//				myPane.FindNearestObject( point, grap, out obj, out index );
+//
+//				if ( obj != null && obj is Legend )
+//				{
+//					Legend legend = myPane.Legend;
+//					if ( legend != null )
+//					{
+//						if ( index >= 0 )
+//							nearestCurve = myPane.CurveList[index];
+//					}
+//				}
+//				else if ( obj is CurveItem )
+//					nearestCurve = (CurveItem) obj;
+//
+//				if ( nearestCurve != null )
+//				{
+//					nearestCurve.IsVisible = false;
+//					//nearestCurve.Color = Color.Green;
+//					//if ( nearestCurve is LineItem )
+//					//	( (LineItem)nearestCurve ).Line.Width = 5;
+//
+//					zg1.Invalidate();
+//				}
+//			}
+//
+//			return false;
 		}
 
 		bool xz1_DoubleClickEvent( ZedGraphControl sender, MouseEventArgs e )
@@ -6851,22 +6851,22 @@ namespace ZedGraph.ControlTest
 
 			return;
 
-			Scale xScale = zedGraphControl1.GraphPane.XAxis.Scale;
-			double range = xScale.Max - xScale.Min;
-			xScale.Min = 10;
-			xScale.Max = 10 + range;
-			Refresh();
-
-			return;
-
-			zedGraphControl1.MasterPane.GetMetafile().Save( "poop.emf" );
-			return;
-
-			this.zedGraphControl1.GraphPane.Y2AxisList.Clear();
-			this.zedGraphControl1.GraphPane.Y2AxisList.Add( "My Title" );
-			//this.zedGraphControl1.GraphPane.Y2AxisList.RemoveAt( this.zedGraphControl1.GraphPane.Y2AxisList.Count - 1 );
-			//myPane.Y2AxisList.RemoveAt( myPane.Y2AxisList.Count - 1 );
-			this.zedGraphControl1.Refresh();
+//			Scale xScale = zedGraphControl1.GraphPane.XAxis.Scale;
+//			double range = xScale.Max - xScale.Min;
+//			xScale.Min = 10;
+//			xScale.Max = 10 + range;
+//			Refresh();
+//
+//			return;
+//
+//			zedGraphControl1.MasterPane.GetMetafile().Save( "poop.emf" );
+//			return;
+//
+//			this.zedGraphControl1.GraphPane.Y2AxisList.Clear();
+//			this.zedGraphControl1.GraphPane.Y2AxisList.Add( "My Title" );
+//			//this.zedGraphControl1.GraphPane.Y2AxisList.RemoveAt( this.zedGraphControl1.GraphPane.Y2AxisList.Count - 1 );
+//			//myPane.Y2AxisList.RemoveAt( myPane.Y2AxisList.Count - 1 );
+//			this.zedGraphControl1.Refresh();
 
 		}
 
@@ -6877,32 +6877,32 @@ namespace ZedGraph.ControlTest
 			return false;
 
 			// Find the Chart rect that contains the current mouse location
-			GraphPane pane = sender.MasterPane.FindChartRect( mousePt );
-
-			// If pane is non-null, we have a valid location.  Otherwise, the mouse is not
-			// within any chart rect.
-			if ( pane != null )
-			{
-				double x, x2, y, y2;
-				// Convert the mouse location to X, Y, and Y2 scale values
-				pane.ReverseTransform( mousePt, out x, out x2, out y, out y2 );
-				// Format the status label text
-				toolStripStatusXY.Text = "(" + x.ToString( "f2" ) + ", " + y.ToString( "f2" ) + ")";
-			}
-			else
-				// If there is no valid data, then clear the status label text
-				toolStripStatusXY.Text = string.Empty;
-
-			object nearestObj;
-			int index;
-			if ( sender.GraphPane.FindNearestObject( mousePt, this.CreateGraphics(), out nearestObj, out index ) )
-				statusLabelLastClick.Text = nearestObj.ToString();
-			else
-				statusLabelLastClick.Text = "";
-
-			// Return false to indicate we have not processed the MouseMoveEvent
-			// ZedGraphControl should still go ahead and handle it
-			return false;
+//			GraphPane pane = sender.MasterPane.FindChartRect( mousePt );
+//
+//			// If pane is non-null, we have a valid location.  Otherwise, the mouse is not
+//			// within any chart rect.
+//			if ( pane != null )
+//			{
+//				double x, x2, y, y2;
+//				// Convert the mouse location to X, Y, and Y2 scale values
+//				pane.ReverseTransform( mousePt, out x, out x2, out y, out y2 );
+//				// Format the status label text
+//				toolStripStatusXY.Text = "(" + x.ToString( "f2" ) + ", " + y.ToString( "f2" ) + ")";
+//			}
+//			else
+//				// If there is no valid data, then clear the status label text
+//				toolStripStatusXY.Text = string.Empty;
+//
+//			object nearestObj;
+//			int index;
+//			if ( sender.GraphPane.FindNearestObject( mousePt, this.CreateGraphics(), out nearestObj, out index ) )
+//				statusLabelLastClick.Text = nearestObj.ToString();
+//			else
+//				statusLabelLastClick.Text = "";
+//
+//			// Return false to indicate we have not processed the MouseMoveEvent
+//			// ZedGraphControl should still go ahead and handle it
+//			return false;
 		}
 
 		private bool zedGraphControl1_MouseDownEvent( ZedGraphControl sender, MouseEventArgs e )
@@ -6911,7 +6911,7 @@ namespace ZedGraph.ControlTest
 			PointF mousePt = new PointF( e.X, e.Y );
 			return false;
 
-			/*
+      /*
 						return false;
 
 						double xvalue1 = zedGraphControl1.GraphPane.XAxis.Scale.ReverseTransform( 245 );
@@ -6947,8 +6947,8 @@ namespace ZedGraph.ControlTest
 						sender.GraphPane.ReverseTransform( new PointF( e.X, e.Y ), out x, out x2, out y, out y2 );
 
 						return false;
-			*/
-			CurveItem dragCurve;
+
+   		CurveItem dragCurve;
 			int dragIndex;
 			GraphPane myPane = this.zedGraphControl1.GraphPane;
 			PointPair startPair;
@@ -6992,9 +6992,10 @@ namespace ZedGraph.ControlTest
 			}
 
 			return false;
-		}
+			*/
+    }
 
-		PointF startPt;
+    PointF startPt;
 		double startX, startY;
 		bool isDragPoint = false;
 		CurveItem dragCurve;
