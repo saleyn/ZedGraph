@@ -2462,7 +2462,9 @@ namespace ZedGraph
         maxVal = 0.0;
 
       // if the scales are autoranged, use the actual data values for the range
-      double range = maxVal - minVal;
+      //double range = maxVal - minVal;
+      // if (one of) the scales are autoranged, use the actual data values for the grace proportion
+      double range = (_maxAuto ? maxVal : _max) - (_minAuto ? minVal : _min);
 
       // "Grace" is applied to the numeric axis types only
       bool numType = !this.IsAnyOrdinal;
