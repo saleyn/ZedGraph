@@ -303,7 +303,9 @@ namespace ZedGraph
           !(pix2.Y > -100000) || !(pix2.Y < 100000)) return;
 
       // get a scaled size for the arrowhead
-      var scaledSize = _size * scaleFactor;
+      var fixedSize  = _size < 0;
+      var sz         = Math.Abs(_size);
+      var scaledSize = sz * scaleFactor;
       var halfSize   = scaledSize / 2f;
 
       // calculate the length and the angle of the arrow "vector"
@@ -313,9 +315,9 @@ namespace ZedGraph
 
       // Save the old transform matrix
       Matrix transform = g.Transform;
-      // Move the coordinate system so it is located at the starting point
+      // Move the coordinate system so it is located at the ending point
       // of this arrow
-      g.TranslateTransform( pix1.X, pix1.Y );
+      g.TranslateTransform( pix2.X, pix2.Y );
 
       if (Math.Abs(dy) > float.Epsilon)
       {
@@ -330,19 +332,19 @@ namespace ZedGraph
       {
         // Create a polygon representing the arrowhead based on the scaled
         // size
-        var hsize = scaledSize / _arrowHeadFactor;
-        var lenToHead = length - scaledSize;
-
+        var hsize     = scaledSize / _arrowHeadFactor;
+        var headLen   = scaledSize;
+        var len       = fixedSize ? 2*scaledSize : length;
         PointF[] polyPt =
         {
-          new PointF(length, 0), 
-          new PointF(lenToHead, halfSize+hsize), 
-          new PointF(lenToHead, halfSize), 
-          new PointF(0,         halfSize), 
-          new PointF(0,        -halfSize),
-          new PointF(lenToHead,-halfSize),
-          new PointF(lenToHead,-halfSize-hsize),
-          new PointF(length, 0)
+          new PointF(0,        0), 
+          new PointF(headLen,  halfSize+hsize), 
+          new PointF(headLen,  halfSize), 
+          new PointF(len,      halfSize), 
+          new PointF(len,     -halfSize),
+          new PointF(headLen, -halfSize),
+          new PointF(headLen, -halfSize-hsize),
+          new PointF(0,        0)
         };
 
         // get a pen according to this arrow properties, and render the arrow

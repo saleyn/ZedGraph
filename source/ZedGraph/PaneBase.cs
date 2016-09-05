@@ -1160,193 +1160,165 @@ namespace ZedGraph
             }
         }
 */
-        internal PointF TransformCoord(double x, double y, CoordType coord)
-        {
-            // If the Transformation is an illegal type, just stick it in the middle
-            if (!(this is GraphPane) && !(coord == CoordType.PaneFraction))
-            {
-                coord = CoordType.PaneFraction;
-                x = 0.5;
-                y = 0.5;
-            }
-
-            // Just to save some casts
-            GraphPane gPane = null;
-            RectangleF chartRect = new RectangleF(0, 0, 1, 1);
-            if (this is GraphPane)
-            {
-                gPane = this as GraphPane;
-                chartRect = gPane.Chart._rect;
-            }
-
-            PointF ptPix = new PointF();
-
-            if (coord == CoordType.ChartFraction)
-            {
-                ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
-                ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
-            }
-            else if (coord == CoordType.AxisXYScale)
-            {
-                ptPix.X = gPane.XAxis.Scale.Transform(x);
-                ptPix.Y = gPane.YAxis.Scale.Transform(y);
-            }
-            else if (coord == CoordType.AxisXY2Scale)
-            {
-                ptPix.X = gPane.XAxis.Scale.Transform(x);
-                ptPix.Y = gPane.Y2Axis.Scale.Transform(y);
-            }
-            else if (coord == CoordType.XScaleYChartFraction)
-            {
-                ptPix.X = gPane.XAxis.Scale.Transform(x);
-                ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
-            }
-            else if (coord == CoordType.XChartFractionYScale)
-            {
-                ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
-                ptPix.Y = gPane.YAxis.Scale.Transform(y);
-            }
-            else if (coord == CoordType.XChartFractionY2Scale)
-            {
-                ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
-                ptPix.Y = gPane.Y2Axis.Scale.Transform(y);
-            }
-            else if (coord == CoordType.XChartFractionYPaneFraction)
-            {
-                ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
-                ptPix.Y = (float)(_rect.Top + y * _rect.Height);
-            }
-            else if (coord == CoordType.XPaneFractionYChartFraction)
-            {
-                ptPix.X = (float)(_rect.Left + x * _rect.Width);
-                ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
-            }
-            else if (coord == CoordType.PaneRelative)
-            {
-                ptPix.X = (float)(_rect.Left + x);
-                ptPix.Y = (float)(_rect.Top + y);
-            }
-      else  // PaneFraction
+    internal PointF TransformCoord(double x, double y, CoordType coord)
+    {
+      // If the Transformation is an illegal type, just stick it in the middle
+      if (!(this is GraphPane) && coord != CoordType.PaneFraction)
       {
-        ptPix.X = (float)( _rect.Left + x * _rect.Width );
-        ptPix.Y = (float)( _rect.Top + y * _rect.Height );
+          coord = CoordType.PaneFraction;
+          x = 0.5;
+          y = 0.5;
+      }
+
+      // Just to save some casts
+      var gPane     = this as GraphPane;
+      var chartRect = gPane?.Chart._rect ?? new RectangleF(0, 0, 1, 1);
+      var ptPix     = new PointF();
+
+      switch (coord) {
+        case CoordType.ChartFraction:
+          ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+          ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
+          break;
+        case CoordType.AxisXYScale:
+          ptPix.X = gPane.XAxis.Scale.Transform(x);
+          ptPix.Y = gPane.YAxis.Scale.Transform(y);
+          break;
+        case CoordType.AxisXY2Scale:
+          ptPix.X = gPane.XAxis.Scale.Transform(x);
+          ptPix.Y = gPane.Y2Axis.Scale.Transform(y);
+          break;
+        case CoordType.XScaleYChartFraction:
+          ptPix.X = gPane.XAxis.Scale.Transform(x);
+          ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
+          break;
+        case CoordType.XChartFractionYScale:
+          ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+          ptPix.Y = gPane.YAxis.Scale.Transform(y);
+          break;
+        case CoordType.XChartFractionY2Scale:
+          ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+          ptPix.Y = gPane.Y2Axis.Scale.Transform(y);
+          break;
+        case CoordType.XChartFractionYPaneFraction:
+          ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+          ptPix.Y = (float)(_rect.Top + y * _rect.Height);
+          break;
+        case CoordType.XPaneFractionYChartFraction:
+          ptPix.X = (float)(_rect.Left + x * _rect.Width);
+          ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
+          break;
+        case CoordType.PaneRelative:
+          ptPix.X = (float)(_rect.Left + x);
+          ptPix.Y = (float)(_rect.Top + y);
+          break;
+        default:
+          ptPix.X = (float)( _rect.Left + x * _rect.Width );
+          ptPix.Y = (float)( _rect.Top + y * _rect.Height );
+          break;
       }
 
       return ptPix;
     }
 
-        internal PointD ReverseTransformCoord(float x, float y, CoordType coord)
+    internal PointD ReverseTransformCoord(float x, float y, CoordType coord)
+    {
+        // If the Transformation is an illegal type, just stick it in the middle
+        if (!(this is GraphPane) && !(coord == CoordType.PaneFraction))
         {
-            // If the Transformation is an illegal type, just stick it in the middle
-            if (!(this is GraphPane) && !(coord == CoordType.PaneFraction))
-            {
-                coord = CoordType.PaneFraction;
-                x = 0.5f;
-                y = 0.5f;
-            }
-
-            // Just to save some casts
-            GraphPane gPane = null;
-            RectangleF chartRect = new RectangleF(0, 0, 1, 1);
-            if (this is GraphPane)
-            {
-                gPane = this as GraphPane;
-                chartRect = gPane.Chart._rect;
-            }
-
-            PointD pt = new PointD();
-
-            if (coord == CoordType.ChartFraction)
-            {
-                //ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
-                //ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
-
-                pt.X = (x - chartRect.Left) / chartRect.Width;
-                pt.Y = (y - chartRect.Top) / chartRect.Height;
-            }
-            else if (coord == CoordType.AxisXYScale)
-            {
-                //ptPix.X = gPane.XAxis.Scale.Transform(x);
-                //ptPix.Y = gPane.YAxis.Scale.Transform(y);
-
-                pt.X = gPane.XAxis.Scale.ReverseTransform(x);
-                pt.Y = gPane.YAxis.Scale.ReverseTransform(y);
-            }
-            else if (coord == CoordType.AxisXY2Scale)
-            {
-                //pt.X = gPane.XAxis.Scale.Transform(x);
-                //pt.Y = gPane.Y2Axis.Scale.Transform(y);
-
-                pt.X = gPane.XAxis.Scale.ReverseTransform(x);
-                pt.Y = gPane.Y2Axis.Scale.ReverseTransform(y);
-            }
-            else if (coord == CoordType.XScaleYChartFraction)
-            {
-                //pt.X = gPane.XAxis.Scale.Transform(x);
-                //pt.Y = (float)(chartRect.Top + y * chartRect.Height);
-
-                pt.X = gPane.XAxis.Scale.ReverseTransform(x);
-                pt.Y = (y - chartRect.Top) / chartRect.Height;
-            }
-            else if (coord == CoordType.XChartFractionYScale)
-            {
-                //pt.X = (float)(chartRect.Left + x * chartRect.Width);
-                //pt.Y = gPane.YAxis.Scale.Transform(y);
-
-                pt.X = (x - chartRect.Left) / chartRect.Width;
-                pt.Y = gPane.YAxis.Scale.ReverseTransform(y);
-            }
-            else if (coord == CoordType.XChartFractionY2Scale)
-            {
-                //pt.X = (float)(chartRect.Left + x * chartRect.Width);
-                //pt.Y = gPane.Y2Axis.Scale.Transform(y);
-
-                pt.X = (x - chartRect.Left) / chartRect.Width;
-                pt.Y = gPane.Y2Axis.Scale.ReverseTransform(y);
-            }
-            else if (coord == CoordType.XChartFractionYPaneFraction)
-            {
-                //pt.X = (float)(chartRect.Left + x * chartRect.Width);
-                //pt.Y = (float)(_rect.Top + y * _rect.Height);
-
-                pt.X = (x - chartRect.Left) / chartRect.Width;
-                pt.Y = (y - _rect.Top) / _rect.Height;
-            }
-            else if (coord == CoordType.XPaneFractionYChartFraction)
-            {
-                //pt.X = (float)(_rect.Left + x * _rect.Width);
-                //pt.Y = (float)(chartRect.Top + y * chartRect.Height);
-
-                pt.X = (x - _rect.Left) / _rect.Width;
-                pt.Y = (y - chartRect.Top) / chartRect.Height;
-            }
-            else if (coord == CoordType.PaneRelative)
-            {
-                //pt.X = (float)(_rect.Left + x);
-                //pt.Y = (float)(_rect.Top + y);
-
-                pt.X = (float)(x - _rect.Left);
-                pt.Y = (float)(y - _rect.Top);
-            }
-            else    // PaneFraction
-            {
-                pt.X = (float)(_rect.Left + x * _rect.Width);
-                pt.Y = (float)(_rect.Top + y * _rect.Height);
-
-                pt.X = (x - _rect.Left) / _rect.Width;
-                pt.Y = (y - _rect.Top) / _rect.Height;
-            }
-
-            // check if result is matched with TransformCoord
-#if false
-            {
-                PointF ptPix = TransformCoord(pt.X, pt.Y, coord);
-
-                System.Diagnostics.Trace.WriteLine(string.Format("Coord {4} COMP: {0} {1} - {2} {3}  ", x, ptPix.X, y, ptPix.Y, coord));
-            }
-#endif
-            return pt;
+            coord = CoordType.PaneFraction;
+            x = 0.5f;
+            y = 0.5f;
         }
+
+        // Just to save some casts
+        var gPane     = this as GraphPane;
+        var chartRect = gPane?.Chart._rect ?? new RectangleF(0, 0, 1, 1);
+        var pt        = new PointD();
+
+        switch (coord) {
+          case CoordType.ChartFraction:
+            //ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
+            //ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
+
+            pt.X = (x - chartRect.Left) / chartRect.Width;
+            pt.Y = (y - chartRect.Top) / chartRect.Height;
+            break;
+          case CoordType.AxisXYScale:
+            //ptPix.X = gPane.XAxis.Scale.Transform(x);
+            //ptPix.Y = gPane.YAxis.Scale.Transform(y);
+
+            pt.X = gPane.XAxis.Scale.ReverseTransform(x);
+            pt.Y = gPane.YAxis.Scale.ReverseTransform(y);
+            break;
+          case CoordType.AxisXY2Scale:
+            //pt.X = gPane.XAxis.Scale.Transform(x);
+            //pt.Y = gPane.Y2Axis.Scale.Transform(y);
+
+            pt.X = gPane.XAxis.Scale.ReverseTransform(x);
+            pt.Y = gPane.Y2Axis.Scale.ReverseTransform(y);
+            break;
+          case CoordType.XScaleYChartFraction:
+            //pt.X = gPane.XAxis.Scale.Transform(x);
+            //pt.Y = (float)(chartRect.Top + y * chartRect.Height);
+
+            pt.X = gPane.XAxis.Scale.ReverseTransform(x);
+            pt.Y = (y - chartRect.Top) / chartRect.Height;
+            break;
+          case CoordType.XChartFractionYScale:
+            //pt.X = (float)(chartRect.Left + x * chartRect.Width);
+            //pt.Y = gPane.YAxis.Scale.Transform(y);
+
+            pt.X = (x - chartRect.Left) / chartRect.Width;
+            pt.Y = gPane.YAxis.Scale.ReverseTransform(y);
+            break;
+          case CoordType.XChartFractionY2Scale:
+            //pt.X = (float)(chartRect.Left + x * chartRect.Width);
+            //pt.Y = gPane.Y2Axis.Scale.Transform(y);
+
+            pt.X = (x - chartRect.Left) / chartRect.Width;
+            pt.Y = gPane.Y2Axis.Scale.ReverseTransform(y);
+            break;
+          case CoordType.XChartFractionYPaneFraction:
+            //pt.X = (float)(chartRect.Left + x * chartRect.Width);
+            //pt.Y = (float)(_rect.Top + y * _rect.Height);
+
+            pt.X = (x - chartRect.Left) / chartRect.Width;
+            pt.Y = (y - _rect.Top) / _rect.Height;
+            break;
+          case CoordType.XPaneFractionYChartFraction:
+            //pt.X = (float)(_rect.Left + x * _rect.Width);
+            //pt.Y = (float)(chartRect.Top + y * chartRect.Height);
+
+            pt.X = (x - _rect.Left) / _rect.Width;
+            pt.Y = (y - chartRect.Top) / chartRect.Height;
+            break;
+          case CoordType.PaneRelative:
+            //pt.X = (float)(_rect.Left + x);
+            //pt.Y = (float)(_rect.Top + y);
+
+            pt.X = (float)(x - _rect.Left);
+            pt.Y = (float)(y - _rect.Top);
+            break;
+          default:
+            pt.X = (float)(_rect.Left + x * _rect.Width);
+            pt.Y = (float)(_rect.Top + y * _rect.Height);
+
+            pt.X = (x - _rect.Left) / _rect.Width;
+            pt.Y = (y - _rect.Top) / _rect.Height;
+            break;
+        }
+
+        // check if result is matched with TransformCoord
+#if false
+        {
+            PointF ptPix = TransformCoord(pt.X, pt.Y, coord);
+
+            System.Diagnostics.Trace.WriteLine(string.Format("Coord {4} COMP: {0} {1} - {2} {3}  ", x, ptPix.X, y, ptPix.Y, coord));
+        }
+#endif
+        return pt;
+    }
 
 #endregion
 

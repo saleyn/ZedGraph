@@ -508,7 +508,7 @@ namespace ZedGraph
 
           if (found)
           {
-            if (obj is GraphObj)
+            if (obj is GraphObj && ((GraphObj)obj).IsSelectable)
             {
               _graphDragState.Obj = obj as GraphObj;
               _graphDragState.Obj.IsSelected = true;
@@ -964,7 +964,8 @@ namespace ZedGraph
         */
       double minLin = axis._scale._minLinearized;
       double maxLin = axis._scale._maxLinearized;
-      double range = ( maxLin - minLin ) * zoomFraction / 2.0;
+      double range  = ( maxLin - minLin ) * zoomFraction / 2.0;
+      double f1     = 1 / zoomFraction - 1;
 
       if ( !isZoomOnCenter )
         centerVal = ( maxLin + minLin ) / 2.0;
@@ -976,8 +977,9 @@ namespace ZedGraph
       //        return;
       //}
 
-      axis._scale._minLinearized = centerVal - range;
-      axis._scale._maxLinearized = centerVal + range;
+      axis._scale._minLinearized = minLin - (minLin - centerVal) * f1;
+      axis._scale._maxLinearized = maxLin - (maxLin - centerVal) * f1;
+
       //  }
 
       axis._scale._minAuto = false;

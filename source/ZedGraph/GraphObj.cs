@@ -90,22 +90,16 @@ namespace ZedGraph
     /// </summary>
     private int _yAxisIndex;
 
-    [CLSCompliant(false)]
-    protected bool _isMoving;
-
-    [CLSCompliant(false)]
-    protected bool _isSelected;
-
     public delegate void LocationEvent(GraphObj graph, PaneBase pan, float dx, float dy);
     public event LocationEvent LocationChanged;
   #endregion
 
-    #region Defaults
-        /// <summary>
-        /// A simple struct that defines the
-        /// default property values for the <see cref="GraphObj"/> class.
-        /// </summary>
-        public struct Default
+  #region Defaults
+    /// <summary>
+    /// A simple struct that defines the
+    /// default property values for the <see cref="GraphObj"/> class.
+    /// </summary>
+    public struct Default
     {
       // Default text item properties
       /// <summary>
@@ -134,6 +128,16 @@ namespace ZedGraph
       /// The default value for <see cref="GraphObj.IsClippedToChartRect"/>.
       /// </summary>
       public static bool IsClippedToChartRect = false;
+
+      /// <summary>
+      /// The default value for <see cref="GraphObj.IsSelectable"/>.
+      /// </summary>
+      public static bool IsSelectable = true;
+
+      /// <summary>
+      /// The default value for <see cref="GraphObj.IsMovable"/>.
+      /// </summary>
+      public static bool IsMovable = true;
     }
   #endregion
 
@@ -205,17 +209,18 @@ namespace ZedGraph
                                    _zOrder == ZOrder.B_BehindLegend ||
                                    _zOrder == ZOrder.C_BehindChartBorder;
 
-    public bool IsSelected
-    {
-        get { return _isSelected; }
-        set { _isSelected = value; }
-    }
+    /// <summary>
+    /// true if current object is selectable
+    /// </summary>
+    public bool IsSelectable { get; set; } = Default.IsSelectable;
 
-    public bool IsMoving
-    {
-        get { return _isMoving; }
-        set { _isMoving = value; }
-    }
+    /// <summary>
+    /// true if current object is movable
+    /// </summary>
+    public bool IsMovable    { get; set; } = Default.IsMovable;
+
+    public bool IsSelected   { get; internal set; }
+    public bool IsMoving     { get; internal set; }
 
     /// <summary>
     /// Gets or sets a value that determines which X axis this <see cref="CurveItem"/>
@@ -381,8 +386,6 @@ namespace ZedGraph
       _zOrder               = ZOrder.A_InFront;
       _location             = new Location( x, y, coordType, alignH, alignV );
       _link                 = new Link();
-      _isSelected           = false;
-      _isMoving             = false;
       IsX2Axis              = false;
       IsY2Axis              = false;
       YAxisIndex            = 0;
@@ -421,8 +424,6 @@ namespace ZedGraph
       _zOrder               = ZOrder.A_InFront;
       _location             = new Location( x, y, x2, y2, coordType, alignH, alignV );
       _link                 = new Link();
-      _isSelected           = false;
-      _isMoving             = false;
       IsX2Axis              = false;
       IsY2Axis              = false;
       _yAxisIndex           = 0;
@@ -440,8 +441,9 @@ namespace ZedGraph
       _zOrder = rhs.ZOrder;
 
       // copy moving, selected property ?
-      _isMoving = rhs._isMoving;
-      _isSelected = rhs._isSelected;
+      IsMoving = rhs.IsMoving;
+      IsSelected = rhs.IsSelected;
+      IsSelectable = rhs.IsSelectable;
 
       // copy reference types by cloning
       this.Tag = ( rhs.Tag is ICloneable ) ? ((ICloneable) rhs.Tag).Clone() : rhs.Tag;
@@ -508,14 +510,17 @@ namespace ZedGraph
       _isClippedToChartRect = info.GetBoolean( "isClippedToChartRect" );
       _link = (Link) info.GetValue( "link", typeof( Link ) );
 
-      _isSelected = info.GetBoolean("isSelected");
-      _isMoving = info.GetBoolean("isMoving");
+      IsSelected = info.GetBoolean("isSelected");
+      IsMoving = info.GetBoolean("isMoving");
       if (schema > 11)
       {
-        IsX2Axis    = info.GetBoolean("isX2Axis");
-        IsY2Axis    = info.GetBoolean("isY2Axis");
-        _yAxisIndex = Math.Max(0, info.GetInt32("yAxisIndex"));
+        IsX2Axis     = info.GetBoolean("isX2Axis");
+        IsY2Axis     = info.GetBoolean("isY2Axis");
+        _yAxisIndex  = Math.Max(0, info.GetInt32("yAxisIndex"));
+        IsSelectable = info.GetBoolean("isSelectable");
+        IsMovable    = info.GetBoolean("isMovable");
       }
+
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -525,25 +530,27 @@ namespace ZedGraph
     [SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
     public virtual void GetObjectData( SerializationInfo info, StreamingContext context )
     {
-      info.AddValue( "schema", schema );
-      info.AddValue( "location", _location );
-      info.AddValue( "isVisible", _isVisible );
-      info.AddValue( "Tag", Tag );
-      info.AddValue( "zOrder", _zOrder );
+      info.AddValue( "schema",      schema );
+      info.AddValue( "location",    _location );
+      info.AddValue( "isVisible",   _isVisible );
+      info.AddValue( "Tag",         Tag );
+      info.AddValue( "zOrder",      _zOrder );
 
       info.AddValue( "isClippedToChartRect", _isClippedToChartRect );
-      info.AddValue( "link", _link );
+      info.AddValue( "link",        _link );
 
-      info.AddValue( "isSelected", _isSelected );
-      info.AddValue( "isMoving", _isMoving );
+      info.AddValue( "isSelected",  IsSelected );
+      info.AddValue( "isMoving",    IsMoving );
 
-      info.AddValue("isX2Axis",   IsX2Axis);
-      info.AddValue("isY2Axis",   IsY2Axis);
-      info.AddValue("yAxisIndex", YAxisIndex);
+      info.AddValue("isX2Axis",     IsX2Axis);
+      info.AddValue("isY2Axis",     IsY2Axis);
+      info.AddValue("yAxisIndex",   YAxisIndex);
+      info.AddValue("isSelectable", IsSelectable);
+      info.AddValue("isMovable",    IsMovable);
     }
-  #endregion
+    #endregion
 
-  #region Rendering Methods
+    #region Rendering Methods
     /// <summary>
     /// Render this <see cref="GraphObj"/> object to the specified <see cref="Graphics"/> device.
     /// </summary>
@@ -601,11 +608,11 @@ namespace ZedGraph
     /// <returns></returns>
     virtual public GraphicsPath MakePath(PaneBase pane)
     {
-      GraphicsPath path = new GraphicsPath();
+      var path = new GraphicsPath();
 
       // transform the x,y location from the user-defined
       // coordinate frame to the screen pixel location
-      RectangleF pixRect = _location.TransformRect(pane);
+      var pixRect = _location.TransformRect(pane);
 
       path.AddRectangle(pixRect);
 
@@ -694,11 +701,11 @@ namespace ZedGraph
                 //if (path != null && Utils.PtInPolygon(points, pt))
                 if (path != null && Utils.PtInPolygon(points, pp))
                 {
-                    lst[0].Add(pp.X, pp.Y, pp.Tag);
+                    lst[0].Add(pp.X, pp.Y, (string)pp.Tag);
                 }
                 else
                 {
-                    lst[1].Add(pp.X, pp.Y, pp.Tag);
+                    lst[1].Add(pp.X, pp.Y, (string)pp.Tag);
                 }
             }
 

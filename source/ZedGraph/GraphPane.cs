@@ -19,12 +19,6 @@
 
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Collections;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.IO;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.ComponentModel;
@@ -577,7 +571,7 @@ namespace ZedGraph
     public void AxisChange()
     {
       using (var img = new Bitmap((int)this.Rect.Width, (int)this.Rect.Height))
-      using (Graphics g = Graphics.FromImage(img))
+      using (var g   = Graphics.FromImage(img))
         AxisChange( g );
     }
 
@@ -609,7 +603,7 @@ namespace ZedGraph
         _isIgnoreInitial, _isBoundedRanges, this );
 
       // Determine the scale factor
-      float scaleFactor = this.CalcScaleFactor();
+      var scaleFactor = this.CalcScaleFactor();
 
       // For pie charts, go ahead and turn off the axis displays if it's only pies
       if ( this.CurveList.IsPieOnly )
@@ -647,9 +641,7 @@ namespace ZedGraph
       _barSettings.CalcClusterScaleWidth();
 
       // Trigger the AxisChangeEvent
-      if ( this.AxisChangeEvent != null )
-        this.AxisChangeEvent( this );
-
+      this.AxisChangeEvent?.Invoke( this );
     }
 
     private void PickScale( Graphics g, float scaleFactor )
@@ -659,44 +651,38 @@ namespace ZedGraph
       _xAxis._scale.PickScale( this, g, scaleFactor );
       _x2Axis._scale.PickScale( this, g, scaleFactor );
 
-      foreach ( Axis axis in _yAxisList )
+      foreach ( var axis in _yAxisList )
       {
         axis._scale.PickScale( this, g, scaleFactor );
-        if ( axis._scale.MaxAuto )
-        {
-          int nTics = axis._scale.CalcNumTics();
-          maxTics = nTics > maxTics ? nTics : maxTics;
-        }
+        if (!axis._scale.MaxAuto) continue;
+
+        int nTics = axis._scale.CalcNumTics();
+        maxTics = nTics > maxTics ? nTics : maxTics;
       }
-      foreach ( Axis axis in _y2AxisList )
+      foreach ( var axis in _y2AxisList )
       {
         axis._scale.PickScale( this, g, scaleFactor );
-        if ( axis._scale.MaxAuto )
-        {
-          int nTics = axis._scale.CalcNumTics();
-          maxTics = nTics > maxTics ? nTics : maxTics;
-        }
+        if (!axis._scale.MaxAuto) continue;
+
+        int nTics = axis._scale.CalcNumTics();
+        maxTics = nTics > maxTics ? nTics : maxTics;
       }
 
-      if ( _isAlignGrids )
-      {
-        foreach ( Axis axis in _yAxisList )
-          ForceNumTics( axis, maxTics );
+      if (!_isAlignGrids) return;
 
-        foreach ( Axis axis in _y2AxisList )
-          ForceNumTics( axis, maxTics );
-      }
+      foreach ( var axis in _yAxisList )
+        ForceNumTics( axis, maxTics );
 
+      foreach ( var axis in _y2AxisList )
+        ForceNumTics( axis, maxTics );
     }
 
     private void ForceNumTics( Axis axis, int numTics )
     {
-      if ( axis._scale.MaxAuto )
-      {
-        int nTics = axis._scale.CalcNumTics();
-        if ( nTics < numTics )
-          axis._scale._maxLinearized += axis._scale._majorStep * ( numTics - nTics );
-      }
+      if (!axis._scale.MaxAuto) return;
+      int nTics = axis._scale.CalcNumTics();
+      if ( nTics < numTics )
+        axis._scale._maxLinearized += axis._scale._majorStep * ( numTics - nTics );
     }
 
     /// <summary>
@@ -728,7 +714,7 @@ namespace ZedGraph
       g.SetClip( _rect );
 
       // calculate scaleFactor on "normal" pane size (BaseDimension)
-      float scaleFactor = this.CalcScaleFactor();
+      var scaleFactor = this.CalcScaleFactor();
 
 
       // if the size of the ChartRect is determined automatically, then do so
@@ -1526,63 +1512,63 @@ namespace ZedGraph
       foreach ( Axis axis in _y2AxisList )
         axis.Scale.SetupScaleData( this, axis );
 
-      return this.TransformCoord( ptF.X, ptF.Y, coord );
+      return TransformCoord( ptF.X, ptF.Y, coord );
     }
 
-        /// <summary>
-        /// Transform a data point from the specified coordinate type
-        /// (<see cref="CoordType"/>) to screen coordinates (pixels).
-        /// </summary>
-        /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
-        /// has already been calculated via <see cref="AxisChange()"/> or
-        /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
-        /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
-        /// <param name="pt">The X,Y pair that defines the point in user
-        /// coordinates.</param>
-        /// <param name="coord">A <see cref="CoordType"/> type that defines the
-        /// coordinate system in which the X,Y pair is defined.</param>
-        /// <returns>A point in screen coordinates that corresponds to the
-        /// specified user point.</returns>
-        public PointF GeneralTransform(PointD pt, CoordType coord)
-        {
-            // Setup the scaling data based on the chart rect
-            _xAxis.Scale.SetupScaleData(this, _xAxis);
-            foreach (Axis axis in _yAxisList)
-                axis.Scale.SetupScaleData(this, axis);
-            foreach (Axis axis in _y2AxisList)
-                axis.Scale.SetupScaleData(this, axis);
+    /// <summary>
+    /// Transform a data point from the specified coordinate type
+    /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+    /// </summary>
+    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+    /// has already been calculated via <see cref="AxisChange()"/> or
+    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
+    /// <param name="pt">The X,Y pair that defines the point in user
+    /// coordinates.</param>
+    /// <param name="coord">A <see cref="CoordType"/> type that defines the
+    /// coordinate system in which the X,Y pair is defined.</param>
+    /// <returns>A point in screen coordinates that corresponds to the
+    /// specified user point.</returns>
+    public PointF GeneralTransform(PointD pt, CoordType coord)
+    {
+      // Setup the scaling data based on the chart rect
+      _xAxis.Scale.SetupScaleData(this, _xAxis);
+      foreach (Axis axis in _yAxisList)
+        axis.Scale.SetupScaleData(this, axis);
+      foreach (Axis axis in _y2AxisList)
+        axis.Scale.SetupScaleData(this, axis);
 
-            return this.TransformCoord(pt.X, pt.Y, coord);
-        }
+      return TransformCoord(pt.X, pt.Y, coord);
+    }
 
-        /// <summary>
-        /// Transform a data point from the specified coordinate type
-        /// (<see cref="CoordType"/>) to screen coordinates (pixels).
-        /// </summary>
-        /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
-        /// has already been calculated via <see cref="AxisChange()"/> or
-        /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
-        /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).
-        /// Note that this method is more accurate than the <see cref="GeneralTransform(PointF,CoordType)" />
-        /// overload, since it uses double types.  This would typically only be significant for
-        /// <see cref="AxisType.Date" /> coordinates.
-        /// </remarks>
-        /// <param name="x">The x coordinate that defines the location in user space</param>
-        /// <param name="y">The y coordinate that defines the location in user space</param>
-        /// <param name="coord">A <see cref="CoordType"/> type that defines the
-        /// coordinate system in which the X,Y pair is defined.</param>
-        /// <returns>A point in screen coordinates that corresponds to the
-        /// specified user point.</returns>
-        public PointF GeneralTransform( double x, double y, CoordType coord )
+    /// <summary>
+    /// Transform a data point from the specified coordinate type
+    /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+    /// </summary>
+    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+    /// has already been calculated via <see cref="AxisChange()"/> or
+    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).
+    /// Note that this method is more accurate than the <see cref="GeneralTransform(PointF,CoordType)" />
+    /// overload, since it uses double types.  This would typically only be significant for
+    /// <see cref="AxisType.Date" /> coordinates.
+    /// </remarks>
+    /// <param name="x">The x coordinate that defines the location in user space</param>
+    /// <param name="y">The y coordinate that defines the location in user space</param>
+    /// <param name="coord">A <see cref="CoordType"/> type that defines the
+    /// coordinate system in which the X,Y pair is defined.</param>
+    /// <returns>A point in screen coordinates that corresponds to the
+    /// specified user point.</returns>
+    public PointF GeneralTransform(double x, double y, CoordType coord)
     {
       // Setup the scaling data based on the chart rect
       _xAxis.Scale.SetupScaleData( this, _xAxis );
-      foreach ( Axis axis in _yAxisList )
+      foreach ( var axis in _yAxisList )
         axis.Scale.SetupScaleData( this, axis );
-      foreach ( Axis axis in _y2AxisList )
+      foreach ( var axis in _y2AxisList )
         axis.Scale.SetupScaleData( this, axis );
 
-      return this.TransformCoord( x, y, coord );
+      return TransformCoord( x, y, coord );
     }
 
         /// <summary>
@@ -1600,18 +1586,18 @@ namespace ZedGraph
     /// <returns>A point in user coordinates that corresponds to the
     /// specified screen point.</returns>
     public PointD GeneralReverseTransform(PointF ptF, CoordType coord)
-        {
-            // Setup the scaling data based on the chart rect
-            _xAxis.Scale.SetupScaleData(this, _xAxis);
-            foreach (Axis axis in _yAxisList)
-                axis.Scale.SetupScaleData(this, axis);
-            foreach (Axis axis in _y2AxisList)
-                axis.Scale.SetupScaleData(this, axis);
+    {
+      // Setup the scaling data based on the chart rect
+      _xAxis.Scale.SetupScaleData(this, _xAxis);
+      foreach (var axis in _yAxisList)
+        axis.Scale.SetupScaleData(this, axis);
+      foreach (var axis in _y2AxisList)
+        axis.Scale.SetupScaleData(this, axis);
 
-            return this.ReverseTransformCoord(ptF.X, ptF.Y, coord);
-        }
+      return ReverseTransformCoord(ptF.X, ptF.Y, coord);
+    }
 
-        /// <summary>
+    /// <summary>
     /// Transform a data point from screen coordinates (pixels) to
     /// the specified coordinate type  (<see cref="CoordType"/>).
     /// </summary>
@@ -1630,33 +1616,33 @@ namespace ZedGraph
     /// <returns>A point in user coordinates that corresponds to the
     /// specified screen point.</returns>
     public PointD GeneralReverseTransform(float x, float y, CoordType coord)
-        {
-            // Setup the scaling data based on the chart rect
-            _xAxis.Scale.SetupScaleData(this, _xAxis);
-            foreach (Axis axis in _yAxisList)
-                axis.Scale.SetupScaleData(this, axis);
-            foreach (Axis axis in _y2AxisList)
-                axis.Scale.SetupScaleData(this, axis);
+    {
+      // Setup the scaling data based on the chart rect
+      _xAxis.Scale.SetupScaleData(this, _xAxis);
+      foreach (var axis in _yAxisList)
+        axis.Scale.SetupScaleData(this, axis);
+      foreach (var axis in _y2AxisList)
+        axis.Scale.SetupScaleData(this, axis);
 
-            return this.ReverseTransformCoord(x, y, coord);
-        }
+      return this.ReverseTransformCoord(x, y, coord);
+    }
 
-        /// <summary>
-        /// Return the user scale values that correspond to the specified screen
-        /// coordinate position (pixels).  This overload assumes the default
-        /// <see cref="XAxis" /> and <see cref="YAxis" />.
-        /// </summary>
-        /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
-        /// has already been calculated via <see cref="AxisChange()"/> or
-        /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
-        /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
-        /// <param name="ptF">The X,Y pair that defines the screen coordinate
-        /// point of interest</param>
-        /// <param name="x">The resultant value in user coordinates from the
-        /// <see cref="XAxis"/></param>
-        /// <param name="y">The resultant value in user coordinates from the
-        /// primary <see cref="YAxis"/></param>
-        public void ReverseTransform( PointF ptF, out double x, out double y )
+    /// <summary>
+    /// Return the user scale values that correspond to the specified screen
+    /// coordinate position (pixels).  This overload assumes the default
+    /// <see cref="XAxis" /> and <see cref="YAxis" />.
+    /// </summary>
+    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+    /// has already been calculated via <see cref="AxisChange()"/> or
+    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
+    /// <param name="ptF">The X,Y pair that defines the screen coordinate
+    /// point of interest</param>
+    /// <param name="x">The resultant value in user coordinates from the
+    /// <see cref="XAxis"/></param>
+    /// <param name="y">The resultant value in user coordinates from the
+    /// primary <see cref="YAxis"/></param>
+    public void ReverseTransform(PointF ptF, out double x, out double y)
     {
       // Setup the scaling data based on the chart rect
       _xAxis.Scale.SetupScaleData( this, _xAxis );
@@ -1956,19 +1942,18 @@ namespace ZedGraph
         {
           Axis y2Axis = _y2AxisList[yIndex];
           float width = y2Axis._tmpSpace;
-          if ( width > 0 )
-          {
-            tmpRect = new RectangleF( left, tmpChartRect.Top,
-              width, tmpChartRect.Height );
-            if ( saveZOrder <= ZOrder.D_BehindAxis && tmpRect.Contains( mousePt ) )
-            {
-              nearestObj = y2Axis;
-              index = yIndex;
-              return true;
-            }
+          if (!(width > 0)) continue;
 
-            left += width;
+          tmpRect = new RectangleF( left, tmpChartRect.Top,
+                                    width, tmpChartRect.Height );
+          if ( saveZOrder <= ZOrder.D_BehindAxis && tmpRect.Contains( mousePt ) )
+          {
+            nearestObj = y2Axis;
+            index = yIndex;
+            return true;
           }
+
+          left += width;
         }
 
         // See if the point is in the X Axis
@@ -1998,18 +1983,18 @@ namespace ZedGraph
 
         CurveItem curve;
         // See if it's a data point
-        if ( saveZOrder <= ZOrder.E_BehindCurves && FindNearestPoint( mousePt, out curve, out index ) )
+        if ( saveZOrder <= ZOrder.E_BehindCurves &&
+             FindNearestPoint( mousePt, out curve, out index ) )
         {
           nearestObj = curve;
           return true;
         }
 
-        if ( saveGraphItem != null )
-        {
-          index = saveIndex;
-          nearestObj = saveGraphItem;
-          return true;
-        }
+        if (saveGraphItem == null) return false;
+
+        index = saveIndex;
+        nearestObj = saveGraphItem;
+        return true;
       }
 
       return false;
@@ -2121,7 +2106,7 @@ namespace ZedGraph
       if ( !AxisRangesValid() )
         return false;
 
-      ValueHandler valueHandler = new ValueHandler( this, false );
+      var valueHandler = new ValueHandler( this, false );
 
       //double  yPixPerUnit = chartRect.Height / ( yAxis.Max - yAxis.Min );
       //double  y2PixPerUnit; // = chartRect.Height / ( y2Axis.Max - y2Axis.Min );
@@ -2139,7 +2124,7 @@ namespace ZedGraph
         if ( curve is PieItem && curve.IsVisible )
         {
           if ( ( (PieItem)curve ).SlicePath != null &&
-              ( (PieItem)curve ).SlicePath.IsVisible( mousePt ) )
+               ( (PieItem)curve ).SlicePath.IsVisible( mousePt ) )
           {
             nearestBar = curve;
             iNearestBar = 0;
@@ -2147,135 +2132,122 @@ namespace ZedGraph
 
           continue;
         }
-        else if ( curve.IsVisible )
+        if (!curve.IsVisible) continue;
+
+        int yIndex = curve.GetYAxisIndex( this );
+        Axis yAxis = curve.GetYAxis( this );
+        Axis xAxis = curve.GetXAxis( this );
+
+        if ( curve.IsY2Axis )
         {
-          int yIndex = curve.GetYAxisIndex( this );
-          Axis yAxis = curve.GetYAxis( this );
-          Axis xAxis = curve.GetXAxis( this );
+          yAct     = y2[yIndex];
+          yMinAct  = _y2AxisList[yIndex]._scale._min;
+          yMaxAct  = _y2AxisList[yIndex]._scale._max;
+        }
+        else
+        {
+          yAct     = y[yIndex];
+          yMinAct  = _yAxisList[yIndex]._scale._min;
+          yMaxAct  = _yAxisList[yIndex]._scale._max;
+        }
 
-          if ( curve.IsY2Axis )
+        yPixPerUnitAct  = _chart._rect.Height / ( yMaxAct - yMinAct );
+        var xPixPerUnit = _chart._rect.Width / ( xAxis._scale._max - xAxis._scale._min );
+        xAct            = xAxis is XAxis ? x : x2;
+
+        var    points        = curve.Points;
+        var    barWidth      = curve.GetBarWidth( this );
+        Axis   baseAxis      = curve.BaseAxis( this );
+        var    isXBaseAxis   = ( baseAxis is XAxis || baseAxis is X2Axis );
+        var barWidthUserHalf = isXBaseAxis
+          ? barWidth/xPixPerUnit/2.0
+          : barWidth/yPixPerUnitAct/2.0;
+
+        if (points == null) continue;
+        for ( var iPt = 0; iPt < curve.NPts; iPt++ )
+        {
+          // xVal is the user scale X value of the current point
+          xVal = xAxis._scale.IsAnyOrdinal && !curve.IsOverrideOrdinal
+            ? iPt + 1.0
+            : points[iPt].X;
+
+          // yVal is the user scale Y value of the current point
+          yVal = yAxis._scale.IsAnyOrdinal && !curve.IsOverrideOrdinal
+            ? iPt + 1.0
+            : points[iPt].Y;
+
+          if (xVal == PointPair.Missing || yVal == PointPair.Missing) continue;
+
+          if ( curve.IsBar || curve is ErrorBarItem ||
+               curve is HiLowBarItem || curve is OHLCBarItem ||
+               curve is JapaneseCandleStickItem )
           {
-            yAct = y2[yIndex];
-            yMinAct = _y2AxisList[yIndex]._scale._min;
-            yMaxAct = _y2AxisList[yIndex]._scale._max;
-          }
-          else
-          {
-            yAct = y[yIndex];
-            yMinAct = _yAxisList[yIndex]._scale._min;
-            yMaxAct = _yAxisList[yIndex]._scale._max;
-          }
+            double baseVal, lowVal, hiVal;
+            valueHandler.GetValues( curve, iPt, out baseVal,
+                                    out lowVal, out hiVal );
 
-          yPixPerUnitAct = _chart._rect.Height / ( yMaxAct - yMinAct );
-
-          double xPixPerUnit = _chart._rect.Width / ( xAxis._scale._max - xAxis._scale._min );
-          xAct = xAxis is XAxis ? x : x2;
-
-          IPointList points = curve.Points;
-          float barWidth = curve.GetBarWidth( this );
-          double barWidthUserHalf;
-          Axis baseAxis = curve.BaseAxis( this );
-          bool isXBaseAxis = ( baseAxis is XAxis || baseAxis is X2Axis );
-          if ( isXBaseAxis )
-            barWidthUserHalf = barWidth / xPixPerUnit / 2.0;
-          else
-            barWidthUserHalf = barWidth / yPixPerUnitAct / 2.0;
-
-          if ( points != null )
-          {
-            for ( int iPt = 0; iPt < curve.NPts; iPt++ )
+            if ( lowVal > hiVal )
             {
-              // xVal is the user scale X value of the current point
-              if ( xAxis._scale.IsAnyOrdinal && !curve.IsOverrideOrdinal )
-                xVal = (double)iPt + 1.0;
-              else
-                xVal = points[iPt].X;
-
-              // yVal is the user scale Y value of the current point
-              if ( yAxis._scale.IsAnyOrdinal && !curve.IsOverrideOrdinal )
-                yVal = (double)iPt + 1.0;
-              else
-                yVal = points[iPt].Y;
-
-              if ( xVal != PointPair.Missing &&
-                  yVal != PointPair.Missing )
-              {
-
-                if ( curve.IsBar || curve is ErrorBarItem ||
-                  curve is HiLowBarItem || curve is OHLCBarItem ||
-                  curve is JapaneseCandleStickItem )
-                {
-                  double baseVal, lowVal, hiVal;
-                  valueHandler.GetValues( curve, iPt, out baseVal,
-                      out lowVal, out hiVal );
-
-                  if ( lowVal > hiVal )
-                  {
-                    double tmpVal = lowVal;
-                    lowVal = hiVal;
-                    hiVal = tmpVal;
-                  }
-
-                  if ( isXBaseAxis )
-                  {
-
-                    double centerVal = valueHandler.BarCenterValue( curve, barWidth, iPt, xVal, iBar );
-
-                    if ( xAct < centerVal - barWidthUserHalf ||
-                        xAct > centerVal + barWidthUserHalf ||
-                        yAct < lowVal || yAct > hiVal )
-                      continue;
-                  }
-                  else
-                  {
-                    double centerVal = valueHandler.BarCenterValue( curve, barWidth, iPt, yVal, iBar );
-
-                    if ( yAct < centerVal - barWidthUserHalf ||
-                        yAct > centerVal + barWidthUserHalf ||
-                        xAct < lowVal || xAct > hiVal )
-                      continue;
-                  }
-
-                  if ( nearestBar == null )
-                  {
-                    iNearestBar = iPt;
-                    nearestBar = curve;
-                  }
-                }
-                else if ( xVal >= xAxis._scale._min && xVal <= xAxis._scale._max &&
-                      yVal >= yMinAct && yVal <= yMaxAct )
-                {
-                  if ( curve is LineItem && _lineType == LineType.Stack )
-                  {
-                    double zVal;
-                    valueHandler.GetValues( curve, iPt, out xVal, out zVal, out yVal );
-                  }
-
-                  distX = ( xVal - xAct ) * xPixPerUnit;
-                  distY = ( yVal - yAct ) * yPixPerUnitAct;
-                  dist = distX * distX + distY * distY;
-
-                  if ( dist >= minDist )
-                    continue;
-
-                  minDist = dist;
-                  iNearest = iPt;
-                  nearestCurve = curve;
-                }
-
-              }
+              var tmpVal = lowVal;
+              lowVal = hiVal;
+              hiVal = tmpVal;
             }
 
-            if ( curve.IsBar )
-              iBar++;
+            if ( isXBaseAxis )
+            {
+
+              var centerVal = valueHandler.BarCenterValue( curve, barWidth, iPt, xVal, iBar );
+
+              if ( xAct < centerVal - barWidthUserHalf ||
+                   xAct > centerVal + barWidthUserHalf ||
+                   yAct < lowVal || yAct > hiVal )
+                continue;
+            }
+            else
+            {
+              var centerVal = valueHandler.BarCenterValue( curve, barWidth, iPt, yVal, iBar );
+
+              if ( yAct < centerVal - barWidthUserHalf ||
+                   yAct > centerVal + barWidthUserHalf ||
+                   xAct < lowVal || xAct > hiVal )
+                continue;
+            }
+
+            if ( nearestBar == null )
+            {
+              iNearestBar = iPt;
+              nearestBar = curve;
+            }
+          }
+          else if ( xVal >= xAxis._scale._min && xVal <= xAxis._scale._max &&
+                    yVal >= yMinAct && yVal <= yMaxAct )
+          {
+            if ( curve is LineItem && _lineType == LineType.Stack )
+            {
+              double zVal;
+              valueHandler.GetValues( curve, iPt, out xVal, out zVal, out yVal );
+            }
+
+            distX = ( xVal - xAct ) * xPixPerUnit;
+            distY = ( yVal - yAct ) * yPixPerUnitAct;
+            dist = distX * distX + distY * distY;
+
+            if ( dist >= minDist )
+              continue;
+
+            minDist = dist;
+            iNearest = iPt;
+            nearestCurve = curve;
           }
         }
+
+        if ( curve.IsBar )
+          iBar++;
       }
 
       if ( nearestCurve is LineItem )
       {
-        float halfSymbol = (float)( ( (LineItem)nearestCurve ).Symbol.Size *
-          CalcScaleFactor() / 2 );
+        var halfSymbol = ( ( (LineItem)nearestCurve ).Symbol.Size * CalcScaleFactor() / 2 );
         minDist -= halfSymbol * halfSymbol;
         if ( minDist < 0 )
           minDist = 0;
@@ -2288,14 +2260,13 @@ namespace ZedGraph
         iNearest = iNearestBar;
         return true;
       }
-      else if ( minDist < tolSquared )
+      if ( minDist < tolSquared )
       {
         // Did we find a close point, and is it within the tolerance?
         // (minDist is the square of the distance in pixel units)
         return true;
       }
-      else  // otherwise, no valid point found
-        return false;
+      return false;
     }
 
     /// <summary>
@@ -2323,16 +2294,12 @@ namespace ZedGraph
       foreach ( GraphObj graphObj in _graphObjList )
       {
         link = graphObj._link;
-        bool inFront = graphObj.IsInFrontOfData;
 
-        if ( link.IsActive )
-        {
-          if ( graphObj.PointInBox( mousePt, this, g, scaleFactor ) )
-          {
-            source = graphObj;
-            return true;
-          }
-        }
+        if (!link.IsActive) continue;
+        if (!graphObj.PointInBox(mousePt, this, g, scaleFactor)) continue;
+
+        source = graphObj;
+        return true;
       }
 
       // Second, look at the curve data points
@@ -2340,32 +2307,25 @@ namespace ZedGraph
       {
         link = curve._link;
 
-        if ( link.IsActive )
-        {
-          CurveItem nearestCurve;
+        if (!link.IsActive) continue;
+        CurveItem nearestCurve;
 
-          if ( FindNearestPoint( mousePt, curve, out nearestCurve, out index ) )
-          {
-            source = curve;
-            return true;
-          }
-        }
+        if (!FindNearestPoint(mousePt, curve, out nearestCurve, out index)) continue;
+
+        source = curve;
+        return true;
       }
 
       // Third, look for graph objects that lie behind the data points
       foreach ( GraphObj graphObj in _graphObjList )
       {
         link = graphObj._link;
-        bool inFront = graphObj.IsInFrontOfData;
 
-        if ( link.IsActive )
-        {
-          if ( graphObj.PointInBox( mousePt, this, g, scaleFactor ) )
-          {
-            source = graphObj;
-            return true;
-          }
-        }
+        if (!link.IsActive) continue;
+        if (!graphObj.PointInBox(mousePt, this, g, scaleFactor)) continue;
+
+        source = graphObj;
+        return true;
       }
 
       source = null;
@@ -2390,18 +2350,16 @@ namespace ZedGraph
       containedObjs = new CurveList();
 
       foreach ( CurveItem ci in this.CurveList )
-      {
         for ( int i = 0; i < ci.Points.Count; i++ )
         {
           if ( ci.Points[i].X > rectF.Left &&
-             ci.Points[i].X < rectF.Right &&
-             ci.Points[i].Y > rectF.Bottom &&
-             ci.Points[i].Y < rectF.Top )
+               ci.Points[i].X < rectF.Right &&
+               ci.Points[i].Y > rectF.Bottom &&
+               ci.Points[i].Y < rectF.Top )
           {
             containedObjs.Add( ci );
           }
         }
-      }
       return ( containedObjs.Count > 0 );
     }
 
@@ -2409,4 +2367,3 @@ namespace ZedGraph
 
   }
 }
-

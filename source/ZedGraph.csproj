@@ -14,7 +14,7 @@
     <AssemblyOriginatorKeyFile>zedgraphkey.snk</AssemblyOriginatorKeyFile>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <!--    <RestorePackages>true</RestorePackages>-->
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
   </PropertyGroup>
@@ -67,11 +67,13 @@
     <Compile Include="ZedGraph\BasicArrayPointList.cs" />
     <Compile Include="ZedGraph\Border.cs" />
     <Compile Include="ZedGraph\BoxObj.cs" />
+    <Compile Include="ZedGraph\Deque.cs" />
     <Compile Include="ZedGraph\GraphDragState.cs" />
     <Compile Include="ZedGraph\HiLowBarItem.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ZedGraph\LineHObj.cs" />
+    <Compile Include="ZedGraph\MinMax.cs" />
     <Compile Include="ZedGraph\OHLCBar.cs" />
     <Compile Include="ZedGraph\OHLCBarItem.cs" />
     <Compile Include="ZedGraph\Chart.cs" />
@@ -124,6 +126,7 @@
     <Compile Include="ZedGraph\PaneList.cs" />
     <Compile Include="ZedGraph\PieItem.cs" />
     <Compile Include="ZedGraph\PointD.cs" />
+    <Compile Include="ZedGraph\PointObj.cs" />
     <Compile Include="ZedGraph\PointPair.cs" />
     <Compile Include="ZedGraph\PointPair4.cs" />
     <Compile Include="ZedGraph\PointPairBase.cs" />

@@ -485,11 +485,11 @@ namespace ZedGraph
     /// </remarks>
     XChartFractionY2Scale,
 
-        /// <summary>
-        /// Coordinates are specified according to the Panel
-        /// </summary>
-        PaneRelative
-    }
+    /// <summary>
+    /// Coordinates are specified according to the Panel
+    /// </summary>
+    PaneRelative
+  }
   
   /// <summary>
   /// Enumeration type that defines how a curve is drawn.  Curves can be drawn
