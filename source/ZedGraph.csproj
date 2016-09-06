@@ -58,6 +58,9 @@
     <Compile Include="ZedGraphControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="ZedGraph\ZedGraphZoomBand.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ZedGraph\ArrowObj.cs" />
     <Compile Include="ZedGraph\Axis.cs" />
     <Compile Include="ZedGraph\AxisLabel.cs" />

@@ -551,7 +551,7 @@ namespace ZedGraph
       _zoomState = null;
       _zoomStateStack = new ZoomStateStack();
 
-            _graphDragState = new GraphDragState();
+      _graphDragState = new GraphDragState();
     }
 
     /// <summary>
@@ -564,10 +564,7 @@ namespace ZedGraph
       lock ( this )
       {
         if ( disposing )
-        {
-          if ( components != null )
-            components.Dispose();
-        }
+          components?.Dispose();
         base.Dispose( disposing );
 
         _masterPane = null;
