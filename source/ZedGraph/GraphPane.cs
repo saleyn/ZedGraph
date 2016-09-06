@@ -22,6 +22,8 @@ using System.Drawing;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.ComponentModel;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace ZedGraph
 {
@@ -201,73 +203,59 @@ namespace ZedGraph
       set { _curveList = value; }
     }
     /// <summary>
+    /// Gets or sets the clipping region for curves for this <see cref="GraphPane"/>
+    /// </summary>
+    /// <value>A reference to a RectangleF object</value>
+    public RectangleF CurveClipRect { get; set; }
+
+    /// <summary>
     /// Accesses the <see cref="XAxis"/> for this graph
     /// </summary>
     /// <value>A reference to a <see cref="XAxis"/> object</value>
-    public XAxis XAxis
-    {
-      get { return _xAxis; }
-    }
+    public XAxis XAxis => _xAxis;
+
     /// <summary>
     /// Accesses the <see cref="X2Axis"/> for this graph
     /// </summary>
     /// <value>A reference to a <see cref="X2Axis"/> object</value>
-    public X2Axis X2Axis
-    {
-      get { return _x2Axis; }
-    }
+    public X2Axis X2Axis => _x2Axis;
+
     /// <summary>
     /// Accesses the primary <see cref="YAxis"/> for this graph
     /// </summary>
     /// <value>A reference to a <see cref="YAxis"/> object</value>
     /// <seealso cref="YAxisList" />
     /// <seealso cref="Y2AxisList" />
-    public YAxis YAxis
-    {
-      get { return _yAxisList[0] as YAxis; }
-    }
+    public YAxis YAxis => _yAxisList[0] as YAxis;
+
     /// <summary>
     /// Accesses the primary <see cref="Y2Axis"/> for this graph
     /// </summary>
     /// <value>A reference to a <see cref="Y2Axis"/> object</value>
     /// <seealso cref="YAxisList" />
     /// <seealso cref="Y2AxisList" />
-    public Y2Axis Y2Axis
-    {
-      get { return _y2AxisList[0] as Y2Axis; }
-    }
+    public Y2Axis Y2Axis => _y2AxisList[0] as Y2Axis;
 
     /// <summary>
     /// Gets the collection of Y axes that belong to this <see cref="GraphPane" />.
     /// </summary>
-    public YAxisList YAxisList
-    {
-      get { return _yAxisList; }
-    }
+    public YAxisList YAxisList => _yAxisList;
+
     /// <summary>
     /// Gets the collection of Y2 axes that belong to this <see cref="GraphPane" />.
     /// </summary>
-    public Y2AxisList Y2AxisList
-    {
-      get { return _y2AxisList; }
-    }
+    public Y2AxisList Y2AxisList => _y2AxisList;
 
     /// <summary>
     /// Gets the <see cref="Chart" /> instance for this <see cref="GraphPane" />.
     /// </summary>
-    public Chart Chart
-    {
-      get { return _chart; }
-    }
+    public Chart Chart => _chart;
 
     /// <summary>
     /// Gets the <see cref="BarSettings" /> instance for this <see cref="GraphPane" />,
     /// which stores the global properties for bar type charts.
     /// </summary>
-    public BarSettings BarSettings
-    {
-      get { return _barSettings; }
-    }
+    public BarSettings BarSettings => _barSettings;
 
   #endregion
 
@@ -767,8 +755,9 @@ namespace ZedGraph
         _graphObjList.Draw( g, this, scaleFactor, ZOrder.E_BehindCurves );
 
         // Clip the points to the actual plot area
-        g.SetClip( _chart._rect );
-        _curveList.Draw( g, this, scaleFactor );
+        g.SetClip(CurveClipRect, CombineMode.Intersect);
+        if (!g.IsClipEmpty) // update region may not be in chart at all
+          _curveList.Draw( g, this, scaleFactor );
         g.SetClip( _rect );
       }
 

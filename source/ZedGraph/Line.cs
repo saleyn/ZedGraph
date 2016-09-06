@@ -667,161 +667,156 @@ namespace ZedGraph
       int minY = (int)pane.Chart.Rect.Top;
       int maxY = (int)pane.Chart.Rect.Bottom;
 
-      using ( Pen pen = source.GetPen( pane, scaleFactor ) )
+      minX = Math.Max(minX, (int)Math.Floor(g.ClipBounds.Left));
+      maxX = Math.Min(maxX, (int)Math.Ceiling(g.ClipBounds.Right));
+
+      using ( var pen = source.GetPen( pane, scaleFactor ) )
       {
-        if ( points != null && !_color.IsEmpty && this.IsVisible )
+        if (points == null || _color.IsEmpty || !this.IsVisible) return;
+        
+        //bool lastOut = false;
+        bool isOut;
+
+        bool isOptDraw = _isOptimizedDraw && points.Count > 1000;
+
+        // (Dale-a-b) we'll set an element to true when it has been drawn  
+        bool[,] isPixelDrawn = null;
+          
+        if ( isOptDraw )
+          isPixelDrawn = new bool[maxX + 1, maxY + 1]; 
+          
+        // Loop over each point in the curve
+        for ( int i = 0; i < points.Count; i++ )
         {
-          //bool lastOut = false;
-          bool isOut;
-
-          bool isOptDraw = _isOptimizedDraw && points.Count > 1000;
-
-          // (Dale-a-b) we'll set an element to true when it has been drawn  
-          bool[,] isPixelDrawn = null;
-          
-          if ( isOptDraw )
-            isPixelDrawn = new bool[maxX + 1, maxY + 1]; 
-          
-          // Loop over each point in the curve
-          for ( int i = 0; i < points.Count; i++ )
+          curPt = points[i];
+          if ( pane.LineType == LineType.Stack )
           {
-            curPt = points[i];
-            if ( pane.LineType == LineType.Stack )
+            if ( !valueHandler.GetValues( curve, i, out curX, out lowVal, out curY ) )
             {
-              if ( !valueHandler.GetValues( curve, i, out curX, out lowVal, out curY ) )
-              {
-                curX = PointPair.Missing;
-                curY = PointPair.Missing;
-              }
+              curX = PointPair.Missing;
+              curY = PointPair.Missing;
             }
-            else
+          }
+          else
+          {
+            curX = curPt.X;
+            curY = curPt.Y;
+          }
+
+          // Any value set to double max is invalid and should be skipped
+          // This is used for calculated values that are out of range, divide
+          //   by zero, etc.
+          // Also, any value <= zero on a log scale is invalid
+          if ( curX == PointPair.Missing ||
+               curY == PointPair.Missing ||
+               double.IsNaN( curX ) ||
+               double.IsNaN( curY ) ||
+               double.IsInfinity( curX ) ||
+               double.IsInfinity( curY ) ||
+               ( xIsLog && curX <= 0.0 ) ||
+               ( yIsLog && curY <= 0.0 ) )
+          {
+            // If the point is invalid, then make a linebreak only if IsIgnoreMissing is false
+            // LastX and LastY are always the last valid point, so this works out
+            lastBad = lastBad || !pane.IsIgnoreMissing;
+            isOut = true;
+          }
+          else
+          {
+            // Transform the current point from user scale units to
+            // screen coordinates
+            tmpX = (int) xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curX );
+            tmpY = (int) yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curY );
+
+            // Maintain an array of "used" pixel locations to avoid duplicate drawing operations
+            // contributed by Dale-a-b
+            if ( isOptDraw && tmpX >= minX && tmpX <= maxX &&
+                 tmpY >= minY && tmpY <= maxY ) // guard against the zoom-in case
             {
-              curX = curPt.X;
-              curY = curPt.Y;
+              if ( isPixelDrawn[tmpX, tmpY] )
+                continue;
+              isPixelDrawn[tmpX, tmpY] = true;
             }
 
-            // Any value set to double max is invalid and should be skipped
-            // This is used for calculated values that are out of range, divide
-            //   by zero, etc.
-            // Also, any value <= zero on a log scale is invalid
-            if ( curX == PointPair.Missing ||
-                curY == PointPair.Missing ||
-                double.IsNaN( curX ) ||
-                double.IsNaN( curY ) ||
-                double.IsInfinity( curX ) ||
-                double.IsInfinity( curY ) ||
-                ( xIsLog && curX <= 0.0 ) ||
-                ( yIsLog && curY <= 0.0 ) )
+            isOut = ( tmpX < minX && lastX < minX ) || ( tmpX > maxX && lastX > maxX ) ||
+                    ( tmpY < minY && lastY < minY ) || ( tmpY > maxY && lastY > maxY );
+
+            if ( !lastBad )
             {
-              // If the point is invalid, then make a linebreak only if IsIgnoreMissing is false
-              // LastX and LastY are always the last valid point, so this works out
-              lastBad = lastBad || !pane.IsIgnoreMissing;
-              isOut = true;
-            }
-            else
-            {
-              // Transform the current point from user scale units to
-              // screen coordinates
-              tmpX = (int) xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curX );
-              tmpY = (int) yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curY );
-
-              // Maintain an array of "used" pixel locations to avoid duplicate drawing operations
-              // contributed by Dale-a-b
-              if ( isOptDraw && tmpX >= minX && tmpX <= maxX &&
-                    tmpY >= minY && tmpY <= maxY ) // guard against the zoom-in case
+              try
               {
-                if ( isPixelDrawn[tmpX, tmpY] )
-                  continue;
-                isPixelDrawn[tmpX, tmpY] = true;
-              }
-
-              isOut = ( tmpX < minX && lastX < minX ) || ( tmpX > maxX && lastX > maxX ) ||
-                ( tmpY < minY && lastY < minY ) || ( tmpY > maxY && lastY > maxY );
-
-              if ( !lastBad )
-              {
-                try
+                // GDI+ plots the data wrong and/or throws an exception for
+                // outrageous coordinates, so we do a sanity check here
+                if ( lastX > 5000000 || lastX < -5000000 ||
+                     lastY > 5000000 || lastY < -5000000 ||
+                     tmpX > 5000000 || tmpX < -5000000 ||
+                     tmpY > 5000000 || tmpY < -5000000 )
+                  InterpolatePoint( g, pane, curve, lastPt, scaleFactor, pen,
+                                    lastX, lastY, tmpX, tmpY );
+                else if ( !isOut )
                 {
-                  // GDI+ plots the data wrong and/or throws an exception for
-                  // outrageous coordinates, so we do a sanity check here
-                  if ( lastX > 5000000 || lastX < -5000000 ||
-                      lastY > 5000000 || lastY < -5000000 ||
-                      tmpX > 5000000 || tmpX < -5000000 ||
-                      tmpY > 5000000 || tmpY < -5000000 )
-                    InterpolatePoint( g, pane, curve, lastPt, scaleFactor, pen,
-                            lastX, lastY, tmpX, tmpY );
-                  else if ( !isOut )
+                  if ( !curve.IsSelected && this._gradientFill.IsGradientValueType )
                   {
-                    if ( !curve.IsSelected && this._gradientFill.IsGradientValueType )
+                    using ( Pen tPen = GetPen( pane, scaleFactor, lastPt ) )
                     {
-                      using ( Pen tPen = GetPen( pane, scaleFactor, lastPt ) )
-                      {
-                        if ( this.StepType == StepType.NonStep )
-                        {
+                      switch (this.StepType) {
+                        case StepType.NonStep:
                           g.DrawLine( tPen, lastX, lastY, tmpX, tmpY );
-                        }
-                        else if ( this.StepType == StepType.ForwardStep )
-                        {
+                          break;
+                        case StepType.ForwardStep:
                           g.DrawLine( tPen, lastX, lastY, tmpX, lastY );
                           g.DrawLine( tPen, tmpX, lastY, tmpX, tmpY );
-                        }
-                        else if ( this.StepType == StepType.RearwardStep )
-                        {
+                          break;
+                        case StepType.RearwardStep:
                           g.DrawLine( tPen, lastX, lastY, lastX, tmpY );
                           g.DrawLine( tPen, lastX, tmpY, tmpX, tmpY );
-                        }
-                        else if ( this.StepType == StepType.ForwardSegment )
-                        {
+                          break;
+                        case StepType.ForwardSegment:
                           g.DrawLine( tPen, lastX, lastY, tmpX, lastY );
-                        }
-                        else
-                        {
+                          break;
+                        default:
                           g.DrawLine( tPen, lastX, tmpY, tmpX, tmpY );
-                        }
-                      }
-                    }
-                    else
-                    {
-                      if ( this.StepType == StepType.NonStep )
-                      {
-                        g.DrawLine( pen, lastX, lastY, tmpX, tmpY );
-                      }
-                      else if ( this.StepType == StepType.ForwardStep )
-                      {
-                        g.DrawLine( pen, lastX, lastY, tmpX, lastY );
-                        g.DrawLine( pen, tmpX, lastY, tmpX, tmpY );
-                      }
-                      else if ( this.StepType == StepType.RearwardStep )
-                      {
-                        g.DrawLine( pen, lastX, lastY, lastX, tmpY );
-                        g.DrawLine( pen, lastX, tmpY, tmpX, tmpY );
-                      }
-                      else if ( this.StepType == StepType.ForwardSegment )
-                      {
-                        g.DrawLine( pen, lastX, lastY, tmpX, lastY );
-                      }
-                      else if ( this.StepType == StepType.RearwardSegment )
-                      {
-                        g.DrawLine( pen, lastX, tmpY, tmpX, tmpY );
+                          break;
                       }
                     }
                   }
-
-                }
-                catch
-                {
-                  InterpolatePoint( g, pane, curve, lastPt, scaleFactor, pen,
-                        lastX, lastY, tmpX, tmpY );
+                  else
+                  {
+                    switch (this.StepType) {
+                      case StepType.NonStep:
+                        g.DrawLine( pen, lastX, lastY, tmpX, tmpY );
+                        break;
+                      case StepType.ForwardStep:
+                        g.DrawLine( pen, lastX, lastY, tmpX, lastY );
+                        g.DrawLine( pen, tmpX, lastY, tmpX, tmpY );
+                        break;
+                      case StepType.RearwardStep:
+                        g.DrawLine( pen, lastX, lastY, lastX, tmpY );
+                        g.DrawLine( pen, lastX, tmpY, tmpX, tmpY );
+                        break;
+                      case StepType.ForwardSegment:
+                        g.DrawLine( pen, lastX, lastY, tmpX, lastY );
+                        break;
+                      case StepType.RearwardSegment:
+                        g.DrawLine( pen, lastX, tmpY, tmpX, tmpY );
+                        break;
+                    }
+                  }
                 }
 
               }
-
-              lastPt = curPt;
-              lastX = tmpX;
-              lastY = tmpY;
-              lastBad = false;
-              //lastOut = isOut;
+              catch
+              {
+                InterpolatePoint( g, pane, curve, lastPt, scaleFactor, pen,
+                                  lastX, lastY, tmpX, tmpY );
+              }
             }
+
+            lastPt = curPt;
+            lastX = tmpX;
+            lastY = tmpY;
+            lastBad = false;
+            //lastOut = isOut;
           }
         }
       }

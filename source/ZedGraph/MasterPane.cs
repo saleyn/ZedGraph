@@ -114,9 +114,15 @@ namespace ZedGraph
     /// </summary>
     private bool _isAntiAlias = false;
 
+    /// <summary>
+    /// The rectangle that is set to the the clipping area in the call to OnPaint.
+    /// </summary>
+    [CLSCompliant(false)]
+    protected RectangleF _clipRectF;
+
   #endregion
 
-  #region Defaults
+    #region Defaults
     /// <summary>
     /// A simple struct that defines the
     /// default property values for the <see cref="MasterPane"/> class.
@@ -572,13 +578,16 @@ namespace ZedGraph
     /// </param>
     public override void Draw( Graphics g )
     {
+      // Save the clipping region
+      _clipRectF = g.ClipBounds;
+
       // Save current AntiAlias mode
       SmoothingMode sModeSave = g.SmoothingMode;
       TextRenderingHint sHintSave = g.TextRenderingHint;
       CompositingQuality sCompQual = g.CompositingQuality;
       InterpolationMode sInterpMode = g.InterpolationMode;
 
-            SetAntiAliasMode(g, _isAntiAlias);
+      SetAntiAliasMode(g, _isAntiAlias);
 
       // Draw the pane border & background fill, the title, and the GraphObj objects that lie at
       // ZOrder.GBehindAll
@@ -604,8 +613,11 @@ namespace ZedGraph
       // Reset the clipping
       g.ResetClip();
 
-      foreach ( GraphPane pane in _paneList )
-        pane.Draw( g );
+      foreach (GraphPane pane in _paneList)
+      {
+        pane.CurveClipRect = _clipRectF;
+        pane.Draw(g);
+      }
 
       // Clip everything to the rect
       g.SetClip( _rect );

@@ -10,14 +10,11 @@ namespace ZedGraph
 
         public object Create(object request, ISpecimenContext context)
         {
-            if (typeof(Point).Equals(request))
-            {
-                var x = (int)context.Resolve(typeof(int));
-                var y = (int)context.Resolve(typeof(int));
-                return new Point(x, y);
-            }
-
-            return new NoSpecimen(request);
+          if (!typeof(Point).Equals(request))
+            return new NoSpecimen();
+          var x = (int)context.Resolve(typeof(int));
+          var y = (int)context.Resolve(typeof(int));
+          return new Point(x, y);
         }
 
         #endregion
