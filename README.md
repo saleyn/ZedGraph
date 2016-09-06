@@ -13,9 +13,11 @@ to make it more usable for financial charting.
 * Auto-updating horizontal line levels in the GraphPane
 * Crosshair drawing (experimental)
 * Chart scrolling with MouseWheel
+* Chart zooming band with fill effect
 * Controlling panning/zooming actions using chart's MouseWheelActions property
 * Chart panning/zooming/by using modifier keys and mouse wheel on the YAxis
 * Mouse selectable LineItem
+* Annotation shapes (PointObj)
 
 Example:
 
