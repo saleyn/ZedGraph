@@ -11,9 +11,10 @@ namespace ZedGraph.Demo
 	/// </summary>
 	public enum DemoType
 	{
-		General,
+    Financial,
+    Line,
+    General,
 		Bar,
-		Line,
 		Pie,
 		Special,
 		Tutorial

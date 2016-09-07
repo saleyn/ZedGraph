@@ -19,9 +19,6 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Windows.Forms;
-using ZedGraph;
 using Timer = System.Timers.Timer;
 
 namespace ZedGraph.Demo
@@ -34,16 +31,16 @@ namespace ZedGraph.Demo
 
 		public OHLCBarRealTimeDemo()
       : base("Demonstration of the OHLCBar Chart Type",
-             "OHLCBar Real-Time Demo", DemoType.Bar)
+             "OHLCBar Real-Time Demo", DemoType.Financial)
     {
-      m_Timer = new Timer { Interval = 500, Enabled = false };
-      m_Data = new StockPointList();
+      m_Timer   = new Timer { Interval = 500, Enabled = false };
+      m_Data    = new StockPointList();
+      m_FilteredData = new FilteredPointList(new[] {0.0}, new[] {0.0});
       m_EMAData = new PointPairList();
-      m_Rand = new Random();
+      m_Rand    = new Random();
+      var now   = fillSampleData();
 
-      var now = fillSampleData();
-
-      m_Pane = base.GraphPane;
+      m_Pane    = base.GraphPane;
 
       //------------------------------------------------------------------------
       // Setup the pane and X/Y axis
@@ -258,6 +255,7 @@ namespace ZedGraph.Demo
     private readonly Timer m_Timer;
     private readonly StockPointList m_Data;
     private readonly PointPairList  m_EMAData;
+    private readonly FilteredPointList m_FilteredData;
 
     private XDate  m_Now;
     private double m_Open;
@@ -268,8 +266,10 @@ namespace ZedGraph.Demo
     private readonly LineObj m_XHair = null;
     private readonly LineObj m_YHair = null;
 
-    private const double EMA_ALPHA = 0.8;
-    private double       m_EMA     = 0;
+    private const double  EMA_ALPHA = 0.8;
+    private double        m_EMA     = 0;
+    private float         m_MinVal  = 0f;
+    private float         m_MaxVal  = 0f;
 
     private StockPt   LastPoint    => m_Data.Count    > 0 ? ((StockPt)m_Data[m_Data.Count - 1]) : new StockPt();
 
@@ -305,6 +305,8 @@ namespace ZedGraph.Demo
         {
           m_Pane.XAxis.Scale.Max = now + 5;
           m_Pane.XAxis.Scale.Min += diff;
+
+
           if (m_Data.Count%1 == 0)
           {
             var yy = m_Pane.Y2Axis.Scale.ReverseTransform(m_Pane.Y2Axis.Scale.Transform(val) + (up ? 5 : -5));

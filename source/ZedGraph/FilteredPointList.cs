@@ -112,7 +112,7 @@ namespace ZedGraph
         if ( _minBoundIndex >= 0 && _maxBoundIndex >= 0 && _maxPts >= 0 )
         {
           // get number of points in bounded range
-          int nPts = _maxBoundIndex - _minBoundIndex + 1;
+          var nPts = _maxBoundIndex - _minBoundIndex + 1;
 
           if ( nPts > _maxPts )
           {
@@ -126,18 +126,8 @@ namespace ZedGraph
           }
         }
 
-        double xVal, yVal;
-        if ( index >= 0 && index < _x.Length )
-          xVal = _x[index];
-        else
-          xVal = PointPair.Missing;
-
-        if ( index >= 0 && index < _y.Length )
-          yVal = _y[index];
-        else
-          yVal = PointPair.Missing;
-
-
+        var xVal = index >= 0 && index < _x.Length ? _x[index] : PointPair.Missing;
+        var yVal = index >= 0 && index < _y.Length ? _y[index] : PointPair.Missing;
 
         return new PointPair( xVal, yVal, PointPair.Missing, null );
       }

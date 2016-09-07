@@ -37,6 +37,18 @@ namespace ZedGraph
 
       Assert.AreEqual(12, mm.Min);
       Assert.AreEqual(19, mm.Max);
+
+      mm.Clear();
+      mm.Update(3);
+
+      Assert.AreEqual(12, mm.Min);
+      Assert.AreEqual(19, mm.Max);
+
+      mm.Clear();
+      mm.Update(4);
+
+      Assert.AreEqual(13, mm.Min);
+      Assert.AreEqual(19, mm.Max);
     }
   }
 }

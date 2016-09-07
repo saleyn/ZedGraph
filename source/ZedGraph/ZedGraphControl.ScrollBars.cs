@@ -79,12 +79,12 @@ namespace ZedGraph
 
     private void Synchronize( Axis source, Axis dest )
     {
-      dest._scale._min = source._scale._min;
-      dest._scale._max = source._scale._max;
-      dest._scale._majorStep = source._scale._majorStep;
-      dest._scale._minorStep = source._scale._minorStep;
-      dest._scale._minAuto = source._scale._minAuto;
-      dest._scale._maxAuto = source._scale._maxAuto;
+      dest._scale._min           = source._scale._min;
+      dest._scale._max           = source._scale._max;
+      dest._scale._majorStep     = source._scale._majorStep;
+      dest._scale._minorStep     = source._scale._minorStep;
+      dest._scale._minAuto       = source._scale._minAuto;
+      dest._scale._maxAuto       = source._scale._maxAuto;
       dest._scale._majorStepAuto = source._scale._majorStepAuto;
       dest._scale._minorStepAuto = source._scale._minorStepAuto;
     }

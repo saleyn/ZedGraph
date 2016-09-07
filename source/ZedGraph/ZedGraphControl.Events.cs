@@ -865,6 +865,8 @@ namespace ZedGraph
     /// <see paramref="centerPt" />, false to center on the <see cref="Chart.Rect" />.
     /// </param>
     /// <param name="isRefresh">true to force a refresh of the control, false to leave it unrefreshed</param>
+    /// <param name="hZoom">Permit horizontal zoom</param>
+    /// <param name="vZoom">Permit vertical zoom</param>
     protected void ZoomPane( GraphPane pane, double zoomFraction, PointF centerPt,
           bool isZoomOnCenter, bool isRefresh, bool hZoom = true, bool vZoom = true)
     {
@@ -878,33 +880,28 @@ namespace ZedGraph
 
       pane.ReverseTransform( centerPt, out x, out x2, out y, out y2 );
 
-      //if ( _isEnableHZoom )
       if ( hZoom )
       {
-        ZoomScale( pane.XAxis, zoomFraction, x, isZoomOnCenter );
+        ZoomScale( pane.XAxis, zoomFraction,  x,  isZoomOnCenter );
         ZoomScale( pane.X2Axis, zoomFraction, x2, isZoomOnCenter );
       }
-      //if ( _isEnableVZoom )
       if ( vZoom )
       {
-        for ( int i = 0; i < pane.YAxisList.Count; i++ )
+        for ( var i = 0; i < pane.YAxisList.Count; i++ )
           ZoomScale( pane.YAxisList[i], zoomFraction, y[i], isZoomOnCenter );
-        for ( int i = 0; i < pane.Y2AxisList.Count; i++ )
+        for ( var i = 0; i < pane.Y2AxisList.Count; i++ )
           ZoomScale( pane.Y2AxisList[i], zoomFraction, y2[i], isZoomOnCenter );
       }
 
-      using ( Graphics g = this.CreateGraphics() )
-      {
+      if (!isRefresh) return;
+
+      using ( var g = this.CreateGraphics() )
         pane.AxisChange( g );
-        //g.Dispose();
-      }
 
-      this.SetScroll( this.hScrollBar1, pane.XAxis, _xScrollRange.Min, _xScrollRange.Max );
-      this.SetScroll( this.vScrollBar1, pane.YAxis, _yScrollRangeList[0].Min,
-        _yScrollRangeList[0].Max );
+      SetScroll( hScrollBar1, pane.XAxis, _xScrollRange.Min, _xScrollRange.Max );
+      SetScroll( vScrollBar1, pane.YAxis, _yScrollRangeList[0].Min, _yScrollRangeList[0].Max );
 
-      if ( isRefresh )
-        Refresh();
+      Refresh();
     }
 
     /// <summary>
@@ -950,8 +947,8 @@ namespace ZedGraph
     /// </param>
     protected void ZoomScale( Axis axis, double zoomFraction, double centerVal, bool isZoomOnCenter )
     {
-      if (axis == null || !(zoomFraction > 0.0001) || !(zoomFraction < 1000.0)) return;
-      Scale scale = axis._scale;
+      if (axis == null || zoomFraction <= 0.0001 || zoomFraction >= 1000.0) return;
+      var scale = axis._scale;
       /*
         if ( axis.Scale.IsLog )
         {
@@ -966,10 +963,10 @@ namespace ZedGraph
         else
         {
         */
-      double minLin = axis._scale._minLinearized;
-      double maxLin = axis._scale._maxLinearized;
-      double range  = ( maxLin - minLin ) * zoomFraction / 2.0;
-      double f1     = 1 / zoomFraction - 1;
+      var minLin = axis._scale._minLinearized;
+      var maxLin = axis._scale._maxLinearized;
+      var range  = ( maxLin - minLin ) * zoomFraction / 2.0;
+      var f1     = 1 / zoomFraction - 1;
 
       if ( !isZoomOnCenter )
         centerVal = ( maxLin + minLin ) / 2.0;

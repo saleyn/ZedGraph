@@ -89,7 +89,7 @@ namespace ZedGraph.Demo
 		/// <param name="type">The type of demo.</param>
 		private void buildPrimaryNode( DemoType type )
 		{
-			TreeNode currNode = new TreeNode( TypeToName( type ) );
+			TreeNode currNode = new TreeNode( type.ToString() );
 			typeToNodeTable[type] = currNode;
 
 			this.demoTree.Nodes.Add( currNode );
@@ -122,32 +122,6 @@ namespace ZedGraph.Demo
 			}
 			// store the demo based on it's title
 			demos[demo.Title] = demo;
-		}
-
-		/// <summary>
-		/// Generates a string name for a demo type.
-		/// </summary>
-		/// 
-		/// <param name="type">A DemoType</param>
-		/// <returns>A name for the DemoType</returns>
-		private string TypeToName( DemoType type )
-		{
-			switch ( type )
-			{
-				case DemoType.Pie:
-					return "Pie";
-				case DemoType.General:
-				default:
-					return "General";
-				case DemoType.Bar:
-					return "Bar";
-				case DemoType.Line:
-					return "Line";
-				case DemoType.Special:
-					return "Special Features";
-				case DemoType.Tutorial:
-					return "Tutorial";
-			}
 		}
 
     private ZedGraphDemo _lastDemo = null;

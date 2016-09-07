@@ -17,14 +17,15 @@ namespace ZedGraph.Demo
 
 
     // The axis that is currently hovered by the mouse
-    private object    m_HoveredYAxis;
+    private Axis      m_HoveredAxis;
+    private bool      m_HoveredHorizontal;
     // The graphpane that contains the axis
     private GraphPane m_FoundPane;
     // The scale of the axis before it is panned
-    private double    m_MovedYAxisMin;
-    private double    m_MovedYAxisMax;
+    private double    m_MovedAxisMin;
+    private double    m_MovedAxisMax;
     // The Y on the axis when the panning operation is starting
-    private float     m_MovedYAxisStartY;
+    private Point     m_MovedAxisStart;
 
     public ZedGraphControlExt()
     {
@@ -90,11 +91,13 @@ namespace ZedGraph.Demo
          ((Control.ModifierKeys == PanModifierKeys ||
           (PanModifierKeys2 != Keys.None && Control.ModifierKeys == PanModifierKeys2))))
       {
-        if (m_HoveredYAxis == null) return;
-        var scale = (m_HoveredYAxis is YAxis) ? ((YAxis)m_HoveredYAxis).Scale : ((Y2Axis)m_HoveredYAxis).Scale;
-        var yOffset = scale.ReverseTransform(pt.Y) - scale.ReverseTransform(m_MovedYAxisStartY);
-        scale.Min = m_MovedYAxisMin - yOffset;
-        scale.Max = m_MovedYAxisMax - yOffset;
+        if (m_HoveredAxis == null) return;
+        var scale  = m_HoveredAxis.Scale;
+        var offset = m_HoveredHorizontal
+                    ? scale.ReverseTransform(pt.X) - scale.ReverseTransform(m_MovedAxisStart.X)
+                    : scale.ReverseTransform(pt.Y) - scale.ReverseTransform(m_MovedAxisStart.Y);
+        scale.Min = m_MovedAxisMin - offset;
+        scale.Max = m_MovedAxisMax - offset;
 
         Invalidate();
       }
@@ -104,10 +107,20 @@ namespace ZedGraph.Demo
                (PanModifierKeys2  != Keys.None && Control.ModifierKeys == PanModifierKeys2))
       {
         var foundObject = findZedGraphObject(new Point(e.X, e.Y));
-        m_HoveredYAxis = foundObject as YAxis ?? (object)(foundObject as Y2Axis);
+        m_HoveredHorizontal = false;
 
-        if (m_HoveredYAxis != null)
-          Cursor = Cursors.SizeNS;
+        if (foundObject is XAxis || foundObject is X2Axis)
+        {
+          m_HoveredAxis = (Axis)foundObject;
+          m_HoveredHorizontal = true;
+        }
+        else if (foundObject is YAxis || foundObject is Y2Axis)
+          m_HoveredAxis = (Axis)foundObject;
+        else
+          m_HoveredAxis = null;
+
+        if (m_HoveredAxis != null)
+          Cursor = m_HoveredHorizontal ? Cursors.SizeWE : Cursors.SizeNS;
         else if (IsShowPointValues)
           Cursor = Cursors.Cross;
         else
@@ -131,14 +144,14 @@ namespace ZedGraph.Demo
     {
       base.OnMouseWheel(e);
 
-      if (m_HoveredYAxis == null) return;
+      if (m_HoveredAxis == null) return;
 
       if (Control.ModifierKeys != ZoomModifierKeys &&
          (ZoomModifierKeys2 == Keys.None || Control.ModifierKeys != ZoomModifierKeys2))
         return;
 
       var direction = e.Delta < 1 ? -.05f : .05f;
-      var scale = (m_HoveredYAxis is YAxis) ? ((YAxis)m_HoveredYAxis).Scale : ((Y2Axis)m_HoveredYAxis).Scale;
+      var scale = m_HoveredAxis.Scale;
       var increment = direction * (scale.Max - scale.Min);
       var newMin = scale.Min + increment;
       var newMax = scale.Max - increment;
@@ -154,7 +167,7 @@ namespace ZedGraph.Demo
     protected override void OnMouseUp(MouseEventArgs e)
     {
       base.OnMouseUp(e);
-      m_HoveredYAxis = null;
+      m_HoveredAxis = null;
     }
 
     protected override void OnMouseDown(MouseEventArgs e)
@@ -162,12 +175,11 @@ namespace ZedGraph.Demo
       base.OnMouseDown(e);
 
       if (e.Button != MouseButtons.Left) return;
-      if (m_HoveredYAxis == null) return;
+      if (m_HoveredAxis == null) return;
 
-      m_MovedYAxisStartY = e.Location.Y;
-      var scale = (m_HoveredYAxis is YAxis) ? ((YAxis)m_HoveredYAxis).Scale : ((Y2Axis)m_HoveredYAxis).Scale;
-      m_MovedYAxisMin = scale.Min;
-      m_MovedYAxisMax = scale.Max;
+      m_MovedAxisStart = e.Location;
+      m_MovedAxisMin   = m_HoveredAxis.Scale.Min;
+      m_MovedAxisMax   = m_HoveredAxis.Scale.Max;
     }
 
     private object findZedGraphObject(Point pt)

@@ -70,9 +70,17 @@ namespace ZedGraph
       m_End++;
     }
 
-    public void Update()
+    public void Update(int startIdx = 0)
     {
       Clear();
+      if (m_List.Count == 0)
+        return;
+
+      if (startIdx >= m_List.Count)
+        throw new ArgumentOutOfRangeException(nameof(startIdx));
+
+      m_End = startIdx;
+
       while (m_End < m_List.Count)
         updateMinMax(m_List[++m_End]);
     }

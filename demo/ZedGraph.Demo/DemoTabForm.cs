@@ -38,6 +38,7 @@ namespace ZedGraph.Demo
 		protected override void loadDemos()
 		{
 			loadDemo(new ComboDemo());
+			loadDemo(new FilteredPointDemo());
 			loadDemo(new PieChartDemo());
 			loadDemo(new LineStackingDemo());
 			loadDemo(new TransparentDemo1());
