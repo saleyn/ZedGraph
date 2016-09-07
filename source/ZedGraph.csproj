@@ -57,6 +57,9 @@
     <Compile Include="ZedGraphControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="ZedGraph\ZedGraphControl.Legend.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="ZedGraph\ZedGraphZoomBand.cs">
       <SubType>Form</SubType>
     </Compile>

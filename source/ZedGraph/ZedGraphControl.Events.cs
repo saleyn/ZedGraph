@@ -1629,14 +1629,18 @@ namespace ZedGraph
           if (nearestObj is CurveItem && iPt >= 0)
           {
             var curve = (CurveItem)nearestObj;
+            var label = "";
             // Provide Callback for User to customize the tooltips
             if (this.PointValueEvent != null)
             {
-              var label = this.PointValueEvent(this, pane, curve, iPt);
+              label = this.PointValueEvent(this, pane, curve, iPt);
               if (!string.IsNullOrEmpty(label))
               {
-                this.SetToolTip(label, mousePt);
-                this.EnableToolTip();
+                if (this.pointToolTip.GetToolTip(this) != label)
+                {
+                  this.pointToolTip.SetToolTip(this, label);
+                  this.pointToolTip.Active = true;
+                }
               }
               else
                 this.DisableToolTip();
@@ -1644,34 +1648,34 @@ namespace ZedGraph
             else
             {
               if (curve is PieItem)
-                this.SetToolTip(((PieItem)curve).Value.ToString(this._pointValueFormat), mousePt);
+                label = ((PieItem)curve).Value.ToString(_pointValueFormat);
               else
               {
-                PointPair pt = curve.Points[iPt];
+                var pt = curve.Points[iPt];
 
                 if (pt.Tag is string)
-                  this.SetToolTip((string)pt.Tag, mousePt);
+                  label = (string)pt.Tag;
                 else
                 {
                   double xVal, yVal, lowVal;
-                  ValueHandler valueHandler = new ValueHandler(pane, false);
+                  var valueHandler = new ValueHandler(pane, false);
                   if ((curve is BarItem || curve is ErrorBarItem || curve is HiLowBarItem)
                       && pane.BarSettings.Base != BarBase.X)
                     valueHandler.GetValues(curve, iPt, out yVal, out lowVal, out xVal);
                   else
                     valueHandler.GetValues(curve, iPt, out xVal, out lowVal, out yVal);
 
-                  string xStr = MakeValueLabel(curve.GetXAxis(pane), xVal, iPt,
+                  var xStr = MakeValueLabel(curve.GetXAxis(pane), xVal, iPt,
                     curve.IsOverrideOrdinal);
-                  string yStr = MakeValueLabel(curve.GetYAxis(pane), yVal, iPt,
+                  var yStr = MakeValueLabel(curve.GetYAxis(pane), yVal, iPt,
                     curve.IsOverrideOrdinal);
 
-                  this.SetToolTip("( " + xStr + ", " + yStr + " )", mousePt);
+                  label = $"({xStr}, {yStr})";
                 }
               }
-
-              this.EnableToolTip();
             }
+
+            this.SetToolTip(label, mousePt);
           }
           else
             this.DisableToolTip();
@@ -1688,20 +1692,12 @@ namespace ZedGraph
     private Point HandleCursorValues(Point mousePt)
     {
       GraphPane pane = _masterPane.FindPane(mousePt);
+      var label = "";
       if (pane != null && pane.Chart._rect.Contains(mousePt))
       {
         // Provide Callback for User to customize the tooltips
         if (this.CursorValueEvent != null)
-        {
-          string label = this.CursorValueEvent(this, pane, mousePt);
-          if (!string.IsNullOrEmpty(label))
-          {
-            this.SetToolTip(label, mousePt);
-            this.EnableToolTip();
-          }
-          else
-            this.DisableToolTip();
-        }
+          label = this.CursorValueEvent(this, pane, mousePt);
         else
         {
           double x, x2, y, y2;
@@ -1710,9 +1706,10 @@ namespace ZedGraph
           string yStr = MakeValueLabel(pane.YAxis, y, -1, true);
           string y2Str = MakeValueLabel(pane.Y2Axis, y2, -1, true);
 
-          this.SetToolTip("( " + xStr + ", " + yStr + ", " + y2Str + " )", mousePt);
-          this.EnableToolTip();
+          label = "( " + xStr + ", " + yStr + ", " + y2Str + " )";
         }
+
+        SetToolTip(label, mousePt);
       }
       else
         this.DisableToolTip();

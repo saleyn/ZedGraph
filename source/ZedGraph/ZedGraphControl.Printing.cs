@@ -174,30 +174,29 @@ namespace ZedGraph
       // Add a try/catch pair since the users of the control can't catch this one
       try
       {
-        if ( pd != null )
+        if (pd == null) return;
+
+        //pd.PrintPage += new PrintPageEventHandler( GraphPrintPage );
+        using (var setupDlg = new PageSetupDialog())
         {
-          //pd.PrintPage += new PrintPageEventHandler( GraphPrintPage );
-          PageSetupDialog setupDlg = new PageSetupDialog();
           setupDlg.Document = pd;
 
-          if ( setupDlg.ShowDialog() == DialogResult.OK )
-          {
-            pd.PrinterSettings = setupDlg.PrinterSettings;
-            pd.DefaultPageSettings = setupDlg.PageSettings;
+          if (setupDlg.ShowDialog() != DialogResult.OK) return;
 
-            // BUG in PrintDocument!!!  Converts in/mm repeatedly
-            // http://support.microsoft.com/?id=814355
-            // from http://www.vbinfozine.com/tpagesetupdialog.shtml, by Palo Mraz
-            //if ( System.Globalization.RegionInfo.CurrentRegion.IsMetric )
-            //{
-            //  setupDlg.Document.DefaultPageSettings.Margins = PrinterUnitConvert.Convert(
-            //  setupDlg.Document.DefaultPageSettings.Margins,
-            //  PrinterUnit.Display, PrinterUnit.TenthsOfAMillimeter );
-            //}
-          }
+          pd.PrinterSettings = setupDlg.PrinterSettings;
+          pd.DefaultPageSettings = setupDlg.PageSettings;
+
+          // BUG in PrintDocument!!!  Converts in/mm repeatedly
+          // http://support.microsoft.com/?id=814355
+          // from http://www.vbinfozine.com/tpagesetupdialog.shtml, by Palo Mraz
+          //if ( System.Globalization.RegionInfo.CurrentRegion.IsMetric )
+          //{
+          //  setupDlg.Document.DefaultPageSettings.Margins = PrinterUnitConvert.Convert(
+          //  setupDlg.Document.DefaultPageSettings.Margins,
+          //  PrinterUnit.Display, PrinterUnit.TenthsOfAMillimeter );
+          //}
         }
       }
-
       catch ( Exception exception )
       {
         MessageBox.Show( exception.Message );
@@ -217,15 +216,14 @@ namespace ZedGraph
 
         if (printDocument != null)
         {
-          PrintDialog printDialog = new PrintDialog
-                       {
-                         UseEXDialog = this.UseExtendedPrintDialog,
-                         Document = printDocument
-                       };
-
-          if (printDialog.ShowDialog() == DialogResult.OK)
+          using (var printDialog = new PrintDialog
           {
-            printDocument.Print();
+            UseEXDialog = this.UseExtendedPrintDialog,
+            Document = printDocument
+          })
+          {
+            if (printDialog.ShowDialog() == DialogResult.OK)
+              printDocument.Print();
           }
         }
       }

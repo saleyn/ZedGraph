@@ -494,6 +494,7 @@ namespace ZedGraph
     public ZedGraphControl()
     {
       InitializeComponent();
+      InitializeComponentPartial();
       this.tooltip = ValuesToolTip.Create(this, this.pointToolTip);
 
       // These commands do nothing, but they get rid of the compiler warnings for
@@ -501,9 +502,9 @@ namespace ZedGraph
       bool b = MouseDown == null || MouseUp == null || MouseMove == null;
 
       // Link in these events from the base class, since we disable them from this class.
-      base.MouseDown += new System.Windows.Forms.MouseEventHandler( this.ZedGraphControl_MouseDown );
-      base.MouseUp += new System.Windows.Forms.MouseEventHandler( this.ZedGraphControl_MouseUp );
-      base.MouseMove += new System.Windows.Forms.MouseEventHandler( this.ZedGraphControl_MouseMove );
+      base.MouseDown += ZedGraphControl_MouseDown;
+      base.MouseUp   += ZedGraphControl_MouseUp;
+      base.MouseMove += ZedGraphControl_MouseMove;
 
       //this.MouseWheel += new System.Windows.Forms.MouseEventHandler( this.ZedGraphControl_MouseWheel );
 

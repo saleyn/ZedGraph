@@ -16,7 +16,6 @@
 //License along with this library; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================
-
 using System;
 using System.Drawing;
 using System.Runtime.Serialization;
@@ -65,9 +64,22 @@ namespace ZedGraph
     /// </summary>
     public event AxisChangeEventHandler AxisChangeEvent;
 
-  #endregion
+    /// <summary>
+    /// A delegate that allows notification after a 'Draw' operation has been completed by a pane.
+    /// </summary>
+    /// <param name="pane">The <see cref="GraphPane"/> object that performed the 'Draw'.</param>
+    public delegate void DrawEventHandler(GraphPane pane);
 
-  #region Private Fields
+    /// <summary>
+    /// Subscribe to this event to be notified when 'Draw' operation has been completed by a pane.
+    /// </summary>
+    [Bindable(true), Category("Events"),
+     Description("Subscribe to this event to be notified when 'Draw' operation has been completed by a pane.")]
+    public event DrawEventHandler DrawEvent;
+
+    #endregion
+
+    #region Private Fields
 
     // Item subclasses ////////////////////////////////////////////////////////////////////
 
@@ -806,6 +818,8 @@ namespace ZedGraph
       foreach ( Axis axis in _y2AxisList )
         axis.Scale.ResetScaleData();
       */
+
+      DrawEvent?.Invoke(this);
     }
 
     internal void DrawGrid( Graphics g, float scaleFactor )
