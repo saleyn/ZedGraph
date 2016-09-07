@@ -26,6 +26,11 @@ using System.Security.Permissions;
 namespace ZedGraph
 {
   /// <summary>
+  /// Specifies that a curve is of "Bar" item type
+  /// </summary>
+  internal interface IBarItem {};
+
+  /// <summary>
   /// Encapsulates a bar type that displays vertical or horizontal bars
   /// </summary>
   /// <remarks>
@@ -36,7 +41,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.27 $ $Date: 2007-11-03 04:41:28 $ </version>
   [Serializable]
-  public class BarItem : CurveItem, ICloneable, ISerializable
+  public class BarItem : CurveItem, ICloneable, IBarItem
   {
   #region Fields
     /// <summary>

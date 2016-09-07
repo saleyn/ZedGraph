@@ -51,7 +51,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.19 $ $Date: 2007-04-16 00:03:01 $ </version>
   [Serializable]
-  public class ErrorBarItem : CurveItem, ICloneable, ISerializable
+  public class ErrorBarItem : CurveItem, ICloneable, IBarItem
   {
   #region Fields
     /// <summary>

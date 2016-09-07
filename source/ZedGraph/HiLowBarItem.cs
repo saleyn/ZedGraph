@@ -47,7 +47,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.18 $ $Date: 2007-11-03 04:41:28 $ </version>
   [Serializable]
-  public class HiLowBarItem : BarItem, ICloneable, ISerializable
+  public class HiLowBarItem : BarItem, ICloneable
   {
 
   #region Constructors

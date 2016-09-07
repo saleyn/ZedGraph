@@ -706,17 +706,16 @@ namespace ZedGraph
       // calculate scaleFactor on "normal" pane size (BaseDimension)
       var scaleFactor = this.CalcScaleFactor();
 
-
       // if the size of the ChartRect is determined automatically, then do so
       // otherwise, calculate the legendrect, scalefactor, hstack, and legendwidth parameters
       // but leave the ChartRect alone
       if ( _chart._isRectAuto )
       {
-        _chart._rect = CalcChartRect( g, scaleFactor );
+        CurveClipRect = _chart._rect = CalcChartRect( g, scaleFactor );
         //this.pieRect = PieItem.CalcPieRect( g, this, scaleFactor, this.chartRect );
       }
       else
-        CalcChartRect( g, scaleFactor );
+        CurveClipRect = CalcChartRect( g, scaleFactor );
 
       // do a sanity check on the ChartRect
       if ( _chart._rect.Width < 1 || _chart._rect.Height < 1 )
@@ -758,13 +757,11 @@ namespace ZedGraph
 
         // Clip the points to the actual plot area
         g.SetClip(CurveClipRect, CombineMode.Intersect);
+
         if (!g.IsClipEmpty) // update region may not be in chart at all
           _curveList.Draw( g, this, scaleFactor );
         g.SetClip( _rect );
-      }
 
-      if ( showGraf )
-      {
         // Draw the GraphItems that are behind the Axis objects
         _graphObjList.Draw( g, this, scaleFactor, ZOrder.D_BehindAxis );
 
@@ -1782,7 +1779,7 @@ namespace ZedGraph
       _x2Axis.Scale.SetupScaleData( this, _x2Axis );
       x2 = this.X2Axis.Scale.ReverseTransform( ptF.X );
 
-      y = new double[_yAxisList.Count];
+      y  = new double[_yAxisList.Count];
       y2 = new double[_y2AxisList.Count];
 
       for ( int i = 0; i < _yAxisList.Count; i++ )
@@ -1791,6 +1788,7 @@ namespace ZedGraph
         axis.Scale.SetupScaleData( this, axis );
         y[i] = axis.Scale.ReverseTransform( ptF.Y );
       }
+
       for ( int i = 0; i < _y2AxisList.Count; i++ )
       {
         Axis axis = _y2AxisList[i];

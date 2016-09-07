@@ -53,7 +53,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.4 $ $Date: 2007-12-31 00:23:05 $ </version>
   [Serializable]
-  public class OHLCBarItem : CurveItem, ICloneable, ISerializable
+  public class OHLCBarItem : CurveItem, ICloneable, IBarItem
   {
   #region Fields
 
@@ -73,10 +73,7 @@ namespace ZedGraph
     /// Gets a reference to the <see cref="OHLCBar"/> class defined
     /// for this <see cref="OHLCBarItem"/>.
     /// </summary>
-    public OHLCBar Bar
-    {
-      get { return _bar; }
-    }
+    public OHLCBar Bar => _bar;
 
     /// <summary>
     /// Gets a flag indicating if the X axis is the independent axis for this <see cref="CurveItem" />
@@ -231,7 +228,7 @@ namespace ZedGraph
     {
       if ( _isVisible )
       {
-        _bar.Draw( g, pane, this, this.BaseAxis( pane ),
+        _bar.Draw(g, pane, this, this.BaseAxis( pane ),
                   this.ValueAxis( pane ), scaleFactor );
       }
     }
