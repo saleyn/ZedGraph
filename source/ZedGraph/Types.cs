@@ -179,6 +179,12 @@ namespace ZedGraph
   /// <seealso cref="ZedGraph.Symbol.Fill"/>
   public enum SymbolType 
   {
+    /// <summary> No symbol is shown (this is equivalent to using
+    /// <see cref="Symbol.IsVisible"/> = false.</summary>
+    None,
+    /// <summary> A Default symbol type (the symbol type will be obtained
+    /// from <see cref="Symbol.Default.Type"/>. </summary>
+    Default,
     /// <summary> Square-shaped <see cref="ZedGraph.Symbol"/> </summary>
     Square,
     /// <summary> Rhombus-shaped <see cref="ZedGraph.Symbol"/> </summary>
@@ -214,12 +220,26 @@ namespace ZedGraph
     /// be used.
     /// </summary>
     UserDefined,
-    /// <summary> A Default symbol type (the symbol type will be obtained
-    /// from <see cref="Symbol.Default.Type"/>. </summary>
-    Default,
-    /// <summary> No symbol is shown (this is equivalent to using
-    /// <see cref="Symbol.IsVisible"/> = false.</summary>
-    None
+    /// <summary>
+    /// Arrow <see cref="ZedGraph.Symbol"/> pointing up.
+    /// The 0,0 coordinate is the pointing tip of the arrow.
+    /// </summary>
+    ArrowUp,
+    /// <summary>
+    /// Arrow <see cref="ZedGraph.Symbol"/> pointing down.
+    /// The 0,0 coordinate is the pointing tip of the arrow.
+    /// </summary>
+    ArrowDown,
+    /// <summary>
+    /// Arrow <see cref="ZedGraph.Symbol"/> pointing left.
+    /// The 0,0 coordinate is the pointing tip of the arrow.
+    /// </summary>
+    ArrowLeft,
+    /// <summary>
+    /// Arrow <see cref="ZedGraph.Symbol"/> pointing right.
+    /// The 0,0 coordinate is the pointing tip of the arrow.
+    /// </summary>
+    ArrowRight
   }
 
   /// <summary>

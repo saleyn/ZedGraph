@@ -87,13 +87,6 @@ namespace ZedGraph
     /// public property <see cref="GraphPane.CurveList"/> to access this class.</summary>
     private CurveList _curveList;
 
-    /// <summary>
-    /// private value that contains a <see cref="ZoomStateStack"/>, which stores prior
-    /// <see cref="ZoomState"/> objects containing scale range information.  This enables
-    /// zooming and panning functionality for the <see cref="ZedGraphControl"/>.
-    /// </summary>
-    private ZoomStateStack _zoomStack;
-
     // Chart Properties //////////////////////////////////////////////////////////////
 
     internal Chart _chart;
@@ -226,7 +219,7 @@ namespace ZedGraph
     /// <value>A reference to a <see cref="YAxis"/> object</value>
     /// <seealso cref="YAxisList" />
     /// <seealso cref="Y2AxisList" />
-    public YAxis YAxis => _yAxisList[0] as YAxis;
+    public YAxis YAxis => _yAxisList[0];
 
     /// <summary>
     /// Accesses the primary <see cref="Y2Axis"/> for this graph
@@ -234,7 +227,7 @@ namespace ZedGraph
     /// <value>A reference to a <see cref="Y2Axis"/> object</value>
     /// <seealso cref="YAxisList" />
     /// <seealso cref="Y2AxisList" />
-    public Y2Axis Y2Axis => _y2AxisList[0] as Y2Axis;
+    public Y2Axis Y2Axis => _y2AxisList[0];
 
     /// <summary>
     /// Gets the collection of Y axes that belong to this <see cref="GraphPane" />.
@@ -337,20 +330,17 @@ namespace ZedGraph
     /// this <see cref="GraphPane" /> is empty.  Note that this value is only used for
     /// the <see cref="ZedGraphControl" />.
     /// </summary>
-    public bool IsZoomed
-    {
-      get { return !_zoomStack.IsEmpty; }
-    }
+    public bool IsZoomed => !ZoomStack.IsEmpty;
 
     /// <summary>
     /// Gets a reference to the <see cref="ZoomStateStack" /> for this <see cref="GraphPane" />.
+    /// The <see cref="ZoomStateStack"/> stores prior <see cref="ZoomState"/> objects
+    /// containing scale range information.  This enables zooming and panning functionality
+    /// for the <see cref="ZedGraphControl"/>.
     /// </summary>
-    public ZoomStateStack ZoomStack
-    {
-      get { return _zoomStack; }
-    }
+    public ZoomStateStack ZoomStack { get; }
 
-  #endregion
+    #endregion
 
   #region Constructors
 
@@ -390,7 +380,7 @@ namespace ZedGraph
       _y2AxisList.Add( new Y2Axis( string.Empty ) );
 
       _curveList = new CurveList();
-      _zoomStack = new ZoomStateStack();
+      ZoomStack = new ZoomStateStack();
 
       _isIgnoreInitial = Default.IsIgnoreInitial;
       _isBoundedRanges = Default.IsBoundedRanges;
@@ -430,7 +420,7 @@ namespace ZedGraph
       _y2AxisList = new Y2AxisList( rhs._y2AxisList );
 
       _curveList = new CurveList( rhs.CurveList );
-      _zoomStack = new ZoomStateStack( rhs._zoomStack );
+      ZoomStack = new ZoomStateStack( rhs.ZoomStack );
 
     }
 
@@ -503,7 +493,7 @@ namespace ZedGraph
 
       _lineType = (LineType)info.GetValue( "lineType", typeof( LineType ) );
 
-      _zoomStack = new ZoomStateStack();
+      ZoomStack = new ZoomStateStack();
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -1492,16 +1482,21 @@ namespace ZedGraph
     /// coordinate system in which the X,Y pair is defined.</param>
     /// <returns>A point in screen coordinates that corresponds to the
     /// specified user point.</returns>
-    public PointF GeneralTransform( PointF ptF, CoordType coord )
+    public PointF GeneralTransform( PointF ptF, CoordType coord, int yAxisIndex = 0 )
     {
       // Setup the scaling data based on the chart rect
       _xAxis.Scale.SetupScaleData( this, _xAxis );
+      if (yAxisIndex < _yAxisList.Count)
+        _yAxisList[yAxisIndex].Scale.SetupScaleData(this, _yAxisList[yAxisIndex]);
+      if (yAxisIndex < _y2AxisList.Count)
+        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this, _y2AxisList[yAxisIndex]);
+      /*
       foreach ( Axis axis in _yAxisList )
         axis.Scale.SetupScaleData( this, axis );
       foreach ( Axis axis in _y2AxisList )
         axis.Scale.SetupScaleData( this, axis );
-
-      return TransformCoord( ptF.X, ptF.Y, coord );
+      */
+      return TransformCoord( ptF.X, ptF.Y, coord, yAxisIndex );
     }
 
     /// <summary>
@@ -1518,16 +1513,21 @@ namespace ZedGraph
     /// coordinate system in which the X,Y pair is defined.</param>
     /// <returns>A point in screen coordinates that corresponds to the
     /// specified user point.</returns>
-    public PointF GeneralTransform(PointD pt, CoordType coord)
+    public PointF GeneralTransform(PointD pt, CoordType coord, int yAxisIndex = 0)
     {
       // Setup the scaling data based on the chart rect
       _xAxis.Scale.SetupScaleData(this, _xAxis);
+      if (yAxisIndex < _yAxisList.Count)
+        _yAxisList[yAxisIndex].Scale.SetupScaleData(this, _yAxisList[yAxisIndex]);
+      if (yAxisIndex < _y2AxisList.Count)
+        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this, _y2AxisList[yAxisIndex]);
+      /*
       foreach (Axis axis in _yAxisList)
         axis.Scale.SetupScaleData(this, axis);
       foreach (Axis axis in _y2AxisList)
         axis.Scale.SetupScaleData(this, axis);
-
-      return TransformCoord(pt.X, pt.Y, coord);
+      */
+      return TransformCoord(pt.X, pt.Y, coord, yAxisIndex);
     }
 
     /// <summary>
@@ -1548,16 +1548,22 @@ namespace ZedGraph
     /// coordinate system in which the X,Y pair is defined.</param>
     /// <returns>A point in screen coordinates that corresponds to the
     /// specified user point.</returns>
-    public PointF GeneralTransform(double x, double y, CoordType coord)
+    public PointF GeneralTransform(double x, double y, CoordType coord, int yAxisIndex = 0)
     {
       // Setup the scaling data based on the chart rect
       _xAxis.Scale.SetupScaleData( this, _xAxis );
-      foreach ( var axis in _yAxisList )
+      if (yAxisIndex < _yAxisList.Count)
+        _yAxisList[yAxisIndex].Scale.SetupScaleData(this, _yAxisList[yAxisIndex]);
+      if (yAxisIndex < _y2AxisList.Count)
+        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this, _y2AxisList[yAxisIndex]);
+      /*
+      foreach ( Axis axis in _yAxisList )
         axis.Scale.SetupScaleData( this, axis );
-      foreach ( var axis in _y2AxisList )
+      foreach ( Axis axis in _y2AxisList )
         axis.Scale.SetupScaleData( this, axis );
+      */
 
-      return TransformCoord( x, y, coord );
+      return TransformCoord( x, y, coord, yAxisIndex );
     }
 
         /// <summary>
@@ -1574,16 +1580,22 @@ namespace ZedGraph
     /// coordinate system in which the output pair is defined.</param>
     /// <returns>A point in user coordinates that corresponds to the
     /// specified screen point.</returns>
-    public PointD GeneralReverseTransform(PointF ptF, CoordType coord)
+    public PointD GeneralReverseTransform(PointF ptF, CoordType coord, int yAxisIndex = 0)
     {
       // Setup the scaling data based on the chart rect
       _xAxis.Scale.SetupScaleData(this, _xAxis);
-      foreach (var axis in _yAxisList)
-        axis.Scale.SetupScaleData(this, axis);
-      foreach (var axis in _y2AxisList)
-        axis.Scale.SetupScaleData(this, axis);
+      if (yAxisIndex < _yAxisList.Count)
+        _yAxisList[yAxisIndex].Scale.SetupScaleData(this, _yAxisList[yAxisIndex]);
+      if (yAxisIndex < _y2AxisList.Count)
+        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this, _y2AxisList[yAxisIndex]);
+      /*
+      foreach ( Axis axis in _yAxisList )
+        axis.Scale.SetupScaleData( this, axis );
+      foreach ( Axis axis in _y2AxisList )
+        axis.Scale.SetupScaleData( this, axis );
+      */
 
-      return ReverseTransformCoord(ptF.X, ptF.Y, coord);
+      return ReverseTransformCoord(ptF.X, ptF.Y, coord, yAxisIndex);
     }
 
     /// <summary>
@@ -1604,14 +1616,20 @@ namespace ZedGraph
     /// coordinate system in which the output pair is defined.</param>
     /// <returns>A point in user coordinates that corresponds to the
     /// specified screen point.</returns>
-    public PointD GeneralReverseTransform(float x, float y, CoordType coord)
+    public PointD GeneralReverseTransform(float x, float y, CoordType coord, int yAxisIndex = 0)
     {
       // Setup the scaling data based on the chart rect
       _xAxis.Scale.SetupScaleData(this, _xAxis);
-      foreach (var axis in _yAxisList)
-        axis.Scale.SetupScaleData(this, axis);
-      foreach (var axis in _y2AxisList)
-        axis.Scale.SetupScaleData(this, axis);
+      if (yAxisIndex < _yAxisList.Count)
+        _yAxisList[yAxisIndex].Scale.SetupScaleData(this, _yAxisList[yAxisIndex]);
+      if (yAxisIndex < _y2AxisList.Count)
+        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this, _y2AxisList[yAxisIndex]);
+      /*
+      foreach ( Axis axis in _yAxisList )
+        axis.Scale.SetupScaleData( this, axis );
+      foreach ( Axis axis in _y2AxisList )
+        axis.Scale.SetupScaleData( this, axis );
+      */
 
       return this.ReverseTransformCoord(x, y, coord);
     }
@@ -1699,9 +1717,7 @@ namespace ZedGraph
           out double x, out double y )
     {
       // Setup the scaling data based on the chart rect
-      Axis xAxis = _xAxis;
-      if ( isX2Axis )
-        xAxis = _x2Axis;
+      var xAxis = isX2Axis ? (Axis)_x2Axis : _xAxis;
 
       xAxis.Scale.SetupScaleData( this, xAxis );
       x = xAxis.Scale.ReverseTransform( ptF.X );
@@ -1786,8 +1802,8 @@ namespace ZedGraph
       YAxis axis = new YAxis( title );
       axis.MajorTic.IsOpposite = false;
       axis.MinorTic.IsOpposite = false;
-      axis.MajorTic.IsInside = false;
-      axis.MinorTic.IsInside = false;
+      axis.MajorTic.IsInside   = false;
+      axis.MinorTic.IsInside   = false;
       _yAxisList.Add( axis );
       return _yAxisList.Count - 1;
     }
@@ -1809,8 +1825,8 @@ namespace ZedGraph
       Y2Axis axis = new Y2Axis( title );
       axis.MajorTic.IsOpposite = false;
       axis.MinorTic.IsOpposite = false;
-      axis.MajorTic.IsInside = false;
-      axis.MinorTic.IsInside = false;
+      axis.MajorTic.IsInside   = false;
+      axis.MinorTic.IsInside   = false;
       _y2AxisList.Add( axis );
       return _y2AxisList.Count - 1;
     }

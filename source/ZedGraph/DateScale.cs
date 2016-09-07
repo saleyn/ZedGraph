@@ -39,7 +39,7 @@ namespace ZedGraph
   /// <author> John Champion  </author>
   /// <version> $Revision: 1.15 $ $Date: 2007-09-19 06:41:56 $ </version>
   [Serializable]
-  class DateScale : Scale, ISerializable //, ICloneable
+  class DateScale : Scale //, ICloneable
   {
 
   #region constructors
@@ -142,7 +142,7 @@ namespace ZedGraph
 
       switch ( _majorUnit )
       {
-        case DateUnit.Year:
+        // DateUnit.Year:
         default:
           xDate.AddYears( tic * _majorStep );
           break;
@@ -192,7 +192,7 @@ namespace ZedGraph
 
       switch ( _minorUnit )
       {
-        case DateUnit.Year:
+        // DateUnit.Year:
         default:
           xDate.AddYears( (double) iTic * _minorStep );
           break;
@@ -231,7 +231,7 @@ namespace ZedGraph
     {
       switch ( _minorUnit )
       {
-        case DateUnit.Year:
+        // DateUnit.Year:
         default:
           return (int) ( ( _min - baseVal ) / ( 365.0 * _minorStep ) );
         case DateUnit.Month:
@@ -270,7 +270,7 @@ namespace ZedGraph
                       out second, out millisecond );
         switch ( _majorUnit )
         {
-          case DateUnit.Year:
+          // DateUnit.Year:
           default:
             month = 1; day = 1; hour = 0; minute = 0; second = 0; millisecond = 0;
             break;
@@ -295,37 +295,36 @@ namespace ZedGraph
         }
 
         double xlDate = XDate.CalendarDateToXLDate( year, month, day, hour, minute, second, millisecond );
-        if ( xlDate < _min )
+        if (xlDate >= _min) return xlDate;
+
+        switch ( _majorUnit )
         {
-          switch ( _majorUnit )
-          {
-            case DateUnit.Year:
-            default:
-              year++;
-              break;
-            case DateUnit.Month:
-              month++;
-              break;
-            case DateUnit.Day:
-              day++;
-              break;
-            case DateUnit.Hour:
-              hour++;
-              break;
-            case DateUnit.Minute:
-              minute++;
-              break;
-            case DateUnit.Second:
-              second++;
-              break;
-            case DateUnit.Millisecond:
-              millisecond++;
-              break;
+          // DateUnit.Year:
+          default:
+            year++;
+            break;
+          case DateUnit.Month:
+            month++;
+            break;
+          case DateUnit.Day:
+            day++;
+            break;
+          case DateUnit.Hour:
+            hour++;
+            break;
+          case DateUnit.Minute:
+            minute++;
+            break;
+          case DateUnit.Second:
+            second++;
+            break;
+          case DateUnit.Millisecond:
+            millisecond++;
+            break;
 
-          }
-
-          xlDate = XDate.CalendarDateToXLDate( year, month, day, hour, minute, second, millisecond );
         }
+
+        xlDate = XDate.CalendarDateToXLDate( year, month, day, hour, minute, second, millisecond );
 
         return xlDate;
       }
@@ -351,7 +350,7 @@ namespace ZedGraph
 
       switch ( _majorUnit )
       {
-        case DateUnit.Year:
+        // DateUnit.Year:
         default:
           nTics = (int) ( ( year2 - year1 ) / _majorStep + 1.001 );
           break;
@@ -712,8 +711,14 @@ namespace ZedGraph
           scale._format = Default.FormatSecondSecond;
 
         tempStep = Math.Ceiling( tempStep * XDate.SecondsPerDay );
-        // make sure the second step size is 1, 5, 15, or 30 seconds
-        if ( tempStep > 15.0 )
+        // make sure the second step size is 1, 5, 15, 30, 60, 90, 120 seconds
+        if ( tempStep > 90.0 )
+          tempStep = 120.0;
+        else if ( tempStep > 60.0 )
+          tempStep = 90.0;
+        else if ( tempStep > 45.0 )
+          tempStep = 60.0;
+        else if ( tempStep > 15.0 )
           tempStep = 30.0;
         else if ( tempStep > 5.0 )
           tempStep = 15.0;
@@ -728,9 +733,17 @@ namespace ZedGraph
           if ( tempStep <= 1.0 )
             scale._minorStep = 0.25;
           else if ( tempStep <= 5.0 )
-            scale._minorStep = 1.0;
+            scale._minorStep = 2.5;
+          else if ( tempStep <= 15.0 )
+            scale._minorStep = 7.5;
+          else if ( tempStep <= 30.0 )
+            scale._minorStep = 10.0;
+          else if ( tempStep <= 60.0 )
+            scale._minorStep = 10.0;
+          else if ( tempStep <= 90.0 )
+            scale._minorStep = 15.0;
           else
-            scale._minorStep = 5.0;
+            scale._minorStep = 20.0;
         }
       }
       else // MilliSecond
@@ -779,52 +792,40 @@ namespace ZedGraph
 
       switch ( _majorUnit )
       {
-        case DateUnit.Year:
+        // DateUnit.Year:
         default:
           // If the date is already an exact year, then don't step to the next year
-          if ( direction == 1 && month == 1 && day == 1 && hour == 0
-            && minute == 0 && second == 0 )
-            return date;
-          else
-            return XDate.CalendarDateToXLDate( year + direction, 1, 1,
-                            0, 0, 0 );
+          return direction == 1 && month == 1 && day == 1 && hour == 0
+                 && minute == 0 && second == 0
+            ? date
+            : XDate.CalendarDateToXLDate(year + direction, 1, 1, 0, 0, 0);
         case DateUnit.Month:
           // If the date is already an exact month, then don't step to the next month
-          if ( direction == 1 && day == 1 && hour == 0
-            && minute == 0 && second == 0 )
-            return date;
-          else
-            return XDate.CalendarDateToXLDate( year, month + direction, 1,
-                        0, 0, 0 );
+          return direction == 1 && day == 1 && hour == 0
+                 && minute == 0 && second == 0
+            ? date
+            : XDate.CalendarDateToXLDate(year, month + direction, 1, 0, 0, 0);
         case DateUnit.Day:
           // If the date is already an exact Day, then don't step to the next day
-          if ( direction == 1 && hour == 0 && minute == 0 && second == 0 )
-            return date;
-          else
-            return XDate.CalendarDateToXLDate( year, month,
-                      day + direction, 0, 0, 0 );
+          return direction == 1 && hour == 0 && minute == 0 && second == 0
+            ? date
+            : XDate.CalendarDateToXLDate(year, month, day + direction, 0, 0, 0);
         case DateUnit.Hour:
           // If the date is already an exact hour, then don't step to the next hour
-          if ( direction == 1 && minute == 0 && second == 0 )
-            return date;
-          else
-            return XDate.CalendarDateToXLDate( year, month, day,
-                          hour + direction, 0, 0 );
+          return direction == 1 && minute == 0 && second == 0
+            ? date
+            : XDate.CalendarDateToXLDate(year, month, day, hour + direction, 0, 0);
         case DateUnit.Minute:
           // If the date is already an exact minute, then don't step to the next minute
-          if ( direction == 1 && second == 0 )
-            return date;
-          else
-            return XDate.CalendarDateToXLDate( year, month, day, hour,
-                          minute + direction, 0 );
+          return direction == 1 && second == 0
+            ? date
+            : XDate.CalendarDateToXLDate(year, month, day, hour, minute + direction, 0);
         case DateUnit.Second:
-          return XDate.CalendarDateToXLDate( year, month, day, hour,
-                          minute, second + direction );
+          return XDate.CalendarDateToXLDate( year, month, day, hour, minute, second + direction );
 
         case DateUnit.Millisecond:
-          return XDate.CalendarDateToXLDate( year, month, day, hour,
-                          minute, second, millisecond + direction );
-
+          return XDate.CalendarDateToXLDate( year, month, day, hour, 
+                                             minute, second, millisecond + direction );
       }
     }
 
@@ -860,10 +861,7 @@ namespace ZedGraph
     /// and <see cref="Scale.Max" />.  This reflects the setting of
     /// <see cref="Scale.MajorUnit" />.
     /// </remarks>
-    override internal double MajorUnitMultiplier
-    {
-      get { return GetUnitMultiple( _majorUnit ); }
-    }
+    override internal double MajorUnitMultiplier => GetUnitMultiple( _majorUnit );
 
     /// <summary>
     /// Gets the minor unit multiplier for this scale type, if any.
@@ -873,10 +871,7 @@ namespace ZedGraph
     /// and <see cref="Scale.Max" />.  This reflects the setting of
     /// <see cref="Scale.MinorUnit" />.
     /// </remarks>
-    override internal double MinorUnitMultiplier
-    {
-      get { return GetUnitMultiple( _minorUnit ); }
-    }
+    override internal double MinorUnitMultiplier => GetUnitMultiple( _minorUnit );
 
     /// <summary>
     /// Internal routine to calculate a multiplier to the selected unit back to days.

@@ -80,7 +80,8 @@ namespace ZedGraph.Demo
       m_Pane.XAxis.Scale.Format                = "yyyy-MM-dd\nHH:mm:ss";
       m_Pane.XAxis.Scale.FontSpec.Size         = 9;
       m_Pane.XAxis.Scale.MajorStep             = 2;
-      m_Pane.XAxis.Scale.MinorStep             = 15;
+      //m_Pane.XAxis.Scale.MinorStep             = 30;
+      m_Pane.XAxis.Scale.MinAuto               = true;
 //      m_Pane.XAxis.Scale.MajorStep             = new XDate(0, 0, 0, 0, 2, 0).XLDate;
 //      m_Pane.XAxis.Scale.MinorStep             = new XDate(0, 0, 0, 0, 0,15).XLDate;
 //
@@ -306,18 +307,21 @@ namespace ZedGraph.Demo
           m_Pane.XAxis.Scale.Min += diff;
           if (m_Data.Count%1 == 0)
           {
-            var y1 = val * (up ? 0.99 : 1.01);
-            var y2 = val * (up ? 0.96 : 1.03);
-            var arrow = new ArrowObj(up ? Color.Green : Color.Red, -5, tm, y1, tm, y2);
-            arrow.IsArrowHead  = true;
-            arrow.IsMovable    = false;
-            arrow.IsY2Axis     = true;
-            arrow.YAxisIndex   = 0;
-            arrow.Fill.Type    = FillType.None;
+            var yy = m_Pane.Y2Axis.Scale.ReverseTransform(m_Pane.Y2Axis.Scale.Transform(val) + (up ? 5 : -5));
+            //var y2 = val * (up ? 0.96 : 1.03);
+            var arrow = new PointObj(tm, yy, 5,
+                                     up ? SymbolType.ArrowUp : SymbolType.ArrowDown,
+                                     up ? Color.Green : Color.Red)
+            {
+              IsMovable = false,
+              IsY2Axis = true,
+              YAxisIndex = 0,
+              //Fill = {Type = FillType.None},
+              IsClippedToChartRect = true
+            };
 
             //arrow.Line.Width = 1;
             //arrow.Location.CoordinateFrame = CoordType.AxisXYScale;
-            arrow.IsClippedToChartRect = true;
             m_Pane.GraphObjList.Add(arrow);
           }
         }

@@ -1,6 +1,6 @@
 ﻿//============================================================================
-// Author: James Dunkerley
-// Date:   2010-01-08
+// Author: Serge Aleynikov (2016-09-01)
+// Author: James Dunkerley (2010-01-08)
 // see:    https://sourceforge.net/p/zedgraph/feature-requests/79/
 //============================================================================
 //ZedGraph Class Library - A Flexible Line Graph/Bar Graph Library in C#
@@ -22,7 +22,6 @@
 //=============================================================================
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -34,117 +33,104 @@ namespace ZedGraph
   /// Based on BoxObj
   /// </summary>
   [Serializable]
-  public class PointObj : GraphObj, ICloneable, ISerializable
+  public class PointObj : GraphObj, ICloneable
   {
-    #region Fields
-    /// <summary>
-    /// Private field that stores the <see cref="ZedGraph.Fill"/> data for this
-    /// <see cref="PointObj"/>.  Use the public property <see cref="Fill"/> to
-    /// access this value.
-    /// </summary>
-    private Fill _fill;
-    /// <summary>
-    /// Private field that stores the <see cref="ZedGraph.Border"/> data for this
-    /// <see cref="PointObj"/>.  Use the public property <see cref="Border"/> to
-    /// access this value.
-    /// </summary>
-    private Border _border;
-    /// <summary>
-    /// Private field that stores the <see cref="SymbolType"/> for this
-    /// <see cref="Symbol"/>.  Use the public
-    /// property <see cref="Type"/> to access this value.
-    /// </summary>
-    private SymbolType _type;
-    #endregion
     #region Defaults
     /// <summary>
     /// A simple struct that defines the
-    /// default property values for the <see cref="ArrowObj"/> class.
+    /// default property values for the <see cref="PointObj"/> class.
     /// </summary>
     new public struct Default
     {
       /// <summary>
+      /// The default size of the <see cref="PointObj"/>.  Units are points.
+      /// </summary>
+      public static float Size = 5.0f;
+      /// <summary>
       /// The default pen width to be used for drawing curve symbols
       /// (<see cref="ZedGraph.LineBase.Width"/> property).  Units are points.
       /// </summary>
-      public static float PenWidth = 1.0F;
+      public static float PenWidth = Symbol.Default.PenWidth;
       /// <summary>
       /// The default color for filling in this <see cref="Symbol"/>
       /// (<see cref="ZedGraph.Fill.Color"/> property).
       /// </summary>
-      public static Color FillColor = Color.Red;
+      public static Color FillColor = Symbol.Default.FillColor;
       /// <summary>
       /// The default custom brush for filling in this <see cref="Symbol"/>
       /// (<see cref="ZedGraph.Fill.Brush"/> property).
       /// </summary>
-      public static Brush FillBrush = null;
+      public static Brush FillBrush = Symbol.Default.FillBrush;
       /// <summary>
       /// The default fill mode for the curve (<see cref="ZedGraph.Fill.Type"/> property).
       /// </summary>
-      public static FillType FillType = FillType.None;
+      public static FillType FillType = Symbol.Default.FillType;
       /// <summary>
       /// The default for drawing frames around symbols (<see cref="ZedGraph.LineBase.IsVisible"/> property).
       /// true to display symbol frames, false to hide them.
       /// </summary>
-      public static bool IsBorderVisible = true;
+      public static bool IsBorderVisible = Symbol.Default.IsBorderVisible;
       /// <summary>
       /// The default color for drawing symbols (<see cref="ZedGraph.LineBase.Color"/> property).
       /// </summary>
-      public static Color BorderColor = Color.Red;
+      public static Color BorderColor = Symbol.Default.BorderColor;
       /// <summary>
       /// The default SymbolType used for the <see cref="PointObj"/> symboltype property.
       /// </summary>
       public static SymbolType Type = SymbolType.XCross;
     }
     #endregion
+
     #region Properties
+    /// <summary>
+    /// Gets or sets the size of the <see cref="Symbol"/>
+    /// </summary>
+    /// <value>Size in points (1/72 inch)</value>
+    /// <seealso cref="Default.Size"/>
+    public float Size
+    {
+      get { return (float)Location.Height; }
+      set { Location.Height = Location.Width = value; }
+    }
+
     /// <summary>
     /// Gets or sets the <see cref="ZedGraph.Fill"/> data for this
     /// <see cref="Symbol"/>.
     /// </summary>
-    public Fill Fill
-    {
-      get { return _fill; }
-      set { _fill = value; }
-    }
+    public Fill Fill { get; set; }
+
     /// <summary>
     /// Gets or sets the <see cref="ZedGraph.Border"/> data for this
     /// <see cref="Symbol"/>, which controls the border outline of the symbol.
     /// </summary>
-    public Border Border
-    {
-      get { return _border; }
-      set { _border = value; }
-    }
+    public Border Border { get; set; }
 
     /// <summary>
     /// Gets or sets the type (shape) of the <see cref="Symbol"/>
     /// </summary>
     /// <value>A <see cref="SymbolType"/> enum value indicating the shape</value>
     /// <seealso cref="Default.Type"/>
-    public SymbolType Type
-    {
-      get { return _type; }
-      set { _type = value; }
-    }
+    public SymbolType Type { get; set; }
+
     #endregion
+
     #region Constructors
+
     /// <overloads>Constructors for the <see cref="PointObj"/> object</overloads>
     /// <summary>
     /// A constructor that allows the position, size, and color of the <see cref="PointObj"/> to be specified.
     /// </summary>
-    /// <param name="Color">An arbitrary <see cref="System.Drawing.Color"/> specification for the poit</param>
-    /// <param name="type">A <see cref="SymbolType"/> enum value indicating the shape of the symbol</param>
     /// <param name="x">The x location for this <see cref="PointObj" />.  This will be in units determined by <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
     /// <param name="y">The y location for this <see cref="PointObj" />.  This will be in units determined by <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
-    /// <param name="width">The width of this <see cref="PointObj" />.  This will be in Pixels.</param>
-    /// <param name="height">The height of this <see cref="PointObj" />.  This will be in Pixels.</param>
-    public PointObj(double x, double y, double width, double height, SymbolType type, Color Color)
-        : base(x, y, width, height)
+    /// <param name="type">A <see cref="SymbolType"/> enum value indicating the shape of the symbol</param>
+    /// <param name="size">The size of the <see cref="PointObj" /> in Pixels</param>
+    /// <param name="color">An arbitrary <see cref="System.Drawing.Color"/> specification for the poit</param>
+    public PointObj(double x, double y, double size, SymbolType type, Color color)
+      : base(x, y, size, size)
     {
-      this.Border = new Border(Default.IsBorderVisible, Color, Default.PenWidth);
-      this.Fill = new Fill(Color, Default.FillBrush, Default.FillType);
-      this.Type = type;
+      Type   = type;
+      Border = new Border(Default.IsBorderVisible, color, Default.PenWidth);
+      Fill   = new Fill(color, Default.FillBrush, Default.FillType);
     }
 
     /// <summary>
@@ -152,35 +138,39 @@ namespace ZedGraph
     /// </summary>
     /// <param name="x">The x location for this <see cref="PointObj" />.  This will be in units determined by <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
     /// <param name="y">The y location for this <see cref="PointObj" />.  This will be in units determined by <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
-    /// <param name="width">The width of this <see cref="PointObj" />.  This will be in Pixels.</param>
-    /// <param name="height">The height of this <see cref="PointObj" />.  This will be in Pixels.</param>
-    public PointObj(double x, double y, double width, double height)
-        : base(x, y, width, height)
-    {
-      this.Border = new Border(Default.IsBorderVisible, Default.BorderColor, Default.PenWidth);
-      this.Fill = new Fill(Default.FillColor, Default.FillBrush, Default.FillType);
-      this.Type = Default.Type;
-    }
+    /// <param name="size">The size of the <see cref="PointObj" /> in Pixels</param>
+    public PointObj(double x, double y, double size)
+        : this(x, y, size, Default.Type, Default.FillColor)
+    {}
+
+    /// <summary>
+    /// A constructor that allows the position of the <see cref="PointObj"/> to be pre-specified.  Other properties are defaulted.
+    /// </summary>
+    /// <param name="x">The x location for this <see cref="PointObj" />.  This will be in units determined by <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
+    /// <param name="y">The y location for this <see cref="PointObj" />.  This will be in units determined by <see cref="ZedGraph.Location.CoordinateFrame" />.</param>
+    /// <param name="type">A <see cref="SymbolType"/> enum value indicating the shape of the symbol</param>
+    /// <param name="color">An arbitrary <see cref="System.Drawing.Color"/> specification for the poit</param>
+    public PointObj(double x, double y, SymbolType type, Color color)
+      : this(x, y, Default.Size, type, color)
+    {}
 
     /// <summary>
     /// A default constructor that creates a <see cref="PointObj"/> using a location of (0,0),
     /// and a width,height of (1,1).  Other properties are defaulted.
     /// </summary>
-    public PointObj()
-        : this(0, 0, 1, 1)
-    {
-    }
+    public PointObj() : this(0, 0, Default.Size)
+    {}
 
     /// <summary>
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The <see cref="PointObj"/> object from which to copy</param>
     public PointObj(PointObj rhs)
-        : base(rhs)
+      : base(rhs)
     {
-      this.Border = rhs.Border.Clone();
-      this.Fill = rhs.Fill.Clone();
-      this.Type = rhs.Type;
+      Border = rhs.Border.Clone();
+      Fill   = rhs.Fill.Clone();
+      Type   = rhs.Type;
     }
 
     /// <summary>
@@ -202,6 +192,7 @@ namespace ZedGraph
       return new PointObj(this);
     }
     #endregion
+
     #region Serialization
     /// <summary>
     /// Current schema value that defines the version of the serialized file
@@ -222,9 +213,9 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32("schema2");
 
-      _type = (SymbolType)info.GetValue("type", typeof(SymbolType));
-      _fill = (Fill)info.GetValue("fill", typeof(Fill));
-      _border = (Border)info.GetValue("border", typeof(Border));
+      Type = (SymbolType)info.GetValue("type", typeof(SymbolType));
+      Fill = (Fill)info.GetValue("fill", typeof(Fill));
+      Border = (Border)info.GetValue("border", typeof(Border));
     }
 
     /// <summary>
@@ -237,18 +228,30 @@ namespace ZedGraph
     {
       base.GetObjectData(info, context);
       info.AddValue("schema2", schema2);
-      info.AddValue("type", _type);
-      info.AddValue("fill", _fill);
-      info.AddValue("border", _border);
+      info.AddValue("type", Type);
+      info.AddValue("fill", Fill);
+      info.AddValue("border", Border);
     }
     #endregion
+
     #region Rendering Methods
     private RectangleF GetPointRect(PaneBase pane, float scaleFactor)
     {
-      RectangleF pixRect = this.Location.TransformRect(pane);
-      float w = ((float)this.Location.Width) * scaleFactor / 2.0f;
-      float h = ((float)this.Location.Height) * scaleFactor / 2.0f;
+      var pixRect = this.Location.TransformRect(pane);
+      var w = ((float)this.Location.Width)  * scaleFactor / 2.0f;
+      var h = ((float)this.Location.Height) * scaleFactor / 2.0f;
       return new RectangleF(pixRect.Left - w, pixRect.Top - h, 2f * w, 2f * h);
+    }
+
+    private Point GetLocation(GraphPane pane, float scaleFactor)
+    {
+      var yAxis = GetYAxis(pane);
+      var xAxis = GetXAxis(pane);
+
+      // Convert the coordinates from the user coordinate system
+      // to the screen coordinate system
+      return new Point((int)Math.Round(xAxis.Scale.Transform(Location.X) * scaleFactor),
+                       (int)Math.Round(yAxis.Scale.Transform(Location.Y) * scaleFactor));
     }
 
     /// <summary>
@@ -274,116 +277,14 @@ namespace ZedGraph
     /// </param>
     override public void Draw(Graphics g, PaneBase pane, float scaleFactor)
     {
+      var gPane = pane as GraphPane;
+      if (pane == null) return;
+
       // Convert the arrow coordinates from the user coordinate system
       // to the screen coordinate system
-      RectangleF pixRect = this.GetPointRect(pane, scaleFactor);
+      var pix = GetLocation(gPane, scaleFactor);
 
-      // Clip the rect to just outside the PaneRect so we don't end up with wild coordinates.
-      RectangleF tmpRect = pane.Rect;
-      tmpRect.Inflate(20, 20);
-      pixRect.Intersect(tmpRect);
-
-      if (Math.Abs(pixRect.Left) < 100000 &&
-              Math.Abs(pixRect.Top) < 100000)
-      {
-        // If the box is to be filled, fill it                
-        using (GraphicsPath path = new GraphicsPath())
-        {
-          switch (this.Type)
-          {
-            case SymbolType.Square:
-              {
-                path.AddLine(pixRect.Left, pixRect.Bottom, pixRect.Right, pixRect.Bottom);
-                path.AddLine(pixRect.Right, pixRect.Bottom, pixRect.Right, pixRect.Top);
-                path.AddLine(pixRect.Right, pixRect.Top, pixRect.Left, pixRect.Top);
-                path.AddLine(pixRect.Left, pixRect.Top, pixRect.Left, pixRect.Bottom);
-                break;
-              }
-            case SymbolType.Diamond:
-              {
-                float midx = (pixRect.Left + pixRect.Right) / 2.0f;
-                float midy = (pixRect.Top + pixRect.Bottom) / 2.0f;
-                path.AddLine(pixRect.Left, midy, midx, pixRect.Bottom);
-                path.AddLine(midx, pixRect.Bottom, pixRect.Right, midy);
-                path.AddLine(pixRect.Right, midy, midx, pixRect.Top);
-                path.AddLine(midx, pixRect.Top, pixRect.Left, midy);
-                break;
-              }
-            case SymbolType.Triangle:
-              {
-                float midx = (pixRect.Left + pixRect.Right) / 2.0f;
-                path.AddLine(midx, pixRect.Top, pixRect.Right, pixRect.Bottom);
-                path.AddLine(pixRect.Right, pixRect.Bottom, pixRect.Left, pixRect.Bottom);
-                path.AddLine(pixRect.Left, pixRect.Bottom, midx, pixRect.Top);
-                break;
-              }
-            case SymbolType.Circle:
-              {
-                path.AddEllipse(pixRect);
-                break;
-              }
-            case SymbolType.Plus:
-              {
-                float midx = (pixRect.Left + pixRect.Right) / 2.0f;
-                float midy = (pixRect.Top + pixRect.Bottom) / 2.0f;
-                path.AddLine(midx, pixRect.Bottom, midx, pixRect.Top);
-                path.StartFigure();
-                path.AddLine(pixRect.Left, midy, pixRect.Right, midy);
-                break;
-              }
-            case SymbolType.Star:
-              {
-                float midx = (pixRect.Left + pixRect.Right) / 2.0f;
-                float midy = (pixRect.Top + pixRect.Bottom) / 2.0f;
-                path.AddLine(midx, pixRect.Bottom, midx, pixRect.Top);
-                path.StartFigure();
-                path.AddLine(pixRect.Left, midy, pixRect.Right, midy);
-                path.StartFigure();
-                path.AddLine(pixRect.Left, pixRect.Bottom, pixRect.Right, pixRect.Top);
-                path.StartFigure();
-                path.AddLine(pixRect.Left, pixRect.Top, pixRect.Right, pixRect.Bottom);
-                break;
-              }
-            case SymbolType.TriangleDown:
-              {
-                float midx = (pixRect.Left + pixRect.Right) / 2.0f;
-                path.AddLine(midx, pixRect.Bottom, pixRect.Right, pixRect.Top);
-                path.AddLine(pixRect.Right, pixRect.Top, pixRect.Left, pixRect.Top);
-                path.AddLine(pixRect.Left, pixRect.Top, midx, pixRect.Bottom);
-                break;
-              }
-            case SymbolType.HDash:
-              {
-                float midy = (pixRect.Top + pixRect.Bottom) / 2.0f;
-                path.AddLine(pixRect.Left, midy, pixRect.Right, midy);
-                break;
-              }
-            case SymbolType.VDash:
-              {
-                float midx = (pixRect.Left + pixRect.Right) / 2.0f;
-                path.AddLine(midx, pixRect.Bottom, midx, pixRect.Top);
-                break;
-              }
-            case SymbolType.XCross:
-            default:
-              {
-                path.AddLine(pixRect.Left, pixRect.Bottom, pixRect.Right, pixRect.Top);
-                path.StartFigure();
-                path.AddLine(pixRect.Left, pixRect.Top, pixRect.Right, pixRect.Bottom);
-                break;
-              }
-          }
-
-          if (_fill.IsVisible)
-            if (this.Type == SymbolType.Circle || this.Type == SymbolType.Diamond || this.Type == SymbolType.Square || this.Type == SymbolType.Triangle || this.Type == SymbolType.TriangleDown)
-              using (Brush brush = _fill.MakeBrush(pixRect))
-                g.FillPath(brush, path);
-
-          if (_border.IsVisible)
-            using (Pen pen = _border.GetPen(pane, scaleFactor))
-              g.DrawPath(pen, path);
-        }
-      }
+      Symbol.DrawSymbol(g, gPane, Type, pix.X, pix.Y, Size, IsVisible, Fill, Border, scaleFactor, false, new PointPair());
     }
 
     /// <summary>

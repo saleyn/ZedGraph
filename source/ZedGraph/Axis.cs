@@ -936,6 +936,20 @@ namespace ZedGraph
     }
 
     /// <summary>
+    /// Return true if difference between two values is below the scale's resolution
+    /// </summary>
+    /// <param name="v1"></param>
+    /// <param name="v2"></param>
+    /// <returns></returns>
+    internal bool IsBelowMajorStepUnit(double v1, double v2)
+    {
+      if (v1 > float.MaxValue || v2 > float.MaxValue) return false;
+      var diff  = Math.Abs(v1 - v2);
+      var limit = Scale.MajorStep * Scale.MajorUnitMultiplier;
+      return diff < limit;
+    }
+
+    /// <summary>
     /// Returns true if the axis is shifted at all due to the setting of
     /// <see cref="Cross" />.  This function will always return false if
     /// <see cref="CrossAuto" /> is true.

@@ -811,38 +811,38 @@ namespace ZedGraph
         return;
       }
 
-      if ((pane.MouseWheelAction & MouseWheelActions.Zoom) > 0 &&
-          _zoomModifierKeys != Keys.None && Control.ModifierKeys == _zoomModifierKeys)
-      { 
-        var oldState = ZoomStateSave( pane, ZoomState.StateType.WheelZoom );
+      if ((pane.MouseWheelAction & MouseWheelActions.Zoom) <= 0 ||
+          _zoomModifierKeys == Keys.None || Control.ModifierKeys != _zoomModifierKeys)
+        return;
 
-        var centerPoint = new PointF( e.X, e.Y );
-        var zoomFraction = ( 1 + ( e.Delta < 0 ? 1.0 : -1.0 ) * ZoomStepFraction );
+      var oldState = ZoomStateSave( pane, ZoomState.StateType.WheelZoom );
 
-        var hZoom = _isEnableHZoom && (pane.MouseWheelAction & MouseWheelActions.ZoomH) > 0;
-        var vZoom = _isEnableVZoom && (pane.MouseWheelAction & MouseWheelActions.ZoomV) > 0;
+      var centerPoint = new PointF( e.X, e.Y );
+      var zoomFraction = ( 1 + ( e.Delta < 0 ? 1.0 : -1.0 ) * ZoomStepFraction );
 
-        ZoomPane( pane, zoomFraction, centerPoint, _isZoomOnMouseCenter, false, hZoom, vZoom);
+      var hZoom = _isEnableHZoom && (pane.MouseWheelAction & MouseWheelActions.ZoomH) > 0;
+      var vZoom = _isEnableVZoom && (pane.MouseWheelAction & MouseWheelActions.ZoomV) > 0;
 
-        ApplyToAllPanes( pane );
+      ZoomPane( pane, zoomFraction, centerPoint, _isZoomOnMouseCenter, false, hZoom, vZoom);
 
-        using ( var g = this.CreateGraphics() )
-        {
-          // always AxisChange() the dragPane
-          pane.AxisChange( g );
+      ApplyToAllPanes( pane );
 
-          foreach (var tempPane in _masterPane._paneList.Where(
-                       tempPane => tempPane != pane && ( _isSynchronizeXAxes || _isSynchronizeYAxes )))
-            tempPane.AxisChange( g );
-        }
+      using ( var g = this.CreateGraphics() )
+      {
+        // always AxisChange() the dragPane
+        pane.AxisChange( g );
 
-        ZoomStatePush( pane );
-
-        // Provide Callback to notify the user of zoom events
-        this.ZoomEvent?.Invoke( this, oldState, new ZoomState( pane, ZoomState.StateType.WheelZoom ) );
-
-        this.Refresh();
+        foreach (var tempPane in _masterPane._paneList.Where(
+          tempPane => tempPane != pane && ( _isSynchronizeXAxes || _isSynchronizeYAxes )))
+          tempPane.AxisChange( g );
       }
+
+      ZoomStatePush( pane );
+
+      // Provide Callback to notify the user of zoom events
+      this.ZoomEvent?.Invoke( this, oldState, new ZoomState( pane, ZoomState.StateType.WheelZoom ) );
+
+      this.Refresh();
     }
 
     /// <summary>
@@ -1198,7 +1198,7 @@ namespace ZedGraph
       */
     }
 
-    private const double ZoomResolution = 1e-300;
+    private const double ZoomResolution = float.Epsilon;
 
     private void DisposeZoomBox()
     {
@@ -1230,21 +1230,21 @@ namespace ZedGraph
         //PointF startPoint = ( (Control)sender ).PointToClient( this.dragRect.Location );
 
         _dragPane.ReverseTransform(_dragStartPt, out x1, out xx1, out y1, out yy1);
-        _dragPane.ReverseTransform(mousePtF, out x2, out xx2, out y2, out yy2);
+        _dragPane.ReverseTransform(mousePtF,     out x2, out xx2, out y2, out yy2);
 
         var zoomLimitExceeded = false;
 
         if (_isEnableHZoom)
         {
-          if (Math.Abs(x1 - x2) < ZoomResolution || Math.Abs(xx1 - xx2) < ZoomResolution)
-            zoomLimitExceeded = true;
+          zoomLimitExceeded = _dragPane.XAxis.IsBelowMajorStepUnit(x1,   x2) ||
+                              _dragPane.XAxis.IsBelowMajorStepUnit(xx1, xx2);
         }
 
         if (_isEnableVZoom && !zoomLimitExceeded)
         {
           zoomLimitExceeded =
-            y1.Where((t, i)  => Math.Abs(t -  y2[i]) < ZoomResolution).Any() ||
-            yy1.Where((t, i) => Math.Abs(t - yy2[i]) < ZoomResolution).Any();
+            !y1 .Where((t, i) => _dragPane.YAxisList[i].IsBelowMajorStepUnit(t,  y2[i])).Any() &&
+            !yy1.Where((t, i) => _dragPane.YAxisList[i].IsBelowMajorStepUnit(t, yy2[i])).Any();
         }
 
         if (!zoomLimitExceeded)

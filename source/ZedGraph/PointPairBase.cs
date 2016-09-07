@@ -43,7 +43,7 @@ namespace ZedGraph
     /// <summary>
     /// Missing values are represented internally using <see cref="System.Double.MaxValue"/>.
     /// </summary>
-    public const double Missing = Double.MaxValue;
+    public const double Missing = double.MaxValue;
 
     /// <summary>
     /// The default format to be used for displaying point values via the

@@ -17,8 +17,8 @@ namespace ZedGraph
 
     public MinMax(IList<T> list, int capacity = 256)
     {
-      if (capacity == 0 || (capacity & (capacity - 1)) != 0)
-        throw new ArgumentException("capacity must be 0 or power of 2");
+      if (capacity == 0)
+        throw new ArgumentException(nameof(capacity));
       if (list == null)
         throw new ArgumentNullException(nameof(list));
 
@@ -28,7 +28,7 @@ namespace ZedGraph
       m_MinFifo = new Deque<int>(capacity);
       m_MaxFifo = new Deque<int>(capacity);
       m_Mask    = capacity-1;
-      //m_End     = 0;
+      m_End     = 0;
     }
 
     #endregion
@@ -41,14 +41,15 @@ namespace ZedGraph
     private int                 m_MinIdx;
     private int                 m_MaxIdx;
     private readonly int        m_Mask;
-    //private readonly int        m_End;
+    private int                 m_End;
 
     #endregion
 
     #region Properties
 
-    public T Min => m_List[m_MinIdx];
-    public T Max => m_List[m_MaxIdx];
+    public T    Min   => m_List[m_MinIdx];
+    public T    Max   => m_List[m_MaxIdx];
+    public bool Empty => m_End == 0;
 
     #endregion
 
@@ -56,23 +57,25 @@ namespace ZedGraph
 
     public void Clear()
     {
-      m_List.Clear();
       m_MinFifo.Clear();
       m_MaxFifo.Clear();
       m_MinIdx = m_MaxIdx = 0;
+      m_End = 0;
     }
 
     public void Add(T sample)
     {
       updateMinMax(sample);
       m_List.Add(sample);
+      m_End++;
     }
 
-//    public void Update()
-//    {
-//      Clear();
-//
-//    }
+    public void Update()
+    {
+      Clear();
+      while (m_End < m_List.Count)
+        updateMinMax(m_List[++m_End]);
+    }
 
     #endregion
 
@@ -80,8 +83,7 @@ namespace ZedGraph
 
     private bool isNotInWindow(int idx)
     {
-      var    iend = Count;
-      var    diff = iend > m_Mask ? iend - m_Mask : 0;
+      var    diff = m_End > m_Mask ? m_End - m_Mask : 0;
       return idx  < diff;
     }
 
@@ -89,11 +91,11 @@ namespace ZedGraph
     {
       if (Empty)
       {
-        m_MinIdx = m_MaxIdx = Count;
+        m_MinIdx = m_MaxIdx = m_End;
         return;
       }
 
-      var prev = Count - 1;
+      var prev = m_End - 1;
 
       if (sample.CompareTo(m_List[prev]) > 0)
       {
@@ -111,7 +113,7 @@ namespace ZedGraph
             if (isNotInWindow(front))
             {
               if (m_MaxIdx == front)
-                m_MaxIdx = Count;
+                m_MaxIdx = m_End;
               m_MaxFifo.RemoveAt(0);
             }
             break;
@@ -133,7 +135,7 @@ namespace ZedGraph
             if (isNotInWindow(front))
             {
               if (m_MinIdx == front)
-                m_MinIdx = Count;
+                m_MinIdx = m_End;
               m_MinFifo.RemoveAt(0);
             }
             break;
@@ -143,14 +145,11 @@ namespace ZedGraph
       }
 
       var  idx = m_MaxFifo.Empty ? m_MaxIdx : m_MaxFifo[0];
-      m_MaxIdx = sample.CompareTo(m_List[idx]) > 0 ? Count : idx;
+      m_MaxIdx = sample.CompareTo(m_List[idx]) > 0 ? m_End : idx;
       idx      = m_MinFifo.Empty ? m_MinIdx : m_MinFifo[0];
-      m_MinIdx = sample.CompareTo(m_List[idx]) < 0 ? Count : idx;
+      m_MinIdx = sample.CompareTo(m_List[idx]) < 0 ? m_End : idx;
     }
 
-    private int  Count => m_List.Count;
-    private bool Empty => m_List.Count == 0;
-    
     #endregion
   }
 }

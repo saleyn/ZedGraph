@@ -18,12 +18,9 @@
 //=============================================================================
 
 using System;
-using System.Collections;
-using System.Text;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 
 namespace ZedGraph
 {
@@ -103,7 +100,7 @@ namespace ZedGraph
     /// <summary> Private <see cref="System.Collections.ArrayList"/> field for the <see cref="Axis"/> array of text labels.
     /// This property is only used if <see cref="Type"/> is set to
     /// <see cref="AxisType.Text"/> </summary>
-    internal string[] _textLabels = null;
+    internal string[] _textLabels;
 
     /// <summary> Private field for the format of the <see cref="Axis"/> tic labels.
     /// Use the public property <see cref="Format"/> for access to this value. </summary>
@@ -151,17 +148,17 @@ namespace ZedGraph
     /// <summary>
     /// Data range temporary values, used by GetRange().
     /// </summary>
-    internal double  _rangeMin,
-                _rangeMax,
-                _lBound,
-                _uBound;
+    internal double _rangeMin,
+                    _rangeMax,
+                    _lBound,
+                    _uBound;
 
     /// <summary>
     /// Pixel positions at the minimum and maximum value for this scale.
     /// These are temporary values used/valid only during the Draw process.
     /// </summary>
     internal float _minPix,
-              _maxPix;
+                   _maxPix;
   
     /// <summary>
     /// Scale values for calculating transforms.  These are temporary values
@@ -172,11 +169,10 @@ namespace ZedGraph
     /// for normal linear scales, but for log or exponent scales they will be a
     /// linear representation.  For <see cref="LogScale" />, it is the
     /// <see cref="Math.Log(double)" /> of the value, and for <see cref="ExponentScale" />,
-    /// it is the <see cref="Math.Exp(double)" />
-    /// of the value.
+    /// it is the <see cref="Math.Exp(double)" /> of the value.
     /// </remarks>
-    internal double  _minLinTemp,
-                _maxLinTemp;
+    internal double _minLinTemp,
+                    _maxLinTemp;
 
     /// <summary>
     /// Gets or sets the linearized version of the <see cref="Min" /> scale range.
@@ -400,6 +396,17 @@ namespace ZedGraph
       /// This value is used by the <see cref="DateScale.CalcDateStepSize"/> method.
       /// </summary>
       public static double RangeSecondSecond = 3.472e-5;  // 3 Seconds
+
+      /// <summary>
+      /// A default setting for the <see cref="AxisType.Date"/> auto-ranging code.
+      /// This values applies only to Date-Time type axes.
+      /// If the total span of data exceeds this number (in days), then the auto-range
+      /// code will select <see cref="MajorUnit"/> = <see cref="DateUnit.Second"/>
+      /// and <see cref="MinorUnit"/> = <see cref="DateUnit.Second"/>.
+      /// This value normally defaults to 0.00138 days (2 minutes).
+      /// This value is used by the <see cref="DateScale.CalcDateStepSize"/> method.
+      /// </summary>
+      public static double Range2MinutesSecond = 0.00138888888888889D;  // 2 Minutes
 
       /// <summary>
       /// A default setting for the <see cref="AxisType.Date"/> auto-ranging code.
@@ -643,7 +650,7 @@ namespace ZedGraph
     /// </summary>
     /// <param name="ownerAxis">The <see cref="Axis" /> object that is the owner of this
     /// <see cref="Scale" /> instance.</param>
-    public Scale( Axis ownerAxis )
+    protected Scale( Axis ownerAxis )
     {
       _ownerAxis = ownerAxis;
 
@@ -653,7 +660,7 @@ namespace ZedGraph
       _minorStep = 0.1;
       _exponent = 1.0;
       _mag = 0;
-      _baseTic = PointPair.Missing;
+      _baseTic = PointPairBase.Missing;
 
       _minGrace = Default.MinGrace;
       _maxGrace = Default.MaxGrace;
@@ -1142,7 +1149,7 @@ namespace ZedGraph
       get { return _majorStep; }
       set
       {
-        if ( value < 1e-300 )
+        if ( value < float.Epsilon )
         {
           _majorStepAuto = true;
         }
@@ -1174,7 +1181,7 @@ namespace ZedGraph
       get { return _minorStep; }
       set
       {
-        if ( value < 1e-300 )
+        if ( value < float.Epsilon )
         {
           _minorStepAuto = true;
         }
@@ -1278,10 +1285,7 @@ namespace ZedGraph
     /// and <see cref="Max" />.  This reflects the setting of
     /// <see cref="MajorUnit" />.
     /// </remarks>
-    virtual internal double MajorUnitMultiplier
-    {
-      get { return 1.0; }
-    }
+    virtual internal double MajorUnitMultiplier => 1.0;
 
     /// <summary>
     /// Gets the minor unit multiplier for this scale type, if any.
@@ -1291,10 +1295,7 @@ namespace ZedGraph
     /// and <see cref="Max" />.  This reflects the setting of
     /// <see cref="MinorUnit" />.
     /// </remarks>
-    virtual internal double MinorUnitMultiplier
-    {
-      get { return 1.0; }
-    }
+    virtual internal double MinorUnitMultiplier => 1.0;
 
     /// <summary>
     /// Gets or sets a value that determines whether or not the minimum scale value <see cref="Min"/>
@@ -1840,7 +1841,7 @@ namespace ZedGraph
       // linear or ordinal is the default behavior
       // this method is overridden for other Scale types
 
-      double scaleMult = Math.Pow( (double)10.0, _mag );
+      var scaleMult = Math.Pow( (double)10.0, _mag );
 
       return ( dVal / scaleMult ).ToString( _format );
     }
@@ -1916,8 +1917,8 @@ namespace ZedGraph
 
         return maxSpace;
       }
-      else
-        return new SizeF(0,0);
+
+      return new SizeF(0,0);
     }
 
     /// <summary>
@@ -2345,13 +2346,13 @@ namespace ZedGraph
     {
       if ( _ownerAxis is XAxis || _ownerAxis is X2Axis )
       {
-        rightPix = pane.Chart._rect.Width;
-        topPix = -pane.Chart._rect.Height;
+        rightPix =  pane.Chart._rect.Width;
+        topPix   = -pane.Chart._rect.Height;
       }
       else
       {
-        rightPix = pane.Chart._rect.Height;
-        topPix = -pane.Chart._rect.Width;
+        rightPix =  pane.Chart._rect.Height;
+        topPix   = -pane.Chart._rect.Width;
       }
 
       // sanity check
@@ -2360,21 +2361,20 @@ namespace ZedGraph
 
       // if the step size is outrageous, then quit
       // (step size not used for log scales)
-      if ( !IsLog )
-      {
-        if ( _majorStep <= 0 || _minorStep <= 0 )
-          return;
+      if (IsLog) return;
 
-        double tMajor = ( _max - _min ) / ( _majorStep * MajorUnitMultiplier );
-        double tMinor = ( _max - _min ) / ( _minorStep * MinorUnitMultiplier );
+      if ( _majorStep <= 0 || _minorStep <= 0 )
+        return;
 
-        MinorTic minorTic = _ownerAxis._minorTic;
+      var tMajor = ( _max - _min ) / ( _majorStep * MajorUnitMultiplier );
+      var tMinor = ( _max - _min ) / ( _minorStep * MinorUnitMultiplier );
 
-        if ( tMajor > 1000 ||
-          ( ( minorTic.IsOutside || minorTic.IsInside || minorTic.IsOpposite )
-          && tMinor > 5000 ) )
-          return;
-      }
+      var minorTic = _ownerAxis._minorTic;
+
+      if ( tMajor > 1000 ||
+           ( ( minorTic.IsOutside || minorTic.IsInside || minorTic.IsOpposite )
+             && tMinor > 5000 ) )
+        return;
     }
 
     /// <summary>
@@ -2456,9 +2456,9 @@ namespace ZedGraph
       double maxVal = _rangeMax;
 
       // Make sure that minVal and maxVal are legitimate values
-      if ( Double.IsInfinity( minVal ) || Double.IsNaN( minVal ) || minVal == Double.MaxValue )
+      if ( double.IsInfinity( minVal ) || double.IsNaN( minVal ) || Math.Abs(minVal - double.MaxValue) < float.Epsilon )
         minVal = 0.0;
-      if ( Double.IsInfinity( maxVal ) || Double.IsNaN( maxVal ) || maxVal == Double.MaxValue )
+      if ( double.IsInfinity( maxVal ) || double.IsNaN( maxVal ) || Math.Abs(maxVal - double.MaxValue) < float.Epsilon)
         maxVal = 0.0;
 
       // if the scales are autoranged, use the actual data values for the range
@@ -2486,28 +2486,26 @@ namespace ZedGraph
           _max = maxVal + _maxGrace * range;
       }
 
-      if ( _max == _min && _maxAuto && _minAuto )
+      if ( Math.Abs(_max - _min) < float.Epsilon && _maxAuto && _minAuto )
       {
-        if ( Math.Abs( _max ) > 1e-100 )
+        if ( Math.Abs( _max ) > float.Epsilon )
         {
           _max *= ( _min < 0 ? 0.95 : 1.05 );
           _min *= ( _min < 0 ? 1.05 : 0.95 );
         }
         else
         {
-          _max = 1.0;
+          _max =  1.0;
           _min = -1.0;
         }
       }
 
-      if ( _max <= _min )
-      {
-        if ( _maxAuto )
-          _max = _min + 1.0;
-        else if ( _minAuto )
-          _min = _max - 1.0;
-      }
+      if (_max > _min) return;
 
+      if ( _maxAuto )
+        _max = _min + 1.0;
+      else if ( _minAuto )
+        _min = _max - 1.0;
     }
 
     /// <summary>
@@ -2737,12 +2735,10 @@ namespace ZedGraph
     /// case</returns>
     protected double MyMod( double x, double y )
     {
-      double temp;
-
-      if ( y == 0 )
+      if ( Math.Abs(y) < float.Epsilon )
         return 0;
 
-      temp = x / y;
+      var temp = x / y;
       return y * ( temp - Math.Floor( temp ) );
     }
 
@@ -2754,29 +2750,27 @@ namespace ZedGraph
     /// <param name="axis">The <see cref="Axis"/> for which to set the range</param>
     internal void SetRange( GraphPane pane, Axis axis )
     {
-      if ( _rangeMin >= Double.MaxValue || _rangeMax <= Double.MinValue )
-      {
-        // If this is a Y axis, and the main Y axis is valid, use it for defaults
-        if ( axis != pane.XAxis && axis != pane.X2Axis &&
-          pane.YAxis.Scale._rangeMin < double.MaxValue && pane.YAxis.Scale._rangeMax > double.MinValue )
-        {
-          _rangeMin = pane.YAxis.Scale._rangeMin;
-          _rangeMax = pane.YAxis.Scale._rangeMax;
-        }
-        // Otherwise, if this is a Y axis, and the main Y2 axis is valid, use it for defaults
-        else if ( axis != pane.XAxis && axis != pane.X2Axis &&
-          pane.Y2Axis.Scale._rangeMin < double.MaxValue && pane.Y2Axis.Scale._rangeMax > double.MinValue )
-        {
-          _rangeMin = pane.Y2Axis.Scale._rangeMin;
-          _rangeMax = pane.Y2Axis.Scale._rangeMax;
-        }
-        // Otherwise, just use 0 and 1
-        else
-        {
-          _rangeMin = 0;
-          _rangeMax = 1;
-        }
+      if (_rangeMin <= double.MaxValue && _rangeMax >= double.MinValue) return;
 
+      // If this is a Y axis, and the main Y axis is valid, use it for defaults
+      if ( axis != pane.XAxis && axis != pane.X2Axis &&
+           pane.YAxis.Scale._rangeMin <= double.MaxValue && pane.YAxis.Scale._rangeMax >= double.MinValue )
+      {
+        _rangeMin = pane.YAxis.Scale._rangeMin;
+        _rangeMax = pane.YAxis.Scale._rangeMax;
+      }
+      // Otherwise, if this is a Y axis, and the main Y2 axis is valid, use it for defaults
+      else if ( axis != pane.XAxis && axis != pane.X2Axis &&
+                pane.Y2Axis.Scale._rangeMin <= double.MaxValue && pane.Y2Axis.Scale._rangeMax >= double.MinValue )
+      {
+        _rangeMin = pane.Y2Axis.Scale._rangeMin;
+        _rangeMax = pane.Y2Axis.Scale._rangeMax;
+      }
+      // Otherwise, just use 0 and 1
+      else
+      {
+        _rangeMin = 0;
+        _rangeMax = 1;
       }
 
       /*
@@ -2810,7 +2804,7 @@ namespace ZedGraph
         */
     }
 
-  #endregion
+    #endregion
 
   #region Coordinate Transform Methods
 

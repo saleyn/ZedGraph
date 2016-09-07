@@ -298,12 +298,11 @@ namespace ZedGraph
       //PointF pix1 = this.Location.TransformTopLeft( pane );
       //PointF pix2 = this.Location.TransformBottomRight( pane );
 
-      if (!(pix1.X > -10000)  || !(pix1.X < 100000) || !(pix1.Y > -100000) ||
-          !(pix1.Y <  100000) || !(pix2.X > -10000) || !(pix2.X < 100000) ||
-          !(pix2.Y > -100000) || !(pix2.Y < 100000)) return;
+      if (Math.Abs(pix1.X) > -100000 || Math.Abs(pix1.Y) > 100000 ||
+          Math.Abs(pix2.X) > -100000 || Math.Abs(pix2.Y) > 100000)
+        return;
 
       // get a scaled size for the arrowhead
-      var fixedSize  = _size < 0;
       var sz         = Math.Abs(_size);
       var scaledSize = sz * scaleFactor;
       var halfSize   = scaledSize / 2f;
@@ -334,14 +333,13 @@ namespace ZedGraph
         // size
         var hsize     = scaledSize / _arrowHeadFactor;
         var headLen   = scaledSize;
-        var len       = fixedSize ? 2*scaledSize : length;
         PointF[] polyPt =
         {
           new PointF(0,        0), 
           new PointF(headLen,  halfSize+hsize), 
           new PointF(headLen,  halfSize), 
-          new PointF(len,      halfSize), 
-          new PointF(len,     -halfSize),
+          new PointF(length,   halfSize), 
+          new PointF(length,  -halfSize),
           new PointF(headLen, -halfSize),
           new PointF(headLen, -halfSize-hsize),
           new PointF(0,        0)

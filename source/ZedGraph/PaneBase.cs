@@ -1160,7 +1160,7 @@ namespace ZedGraph
             }
         }
 */
-    internal PointF TransformCoord(double x, double y, CoordType coord)
+    internal PointF TransformCoord(double x, double y, CoordType coord, int yAxisIndex = 0)
     {
       // If the Transformation is an illegal type, just stick it in the middle
       if (!(this is GraphPane) && coord != CoordType.PaneFraction)
@@ -1181,24 +1181,32 @@ namespace ZedGraph
           ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
           break;
         case CoordType.AxisXYScale:
+          if (yAxisIndex >= gPane.YAxisList.Count)
+            throw new ArgumentOutOfRangeException(nameof(yAxisIndex));
           ptPix.X = gPane.XAxis.Scale.Transform(x);
-          ptPix.Y = gPane.YAxis.Scale.Transform(y);
+          ptPix.Y = gPane.YAxisList[yAxisIndex].Scale.Transform(y);
           break;
         case CoordType.AxisXY2Scale:
+          if (yAxisIndex >= gPane.Y2AxisList.Count)
+            throw new ArgumentOutOfRangeException(nameof(yAxisIndex));
           ptPix.X = gPane.XAxis.Scale.Transform(x);
-          ptPix.Y = gPane.Y2Axis.Scale.Transform(y);
+          ptPix.Y = gPane.Y2AxisList[yAxisIndex].Scale.Transform(y);
           break;
         case CoordType.XScaleYChartFraction:
           ptPix.X = gPane.XAxis.Scale.Transform(x);
           ptPix.Y = (float)(chartRect.Top + y * chartRect.Height);
           break;
         case CoordType.XChartFractionYScale:
+          if (yAxisIndex >= gPane.YAxisList.Count)
+            throw new ArgumentOutOfRangeException(nameof(yAxisIndex));
           ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
-          ptPix.Y = gPane.YAxis.Scale.Transform(y);
+          ptPix.Y = gPane.YAxisList[yAxisIndex].Scale.Transform(y);
           break;
         case CoordType.XChartFractionY2Scale:
+          if (yAxisIndex >= gPane.Y2AxisList.Count)
+            throw new ArgumentOutOfRangeException(nameof(yAxisIndex));
           ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
-          ptPix.Y = gPane.Y2Axis.Scale.Transform(y);
+          ptPix.Y = gPane.Y2AxisList[yAxisIndex].Scale.Transform(y);
           break;
         case CoordType.XChartFractionYPaneFraction:
           ptPix.X = (float)(chartRect.Left + x * chartRect.Width);
@@ -1221,10 +1229,10 @@ namespace ZedGraph
       return ptPix;
     }
 
-    internal PointD ReverseTransformCoord(float x, float y, CoordType coord)
+    internal PointD ReverseTransformCoord(float x, float y, CoordType coord, int yAxisIndex = 0)
     {
         // If the Transformation is an illegal type, just stick it in the middle
-        if (!(this is GraphPane) && !(coord == CoordType.PaneFraction))
+        if (!(this is GraphPane) && coord != CoordType.PaneFraction)
         {
             coord = CoordType.PaneFraction;
             x = 0.5f;
@@ -1247,16 +1255,20 @@ namespace ZedGraph
           case CoordType.AxisXYScale:
             //ptPix.X = gPane.XAxis.Scale.Transform(x);
             //ptPix.Y = gPane.YAxis.Scale.Transform(y);
+            if (yAxisIndex >= gPane.YAxisList.Count)
+              throw new ArgumentOutOfRangeException(nameof(yAxisIndex));
 
             pt.X = gPane.XAxis.Scale.ReverseTransform(x);
-            pt.Y = gPane.YAxis.Scale.ReverseTransform(y);
+            pt.Y = gPane.YAxisList[yAxisIndex].Scale.ReverseTransform(y);
             break;
           case CoordType.AxisXY2Scale:
             //pt.X = gPane.XAxis.Scale.Transform(x);
             //pt.Y = gPane.Y2Axis.Scale.Transform(y);
+            if (yAxisIndex >= gPane.Y2AxisList.Count)
+              throw new ArgumentOutOfRangeException(nameof(yAxisIndex));
 
             pt.X = gPane.XAxis.Scale.ReverseTransform(x);
-            pt.Y = gPane.Y2Axis.Scale.ReverseTransform(y);
+            pt.Y = gPane.Y2AxisList[yAxisIndex].Scale.ReverseTransform(y);
             break;
           case CoordType.XScaleYChartFraction:
             //pt.X = gPane.XAxis.Scale.Transform(x);
@@ -1268,16 +1280,20 @@ namespace ZedGraph
           case CoordType.XChartFractionYScale:
             //pt.X = (float)(chartRect.Left + x * chartRect.Width);
             //pt.Y = gPane.YAxis.Scale.Transform(y);
+            if (yAxisIndex >= gPane.YAxisList.Count)
+              throw new ArgumentOutOfRangeException(nameof(yAxisIndex));
 
             pt.X = (x - chartRect.Left) / chartRect.Width;
-            pt.Y = gPane.YAxis.Scale.ReverseTransform(y);
+            pt.Y = gPane.YAxisList[yAxisIndex].Scale.ReverseTransform(y);
             break;
           case CoordType.XChartFractionY2Scale:
             //pt.X = (float)(chartRect.Left + x * chartRect.Width);
             //pt.Y = gPane.Y2Axis.Scale.Transform(y);
+            if (yAxisIndex >= gPane.Y2AxisList.Count)
+              throw new ArgumentOutOfRangeException(nameof(yAxisIndex));
 
             pt.X = (x - chartRect.Left) / chartRect.Width;
-            pt.Y = gPane.Y2Axis.Scale.ReverseTransform(y);
+            pt.Y = gPane.Y2AxisList[yAxisIndex].Scale.ReverseTransform(y);
             break;
           case CoordType.XChartFractionYPaneFraction:
             //pt.X = (float)(chartRect.Left + x * chartRect.Width);

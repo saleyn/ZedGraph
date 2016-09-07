@@ -16,7 +16,7 @@ namespace ZedGraph
     public void MinMaxTest()
     {
       var list = new List<int>();
-      var mm = new ZedGraph.MinMax<int>(list, 4);
+      var mm = new MinMax<int>(list, 4);
 
       mm.Add(10);
       mm.Add(14);
@@ -28,6 +28,15 @@ namespace ZedGraph
 
       Assert.That(mm.Min, Is.EqualTo(12));
       Assert.That(mm.Max, Is.EqualTo(19));
+
+      mm.Clear();
+
+      Assert.IsTrue(mm.Empty);
+
+      mm.Update();
+
+      Assert.AreEqual(12, mm.Min);
+      Assert.AreEqual(19, mm.Max);
     }
   }
 }
