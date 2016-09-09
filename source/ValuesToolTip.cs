@@ -40,10 +40,8 @@ namespace ZedGraph
       if (control == null)
         throw new ArgumentNullException(nameof(control));
 
-      ActiveCallback = active => toolTip.Active = active;
-      SetCallback    = toolTip.SetToolTip;
-      GetCallback    = () => toolTip.GetToolTip(control);
-      Control        = control;
+      Control = control;
+      ToolTip = toolTip;
     }
 
     #endregion
@@ -51,53 +49,29 @@ namespace ZedGraph
     #region Properties and Indexers
 
     /// <summary>
-    /// Gets the delegate that is called when the active state of the tool
-    /// tip is changed.
-    /// </summary>
-    /// <value>
-    /// The active state delegate callback.
-    /// </value>
-    public Action<bool> ActiveCallback { get; }
-
-    /// <summary>
     /// Gets the control that this tool tip instance handles.
     /// </summary>
     /// <value>
     /// The control that this tool tip instance handles.
     /// </value>
-    public Control Control { get; }
+    internal Control Control { get; }
 
     /// <summary>
-    /// Gets the callback delegate to call when the caption is set.
+    /// Internal toolTip
     /// </summary>
-    /// <value>
-    /// The callback delegate to call when the caption is set.
-    /// </value>
-    public Action<Control, string> SetCallback { get; }
-
-    /// <summary>
-    /// The callback to call to get the caption
-    /// </summary>
-    public Func<string> GetCallback { get; }
+    internal ToolTip ToolTip { get; }
 
     #endregion
 
     #region Methods
 
     /// <summary>
-    /// Disables the tool tip.
+    /// Enables/Disables the tool tip.
     /// </summary>
-    public void Disable()
+    public bool Active
     {
-      this.ActiveCallback(false);
-    }
-
-    /// <summary>
-    /// Enables the tool tip.
-    /// </summary>
-    public void Enable()
-    {
-      this.ActiveCallback(true);
+      get { return ToolTip.Active;  }
+      set { ToolTip.Active = value; }
     }
 
     /// <summary>
@@ -106,7 +80,7 @@ namespace ZedGraph
     /// <param name="caption">The caption.</param>
     public void Set(string caption)
     {
-      this.Set(caption, this.lastPoint);
+      Set(caption, lastPoint);
     }
 
     /// <summary>
@@ -116,16 +90,20 @@ namespace ZedGraph
     /// <param name="point">The point.</param>
     public void Set(string caption, Point point)
     {
-      if (point == this.lastPoint && caption == this.lastCaption) return;
+      if (point == this.lastPoint && caption == this.lastCaption)
+        return;
 
-      this.SetCallback(this.Control, caption);
-      this.lastPoint = point;
+      ToolTip.SetToolTip(Control, caption);
+      this.lastPoint   = point;
       this.lastCaption = caption;
     }
 
+    /// <summary>
+    /// Get current ToolTip's caption
+    /// </summary>
     public string Get()
     {
-      return GetCallback();
+      return ToolTip.GetToolTip(Control);
     }
 
     /// <summary>

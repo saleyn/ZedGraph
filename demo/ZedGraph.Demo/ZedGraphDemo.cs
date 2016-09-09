@@ -41,7 +41,7 @@ namespace ZedGraph.Demo
     /// <summary>
     /// The control used to display this demo.
     /// </summary>
-    ZedGraphControlExt ZedGraphControl { get; }
+    ZedGraphControl ZedGraphControl { get; }
 
 		/// <summary>
 		/// A collection of DemoType objects that this demo applies to.

@@ -469,8 +469,8 @@ namespace ZedGraph
               !System.Double.IsNaN( pt.Y ) &&
               !System.Double.IsInfinity( pt.X ) &&
               !System.Double.IsInfinity( pt.Y ) &&
-              ( !xAxis._scale.IsLog || pt.X > 0.0 ) &&
-              ( !yAxis._scale.IsLog || pt.Y > 0.0 ) )
+              ( !xAxis.Scale.IsLog || pt.X > 0.0 ) &&
+              ( !yAxis.Scale.IsLog || pt.Y > 0.0 ) )
           {
             float pixY = yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, pt.Y );
             float pixX = xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, pt.X );
@@ -547,7 +547,7 @@ namespace ZedGraph
           {
             path.AddCurve( arrPoints, 0, count - 2, tension );
 
-            double yMin = yAxis._scale._min < 0 ? 0.0 : yAxis._scale._min;
+            double yMin = yAxis.Scale._min < 0 ? 0.0 : yAxis.Scale._min;
             CloseCurve( pane, curve, arrPoints, count, yMin, path );
 
             RectangleF rect = path.GetBounds();
@@ -645,11 +645,9 @@ namespace ZedGraph
         source = Selection.Line;
 
       // switch to int to optimize drawing speed (per Dale-a-b)
-      int  tmpX, tmpY,
-          lastX = int.MaxValue,
+      int  lastX = int.MaxValue,
           lastY = int.MaxValue;
 
-      double curX, curY, lowVal;
       PointPair curPt, lastPt = new PointPair();
 
       bool lastBad = true;
@@ -658,8 +656,8 @@ namespace ZedGraph
       Axis yAxis = curve.GetYAxis( pane );
       Axis xAxis = curve.GetXAxis( pane );
 
-      bool xIsLog = xAxis._scale.IsLog;
-      bool yIsLog = yAxis._scale.IsLog;
+      bool xIsLog = xAxis.Scale.IsLog;
+      bool yIsLog = yAxis.Scale.IsLog;
 
       // switch to int to optimize drawing speed (per Dale-a-b)
       int minX = (int)pane.Chart.Rect.Left;
@@ -689,8 +687,11 @@ namespace ZedGraph
         for ( int i = 0; i < points.Count; i++ )
         {
           curPt = points[i];
+          double curX;
+          double curY;
           if ( pane.LineType == LineType.Stack )
           {
+            double lowVal;
             if ( !valueHandler.GetValues( curve, i, out curX, out lowVal, out curY ) )
             {
               curX = PointPair.Missing;
@@ -725,8 +726,8 @@ namespace ZedGraph
           {
             // Transform the current point from user scale units to
             // screen coordinates
-            tmpX = (int) xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curX );
-            tmpY = (int) yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curY );
+            var  tmpX = (int) xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curX );
+            var  tmpY = (int) yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curY );
 
             // Maintain an array of "used" pixel locations to avoid duplicate drawing operations
             // contributed by Dale-a-b
@@ -747,10 +748,8 @@ namespace ZedGraph
               {
                 // GDI+ plots the data wrong and/or throws an exception for
                 // outrageous coordinates, so we do a sanity check here
-                if ( lastX > 5000000 || lastX < -5000000 ||
-                     lastY > 5000000 || lastY < -5000000 ||
-                     tmpX > 5000000 || tmpX < -5000000 ||
-                     tmpY > 5000000 || tmpY < -5000000 )
+                if (Math.Abs(lastX) > 5000000 || Math.Abs(lastY) > 5000000 ||
+                    Math.Abs(tmpX)  > 5000000 || Math.Abs(tmpY)  > 5000000)
                   InterpolatePoint( g, pane, curve, lastPt, scaleFactor, pen,
                                     lastX, lastY, tmpX, tmpY );
                 else if ( !isOut )
@@ -854,10 +853,8 @@ namespace ZedGraph
       if ( curve.IsSelected )
         source = Selection.Line;
 
-      float tmpX, tmpY,
-          lastX = float.MaxValue,
-          lastY = float.MaxValue;
-      double curX, curY, lowVal;
+      float lastX = float.MaxValue,
+            lastY = float.MaxValue;
       PointPair curPt, lastPt = new PointPair();
 
       bool lastBad = true;
@@ -866,8 +863,8 @@ namespace ZedGraph
       Axis yAxis = curve.GetYAxis( pane );
       Axis xAxis = curve.GetXAxis( pane );
 
-      bool xIsLog = xAxis._scale.IsLog;
-      bool yIsLog = yAxis._scale.IsLog;
+      bool xIsLog = xAxis.Scale.IsLog;
+      bool yIsLog = yAxis.Scale.IsLog;
 
       float minX = pane.Chart.Rect.Left;
       float maxX = pane.Chart.Rect.Right;
@@ -885,8 +882,11 @@ namespace ZedGraph
           for ( int i = 0; i < points.Count; i++ )
           {
             curPt = points[i];
+            double curY;
+            double curX;
             if ( pane.LineType == LineType.Stack )
             {
+              double lowVal;
               if ( !valueHandler.GetValues( curve, i, out curX, out lowVal, out curY ) )
               {
                 curX = PointPair.Missing;
@@ -921,8 +921,8 @@ namespace ZedGraph
             {
               // Transform the current point from user scale units to
               // screen coordinates
-              tmpX = xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curX );
-              tmpY = yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curY );
+              var tmpX = xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curX );
+              var tmpY = yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, curY );
               isOut = ( tmpX < minX && lastX < minX ) || ( tmpX > maxX && lastX > maxX ) ||
                 ( tmpY < minY && lastY < minY ) || ( tmpY > maxY && lastY > maxY );
 
@@ -932,10 +932,8 @@ namespace ZedGraph
                 {
                   // GDI+ plots the data wrong and/or throws an exception for
                   // outrageous coordinates, so we do a sanity check here
-                  if ( lastX > 5000000 || lastX < -5000000 ||
-                      lastY > 5000000 || lastY < -5000000 ||
-                      tmpX > 5000000 || tmpX < -5000000 ||
-                      tmpY > 5000000 || tmpY < -5000000 )
+                  if (Math.Abs(lastX) > 5000000 || Math.Abs(lastY) > 5000000 ||
+                      Math.Abs(tmpX)  > 5000000 || Math.Abs(tmpY) > 5000000)
                     InterpolatePoint( g, pane, curve, lastPt, scaleFactor, pen,
                             lastX, lastY, tmpX, tmpY );
                   else if ( !isOut )

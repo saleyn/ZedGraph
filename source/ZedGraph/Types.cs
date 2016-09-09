@@ -940,4 +940,20 @@ namespace ZedGraph
     /// </summary>
     Value
   }
+
+  /// <summary>
+  /// Type of cross hair display
+  /// </summary>
+  public enum CrossHairType
+  {
+    /// <summary>
+    /// Display crosshair in current pane only
+    /// </summary>
+    CurrentPane,
+    /// <summary>
+    /// Display crosshair through the whole chart's master pane
+    /// </summary>
+    MasterPane
+  }
+
 }

@@ -183,7 +183,7 @@ namespace ZedGraph
         // Calculate the new minor step size
         if ( scale._minorStepAuto )
           scale._minorStep = Scale.CalcStepSize( scale._majorStep,
-            ( scale._ownerAxis is XAxis || scale._ownerAxis is X2Axis ) ?
+            ( scale._ownerAxis is IXAxis ) ?
                 Default.TargetMinorXSteps : Default.TargetMinorYSteps );
 
         if ( scale._minAuto )

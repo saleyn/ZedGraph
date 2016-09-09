@@ -248,7 +248,8 @@ namespace ZedGraph
     /// <param name="lineItem">The line item.</param>
     /// <returns></returns>
     ///------------------------------------------------------------------------
-    public bool ZoomCurve(GraphPane graphPane, CurveItem lineItem)
+    public bool ZoomCurve(GraphPane graphPane, CurveItem lineItem,
+      double filterMinX = double.MinValue, double filterMaxX = double.MaxValue)
     {
       if (lineItem.Points.Count == 0)
         return false;
@@ -262,37 +263,61 @@ namespace ZedGraph
       var oldState = new ZoomState(graphPane, ZoomState.StateType.Zoom);
       graphPane.ZoomStack.Push(graphPane, ZoomState.StateType.Zoom);
       ZoomEvent?.Invoke(this, oldState, new ZoomState(graphPane, ZoomState.StateType.Zoom));
+
+      if (!SetZoomScale(graphPane, lineItem, filterMinX, filterMaxX))
+        return false;
+
+      // Update the pane
+      graphPane.AxisChange();
+      Invalidate();
+      return true;
+    }
+
+    /// <summary>
+    /// Set zoom scale for a given <see cref="CurveItem"/> to fit the selected
+    /// range between filterMinX to filterMaxX
+    /// </summary>
+    /// <returns>true if any scales were adjusted.</returns>
+    internal bool SetZoomScale(GraphPane graphPane, CurveItem lineItem,
+      double filterMinX = double.MinValue, double filterMaxX = double.MaxValue)
+    {
       // Set the axes scales
-      var gap = 0.0;
+      var gap  = 0.0;
       var maxY = double.MinValue;
       var maxX = double.MinValue;
       var minY = double.MaxValue;
       var minX = double.MaxValue;
 
-      for (int i = 0; i < lineItem.Points.Count; i++)
+      for (var i = 0; i < lineItem.Points.Count; i++)
       {
-        if (lineItem[i].X == PointPair.Missing || lineItem[i].Y == PointPair.Missing)
+        var item = lineItem[i];
+        if (item.X == PointPairBase.Missing || item.Y == PointPairBase.Missing)
           continue;
+        if (item.X < filterMinX)
+          continue;
+        if (item.X > filterMaxX)
+          break;
 
-        maxY = Math.Max(lineItem[i].Y, maxY);
-        minY = Math.Min(lineItem[i].Y, minY);
-        maxX = Math.Max(lineItem[i].X, maxX);
-        minX = Math.Min(lineItem[i].X, minX);
+        maxY = Math.Max(item.Y, maxY);
+        minY = Math.Min(item.Y, minY);
+        maxX = Math.Max(item.X, maxX);
+        minX = Math.Min(item.X, minX);
       }
 
-      if (minY == PointPair.Missing ||
-          maxY == PointPair.Missing ||
-          minX == PointPair.Missing ||
-          maxX == PointPair.Missing)
-      {
+      if (minY == PointPairBase.Missing ||
+          maxY == PointPairBase.Missing ||
+          minX == PointPairBase.Missing ||
+          maxX == PointPairBase.Missing)
         return false;
-      }
+
       // Calculate the border gap and set the graph scale values.
-      gap = Math.Abs(maxY - minY) == 0.0 ? 0.5 : Math.Abs(maxY - minY) * 0.05;
+      gap = Math.Abs(maxY - minY);
+      gap = gap < float.Epsilon ? 0.5 : gap * 0.05;
+
       if (lineItem.IsY2Axis)
       {
-        graphPane.Y2Axis.Scale.Max = maxY + gap;
-        graphPane.Y2Axis.Scale.Min = ZoomToZeroYAxis ? 0.0 : minY + (gap * -1.0);
+        graphPane.YAxisList[lineItem.YAxisIndex].Scale.Max = maxY + gap;
+        graphPane.YAxisList[lineItem.YAxisIndex].Scale.Min = ZoomToZeroYAxis ? 0.0 : minY + (gap * -1.0);
       }
       else
       {
@@ -300,12 +325,11 @@ namespace ZedGraph
         graphPane.YAxis.Scale.Min = ZoomToZeroYAxis ? 0.0 : minY + (gap * -1.0);
       }
 
-      gap = Math.Abs(maxX - minX) == 0.0 ? 0.5 : Math.Abs(maxX - minX) * 0.05;
+      gap = Math.Abs(maxX - minX);
+      gap = gap < float.Epsilon ? 0.5 : gap * 0.05;
       graphPane.XAxis.Scale.Max = maxX + gap;
       graphPane.XAxis.Scale.Min = minX - gap;
-      // Update the pane
-      graphPane.AxisChange();
-      Invalidate();
+
       return true;
     }
 
@@ -337,12 +361,12 @@ namespace ZedGraph
       this.Invalidate();
     }
 
-    ///------------------------------------------------------------------------
+    ///-------------------------------------------------------------------------
 		/// <summary>
 		/// Makes the curves visible.
 		/// </summary>
 		/// <param name="graphPane">The graph pane.</param>
-    ///------------------------------------------------------------------------
+    ///-------------------------------------------------------------------------
 		public void MakeCurvesVisible(GraphPane graphPane)
     {
       foreach (var curve in graphPane.CurveList.Where(curve => !curve.IsVisible))
@@ -354,16 +378,39 @@ namespace ZedGraph
       this.Invalidate();
     }
 
-    ///------------------------------------------------------------------------
+    ///-------------------------------------------------------------------------
     /// <summary>
     /// Shows the curve exclusive. Hides all orher curves.
     /// </summary>
     /// <param name="graphPane">The graph pane.</param>
     /// <param name="curveLabel">The curve label.</param>
-    ///------------------------------------------------------------------------
+    /// <param name="showAllIfSingleCurve">If single curve is visible, make all
+    /// curves visible</param>
+    ///-------------------------------------------------------------------------
     public void ShowCurveExclusive(GraphPane graphPane, string curveLabel)
     {
-      foreach (var curve in graphPane.CurveList)
+      ShowCurveExclusive(graphPane, curveLabel, false);
+    }
+
+    ///-------------------------------------------------------------------------
+    /// <summary>
+    /// Shows the curve exclusive. Hides all orher curves.
+    /// </summary>
+    /// <param name="graphPane">The graph pane.</param>
+    /// <param name="curveLabel">The curve label.</param>
+    /// <param name="showAllIfSingleCurve">If single curve is visible, make all
+    /// curves visible</param>
+    ///-------------------------------------------------------------------------
+    private void ShowCurveExclusive(GraphPane graphPane, string curveLabel,
+      bool showAllIfSingleCurve)
+    {
+      if (!showAllIfSingleCurve || graphPane.CurveList.Count(c => c.IsVisible) == 1)
+      {
+        MakeCurvesVisible(graphPane);
+        return;
+      }
+
+      foreach (var curve in graphPane.CurveList.Where(c => c.Label.Text != curveLabel))
       {
         curve.IsVisible = false;
         AddCurveToHiddenList(curve.Label.Text);
@@ -371,11 +418,12 @@ namespace ZedGraph
         curve.Label.FontSpec = FontDisabled;
         curve.Label.FontSpec.Border.IsVisible = false;
       }
+
       var ci = graphPane.CurveList[curveLabel];
       ci.IsVisible = true;
       ci.Label.FontSpec = null;
       RemoveCurveFromHiddenList(curveLabel);
-      ZoomCurve(graphPane, (LineItem)graphPane.CurveList[graphPane.CurveList.IndexOf(curveLabel)]);
+      ZoomCurve(graphPane, graphPane.CurveList[graphPane.CurveList.IndexOf(curveLabel)]);
     }
 
     #endregion Public Methods
@@ -475,22 +523,18 @@ namespace ZedGraph
     ///------------------------------------------------------------------------
 		private void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
     {
-      GraphPane graphPane = this.MasterPane.FindPane(this._menuClickPt);
-      using (Graphics g = this.CreateGraphics())
+      var graphPane = this.MasterPane.FindPane(this._menuClickPt);
+      using (var g = this.CreateGraphics())
       {
         object nearestObject;
         int index;
-        if (this.MasterPane.FindNearestPaneObject(_menuClickPt, g, out graphPane, out nearestObject, out index))
+        if (MasterPane.FindNearestPaneObject(_menuClickPt, g, out graphPane, out nearestObject, out index))
         {
           if (nearestObject is Legend)
-          {
             e.Cancel = true;
-          }
         }
         else if (MasterPane.Legend.FindPoint(_menuClickPt, MasterPane, MasterPane.CalcScaleFactor(), out index))
-        {
           e.Cancel = true;
-        }
       }
     }
 
@@ -501,19 +545,18 @@ namespace ZedGraph
       // Remove the 'Show Values' menu entry, since this control has its own value display.
       for (int i = 0; i < menuStrip.Items.Count; ++i)
       {
-        ToolStripItem oldItem = menuStrip.Items[i];
+        var oldItem = menuStrip.Items[i];
 
         if (oldItem.Name == "set_default")
         {
-          ToolStripMenuItem item = new ToolStripMenuItem();
-          item.Name = oldItem.Name;
-          item.Tag = oldItem.Tag;
-          item.Text = oldItem.Text;
-          item.Click += setDefaultItemClick;
+          var item     = new ToolStripMenuItem();
+          item.Name    = oldItem.Name;
+          item.Tag     = oldItem.Tag;
+          item.Text    = oldItem.Text;
+          item.Click  += setDefaultItemClick;
           item.Enabled = oldItem.Enabled;
 
           menuStrip.Items.RemoveAt(i);
-
           menuStrip.Items.Insert(i, item);
 
           break;
@@ -686,7 +729,7 @@ namespace ZedGraph
 
           if (e.Button == MouseButtons.Left)
           {
-            this.ShowCurveExclusive(graphPane, graphPane.CurveList[curveIndex].Label.Text);
+            this.ShowCurveExclusive(graphPane, graphPane.CurveList[curveIndex].Label.Text, true);
             return true;
           }
         }
@@ -694,14 +737,14 @@ namespace ZedGraph
         {
           if (MouseDoubleClickLegendArea != null)
           {
-            this.MouseDoubleClickLegendArea(graphPane, e, "");
+            MouseDoubleClickLegendArea(graphPane, e, "");
             OnResetScale(graphPane);
             return false;
           }
 
           if (e.Button == MouseButtons.Left)
           {
-            this.MakeCurvesVisible(graphPane);
+            MakeCurvesVisible(graphPane);
             OnResetScale(graphPane);
             return true;
           }
@@ -744,8 +787,8 @@ namespace ZedGraph
       if (autoScale)
       {
         RestoreScale(graphPane);
-        _isEnableHZoom = true;
-        _isEnableVZoom = true;
+        IsEnableHZoom = true;
+        IsEnableVZoom = true;
       }
       graphPane.ZoomStack.Clear();
     }
@@ -756,12 +799,14 @@ namespace ZedGraph
 
     #region Non-Public Members
 
+    /*
     ///--------------------------------------------------------------------------
     /// <summary>
     /// Internal variable, used by the individual x- and y- zooming.
     /// </summary>
     ///--------------------------------------------------------------------------
     private bool _drawCrossline;
+    */
 
     #endregion Non-Public Members
 

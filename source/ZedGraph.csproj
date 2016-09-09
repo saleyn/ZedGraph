@@ -57,6 +57,8 @@
     <Compile Include="ZedGraphControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="ZedGraph\DynFilteredPointList.cs" />
+    <Compile Include="ZedGraph\ZedGraph.DistanceMeasurer.cs" />
     <Compile Include="ZedGraph\ZedGraphControl.Legend.cs">
       <SubType>UserControl</SubType>
     </Compile>

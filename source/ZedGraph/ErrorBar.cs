@@ -364,8 +364,8 @@ namespace ZedGraph
             // Also, any value <= zero on a log scale is invalid
 
             if ( !curve.Points[i].IsInvalid3D &&
-                ( scaleBase > 0 || !baseAxis._scale.IsLog ) &&
-                ( ( scaleValue > 0 && scaleLowValue > 0 ) || !valueAxis._scale.IsLog ) )
+                ( scaleBase > 0 || !baseAxis.Scale.IsLog ) &&
+                ( ( scaleValue > 0 && scaleLowValue > 0 ) || !valueAxis.Scale.IsLog ) )
             {
               pixBase = baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, scaleBase );
               pixValue = valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, scaleValue );

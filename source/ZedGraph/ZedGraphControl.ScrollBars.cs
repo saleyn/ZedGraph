@@ -41,7 +41,7 @@ namespace ZedGraph
         }
         for ( int i = 0; i < this.GraphPane.YAxisList.Count; i++ )
         {
-          ScrollRange scroll = _yScrollRangeList[i];
+          ScrollRange scroll = YScrollRangeList[i];
           if (!scroll.IsScrollable) continue;
 
           Axis axis = this.GraphPane.YAxisList[i];
@@ -51,7 +51,7 @@ namespace ZedGraph
 
         for ( int i = 0; i < this.GraphPane.Y2AxisList.Count; i++ )
         {
-          ScrollRange scroll = _y2ScrollRangeList[i];
+          ScrollRange scroll = Y2ScrollRangeList[i];
           if (!scroll.IsScrollable) continue;
 
           Axis axis = this.GraphPane.Y2AxisList[i];
@@ -69,24 +69,31 @@ namespace ZedGraph
     {
       if (!_isSynchronizeXAxes && !_isSynchronizeYAxes) return;
 
-      foreach (var pane in _masterPane._paneList.Where(pane => pane != primaryPane)) {
-        if ( _isSynchronizeXAxes )
-          Synchronize( primaryPane.XAxis, pane.XAxis );
-        if ( _isSynchronizeYAxes )
-          Synchronize( primaryPane.YAxis, pane.YAxis );
+      foreach (var pane in _masterPane._paneList.Where(pane => pane != primaryPane))
+      {
+        if (_isSynchronizeXAxes)
+        {
+          Synchronize(primaryPane.XAxis,  pane.XAxis);
+          Synchronize(primaryPane.X2Axis, pane.X2Axis);
+        }
+        if (_isSynchronizeYAxes)
+        {
+          Synchronize(primaryPane.YAxis,  pane.YAxis);
+          Synchronize(primaryPane.Y2Axis, pane.Y2Axis);
+        }
       }
     }
 
     private void Synchronize( Axis source, Axis dest )
     {
-      dest._scale._min           = source._scale._min;
-      dest._scale._max           = source._scale._max;
-      dest._scale._majorStep     = source._scale._majorStep;
-      dest._scale._minorStep     = source._scale._minorStep;
-      dest._scale._minAuto       = source._scale._minAuto;
-      dest._scale._maxAuto       = source._scale._maxAuto;
-      dest._scale._majorStepAuto = source._scale._majorStepAuto;
-      dest._scale._minorStepAuto = source._scale._minorStepAuto;
+      dest.Scale._min           = source.Scale._min;
+      dest.Scale._max           = source.Scale._max;
+      dest.Scale._majorStep     = source.Scale._majorStep;
+      dest.Scale._minorStep     = source.Scale._minorStep;
+      dest.Scale._minAuto       = source.Scale._minAuto;
+      dest.Scale._maxAuto       = source.Scale._maxAuto;
+      dest.Scale._majorStepAuto = source.Scale._majorStepAuto;
+      dest.Scale._minorStepAuto = source.Scale._minorStepAuto;
     }
 
     private void hScrollBar1_Scroll( object sender, ScrollEventArgs e )
@@ -174,10 +181,10 @@ namespace ZedGraph
                   int largeChange, bool reverse )
     {
       if (axis == null) return;
-      if ( scrollMin > axis._scale._min )
-        scrollMin = axis._scale._min;
-      if ( scrollMax < axis._scale._max )
-        scrollMax = axis._scale._max;
+      if ( scrollMin > axis.Scale._min )
+        scrollMin = axis.Scale._min;
+      if ( scrollMax < axis.Scale._max )
+        scrollMax = axis.Scale._max;
 
       int span = _ScrollControlSpan - largeChange;
       if ( span <= 0 )
@@ -186,7 +193,7 @@ namespace ZedGraph
       if ( reverse )
         newValue = span - newValue;
 
-      Scale scale = axis._scale;
+      Scale scale = axis.Scale;
 
       double delta = scale._maxLinearized - scale._minLinearized;
       double scrollMin2 = scale.Linearize( scrollMax ) - delta;
@@ -249,12 +256,12 @@ namespace ZedGraph
         Axis axis = this.GraphPane.YAxisList[i];
         grace = CalcScrollGrace( axis.Scale._rangeMin, axis.Scale._rangeMax );
         ScrollRange range = new ScrollRange( axis.Scale._rangeMin - grace,
-                                             axis.Scale._rangeMax + grace, _yScrollRangeList[i].IsScrollable );
+                                             axis.Scale._rangeMax + grace, YScrollRangeList[i].IsScrollable );
 
-        if ( i >= _yScrollRangeList.Count )
-          _yScrollRangeList.Add( range );
+        if ( i >= YScrollRangeList.Count )
+          YScrollRangeList.Add( range );
         else
-          _yScrollRangeList[i] = range;
+          YScrollRangeList[i] = range;
       }
 
       for ( int i = 0; i < this.GraphPane.Y2AxisList.Count; i++ )
@@ -262,12 +269,12 @@ namespace ZedGraph
         Axis axis = this.GraphPane.Y2AxisList[i];
         grace = CalcScrollGrace( axis.Scale._rangeMin, axis.Scale._rangeMax );
         ScrollRange range = new ScrollRange( axis.Scale._rangeMin - grace,
-                                             axis.Scale._rangeMax + grace, _y2ScrollRangeList[i].IsScrollable );
+                                             axis.Scale._rangeMax + grace, Y2ScrollRangeList[i].IsScrollable );
 
-        if ( i >= _y2ScrollRangeList.Count )
-          _y2ScrollRangeList.Add( range );
+        if ( i >= Y2ScrollRangeList.Count )
+          Y2ScrollRangeList.Add( range );
         else
-          _y2ScrollRangeList[i] = range;
+          Y2ScrollRangeList[i] = range;
       }
 
       //this.GraphPane.CurveList.GetRange( out scrollMinX, out scrollMaxX,
@@ -280,12 +287,12 @@ namespace ZedGraph
       if ( Math.Abs( max - min ) < 1e-30 )
       {
         if ( Math.Abs( max ) < 1e-30 )
-          return _scrollGrace;
+          return ScrollGrace;
         else
-          return max * _scrollGrace;
+          return max * ScrollGrace;
       }
       else
-        return ( max - min ) * _scrollGrace;
+        return ( max - min ) * ScrollGrace;
     }
 
     private void SetScroll( ScrollBar scrollBar, Axis axis, double scrollMin, double scrollMax )
@@ -295,14 +302,14 @@ namespace ZedGraph
       scrollBar.Minimum = 0;
       scrollBar.Maximum = _ScrollControlSpan - 1;
 
-      if ( scrollMin > axis._scale._min )
-        scrollMin = axis._scale._min;
-      if ( scrollMax < axis._scale._max )
-        scrollMax = axis._scale._max;
+      if ( scrollMin < axis.Scale._min )
+        scrollMin = axis.Scale._min;
+      if ( scrollMax > axis.Scale._max )
+        scrollMax = axis.Scale._max;
 
       int val = 0;
 
-      Scale scale = axis._scale;
+      Scale scale = axis.Scale;
       double minLinearized = scale._minLinearized;
       double maxLinearized = scale._maxLinearized;
       scrollMin = scale.Linearize( scrollMin );

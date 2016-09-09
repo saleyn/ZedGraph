@@ -25,6 +25,11 @@ using System.Security.Permissions;
 namespace ZedGraph
 {
   /// <summary>
+  /// YAxis implements this interface
+  /// </summary>
+  public interface IYAxis {};
+
+  /// <summary>
   /// <see cref="YAxis"/> inherits from <see cref="Axis"/>, and defines the
   /// special characteristics of a vertical axis, specifically located on
   /// the right side of the <see cref="Chart.Rect"/> of the <see cref="GraphPane"/>
@@ -34,7 +39,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.16 $ $Date: 2007-04-16 00:03:06 $ </version>
   [Serializable]
-  public class YAxis : Axis, ICloneable, ISerializable
+  public class YAxis : Axis, ICloneable, IYAxis
   {
     #region Defaults
     /// <summary>
@@ -80,10 +85,10 @@ namespace ZedGraph
     public YAxis( string title )
       : base( title )
     {
-      _isVisible = Default.IsVisible;
-      _majorGrid._isZeroLine = Default.IsZeroLine;
-      _scale._fontSpec.Angle = 90.0F;
-      _title._fontSpec.Angle = -180F;
+      IsVisible = Default.IsVisible;
+      MajorGrid._isZeroLine = Default.IsZeroLine;
+      Scale._fontSpec.Angle = 90.0F;
+      Title._fontSpec.Angle = -180F;
       base.LineHObjs = new LineHObjList();
     }
 
@@ -223,7 +228,7 @@ namespace ZedGraph
     {
       double effCross = EffectiveCrossValue( pane );
 
-      if ( !_crossAuto )
+      if ( !CrossAuto )
         return pane.XAxis.Scale._minPix - pane.XAxis.Scale.Transform( effCross );
       else
         return 0;

@@ -2,19 +2,14 @@ using System;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Collections;
-using System.ComponentModel;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.Drawing.Printing;
-using System.Drawing.Text;
-using System.Data;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.IO;
 using GDIDB;
-using ZedGraph;
 using System.Diagnostics;
 using System.Threading;
 
@@ -1973,8 +1968,8 @@ namespace ZedGraph.LibTest
 			Axis y2Axis = pane.Y2Axis;
 
 			// Reset both Y axes to autoscaling mode (this also calls AxisChange())
-			yAxis.ResetAutoScale( pane, g );
-			y2Axis.ResetAutoScale( pane, g );
+			yAxis.RestoreAutoScale( pane, g );
+			y2Axis.RestoreAutoScale( pane, g );
 
 			g.Dispose();
 

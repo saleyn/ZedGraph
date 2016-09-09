@@ -550,13 +550,13 @@ namespace ZedGraph
         }
       }
 
-      pane.XAxis.Scale.SetRange( pane, pane.XAxis );
-      pane.X2Axis.Scale.SetRange( pane, pane.X2Axis );
+      pane.XAxis.Scale.SetRange(pane);
+      pane.X2Axis.Scale.SetRange(pane);
 
       foreach ( YAxis axis in pane.YAxisList )
-        axis.Scale.SetRange( pane, axis );
+        axis.Scale.SetRange(pane );
       foreach ( Y2Axis axis in pane.Y2AxisList )
-        axis.Scale.SetRange( pane, axis );
+        axis.Scale.SetRange(pane);
     }
 
     private void InitScale( Scale scale, bool isBoundedRanges )

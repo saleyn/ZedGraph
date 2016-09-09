@@ -259,24 +259,24 @@ namespace ZedGraph
 
       if ( pane._barSettings.Base == BarBase.X )
       {
-        pixBase = rect.Left + rect.Width / 2.0F;
-        pixHigh = rect.Top;
-        pixLow = rect.Bottom;
-        pixOpen = pixHigh + rect.Height / 4;
+        pixBase  = rect.Left + rect.Width / 2.0F;
+        pixHigh  = rect.Top;
+        pixLow   = rect.Bottom;
+        pixOpen  = pixHigh + rect.Height / 4;
         pixClose = pixLow - rect.Height / 4;
       }
       else
       {
-        pixBase = rect.Top + rect.Height / 2.0F;
-        pixHigh = rect.Right;
-        pixLow = rect.Left;
-        pixOpen = pixHigh - rect.Width / 4;
+        pixBase  = rect.Top + rect.Height / 2.0F;
+        pixHigh  = rect.Right;
+        pixLow   = rect.Left;
+        pixOpen  = pixHigh - rect.Width / 4;
         pixClose = pixLow + rect.Width / 4;
       }
 
-      float halfSize = 2.0f * scaleFactor;
+      var halfSize = 2.0f * scaleFactor;
 
-      using ( Pen pen = new Pen( _bar.Color, _bar._width ) )
+      using ( var pen = new Pen( _bar.Color, _bar._width ) )
       {
         _bar.Draw( g, pane, pane._barSettings.Base == BarBase.X, pixBase, pixHigh,
                 pixLow, pixOpen, pixClose, halfSize, pen );
@@ -299,42 +299,44 @@ namespace ZedGraph
       if ( i < 0 || i >= _points.Count )
         return false;
 
-      Axis valueAxis = ValueAxis( pane );
-      Axis baseAxis = BaseAxis( pane );
+      var valueAxis = ValueAxis( pane );
+      var baseAxis = BaseAxis( pane );
 
-      float halfSize = _bar.Size * pane.CalcScaleFactor();
+      var halfSize = _bar.Size * pane.CalcScaleFactor();
 
-      PointPair pt = _points[i];
+      var pt = _points[i];
       double date = pt.X;
-      double high = pt.Y;
-      double low = pt.Z;
-
-      if ( !pt.IsInvalid3D &&
-          ( date > 0 || !baseAxis._scale.IsLog ) &&
-          ( ( high > 0 && low > 0 ) || !valueAxis._scale.IsLog ) )
+      double high;
+      double low;
+      if (pt is StockPt)
       {
-        float pixBase, pixHigh, pixLow;
-        pixBase = baseAxis.Scale.Transform( _isOverrideOrdinal, i, date );
-        pixHigh = valueAxis.Scale.Transform( _isOverrideOrdinal, i, high );
-        pixLow = valueAxis.Scale.Transform( _isOverrideOrdinal, i, low );
-
-        // Calculate the pixel location for the side of the bar (on the base axis)
-        float pixSide = pixBase - halfSize;
-
-        // Draw the bar
-        if ( baseAxis is XAxis || baseAxis is X2Axis )
-          coords = String.Format( "{0:f0},{1:f0},{2:f0},{3:f0}",
-                pixSide, pixLow,
-                pixSide + halfSize * 2, pixHigh );
-        else
-          coords = String.Format( "{0:f0},{1:f0},{2:f0},{3:f0}",
-                pixLow, pixSide,
-                pixHigh, pixSide + halfSize * 2 );
-
-        return true;
+        var p = (StockPt)pt;
+        high  = p.High;
+        low   = p.Low;
+      }
+      else
+      {
+        high  = pt.Y;
+        low   = pt.Z;
       }
 
-      return false;
+      if (pt.IsInvalid3D || (!(date > 0) && baseAxis.Scale.IsLog) ||
+          ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
+        return false;
+
+      var pixBase = baseAxis.Scale.Transform( _isOverrideOrdinal, i, date );
+      var pixHigh = valueAxis.Scale.Transform( _isOverrideOrdinal, i, high );
+      var pixLow  = valueAxis.Scale.Transform( _isOverrideOrdinal, i, low );
+
+      // Calculate the pixel location for the side of the bar (on the base axis)
+      var pixSide = pixBase - halfSize;
+
+      // Draw the bar
+      coords = baseAxis is IXAxis
+        ? $"{pixSide:f0},{pixLow:f0},{pixSide + halfSize*2:f0},{pixHigh:f0}"
+        : $"{pixLow:f0},{pixSide:f0},{pixHigh:f0},{pixSide + halfSize*2:f0}";
+
+      return true;
     }
 
   #endregion

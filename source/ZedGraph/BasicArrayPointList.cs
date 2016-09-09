@@ -67,17 +67,9 @@ namespace ZedGraph
     {
       get
       {
-        double xVal, yVal;
-        if ( index >= 0 && index < x.Length )
-          xVal = x[index];
-        else
-          xVal = PointPair.Missing;
-
-        if ( index >= 0 && index < y.Length )
-          yVal = y[index];
-        else
-          yVal = PointPair.Missing;
-        return new PointPair( xVal, yVal, PointPair.Missing, null );
+        var xVal = index >= 0 && index < x.Length ? x[index] : PointPairBase.Missing;
+        var yVal = index >= 0 && index < y.Length ? y[index] : PointPairBase.Missing;
+        return new PointPair( xVal, yVal, PointPairBase.Missing, null );
       }
       set
       {

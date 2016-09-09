@@ -19,7 +19,7 @@
 using System;
 using ICollection	= System.Collections.ICollection;
 using System.Collections;
-
+using System.Drawing;
 using ZedGraph;
 
 namespace ZedGraph.Demo
@@ -32,10 +32,8 @@ namespace ZedGraph.Demo
 		protected string description;
 		protected string title;
 		protected ICollection types;
-		
-		private ZedGraphControlExt control;
 
-		public DemoBase( string description, string title, DemoType type )
+	  public DemoBase( string description, string title, DemoType type )
 		{
 			ArrayList types = new ArrayList();
 			types.Add( type );
@@ -63,45 +61,54 @@ namespace ZedGraph.Demo
 			this.title = title;
 			this.types = types;
 
-			control = new ZedGraphControlExt();
-		  control.IsAntiAlias = true;
-		}
+		  ZedGraphControl = new ZedGraphControl
+		  {
+		    IsAntiAlias     = true,
+        IsShowCrossHair = true,
+        IsShowVScrollBar = true,
+        IsShowHScrollBar = true,
+        IsAutoScrollRange = true,
 
-	  public virtual void Activate()   {}
+        //CrossHairType   = CrossHairType.MasterPane
+		  };
+      m_DistanceMeasurer = new DistanceMeasurer(ZedGraphControl, Color.DarkOrange, Color.Red, 9.0F, CoordType.AxisXYScale);
+      GraphPane.IsBoundedRanges = true;
+    }
+
+    public virtual void Activate()   {}
 	  public virtual void Deactivate() {}
 
-	  #region ZedGraphDemo Members
+    #region ZedGraphDemo Members
 
-		/// <summary>
+    private DistanceMeasurer m_DistanceMeasurer;
+
+    /// <summary>
+    /// The graph pane the chart is show in.
+    /// </summary>
+    public PaneBase Pane => ZedGraphControl.GraphPane;
+
+	  /// <summary>
 		/// The graph pane the chart is show in.
 		/// </summary>
-		public PaneBase Pane { get { return control.GraphPane; } }
-		
-		/// <summary>
-		/// The graph pane the chart is show in.
-		/// </summary>
-		public MasterPane MasterPane { get { return control.MasterPane; } }
+		public MasterPane MasterPane => ZedGraphControl.MasterPane;
 
-		/// <summary>
+	  /// <summary>
 		/// The graph pane the chart is show in (same as .Pane).
 		/// </summary>
-		public GraphPane GraphPane { get { return control.GraphPane; } }
+		public GraphPane GraphPane => ZedGraphControl.GraphPane;
 
-		public virtual string Description { get { return description; } }
+	  public virtual string Description => description;
 
-		public virtual string Title { get { return title; } }
+	  public virtual string Title => title;
 
-		public virtual ICollection Types { get { return types; } }
-		
-		/// <summary>
+	  public virtual ICollection Types => types;
+
+	  /// <summary>
 		/// The control the graph pane is in.
 		/// </summary>
-		public ZedGraphControlExt ZedGraphControl
-		{
-			get { return control; }
-		}
+		public ZedGraphControl ZedGraphControl { get; private set; }
 
-	#endregion
+	  #endregion
 
 	}
 }

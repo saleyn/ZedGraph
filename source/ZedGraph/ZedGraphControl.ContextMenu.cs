@@ -115,7 +115,7 @@ namespace ZedGraph
         _menuClickPt = this.PointToClient( Control.MousePosition );
         GraphPane pane = _masterPane.FindPane( _menuClickPt );
 
-        if ( _isShowContextMenu )
+        if ( IsShowContextMenu )
         {
           string menuStr = string.Empty;
 
@@ -236,7 +236,7 @@ namespace ZedGraph
     /// <param name="e"></param>
     protected void MenuClick_Copy( System.Object sender, System.EventArgs e )
     {
-      Copy( _isShowCopyMessage );
+      Copy( IsShowCopyMessage );
     }
 
     /// <summary>
@@ -680,18 +680,17 @@ namespace ZedGraph
             foreach ( GraphPane pane in _masterPane._paneList )
             {
               pane.ZoomStack.Push( pane, ZoomState.StateType.Zoom );
-              ResetAutoScale( pane, g );
+              RestoreAutoScale( pane, g );
             }
           }
           else
           {
             primaryPane.ZoomStack.Push( primaryPane, ZoomState.StateType.Zoom );
-            ResetAutoScale( primaryPane, g );
+            RestoreAutoScale( primaryPane, g );
           }
 
           // Provide Callback to notify the user of zoom events
-          if ( this.ZoomEvent != null )
-            this.ZoomEvent( this, oldState, new ZoomState( primaryPane, ZoomState.StateType.Zoom ) );
+          ZoomEvent?.Invoke( this, oldState, new ZoomState( primaryPane, ZoomState.StateType.Zoom ) );
 
           //g.Dispose();
         }
@@ -699,14 +698,14 @@ namespace ZedGraph
       }
     }
 
-    private void ResetAutoScale( GraphPane pane, Graphics g )
+    private void RestoreAutoScale( GraphPane pane, Graphics g )
     {
-      pane.XAxis.ResetAutoScale( pane, g );
-      pane.X2Axis.ResetAutoScale( pane, g );
+      pane.XAxis.RestoreAutoScale( pane, g );
+      pane.X2Axis.RestoreAutoScale( pane, g );
       foreach ( YAxis axis in pane.YAxisList )
-        axis.ResetAutoScale( pane, g );
+        axis.RestoreAutoScale( pane, g );
       foreach ( Y2Axis axis in pane.Y2AxisList )
-        axis.ResetAutoScale( pane, g );
+        axis.RestoreAutoScale( pane, g );
     }
 
     /*

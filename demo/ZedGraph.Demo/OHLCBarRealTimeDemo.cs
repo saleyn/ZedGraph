@@ -19,6 +19,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using Timer = System.Timers.Timer;
 
 namespace ZedGraph.Demo
@@ -35,7 +36,7 @@ namespace ZedGraph.Demo
     {
       m_Timer   = new Timer { Interval = 500, Enabled = false };
       m_Data    = new StockPointList();
-      m_FilteredData = new FilteredPointList(new[] {0.0}, new[] {0.0});
+      m_FilteredData = new DynFilteredPointList(new [] {0.0}, new [] {0.0});
       m_EMAData = new PointPairList();
       m_Rand    = new Random();
       var now   = fillSampleData();
@@ -71,13 +72,14 @@ namespace ZedGraph.Demo
       m_Pane.XAxis.MajorGrid.DashOn            = 1;
       m_Pane.XAxis.MajorTic.Size               = 3;
       m_Pane.XAxis.MinorTic.Size               = 1;
-      m_Pane.XAxis.Type                        = AxisType.Date;
-      m_Pane.XAxis.Scale.MajorUnit             = DateUnit.Minute;
-      m_Pane.XAxis.Scale.MinorUnit             = DateUnit.Second;
+      m_Pane.XAxis.Type                        = AxisType.DateAsOrdinal;
+      //m_Pane.XAxis.Scale.MajorUnit             = DateUnit.Minute;
+      //m_Pane.XAxis.Scale.MinorUnit             = DateUnit.Second;
       m_Pane.XAxis.Scale.Format                = "yyyy-MM-dd\nHH:mm:ss";
       m_Pane.XAxis.Scale.FontSpec.Size         = 9;
-      m_Pane.XAxis.Scale.MajorStep             = 2;
+      //m_Pane.XAxis.Scale.MajorStep             = 2;
       //m_Pane.XAxis.Scale.MinorStep             = 30;
+      m_Pane.XAxis.Scale.MaxAuto               = true;
       m_Pane.XAxis.Scale.MinAuto               = true;
 //      m_Pane.XAxis.Scale.MajorStep             = new XDate(0, 0, 0, 0, 2, 0).XLDate;
 //      m_Pane.XAxis.Scale.MinorStep             = new XDate(0, 0, 0, 0, 0,15).XLDate;
@@ -93,8 +95,8 @@ namespace ZedGraph.Demo
       //m_Pane.XAxis.Scale.MaxGrace              = 50;
       m_Pane.XAxis.Scale.IsSkipFirstLabel      = true;
       m_Pane.XAxis.Scale.IsSkipLastLabel       = false;
-      m_Pane.XAxis.Scale.Max                   = new XDate(now);
-      m_Pane.XAxis.Scale.Min                   = new XDate(now) - 2*60;
+      //m_Pane.XAxis.Scale.Max                   = new XDate(now);
+      //m_Pane.XAxis.Scale.Min                   = new XDate(now) - 2*60;
 //      m_Pane.XAxis.Scale.AlignH                = AlignH.Center;
 //      m_Pane.XAxis.Scale.Align                 = AlignP.Inside;
       m_Pane.XAxis.MajorTic.IsBetweenLabels    = true;
@@ -102,7 +104,13 @@ namespace ZedGraph.Demo
       m_Pane.XAxis.MinorTic.IsInside           = false;
       m_Pane.XAxis.MajorTic.IsInside           = false;
       m_Pane.XAxis.MinorTic.IsOutside          = true;
-//      m_Pane.XAxis.Scale.MajorStep             = new XDate(now - TimeSpan.FromSeconds(15));
+
+      m_Pane.XAxis.MajorGrid.IsVisible         = true;
+      m_Pane.XAxis.MajorGrid.DashOff           = 10;
+      m_Pane.XAxis.MajorGrid.DashOn            = 1;
+      m_Pane.XAxis.MajorGrid.Color             = Color.SlateGray;
+      m_Pane.XAxis.MinorGrid.IsVisible         = false;
+      //      m_Pane.XAxis.Scale.MajorStep             = new XDate(now - TimeSpan.FromSeconds(15));
 
       // Disable left-side Y axis
       m_Pane.YAxis.IsVisible                   = false;
@@ -116,9 +124,19 @@ namespace ZedGraph.Demo
       m_Pane.Y2Axis.AxisGap                    = 5;
       m_Pane.Y2Axis.Scale.LabelGap             = 0;
       m_Pane.Y2Axis.MajorGrid.IsVisible        = true;
-      m_Pane.Y2Axis.MajorGrid.DashOff          = 7;
+      m_Pane.Y2Axis.MajorGrid.DashOff          = 10;
       m_Pane.Y2Axis.MajorGrid.DashOn           = 1;
-      m_Pane.Y2Axis.MajorGrid.Color            = Color.DarkGray;
+      m_Pane.Y2Axis.MajorGrid.Color            = Color.SlateGray;
+      m_Pane.Y2Axis.MinorGrid.PenWidth         = 1;
+
+      m_Pane.Y2Axis.MinorGrid.IsVisible        = false;
+      /*
+      m_Pane.Y2Axis.MinorGrid.DashOff          = 15;
+      m_Pane.Y2Axis.MinorGrid.DashOn           = 1;
+      m_Pane.Y2Axis.MinorGrid.Color            = Color.DarkGray;
+      m_Pane.Y2Axis.MinorGrid.PenWidth         = 1;
+      */
+
       m_Pane.Y2Axis.MajorTic.Size              = 3;
       m_Pane.Y2Axis.MinorTic.Size              = 1;
       //m_Pane.Y2Axis.Scale.AlignH               = AlignH.Right;
@@ -233,18 +251,17 @@ namespace ZedGraph.Demo
 
     public override void Activate()
 	  {
-      ZedGraphControl.CrossHair = false;
       ZedGraphControl.IsEnableGraphEdit = true;
       ZedGraphControl.IsZoomOnMouseCenter = true;
       //ZedGraphControl.IsShowHScrollBar = true;
       //ZedGraphControl.IsEnableHZoom = false;
       //ZedGraphControl.IsEnableVZoom = true;
       ZedGraphControl.IsAutoScrollRange = true;
+      ZedGraphControl.ZoomResolution = 0.001;
     }
 
     public override void Deactivate()
 	  {
-      ZedGraphControl.CrossHair = true;
       ZedGraphControl.IsZoomOnMouseCenter = false;
       //ZedGraphControl.IsShowHScrollBar = false;
       //ZedGraphControl.IsEnableHZoom = true;
@@ -255,7 +272,7 @@ namespace ZedGraph.Demo
     private readonly Timer m_Timer;
     private readonly StockPointList m_Data;
     private readonly PointPairList  m_EMAData;
-    private readonly FilteredPointList m_FilteredData;
+    private readonly DynFilteredPointList m_FilteredData;
 
     private XDate  m_Now;
     private double m_Open;
@@ -288,12 +305,13 @@ namespace ZedGraph.Demo
 
       if (add)
       {
+        double open  = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
         double close = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        double hi    = Math.Max(m_Open, close) + m_Rand.NextDouble()*5.0;
-        double low   = Math.Min(m_Open, close) - m_Rand.NextDouble()*5.0;
+        double hi    = Math.Max(open, close) + m_Rand.NextDouble()*5.0;
+        double low   = Math.Min(open, close) - m_Rand.NextDouble()*5.0;
 
-        var x  = now.XLDate;
-        pt = new StockPt(x, hi, low, m_Open, close, 100000);
+        var x = now.XLDate - (now.XLDate % diff);
+        pt = new StockPt(x, hi, low, open, close, 100000);
 
         m_Data.Add(pt);
         m_Open = close;
@@ -303,15 +321,31 @@ namespace ZedGraph.Demo
 
         if (timer)
         {
-          m_Pane.XAxis.Scale.Max = now + 5;
-          m_Pane.XAxis.Scale.Min += diff;
+          //m_Pane.XAxis.Scale.Max = now + 5;
+          //m_Pane.XAxis.Scale.Min += diff;
+          var window = (int)(m_Pane.XAxis.Scale.Max - m_Pane.XAxis.Scale.Min);
+          m_Pane.XAxis.Scale.Max = m_Data.Count + 1;
+          m_Pane.XAxis.Scale.Min = m_Pane.XAxis.Scale.Max - window;
 
+          double min = double.MaxValue, max = double.MinValue;
+          var xMin = Scale.MinMax(0, (int)m_Pane.XAxis.Scale.Min, m_Data.Count - 1);
+          var xMax = Scale.MinMax(0, (int)m_Pane.XAxis.Scale.Max, m_Data.Count - 1);
+          for (int i = xMin; i < xMax; ++i)
+          {
+            var d = (StockPt)m_Data[i];
+            min = Math.Min(d.Low,  min);
+            max = Math.Max(d.High, max);
+          }
+
+          m_Pane.Y2Axis.Scale.Min = min * 0.90;
+          m_Pane.Y2Axis.Scale.Max = max * 1.05;
+          m_Pane.AxisChange();
 
           if (m_Data.Count%1 == 0)
           {
             var yy = m_Pane.Y2Axis.Scale.ReverseTransform(m_Pane.Y2Axis.Scale.Transform(val) + (up ? 5 : -5));
             //var y2 = val * (up ? 0.96 : 1.03);
-            var arrow = new PointObj(tm, yy, 5,
+            var arrow = new PointObj(m_Data.Count-1, yy, 5,
                                      up ? SymbolType.ArrowUp : SymbolType.ArrowDown,
                                      up ? Color.Green : Color.Red)
             {

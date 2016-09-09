@@ -216,7 +216,7 @@ namespace ZedGraph
               pt2 = pane.CurveList[0].Points[p2-1];
             }
           }
-          if ( _ownerAxis is XAxis || _ownerAxis is X2Axis )
+          if ( _ownerAxis is IXAxis )
           {
             val1 = pt1.X;
             val2 = pt2.X;

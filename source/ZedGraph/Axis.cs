@@ -42,59 +42,11 @@ namespace ZedGraph
 
   #region Class Fields
 
-    /// <summary>
-    /// private field that stores the <see cref="ZedGraph.Scale" /> class, which implements all the
-    /// calculations and methods associated with the numeric scale for this
-    /// <see cref="Axis" />.  See the public property <see cref="Scale" /> to access this class.
-    /// </summary>
-    internal Scale _scale;
-
-    /// <summary>
-    /// Private field that stores the <see cref="ZedGraph.MinorTic" /> class, which handles all
-    /// the minor tic information.  See the public property <see cref="MinorTic" /> to access this class.
-    /// </summary>
-    internal MinorTic _minorTic;
-    /// <summary>
-    /// Private field that stores the <see cref="ZedGraph.MajorTic" /> class, which handles all
-    /// the major tic information.  See the public property <see cref="MajorTic" /> to access this class.
-    /// </summary>
-    internal MajorTic _majorTic;
-
-    /// <summary>
-    /// Private field that stores the <see cref="ZedGraph.MajorGrid" /> class, which handles all
-    /// the major grid information.  See the public property <see cref="MajorGrid" /> to access this class.
-    /// </summary>
-    internal MajorGrid  _majorGrid;
-    /// <summary>
-    /// Private field that stores the <see cref="ZedGraph.MinorGrid" /> class, which handles all
-    /// the minor grid information.  See the public property <see cref="MinorGrid" /> to access this class.
-    /// </summary>
-    internal MinorGrid _minorGrid;
-
     /// <summary> Private fields for the <see cref="Axis"/> scale rendering properties.
-    /// Use the public properties <see cref="Cross"/> and <see cref="ZedGraph.Scale.BaseTic"/>
+    /// Use the public properties <see cref="Cross"/> and <see cref="Scale.BaseTic"/>
     /// for access to these values.
     /// </summary>
-    internal double _cross;
-
-    /// <summary> Private field for the <see cref="Axis"/> automatic cross position mode.
-    /// Use the public property <see cref="CrossAuto"/> for access to this value.
-    /// </summary>
-    internal bool _crossAuto;
-
-    /// <summary> Private fields for the <see cref="Axis"/> attributes.
-    /// Use the public properties <see cref="IsVisible"/>, <see cref="IsAxisSegmentVisible"/>
-    /// for access to these values.
-    /// </summary>
-    [CLSCompliant(false)]
-    protected bool _isVisible,
-              _isAxisSegmentVisible;
-
-    /// <summary> Private field for the <see cref="Axis"/> title string.
-    /// Use the public property <see cref="Title"/> for access to this value.
-    /// </summary>
-    [CLSCompliant(false)]
-    protected AxisLabel _title;
+    private double _cross;
 
     /// <summary>
     /// A tag object for use by the user.  This can be used to store additional
@@ -106,31 +58,14 @@ namespace ZedGraph
     /// that you store in <see cref="Tag"/> must be a serializable type (or
     /// it will cause an exception).
     /// </remarks>
-    public object Tag;
-
-    /// <summary> Private field for the <see cref="Axis"/> drawing dimensions.
-    /// Use the public property <see cref="AxisGap"/>
-    /// for access to these values. </summary>
-    private float  _axisGap;
-
-    /// <summary>
-    /// Private field for the <see cref="Axis"/> minimum allowable space allocation.
-    /// Use the public property <see cref="MinSpace"/> to access this value.
-    /// </summary>
-    /// <seealso cref="Default.MinSpace"/>
-    private float _minSpace;
-
-    /// <summary> Private fields for the <see cref="Axis"/> colors.
-    /// Use the public property <see cref="Color"/> for access to this values.
-    /// </summary>
-    private Color _color;
+    public object Tag { get; set; }
 
     /// <summary>
     /// Temporary values for axis space calculations (see <see cref="CalcSpace" />).
     /// </summary>
     internal float _tmpSpace;
 
-  #endregion
+    #endregion
 
   #region Events
 
@@ -292,36 +227,33 @@ namespace ZedGraph
     /// Default constructor for <see cref="Axis"/> that sets all axis properties
     /// to default values as defined in the <see cref="Default"/> class.
     /// </summary>
-    public Axis()
+    protected Axis()
     {
-      _scale = new LinearScale( this );
+      Scale     = new LinearScale( this );
+      Cross     = 0.0;
+      CrossAuto = true;
 
-      _cross = 0.0;
+      MajorTic  = new MajorTic();
+      MinorTic  = new MinorTic();
 
-      _crossAuto = true;
+      MajorGrid = new MajorGrid();
+      MinorGrid = new MinorGrid();
 
-      _majorTic = new MajorTic();
-      _minorTic = new MinorTic();
+      AxisGap   = Default.AxisGap;
+      MinSpace  = Default.MinSpace;
+      IsVisible = true;
 
-      _majorGrid = new MajorGrid();
-      _minorGrid = new MinorGrid();
+      IsAxisSegmentVisible = Default.IsAxisSegmentVisible;
 
-      _axisGap = Default.AxisGap;
-
-      _minSpace = Default.MinSpace;
-      _isVisible = true;
-
-      _isAxisSegmentVisible = Default.IsAxisSegmentVisible;
-
-      _title = new AxisLabel( "", Default.TitleFontFamily, Default.TitleFontSize,
+      Title = new AxisLabel( "", Default.TitleFontFamily, Default.TitleFontSize,
           Default.TitleFontColor, Default.TitleFontBold,
           Default.TitleFontUnderline, Default.TitleFontItalic );
-      _title.FontSpec.Fill = new Fill( Default.TitleFillColor, Default.TitleFillBrush,
+      Title.FontSpec.Fill = new Fill( Default.TitleFillColor, Default.TitleFillBrush,
           Default.TitleFillType );
 
-      _title.FontSpec.Border.IsVisible = false;
+      Title.FontSpec.Border.IsVisible = false;
 
-      _color = Default.Color;
+      Color = Default.Color;
     }
 
     /// <summary>
@@ -330,40 +262,40 @@ namespace ZedGraph
     /// except for the <see cref="Title"/>.
     /// </summary>
     /// <param name="title">A string containing the axis title</param>
-    public Axis( string title ) : this()
+    protected Axis( string title ) : this()
     {
-      _title._text = title;
+      Title._text = title;
     }
 
     /// <summary>
     /// The Copy Constructor.
     /// </summary>
     /// <param name="rhs">The Axis object from which to copy</param>
-    public Axis( Axis rhs )
+    protected Axis( Axis rhs )
     {
-      _scale = rhs._scale.Clone( this );
+      Scale = rhs.Scale.Clone( this );
 
-      _cross = rhs._cross;
+      Cross = rhs.Cross;
 
-      _crossAuto = rhs._crossAuto;
+      CrossAuto = rhs.CrossAuto;
 
-      _majorTic = rhs.MajorTic.Clone();
-      _minorTic = rhs.MinorTic.Clone();
+      MajorTic = rhs.MajorTic.Clone();
+      MinorTic = rhs.MinorTic.Clone();
 
-      _majorGrid = rhs._majorGrid.Clone();
-      _minorGrid = rhs._minorGrid.Clone();
+      MajorGrid = rhs.MajorGrid.Clone();
+      MinorGrid = rhs.MinorGrid.Clone();
 
-      _isVisible = rhs.IsVisible;
+      IsVisible = rhs.IsVisible;
 
-      _isAxisSegmentVisible = rhs._isAxisSegmentVisible;
+      IsAxisSegmentVisible = rhs.IsAxisSegmentVisible;
 
-      _title = (AxisLabel) rhs.Title.Clone();
+      Title = rhs.Title.Clone();
 
-      _axisGap = rhs._axisGap;
+      AxisGap = rhs.AxisGap;
 
-      _minSpace = rhs.MinSpace;
+      MinSpace = rhs.MinSpace;
 
-      _color = rhs.Color;
+      Color = rhs.Color;
 
       if (rhs.LineHObjs != null)
         LineHObjs = rhs.LineHObjs.Clone();
@@ -413,29 +345,29 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32( "schema" );
 
-      _cross = info.GetDouble( "cross" );
-      _crossAuto = info.GetBoolean( "crossAuto" );
+      Cross = info.GetDouble( "cross" );
+      CrossAuto = info.GetBoolean( "crossAuto" );
 
-      _majorTic = (MajorTic)info.GetValue( "MajorTic", typeof( MajorTic ) );
-      _minorTic = (MinorTic)info.GetValue( "MinorTic", typeof( MinorTic ) );
-      _majorGrid = (MajorGrid)info.GetValue( "majorGrid", typeof( MajorGrid ) );
-      _minorGrid = (MinorGrid)info.GetValue( "minorGrid", typeof( MinorGrid ) );
+      MajorTic = (MajorTic)info.GetValue( "MajorTic", typeof( MajorTic ) );
+      MinorTic = (MinorTic)info.GetValue( "MinorTic", typeof( MinorTic ) );
+      MajorGrid = (MajorGrid)info.GetValue( "majorGrid", typeof( MajorGrid ) );
+      MinorGrid = (MinorGrid)info.GetValue( "minorGrid", typeof( MinorGrid ) );
 
-      _isVisible = info.GetBoolean( "isVisible" );
+      IsVisible = info.GetBoolean( "isVisible" );
 
-      _title = (AxisLabel) info.GetValue( "title", typeof( AxisLabel ) );
+      Title = (AxisLabel) info.GetValue( "title", typeof( AxisLabel ) );
 
-      _minSpace = info.GetSingle( "minSpace" );
+      MinSpace = info.GetSingle( "minSpace" );
 
-      _color = (Color)info.GetValue( "color", typeof( Color ) );
+      Color = (Color)info.GetValue( "color", typeof( Color ) );
 
-      _isAxisSegmentVisible = info.GetBoolean( "isAxisSegmentVisible" );
+      IsAxisSegmentVisible = info.GetBoolean( "isAxisSegmentVisible" );
 
 
-      _axisGap = info.GetSingle( "axisGap" );
+      AxisGap = info.GetSingle( "axisGap" );
 
-      _scale = (Scale)info.GetValue( "scale", typeof( Scale ) );
-      _scale._ownerAxis = this;
+      Scale = (Scale)info.GetValue( "scale", typeof( Scale ) );
+      Scale._ownerAxis = this;
 
       LineHObjs = (LineHObjList)info.GetValue("LineHObjs", typeof(LineHObjList));
     }
@@ -449,27 +381,27 @@ namespace ZedGraph
     {
       info.AddValue( "schema", schema );
 
-      info.AddValue( "cross", _cross );
-      info.AddValue( "crossAuto", _crossAuto );
+      info.AddValue( "cross", Cross );
+      info.AddValue( "crossAuto", CrossAuto );
 
       info.AddValue( "MajorTic", MajorTic );
       info.AddValue( "MinorTic", MinorTic );
-      info.AddValue( "majorGrid", _majorGrid );
-      info.AddValue( "minorGrid", _minorGrid );
+      info.AddValue( "majorGrid", MajorGrid );
+      info.AddValue( "minorGrid", MinorGrid );
 
-      info.AddValue( "isVisible", _isVisible );
+      info.AddValue( "isVisible", IsVisible );
 
-      info.AddValue( "title", _title );
+      info.AddValue( "title", Title );
 
-      info.AddValue( "minSpace", _minSpace );
+      info.AddValue( "minSpace", MinSpace );
 
-      info.AddValue( "color", _color );
+      info.AddValue( "color", Color );
 
-      info.AddValue( "isAxisSegmentVisible", _isAxisSegmentVisible );
+      info.AddValue( "isAxisSegmentVisible", IsAxisSegmentVisible );
 
-      info.AddValue( "axisGap", _axisGap );
+      info.AddValue( "axisGap", AxisGap );
 
-      info.AddValue( "scale", _scale );
+      info.AddValue( "scale", Scale );
 
       info.AddValue( "LineHObjs", LineHObjs);
     }
@@ -481,10 +413,8 @@ namespace ZedGraph
     /// <summary>
     /// Gets the <see cref="Scale" /> instance associated with this <see cref="Axis" />.
     /// </summary>
-    public Scale Scale
-    {
-      get { return _scale; }
-    }
+    public Scale Scale { get; set; }
+
     /// <summary>
     /// Gets or sets the scale value at which this axis should cross the "other" axis.
     /// </summary>
@@ -498,14 +428,14 @@ namespace ZedGraph
     /// Y2Axis, the "other" axis is the XAxis.
     /// </remarks>
     /// <value> The value is defined in user scale units </value>
-    /// <seealso cref="ZedGraph.Scale.Min"/>
-    /// <seealso cref="ZedGraph.Scale.Max"/>
-    /// <seealso cref="ZedGraph.Scale.MajorStep"/>
+    /// <seealso cref="Scale.Min"/>
+    /// <seealso cref="Scale.Max"/>
+    /// <seealso cref="Scale.MajorStep"/>
     /// <seealso cref="CrossAuto"/>
     public double Cross
     {
       get { return _cross; }
-      set { _cross = value; _crossAuto = false; }
+      set { _cross = value; CrossAuto = false; }
     }
     /// <summary>
     /// Gets or sets a value that determines whether or not the <see cref="Cross"/> value
@@ -513,15 +443,11 @@ namespace ZedGraph
     /// </summary>
     /// <value>Set to true to have ZedGraph put the axis in the default location, or false
     /// to specify the axis location manually with a <see cref="Cross"/> value.</value>
-    /// <seealso cref="ZedGraph.Scale.Min"/>
-    /// <seealso cref="ZedGraph.Scale.Max"/>
-    /// <seealso cref="ZedGraph.Scale.MajorStep"/>
+    /// <seealso cref="Scale.Min"/>
+    /// <seealso cref="Scale.Max"/>
+    /// <seealso cref="Scale.MajorStep"/>
     /// <seealso cref="Cross"/>
-    public bool CrossAuto
-    {
-      get { return _crossAuto; }
-      set { _crossAuto = value; }
-    }
+    public bool CrossAuto { get; set; }
 
     /// <summary>
     /// Gets or sets the minimum axis space allocation.
@@ -534,17 +460,18 @@ namespace ZedGraph
     /// <see cref="PaneBase.Rect">GraphPane.Rect</see>.  This minimum space
     /// applies whether <see cref="IsVisible"/> is true or false.
     /// </remarks>
-    public float MinSpace
-    {
-      get { return _minSpace; }
-      set { _minSpace = value; }
-    }
+    public float MinSpace { get; set; }
 
     /// <summary>
     /// Gets or sets the list of <see cref="LineHObj"/> items for this <see cref="GraphPane"/>
     /// </summary>
     /// <value>A reference to a <see cref="LineHObjList"/> collection object</value>
     protected LineHObjList LineHObjs { get; set; }
+
+    /// <summary>
+    /// Rectangle of the axis updated after the axis is drawn
+    /// </summary>
+    internal RectangleF Rect { get; set; }
 
   #endregion
 
@@ -564,28 +491,19 @@ namespace ZedGraph
     /// <see cref="System.Drawing.Color"/> class</value>
     /// <seealso cref="Default.Color"/>.
     /// <seealso cref="IsVisible"/>
-    public Color Color
-    {
-      get { return _color; }
-      set { _color = value; }
-    }
+    public Color Color { get; set; }
 
     /// <summary>
     /// Gets a reference to the <see cref="ZedGraph.MajorTic" /> class instance
     /// for this <see cref="Axis" />.  This class stores all the major tic settings.
     /// </summary>
-    public MajorTic MajorTic
-    {
-      get { return _majorTic; }
-    }
+    public MajorTic MajorTic { get; }
+
     /// <summary>
     /// Gets a reference to the <see cref="ZedGraph.MinorTic" /> class instance
     /// for this <see cref="Axis" />.  This class stores all the minor tic settings.
     /// </summary>
-    public MinorTic MinorTic
-    {
-      get { return _minorTic; }
-    }
+    public MinorTic MinorTic { get; }
 
     #endregion
 
@@ -595,22 +513,15 @@ namespace ZedGraph
     /// Gets a reference to the <see cref="MajorGrid" /> class that contains the properties
     /// of the major grid.
     /// </summary>
-    public MajorGrid MajorGrid
-    {
-      get { return _majorGrid; }
-    }
+    public MajorGrid MajorGrid { get; }
 
     /// <summary>
     /// Gets a reference to the <see cref="MinorGrid" /> class that contains the properties
     /// of the minor grid.
     /// </summary>
-    public MinorGrid MinorGrid
-    {
-      get { return _minorGrid; }
-    }
+    public MinorGrid MinorGrid { get; }
 
-
-  #endregion
+    #endregion
 
   #region Type Properties
 
@@ -623,15 +534,11 @@ namespace ZedGraph
     /// graph, it will just be invisible to the user
     /// </remarks>
     /// <value>true to show the axis, false to disable all drawing of this axis</value>
-    /// <seealso cref="ZedGraph.Scale.IsVisible"/>.
+    /// <seealso cref="Scale.IsVisible"/>.
     /// <seealso cref="XAxis.Default.IsVisible"/>.
     /// <seealso cref="YAxis.Default.IsVisible"/>.
     /// <seealso cref="Y2Axis.Default.IsVisible"/>.
-    public bool IsVisible
-    {
-      get { return _isVisible; }
-      set { _isVisible = value; }
-    }
+    public bool IsVisible { get; set; }
 
     /// <summary>
     /// Gets or sets a property that determines whether or not the axis segment (the line that
@@ -643,11 +550,7 @@ namespace ZedGraph
     /// However, when the border is not visible, or when <see cref="Axis.CrossAuto"/> is set to
     /// false, this value will make a difference.
     /// </remarks>
-    public bool IsAxisSegmentVisible
-    {
-      get { return _isAxisSegmentVisible; }
-      set { _isAxisSegmentVisible = value; }
-    }
+    public bool IsAxisSegmentVisible { get; set; }
 
     /// <summary>
     /// Gets or sets the <see cref="AxisType"/> for this <see cref="Axis"/>.
@@ -657,15 +560,15 @@ namespace ZedGraph
     /// <see cref="AxisType.Log"/>, <see cref="AxisType.Date"/>,
     /// or <see cref="AxisType.Text"/>.
     /// </remarks>
-    /// <seealso cref="ZedGraph.Scale.IsLog"/>
-    /// <seealso cref="ZedGraph.Scale.IsText"/>
-    /// <seealso cref="ZedGraph.Scale.IsOrdinal"/>
-    /// <seealso cref="ZedGraph.Scale.IsDate"/>
-    /// <seealso cref="ZedGraph.Scale.IsReverse"/>
+    /// <seealso cref="Scale.IsLog"/>
+    /// <seealso cref="Scale.IsText"/>
+    /// <seealso cref="Scale.IsOrdinal"/>
+    /// <seealso cref="Scale.IsDate"/>
+    /// <seealso cref="Scale.IsReverse"/>
     public AxisType Type
     {
-      get { return _scale.Type; }
-      set { _scale = Scale.MakeNewScale( _scale, value ); }
+      get { return Scale.Type; }
+      set { Scale = Scale.MakeNewScale( Scale, value ); }
     }
 
   #endregion
@@ -683,11 +586,7 @@ namespace ZedGraph
     /// </remarks>
     /// <value>the title is a string value</value>
     /// <seealso cref="AxisLabel.IsOmitMag"/>
-    public AxisLabel Title
-    {
-      get { return _title; }
-      set { _title = value; }
-    }
+    public AxisLabel Title { get; set; }
 
     /// <summary>
     /// The size of the gap between multiple axes (see <see cref="GraphPane.YAxisList" /> and
@@ -700,11 +599,7 @@ namespace ZedGraph
     /// </remarks>
     /// <value>The axis gap is measured in points (1/72 inch)</value>
     /// <seealso cref="Default.AxisGap"/>.
-    public float AxisGap
-    {
-      get { return _axisGap; }
-      set { _axisGap = value; }
-    }
+    public float AxisGap { get; set; }
 
   #endregion
 
@@ -722,22 +617,34 @@ namespace ZedGraph
     /// A graphic device object to be drawn into.  This is normally e.Graphics from the
     /// PaintEventArgs argument to the Paint() method.
     /// </param>
-    /// <seealso cref="ZedGraph.Scale.MinAuto"/>
-    /// <seealso cref="ZedGraph.Scale.MaxAuto"/>
-    /// <seealso cref="ZedGraph.Scale.MajorStepAuto"/>
-    /// <seealso cref="ZedGraph.Scale.MagAuto"/>
-    /// <seealso cref="ZedGraph.Scale.FormatAuto"/>
-    public void ResetAutoScale( GraphPane pane, Graphics g )
+    /// <seealso cref="Scale.MinAuto"/>
+    /// <seealso cref="Scale.MaxAuto"/>
+    /// <seealso cref="Scale.MajorStepAuto"/>
+    /// <seealso cref="Scale.MagAuto"/>
+    /// <seealso cref="Scale.FormatAuto"/>
+    public void RestoreAutoScale( GraphPane pane, Graphics g, bool autoFormat = false )
     {
-      _scale._minAuto = true;
-      _scale._maxAuto = true;
-      _scale._majorStepAuto = true;
-      _scale._minorStepAuto = true;
-      _crossAuto = true;
-      _scale._magAuto = true;
+      Scale._minAuto = true;
+      Scale._maxAuto = true;
+      Scale._majorStepAuto = true;
+      Scale._minorStepAuto = true;
+      CrossAuto = true;
+      Scale._magAuto = true;
       //this.numDecAuto = true;
-      _scale._formatAuto = true;
+      if (autoFormat)
+        Scale._formatAuto = true;
       pane.AxisChange( g );
+    }
+
+    /// <summary>
+    /// Return the user scale value that corresponds to the specified screen
+    /// coordinate position (pixels).
+    /// </summary>
+    public double ReverseTransform(GraphPane pane, int pixCoord)
+    {
+      // Setup the scaling data based on the chart rect
+      Scale.SetupScaleData(pane);
+      return Scale.ReverseTransform(pixCoord);
     }
 
     /// <summary>
@@ -770,9 +677,9 @@ namespace ZedGraph
     {
       Matrix saveMatrix = g.Transform;
 
-      _scale.SetupScaleData( pane, this );
+      Scale.SetupScaleData( pane );
 
-      if ( _isVisible )
+      if ( IsVisible )
       {
         var smode = g.SmoothingMode;
         g.SmoothingMode = SmoothingMode.None;
@@ -781,7 +688,7 @@ namespace ZedGraph
 
         shiftPos = CalcTotalShift( pane, scaleFactor, shiftPos );
 
-        _scale.Draw( g, pane, scaleFactor, shiftPos );
+        Scale.Draw( g, pane, scaleFactor, shiftPos );
 
         //DrawTitle( g, pane, scaleFactor );
 
@@ -796,18 +703,18 @@ namespace ZedGraph
 
     internal void DrawGrid( Graphics g, GraphPane pane, float scaleFactor, float shiftPos )
     {
-      if ( _isVisible )
+      if ( IsVisible )
       {
         Matrix saveMatrix = g.Transform;
         SetTransformMatrix( g, pane, scaleFactor );
 
-        double baseVal = _scale.CalcBaseTic();
+        double baseVal = Scale.CalcBaseTic();
         float topPix, rightPix;
-        _scale.GetTopRightPix( pane, out topPix, out rightPix );
+        Scale.GetTopRightPix( pane, out topPix, out rightPix );
 
         shiftPos = CalcTotalShift( pane, scaleFactor, shiftPos );
 
-        _scale.DrawGrid( g, pane, baseVal, topPix, scaleFactor );
+        Scale.DrawGrid( g, pane, baseVal, topPix, scaleFactor );
 
         DrawMinorTics( g, pane, baseVal, shiftPos, scaleFactor, topPix );
 
@@ -905,7 +812,7 @@ namespace ZedGraph
 
     /// <summary>
     /// Returns the linearized actual cross position for this axis, reflecting the settings of
-    /// <see cref="Cross" />, <see cref="CrossAuto" />, and <see cref="ZedGraph.Scale.IsReverse" />.
+    /// <see cref="Cross" />, <see cref="CrossAuto" />, and <see cref="Scale.IsReverse" />.
     /// </summary>
     /// <remarks>
     /// If the value of <see cref="Cross" /> lies outside the axis range, it is
@@ -917,22 +824,22 @@ namespace ZedGraph
 
       // Use Linearize here instead of _minLinTemp because this method is called
       // as part of CalcRect() before scale is fully setup
-      double min = crossAxis._scale.Linearize( crossAxis._scale._min );
-      double max = crossAxis._scale.Linearize( crossAxis._scale._max );
+      double min = crossAxis.Scale.Linearize( crossAxis.Scale._min );
+      double max = crossAxis.Scale.Linearize( crossAxis.Scale._max );
 
-      if ( _crossAuto )
+      if ( CrossAuto )
       {
-        if ( crossAxis._scale.IsReverse == ( this is Y2Axis || this is X2Axis ) )
+        if ( crossAxis.Scale.IsReverse == ( this is Y2Axis || this is X2Axis ) )
           return max;
         else
           return min;
       }
-      else if ( _cross < min )
+      else if ( Cross < min )
         return min;
-      else if ( _cross > max )
+      else if ( Cross > max )
         return max;
       else
-        return _scale.Linearize( _cross );
+        return Scale.Linearize( Cross );
     }
 
     /// <summary>
@@ -941,12 +848,13 @@ namespace ZedGraph
     /// <param name="v1"></param>
     /// <param name="v2"></param>
     /// <returns></returns>
-    internal bool IsBelowMajorStepUnit(double v1, double v2)
+    internal void MinScaleLimit(double v1, ref double v2)
     {
-      if (v1 > float.MaxValue || v2 > float.MaxValue) return false;
-      var diff  = Math.Abs(v1 - v2);
       var limit = Scale.MajorStep * Scale.MajorUnitMultiplier;
-      return diff < limit;
+      if (v1 > float.MaxValue || v2 > float.MaxValue) return;
+      var diff  = Math.Abs(v1 - v2);
+      if (Scale.MajorStep < float.MaxValue && diff < limit)
+        v2 = v1 < v2 ? v1 + limit : v1 - limit;
     }
 
     /// <summary>
@@ -956,20 +864,20 @@ namespace ZedGraph
     /// </summary>
     internal bool IsCrossShifted( GraphPane pane )
     {
-      if ( _crossAuto )
+      if ( CrossAuto )
         return false;
       else
       {
         Axis crossAxis = GetCrossAxis( pane );
-        if ( ( ( this is XAxis || this is YAxis ) && !crossAxis._scale.IsReverse ) ||
-          ( ( this is X2Axis || this is Y2Axis ) && crossAxis._scale.IsReverse ) )
+        if ( ( ( this is XAxis || this is YAxis ) && !crossAxis.Scale.IsReverse ) ||
+          ( ( this is X2Axis || this is Y2Axis ) && crossAxis.Scale.IsReverse ) )
         {
-          if ( _cross <= crossAxis._scale._min )
+          if ( Cross <= crossAxis.Scale._min )
             return false;
         }
         else
         {
-          if ( _cross >= crossAxis._scale._max )
+          if ( Cross >= crossAxis.Scale._max )
             return false;
         }
       }
@@ -990,7 +898,7 @@ namespace ZedGraph
       {
         // if it's the primary axis and the scale labels are on the inside, then we
         // don't need to save any room for the axis labels (they will be inside the chart rect)
-        if ( IsPrimary( pane ) && _scale._isLabelsInside )
+        if ( IsPrimary( pane ) && Scale._isLabelsInside )
           return 1.0f;
         // otherwise, it's a secondary (outboard) axis and we always save room for the axis and labels.
         else
@@ -1004,15 +912,15 @@ namespace ZedGraph
       // as part of CalcRect() before scale is fully setup
       //      double max = crossAxis._scale._maxLinTemp;
       //      double min = crossAxis._scale._minLinTemp;
-      double max = crossAxis._scale.Linearize( crossAxis._scale._min );
-      double min = crossAxis._scale.Linearize( crossAxis._scale._max );
+      double max = crossAxis.Scale.Linearize( crossAxis.Scale._min );
+      double min = crossAxis.Scale.Linearize( crossAxis.Scale._max );
       float frac;
 
-      if ( ( ( this is XAxis || this is YAxis ) && _scale._isLabelsInside == crossAxis._scale.IsReverse ) ||
-         ( ( this is X2Axis || this is Y2Axis ) && _scale._isLabelsInside != crossAxis._scale.IsReverse ) )
-        frac = (float)( ( effCross - min ) / ( max - min ) );
+      if (((this is XAxis || this is YAxis)  && Scale._isLabelsInside == crossAxis.Scale.IsReverse) ||
+         ((this is X2Axis || this is Y2Axis) && Scale._isLabelsInside != crossAxis.Scale.IsReverse))
+        frac = (float)((effCross - min) / (max - min));
       else
-        frac = (float)( ( max - effCross ) / ( max - min ) );
+        frac = (float)((max - effCross) / (max - min));
 
       if ( frac < 0.0f )
         frac = 0.0f;
@@ -1024,6 +932,8 @@ namespace ZedGraph
 
     private float CalcTotalShift( GraphPane pane, float scaleFactor, float shiftPos )
     {
+      var startPos = shiftPos;
+
       if ( !IsPrimary( pane ) )
       {
         // if ( CalcCrossFraction( pane ) != 0.0 )
@@ -1034,27 +944,27 @@ namespace ZedGraph
         else
         {
           // Scaled size (pixels) of a tic
-          float ticSize = _majorTic.ScaledTic( scaleFactor );
+          float ticSize = MajorTic.ScaledTic( scaleFactor );
 
           // if the scalelabels are on the inside, shift everything so the axis is drawn,
           // for example, to the left side of the available space for a YAxis type
-          if ( _scale._isLabelsInside )
+          if ( Scale._isLabelsInside )
           {
             shiftPos += _tmpSpace;
 
             // shift the axis to leave room for the outside tics
-            if ( _majorTic.IsOutside || _majorTic._isCrossOutside ||
-                 _minorTic.IsOutside || _minorTic._isCrossOutside )
+            if ( MajorTic.IsOutside || MajorTic._isCrossOutside ||
+                 MinorTic.IsOutside || MinorTic._isCrossOutside )
               shiftPos -= ticSize;
           }
           else
           {
             // if it's not the primary axis, add a tic space for the spacing between axes
-            shiftPos += _axisGap * scaleFactor;
+            shiftPos += AxisGap * scaleFactor;
 
             // if it has inside tics, leave another tic space
-            if ( _majorTic.IsInside || _majorTic._isCrossInside ||
-                 _minorTic.IsInside || _minorTic._isCrossInside )
+            if ( MajorTic.IsInside || MajorTic._isCrossInside ||
+                 MinorTic.IsInside || MinorTic._isCrossInside )
               shiftPos += ticSize;
           }
         }
@@ -1064,7 +974,18 @@ namespace ZedGraph
       // everything else is based on that position.
       float crossShift = CalcCrossShift( pane );
       shiftPos += crossShift;
-
+/*
+      if (this is IXAxis)
+      {
+        Rect.X     = 0f;
+        Rect.Width = (startPos - shiftPos);
+      }
+      else
+      {
+        Rect.Y      = 0f;
+        Rect.Height = (startPos - shiftPos);
+      }
+*/
       return shiftPos;
     }
 
@@ -1103,13 +1024,13 @@ namespace ZedGraph
       //fixedSpace = 0;
 
       //Typical character height for the scale font
-      float charHeight = _scale._fontSpec.GetHeight( scaleFactor );
+      float charHeight = Scale._fontSpec.GetHeight( scaleFactor );
       // Scaled size (pixels) of a tic
-      float ticSize = _majorTic.ScaledTic( scaleFactor );
+      float ticSize = MajorTic.ScaledTic( scaleFactor );
       // Scaled size (pixels) of the axis gap
-      float axisGap = _axisGap * scaleFactor;
-      float scaledLabelGap = _scale._labelGap * charHeight;
-      float scaledTitleGap = _title.GetScaledGap( scaleFactor );
+      float axisGap = AxisGap * scaleFactor;
+      float scaledLabelGap = Scale._labelGap * charHeight;
+      float scaledTitleGap = Title.GetScaledGap( scaleFactor );
 
       // The minimum amount of space to reserve for the NORMAL position of the axis.  This would
       // be the left side of the chart rect for the Y axis, the right side for the Y2 axis, etc.
@@ -1121,7 +1042,7 @@ namespace ZedGraph
       _tmpSpace = 0;
 
       // Account for the Axis
-      if ( _isVisible )
+      if ( IsVisible )
       {
         bool hasTic = this.MajorTic.IsOutside || this.MajorTic._isCrossOutside ||
                       this.MinorTic.IsOutside || this.MinorTic._isCrossOutside;
@@ -1148,7 +1069,7 @@ namespace ZedGraph
         // space between scale label and axis label is 0.5 tic
 
         // account for the tic labels + 'LabelGap' tic gap between the tic and the label
-        _tmpSpace += _scale.GetScaleMaxSpace( g, pane, scaleFactor, true ).Height +
+        _tmpSpace += Scale.GetScaleMaxSpace( g, pane, scaleFactor, true ).Height +
             scaledLabelGap;
 
         string str = MakeTitle();
@@ -1156,7 +1077,7 @@ namespace ZedGraph
         // Only add space for the title if there is one
         // Axis Title gets actual height
         // if ( str.Length > 0 && _title._isVisible )
-        if ( !string.IsNullOrEmpty( str ) && _title._isVisible )
+        if ( !string.IsNullOrEmpty( str ) && Title._isVisible )
         {
           //tmpSpace += this.TitleFontSpec.BoundingBox( g, str, scaleFactor ).Height;
           fixedSpace = this.Title.FontSpec.BoundingBox( g, str, scaleFactor ).Height +
@@ -1174,15 +1095,15 @@ namespace ZedGraph
       // and last X axis scale label
       if ( this.IsPrimary( pane ) && ( (
           ( this is YAxis && (
-            ( !pane.XAxis._scale._isSkipFirstLabel && !pane.XAxis._scale._isReverse ) ||
-            ( !pane.XAxis._scale._isSkipLastLabel && pane.XAxis._scale._isReverse ) ) ) ||
+            ( !pane.XAxis.Scale._isSkipFirstLabel && !pane.XAxis.Scale._isReverse ) ||
+            ( !pane.XAxis.Scale._isSkipLastLabel && pane.XAxis.Scale._isReverse ) ) ) ||
           ( this is Y2Axis && (
-            ( !pane.XAxis._scale._isSkipFirstLabel && pane.XAxis._scale._isReverse ) ||
-            ( !pane.XAxis._scale._isSkipLastLabel && !pane.XAxis._scale._isReverse ) ) ) ) &&
-          pane.XAxis.IsVisible && pane.XAxis._scale._isVisible ) )
+            ( !pane.XAxis.Scale._isSkipFirstLabel && pane.XAxis.Scale._isReverse ) ||
+            ( !pane.XAxis.Scale._isSkipLastLabel && !pane.XAxis.Scale._isReverse ) ) ) ) &&
+          pane.XAxis.IsVisible && pane.XAxis.Scale._isVisible ) )
       {
         // half the width of the widest item, plus a gap of 1/2 the charheight
-        float tmp = pane.XAxis._scale.GetScaleMaxSpace( g, pane, scaleFactor, true ).Width / 2.0F;
+        float tmp = pane.XAxis.Scale.GetScaleMaxSpace( g, pane, scaleFactor, true ).Width / 2.0F;
         //+ charHeight / 2.0F;
         //if ( tmp > tmpSpace )
         //  tmpSpace = tmp;
@@ -1191,9 +1112,9 @@ namespace ZedGraph
       }
 
       // Verify that the minSpace property was satisfied
-      _tmpSpace = Math.Max( _tmpSpace, _minSpace * (float)scaleFactor );
+      _tmpSpace = Math.Max( _tmpSpace, MinSpace * (float)scaleFactor );
 
-      fixedSpace = Math.Max( fixedSpace, _minSpace * (float)scaleFactor );
+      fixedSpace = Math.Max( fixedSpace, MinSpace * (float)scaleFactor );
 
       return _tmpSpace;
     }
@@ -1222,13 +1143,13 @@ namespace ZedGraph
         float left, float right )
     {
       // restore the zero line if needed (since the fill tends to cover it up)
-      if ( _isVisible && _majorGrid._isZeroLine &&
-          _scale._min < 0.0 && _scale._max > 0.0 )
+      if ( IsVisible && MajorGrid._isZeroLine &&
+          Scale._min < 0.0 && Scale._max > 0.0 )
       {
-        float zeroPix = _scale.Transform( 0.0 );
+        float zeroPix = Scale.Transform( 0.0 );
 
-        using ( Pen zeroPen = new Pen( _color,
-            pane.ScaledPenWidth( _majorGrid._penWidth, scaleFactor ) ) )
+        using ( Pen zeroPen = new Pen( Color,
+            pane.ScaledPenWidth( MajorGrid._penWidth, scaleFactor ) ) )
         {
           g.DrawLine( zeroPen, left, zeroPix, right, zeroPix );
           //zeroPen.Dispose();
@@ -1269,13 +1190,13 @@ namespace ZedGraph
                 float scaleFactor, float topPix )
     {
       if ( ( this.MinorTic.IsOutside || this.MinorTic.IsOpposite || this.MinorTic.IsInside ||
-          this.MinorTic._isCrossOutside || this.MinorTic._isCrossInside || _minorGrid._isVisible )
-          && _isVisible )
+          this.MinorTic._isCrossOutside || this.MinorTic._isCrossInside || MinorGrid._isVisible )
+          && IsVisible )
       {
-        double  tMajor = _scale._majorStep * _scale.MajorUnitMultiplier,
-              tMinor = _scale._minorStep * _scale.MinorUnitMultiplier;
+        double  tMajor = Scale._majorStep * Scale.MajorUnitMultiplier,
+              tMinor = Scale._minorStep * Scale.MinorUnitMultiplier;
 
-        if ( _scale.IsLog || tMinor < tMajor )
+        if ( Scale.IsLog || tMinor < tMajor )
         {
           float minorScaledTic = this.MinorTic.ScaledTic( scaleFactor );
 
@@ -1283,40 +1204,40 @@ namespace ZedGraph
           // the full scale.  This means that if the minor step size is not
           // an even division of the major step size, the minor tics won't
           // line up with all of the scale labels and major tics.
-          double  first = _scale._minLinTemp,
-                last = _scale._maxLinTemp;
+          double  first = Scale._minLinTemp,
+                last = Scale._maxLinTemp;
 
           double dVal = first;
           float pixVal;
 
-          int iTic = _scale.CalcMinorStart( baseVal );
+          int iTic = Scale.CalcMinorStart( baseVal );
           int MajorTic = 0;
-          double majorVal = _scale.CalcMajorTicValue( baseVal, MajorTic );
+          double majorVal = Scale.CalcMajorTicValue( baseVal, MajorTic );
 
-          using ( Pen  pen = new Pen( _minorTic._color,
+          using ( Pen  pen = new Pen( MinorTic._color,
                     pane.ScaledPenWidth( MinorTic._penWidth, scaleFactor ) ) )
-          using ( Pen minorGridPen = _minorGrid.GetPen( pane, scaleFactor ) )
+          using ( Pen minorGridPen = MinorGrid.GetPen( pane, scaleFactor ) )
           {
 
             // Draw the minor tic marks
             while ( dVal < last && iTic < 5000 )
             {
               // Calculate the scale value for the current tic
-              dVal = _scale.CalcMinorTicValue( baseVal, iTic );
+              dVal = Scale.CalcMinorTicValue( baseVal, iTic );
               // Maintain a value for the current major tic
               if ( dVal > majorVal )
-                majorVal = _scale.CalcMajorTicValue( baseVal, ++MajorTic );
+                majorVal = Scale.CalcMajorTicValue( baseVal, ++MajorTic );
 
               // Make sure that the current value does not match up with a major tic
               if ( ( ( Math.Abs( dVal ) < 1e-20 && Math.Abs( dVal - majorVal ) > 1e-20 ) ||
                 ( Math.Abs( dVal ) > 1e-20 && Math.Abs( ( dVal - majorVal ) / dVal ) > 1e-10 ) ) &&
                 ( dVal >= first && dVal <= last ) )
               {
-                pixVal = _scale.LocalTransform( dVal );
+                pixVal = Scale.LocalTransform( dVal );
 
-                _minorGrid.Draw( g, minorGridPen, pixVal, topPix );
+                MinorGrid.Draw( g, minorGridPen, pixVal, topPix );
 
-                _minorTic.Draw( g, pane, pen, pixVal, topPix, shift, minorScaledTic );
+                MinorTic.Draw( g, pane, pen, pixVal, topPix, shift, minorScaledTic );
               }
 
               iTic++;
@@ -1356,19 +1277,19 @@ namespace ZedGraph
 
       // If the Axis is visible, draw the title
       //if ( _isVisible && _title._isVisible && str.Length > 0 )
-      if ( _isVisible && _title._isVisible && !string.IsNullOrEmpty( str ) )
+      if ( IsVisible && Title._isVisible && !string.IsNullOrEmpty( str ) )
       {
-        bool hasTic = ( _scale._isLabelsInside ?
+        bool hasTic = ( Scale._isLabelsInside ?
             ( this.MajorTic.IsInside || this.MajorTic._isCrossInside ||
                 this.MinorTic.IsInside || this.MinorTic._isCrossInside ) :
             ( this.MajorTic.IsOutside || this.MajorTic._isCrossOutside || this.MinorTic.IsOutside || this.MinorTic._isCrossOutside ) );
 
         // Calculate the title position in screen coordinates
-        float x = ( _scale._maxPix - _scale._minPix ) / 2;
+        float x = ( Scale._maxPix - Scale._minPix ) / 2;
 
         float scaledTic = MajorTic.ScaledTic( scaleFactor );
-        float scaledLabelGap = _scale._fontSpec.GetHeight( scaleFactor ) * _scale._labelGap;
-        float scaledTitleGap = _title.GetScaledGap( scaleFactor );
+        float scaledLabelGap = Scale._fontSpec.GetHeight( scaleFactor ) * Scale._labelGap;
+        float scaledTitleGap = Title.GetScaledGap( scaleFactor );
 
         // The space for the scale labels is only reserved if the axis is not shifted due to the
         // cross value.  Note that this could be a problem if the axis is only shifted slightly,
@@ -1379,15 +1300,15 @@ namespace ZedGraph
 
         float gap = scaledTic * ( hasTic ? 1.0f : 0.0f ) +
               this.Title.FontSpec.BoundingBox( g, str, scaleFactor ).Height / 2.0F;
-        float y = ( _scale._isVisible ? _scale.GetScaleMaxSpace( g, pane, scaleFactor, true ).Height
+        float y = ( Scale._isVisible ? Scale.GetScaleMaxSpace( g, pane, scaleFactor, true ).Height
               + scaledLabelGap : 0 );
 
-        if ( _scale._isLabelsInside )
+        if ( Scale._isLabelsInside )
           y = shiftPos - y - gap;
         else
           y = shiftPos + y + gap;
 
-        if ( !_crossAuto && !_title._isTitleAtCross )
+        if ( !CrossAuto && !Title._isTitleAtCross )
           y = Math.Max( y, gap );
 
         AlignV alignV = AlignV.Center;
@@ -1403,8 +1324,8 @@ namespace ZedGraph
 
     private string MakeTitle()
     {
-      if ( _title._text == null )
-        _title._text = "";
+      if ( Title._text == null )
+        Title._text = "";
 
       // Revision: JCarpenter 10/06
       // Allow customization of the modified title when the scale is very large
@@ -1419,10 +1340,10 @@ namespace ZedGraph
 
       // If the Mag is non-zero and IsOmitMag == false, and IsLog == false,
       // then add the mag indicator to the title.
-      if ( _scale._mag != 0 && !_title._isOmitMag && !_scale.IsLog )
-        return _title._text + String.Format( " (10^{0})", _scale._mag );
+      if ( Scale._mag != 0 && !Title._isOmitMag && !Scale.IsLog )
+        return Title._text + String.Format( " (10^{0})", Scale._mag );
       else
-        return _title._text;
+        return Title._text;
 
     }
 
@@ -1430,8 +1351,8 @@ namespace ZedGraph
     /// Make a value label for the axis at the specified ordinal position.
     /// </summary>
     /// <remarks>
-    /// This method properly accounts for <see cref="ZedGraph.Scale.IsLog"/>,
-    /// <see cref="ZedGraph.Scale.IsText"/>,
+    /// This method properly accounts for <see cref="Scale.IsLog"/>,
+    /// <see cref="Scale.IsText"/>,
     /// and other axis format settings.  It also implements the ScaleFormatEvent such that
     /// custom labels can be created.
     /// </remarks>
@@ -1445,32 +1366,27 @@ namespace ZedGraph
     /// </param>
     /// <param name="dVal">
     /// The numeric value associated with the label.  This value is ignored for log
-    /// (<see cref="ZedGraph.Scale.IsLog"/>)
-    /// and text (<see cref="ZedGraph.Scale.IsText"/>) type axes.
+    /// (<see cref="Scale.IsLog"/>)
+    /// and text (<see cref="Scale.IsText"/>) type axes.
     /// </param>
     /// <returns>The resulting value label as a <see cref="string" /></returns>
     internal string MakeLabelEventWorks( GraphPane pane, int index, double dVal )
     {
       // if there is a valid ScaleFormatEvent, then try to use it to create the label
       // the label will be non-null if it's to be used
-      if ( this.ScaleFormatEvent != null )
-      {
-        string label;
+      if (ScaleFormatEvent == null)
+        return Scale != null ? Scale.MakeLabel(pane, index, dVal) : "?";
 
-        label = this.ScaleFormatEvent( pane, this, dVal, index );
-        if ( label != null )
-          return label;
-      }
+      var label = ScaleFormatEvent( pane, this, dVal, index );
+      if (label != null)
+        return label;
 
       // second try.  If there's no custom ScaleFormatEvent, then just call
       // _scale.MakeLabel according to the type of scale
-      if ( this.Scale != null )
-        return _scale.MakeLabel( pane, index, dVal );
-      else
-        return "?";
+      return Scale != null ? Scale.MakeLabel( pane, index, dVal ) : "?";
     }
 
-  #endregion
+    #endregion
 
   }
 }

@@ -96,7 +96,7 @@ namespace ZedGraph
       {
         isPenSave[i + 1] = mPane[i].IsPenWidthScaled;
         isFontSave[i + 1] = mPane[i].IsFontsScaled;
-        if ( _isPrintScaleAll )
+        if ( IsPrintScaleAll )
         {
           mPane[i].IsPenWidthScaled = true;
           mPane[i].IsFontsScaled = true;
@@ -105,7 +105,7 @@ namespace ZedGraph
 
       RectangleF saveRect = mPane.Rect;
       SizeF newSize = mPane.Rect.Size;
-      if ( _isPrintFillPage && _isPrintKeepAspectRatio )
+      if ( IsPrintFillPage && IsPrintKeepAspectRatio )
       {
         float xRatio = (float)e.MarginBounds.Width / (float)newSize.Width;
         float yRatio = (float)e.MarginBounds.Height / (float)newSize.Height;
@@ -114,7 +114,7 @@ namespace ZedGraph
         newSize.Width *= ratio;
         newSize.Height *= ratio;
       }
-      else if ( _isPrintFillPage )
+      else if ( IsPrintFillPage )
         newSize = e.MarginBounds.Size;
 
       mPane.ReSize( e.Graphics, new RectangleF( e.MarginBounds.Left,

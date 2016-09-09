@@ -158,8 +158,8 @@ namespace ZedGraph
 
       if (y < pane.Chart._rect.Top || y >= pane.Chart._rect.Bottom) return;
 
-      var charHeight   = axis.Scale.FontSpec.GetHeight(scaleFactor);
-      var maxLabelSize = axis.Scale.GetScaleMaxSpace(g, pane, scaleFactor, true);
+      var charHeight   = axis.Scale.FontSpec.Font.Height; // GetHeight(scaleFactor);
+      var maxLabelSize = axis.Scale._maxSpace; // GetScaleMaxSpace(g, pane, scaleFactor, true);
       var maxSpace     = maxLabelSize.Height;
       var scaledTic    = axis.MajorTic.ScaledTic(scaleFactor);
 

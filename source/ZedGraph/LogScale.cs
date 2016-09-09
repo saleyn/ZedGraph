@@ -131,15 +131,12 @@ namespace ZedGraph
     /// methods to setup for coordinate transformations.
     /// </remarks>
     /// <param name="pane">
-    /// A reference to the <see cref="GraphPane"/> object that is the parent or
-    /// owner of this object.
+    ///   A reference to the <see cref="GraphPane"/> object that is the parent or
+    ///   owner of this object.
     /// </param>
-    /// <param name="axis">
-    /// The parent <see cref="Axis" /> for this <see cref="Scale" />
-    /// </param>
-    override public void SetupScaleData( GraphPane pane, Axis axis )
+    override public void SetupScaleData(GraphPane pane)
     {
-      base.SetupScaleData( pane, axis );
+      base.SetupScaleData( pane );
 
       _minLinTemp = Linearize( _min );
       _maxLinTemp = Linearize( _max );

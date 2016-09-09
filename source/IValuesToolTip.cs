@@ -5,16 +5,6 @@ namespace ZedGraph
   public interface IValuesToolTip
   {
     /// <summary>
-    /// Disables the tool tip.
-    /// </summary>
-    void Disable();
-
-    /// <summary>
-    /// Enables the tool tip.
-    /// </summary>
-    void Enable();
-
-    /// <summary>
     /// Sets the caption for the tool tip at the specified point.
     /// </summary>
     /// <param name="caption">The caption.</param>
@@ -25,5 +15,10 @@ namespace ZedGraph
     /// Get tooltip's value for given control
     /// </summary>
     string Get();
+
+    /// <summary>
+    /// True if tooltip is active
+    /// </summary>
+    bool Active { get; set; }
   }
 }

@@ -21,8 +21,6 @@ using System;
 using System.Drawing;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using System.Collections;
-using IComparer  = System.Collections.IComparer;
 
 #if ( !DOTNET1 )  // Is this a .Net 2 compilation?
 using System.Collections.Generic;
@@ -38,7 +36,7 @@ namespace ZedGraph
   /// <author> Jerry Vos modified by John Champion </author>
   /// <version> $Revision: 3.26 $ $Date: 2007-11-28 02:38:22 $ </version>
   [Serializable]
-  public class PointPair : PointPairBase, ISerializable, ICloneable
+  public class PointPair : PointPairBase, ICloneable
   {
   #region Member variables
     
@@ -221,7 +219,7 @@ namespace ZedGraph
     /// <summary>
     /// Readonly value that determines if either the X, Y, or Z
     /// coordinate in this PointPair is an invalid (not plotable) value.
-    /// It is considered invalid if it is missing (equal to System.Double.Max),
+    /// It is considered invalid if it is missing (equal to System.double.Max),
     /// Infinity, or NaN.
     /// </summary>
     /// <returns>true if any value is invalid</returns>
@@ -230,12 +228,12 @@ namespace ZedGraph
       get { return  this.X == PointPair.Missing ||
               this.Y == PointPair.Missing ||
               this.Z == PointPair.Missing ||
-              Double.IsInfinity( this.X ) ||
-              Double.IsInfinity( this.Y ) ||
-              Double.IsInfinity( this.Z ) ||
-              Double.IsNaN( this.X ) ||
-              Double.IsNaN( this.Y ) ||
-              Double.IsNaN( this.Z );
+              double.IsInfinity( this.X ) ||
+              double.IsInfinity( this.Y ) ||
+              double.IsInfinity( this.Z ) ||
+              double.IsNaN( this.X ) ||
+              double.IsNaN( this.Y ) ||
+              double.IsNaN( this.Z );
         }
     }
 
@@ -362,9 +360,9 @@ namespace ZedGraph
           rVal = pr.Y;
         }
         
-        if ( lVal == PointPair.Missing || Double.IsInfinity( lVal ) || Double.IsNaN( lVal ) )
+        if ( lVal == PointPair.Missing || double.IsInfinity( lVal ) || double.IsNaN( lVal ) )
           pl = null;
-        if ( rVal == PointPair.Missing || Double.IsInfinity( rVal ) || Double.IsNaN( rVal ) )
+        if ( rVal == PointPair.Missing || double.IsInfinity( rVal ) || double.IsNaN( rVal ) )
           pr = null;
 
         if ( ( pl == null && pr == null ) || ( System.Math.Abs( lVal - rVal ) < 1e-10 ) )
@@ -465,9 +463,9 @@ namespace ZedGraph
           rVal = r.Y;
         }
 
-        if ( lVal == PointPair.Missing || Double.IsInfinity( lVal ) || Double.IsNaN( lVal ) )
+        if ( lVal == PointPair.Missing || double.IsInfinity( lVal ) || double.IsNaN( lVal ) )
           l = null;
-        if ( rVal == PointPair.Missing || Double.IsInfinity( rVal ) || Double.IsNaN( rVal ) )
+        if ( rVal == PointPair.Missing || double.IsInfinity( rVal ) || double.IsNaN( rVal ) )
           r = null;
 
         if ( ( l == null && r == null ) || ( System.Math.Abs( lVal - rVal ) < 1e-100 ) )
@@ -526,7 +524,7 @@ namespace ZedGraph
     /// is true, then the third "Z" coordinate is also shown.
     /// </summary>
     /// <param name="format">A format string that will be used to format each of
-    /// the two double type values (see <see cref="System.Double.ToString()"/>).</param>
+    /// the two double type values (see <see cref="System.double.ToString()"/>).</param>
     /// <returns>A string representation of the PointPair</returns>
     /// <param name="isShowZ">true to show the third "Z" or low dependent value coordinate</param>
     virtual public string ToString( string format, bool isShowZ )
@@ -542,11 +540,11 @@ namespace ZedGraph
     /// Example:  a format string of "e2" would give "( 1.23e+001, -1.69e+001 )".
     /// </summary>
     /// <param name="formatX">A format string that will be used to format the X
-    /// double type value (see <see cref="System.Double.ToString()"/>).</param>
+    /// double type value (see <see cref="System.double.ToString()"/>).</param>
     /// <param name="formatY">A format string that will be used to format the Y
-    /// double type value (see <see cref="System.Double.ToString()"/>).</param>
+    /// double type value (see <see cref="System.double.ToString()"/>).</param>
     /// <param name="formatZ">A format string that will be used to format the Z
-    /// double type value (see <see cref="System.Double.ToString()"/>).</param>
+    /// double type value (see <see cref="System.double.ToString()"/>).</param>
     /// <returns>A string representation of the PointPair</returns>
     public string ToString( string formatX, string formatY, string formatZ )
     {

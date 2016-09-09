@@ -353,7 +353,7 @@ namespace ZedGraph
     {
       double minStep = Double.MaxValue;
 
-      if ( list.Count <= 0 || baseAxis._scale.IsAnyOrdinal )
+      if ( list.Count <= 0 || baseAxis.Scale.IsAnyOrdinal )
         return 1.0;
 
       PointPair lastPt = list[0];
@@ -401,7 +401,7 @@ namespace ZedGraph
     /// <returns>The width of each bar cluster, in pixel units</returns>
     public float GetClusterWidth()
     {
-      return BarBaseAxis()._scale.GetClusterWidth( _ownerPane );
+      return BarBaseAxis().Scale.GetClusterWidth( _ownerPane );
     }
 
     /// <summary>

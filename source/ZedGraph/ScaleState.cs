@@ -69,24 +69,24 @@ namespace ZedGraph
     /// range settings.</param>
     public ScaleState( Axis axis )
     {
-      _min = axis._scale._min;
-      _minorStep = axis._scale._minorStep;
-      _majorStep = axis._scale._majorStep;
-      _max = axis._scale._max;
-      _majorUnit = axis._scale._majorUnit;
-      _minorUnit = axis._scale._minorUnit;
+      _min = axis.Scale._min;
+      _minorStep = axis.Scale._minorStep;
+      _majorStep = axis.Scale._majorStep;
+      _max = axis.Scale._max;
+      _majorUnit = axis.Scale._majorUnit;
+      _minorUnit = axis.Scale._minorUnit;
 
-      _format = axis._scale._format;
-      _mag = axis._scale._mag;
+      _format = axis.Scale._format;
+      _mag = axis.Scale._mag;
       //this.numDec = axis.NumDec;
 
-      _minAuto = axis._scale._minAuto;
-      _majorStepAuto = axis._scale._majorStepAuto;
-      _minorStepAuto = axis._scale._minorStepAuto;
-      _maxAuto = axis._scale._maxAuto;
+      _minAuto = axis.Scale._minAuto;
+      _majorStepAuto = axis.Scale._majorStepAuto;
+      _minorStepAuto = axis.Scale._minorStepAuto;
+      _maxAuto = axis.Scale._maxAuto;
 
-      _formatAuto = axis._scale._formatAuto;
-      _magAuto = axis._scale._magAuto;
+      _formatAuto = axis.Scale._formatAuto;
+      _magAuto = axis.Scale._magAuto;
     }
 
     /// <summary>
@@ -140,25 +140,25 @@ namespace ZedGraph
     /// copied</param>
     public void ApplyScale( Axis axis )
     {
-      axis._scale._min = _min;
-      axis._scale._majorStep = _majorStep;
-      axis._scale._minorStep = _minorStep;
-      axis._scale._max = _max;
-      axis._scale._majorUnit = _majorUnit;
-      axis._scale._minorUnit = _minorUnit;
+      axis.Scale._min = _min;
+      axis.Scale._majorStep = _majorStep;
+      axis.Scale._minorStep = _minorStep;
+      axis.Scale._max = _max;
+      axis.Scale._majorUnit = _majorUnit;
+      axis.Scale._minorUnit = _minorUnit;
 
-      axis._scale._format = _format;
-      axis._scale._mag = _mag;
+      axis.Scale._format = _format;
+      axis.Scale._mag = _mag;
 
       // The auto settings must be made after the min/step/max settings, since setting those
       // properties actually affects the auto settings.
-      axis._scale._minAuto = _minAuto;
-      axis._scale._minorStepAuto = _minorStepAuto;
-      axis._scale._majorStepAuto = _majorStepAuto;
-      axis._scale._maxAuto = _maxAuto;
+      axis.Scale._minAuto = _minAuto;
+      axis.Scale._minorStepAuto = _minorStepAuto;
+      axis.Scale._majorStepAuto = _majorStepAuto;
+      axis.Scale._maxAuto = _maxAuto;
 
-      axis._scale._formatAuto = _formatAuto;
-      axis._scale._magAuto = _magAuto;
+      axis.Scale._formatAuto = _formatAuto;
+      axis.Scale._magAuto = _magAuto;
 
     }
 
@@ -170,16 +170,16 @@ namespace ZedGraph
     /// <returns>true if the states are different, false otherwise</returns>
     public bool IsChanged( Axis axis )
     {
-      return axis._scale._min != _min ||
-          axis._scale._majorStep != _majorStep ||
-          axis._scale._minorStep != _minorStep ||
-          axis._scale._max != _max ||
-          axis._scale._minorUnit != _minorUnit ||
-          axis._scale._majorUnit != _majorUnit ||
-          axis._scale._minAuto != _minAuto ||
-          axis._scale._minorStepAuto != _minorStepAuto ||
-          axis._scale._majorStepAuto != _majorStepAuto ||
-          axis._scale._maxAuto != _maxAuto;
+      return axis.Scale._min != _min ||
+          axis.Scale._majorStep != _majorStep ||
+          axis.Scale._minorStep != _minorStep ||
+          axis.Scale._max != _max ||
+          axis.Scale._minorUnit != _minorUnit ||
+          axis.Scale._majorUnit != _majorUnit ||
+          axis.Scale._minAuto != _minAuto ||
+          axis.Scale._minorStepAuto != _minorStepAuto ||
+          axis.Scale._majorStepAuto != _majorStepAuto ||
+          axis.Scale._maxAuto != _maxAuto;
     }
 
   }

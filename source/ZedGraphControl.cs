@@ -9,7 +9,7 @@
     /// <summary>
     /// The tool tip for displaying the cursor and point values.
     /// </summary>
-    private readonly IValuesToolTip tooltip;
+    private readonly IValuesToolTip _tooltip;
 
     #endregion
 
@@ -20,7 +20,7 @@
     /// </summary>
     private void EnableToolTip()
     {
-      this.tooltip.Enable();
+      this._tooltip.Active = true;
     }
 
     /// <summary>
@@ -36,10 +36,10 @@
         return;
       }
 
-      if (string.Equals(tooltip.Get(), caption)) return;
+      _tooltip.Set(caption, point);
 
-      tooltip.Set(caption, point);
-      EnableToolTip();
+      if (!_tooltip.Active)
+        EnableToolTip();
     }
 
     /// <summary>
@@ -47,7 +47,7 @@
     /// </summary>
     private void DisableToolTip()
     {
-      this.tooltip.Disable();
+      this._tooltip.Active = false;
     }
 
     #endregion

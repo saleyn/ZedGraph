@@ -41,13 +41,9 @@ namespace ZedGraph
     /// of <see cref="ZoomButtons"/> to <see cref="MouseButtons.None"/>.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( MouseButtons.Left ),
      Description( "Determines which mouse button is used as the primary for zooming" )]
-    public MouseButtons ZoomButtons
-    {
-      get { return _zoomButtons; }
-      set { _zoomButtons = value; }
-    }
+    public MouseButtons ZoomButtons { get; set; } = MouseButtons.Left;
+
     /// <summary>
     /// Gets or sets a value that determines which mouse button will be used as the secondary option
     /// to trigger a zoom event.
@@ -59,13 +55,9 @@ namespace ZedGraph
     /// of <see cref="ZoomButtons2"/> to <see cref="MouseButtons.None"/>.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( MouseButtons.None ),
      Description( "Determines which mouse button is used as the secondary for zooming" )]
-    public MouseButtons ZoomButtons2
-    {
-      get { return _zoomButtons2; }
-      set { _zoomButtons2 = value; }
-    }
+    public MouseButtons ZoomButtons2 { get; set; } = MouseButtons.None;
+
     /// <summary>
     /// Gets or sets a value that determines which modifier keys will be used as a primary option
     /// to trigger a zoom event.
@@ -77,13 +69,9 @@ namespace ZedGraph
     /// of <see cref="ZoomButtons"/> to <see cref="MouseButtons.None"/>.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( Keys.None ),
      Description( "Determines which modifier key used as the primary for zooming" )]
-    public Keys ZoomModifierKeys
-    {
-      get { return _zoomModifierKeys; }
-      set { _zoomModifierKeys = value; }
-    }
+    public Keys ZoomModifierKeys { get; set; } = Keys.Shift;
+
     /// <summary>
     /// Gets or sets a value that determines which modifier keys will be used as a secondary option
     /// to trigger a zoom event.
@@ -95,13 +83,8 @@ namespace ZedGraph
     /// of <see cref="ZoomButtons2"/> to <see cref="MouseButtons.None"/>.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( Keys.None ),
      Description( "Determines which modifier key used as the secondary for zooming" )]
-    public Keys ZoomModifierKeys2
-    {
-      get { return _zoomModifierKeys2; }
-      set { _zoomModifierKeys2 = value; }
-    }
+    public Keys ZoomModifierKeys2 { get; set; } = Keys.Alt;
 
     /// <summary>
     /// Gets or sets a value that determines which mouse button will be used as a primary option
@@ -114,13 +97,9 @@ namespace ZedGraph
     /// of <see cref="PanButtons"/> to <see cref="MouseButtons.None"/>.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( MouseButtons.Left ),
      Description( "Determines which mouse button is used as the primary for panning" )]
-    public MouseButtons PanButtons
-    {
-      get { return _panButtons; }
-      set { _panButtons = value; }
-    }
+    public MouseButtons PanButtons { get; set; } = MouseButtons.Left;
+
     /// <summary>
     /// Gets or sets a value that determines which mouse button will be used as the secondary option
     /// to trigger a pan event.
@@ -132,13 +111,8 @@ namespace ZedGraph
     /// of <see cref="PanButtons2"/> to <see cref="MouseButtons.None"/>.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( MouseButtons.Middle ),
      Description( "Determines which mouse button is used as the secondary for panning" )]
-    public MouseButtons PanButtons2
-    {
-      get { return _panButtons2; }
-      set { _panButtons2 = value; }
-    }
+    public MouseButtons PanButtons2 { get; set; } = MouseButtons.Middle;
 
     // NOTE: The default value of PanModifierKeys is Keys.Shift. Because of an apparent bug in
     // VS 2003, the initial value set in InitializeComponent by the code wizard is "Keys.Shift+None"
@@ -156,13 +130,8 @@ namespace ZedGraph
     /// of <see cref="PanButtons"/> to <see cref="MouseButtons.None"/>.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( Keys.Control ),
      Description( "Determines which modifier key is used as the primary for panning" )]
-    public Keys PanModifierKeys
-    {
-      get { return _panModifierKeys; }
-      set { _panModifierKeys = value; }
-    }
+    public Keys PanModifierKeys { get; set; } = Keys.Control;
 
     /// <summary>
     /// Gets or sets a value that determines which modifier keys will be used as a secondary option
@@ -175,13 +144,8 @@ namespace ZedGraph
     /// of <see cref="PanButtons2"/> to <see cref="MouseButtons.None"/>.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( Keys.None ),
      Description( "Determines which modifier key is used as the secondary for panning" )]
-    public Keys PanModifierKeys2
-    {
-      get { return _panModifierKeys2; }
-      set { _panModifierKeys2 = value; }
-    }
+    public Keys PanModifierKeys2 { get; set; } = Keys.Alt;
 
     /// <summary>
     /// Gets or sets a value that determines which Mouse button will be used to edit point
@@ -193,13 +157,9 @@ namespace ZedGraph
     /// </remarks>
     /// <seealso cref="EditModifierKeys" />
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( MouseButtons.Right ),
      Description( "Specify mouse button for point editing" )]
-    public MouseButtons EditButtons
-    {
-      get { return _editButtons; }
-      set { _editButtons = value; }
-    }
+    public MouseButtons EditButtons { get; set; } = MouseButtons.Right;
+
     /// <summary>
     /// Gets or sets a value that determines which modifier keys will be used to edit point
     /// data values
@@ -210,13 +170,8 @@ namespace ZedGraph
     /// </remarks>
     /// <seealso cref="EditButtons" />
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( Keys.Alt ),
      Description( "Specify modifier key for point editing" )]
-    public Keys EditModifierKeys
-    {
-      get { return _editModifierKeys; }
-      set { _editModifierKeys = value; }
-    }
+    public Keys EditModifierKeys { get; set; } = Keys.Alt;
 
     /// <summary>
     /// Gets or sets a value that determines which Mouse button will be used to 
@@ -227,13 +182,9 @@ namespace ZedGraph
     /// </remarks>
     /// <seealso cref="SelectModifierKeys" />
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( MouseButtons.Left ),
      Description( "Specify mouse button for curve selection" )]
-    public MouseButtons SelectButtons
-    {
-      get { return _selectButtons; }
-      set { _selectButtons = value; }
-    }
+    public MouseButtons SelectButtons { get; set; } = MouseButtons.Left;
+
     /// <summary>
     /// Gets or sets a value that determines which Modifier keys will be used to 
     /// select <see cref="CurveItem" />'s.
@@ -243,25 +194,16 @@ namespace ZedGraph
     /// </remarks>
     /// <seealso cref="SelectButtons" />
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( Keys.Shift ),
      Description( "Specify modifier key for curve selection" )]
-    public Keys SelectModifierKeys
-    {
-      get { return _selectModifierKeys; }
-      set { _selectModifierKeys = value; }
-    }
+    public Keys SelectModifierKeys { get; set; } = Keys.Shift;
 
     /// <summary>
     /// Gets or sets a value that determines which Modifier keys will be used to 
     /// append a <see cref="CurveItem" /> to the selection list.
     /// </summary>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( Keys.Shift | Keys.Alt ),
      Description( "Specify modifier key for append curve selection" )]
-    public Keys SelectAppendModifierKeys
-    {
-      get { return _selectAppendModifierKeys; }
-    }
+    public Keys SelectAppendModifierKeys { get; } = Keys.Shift | Keys.Control;
 
     /// <summary>
     /// Gets or sets a value that determines which Mouse button will be used to click
@@ -271,13 +213,9 @@ namespace ZedGraph
     /// <seealso cref="LinkEvent"/>
     // /// <seealso cref="ZedGraph.Web.IsImageMap"/>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( MouseButtons.Left ),
      Description( "Specify mouse button for clicking on linkable objects" )]
-    public MouseButtons LinkButtons
-    {
-      get { return _linkButtons; }
-      set { _linkButtons = value; }
-    }
+    public MouseButtons LinkButtons { get; set; } = MouseButtons.Left;
+
     /// <summary>
     /// Gets or sets a value that determines which modifier keys will be used to click
     /// on linkable objects
@@ -286,13 +224,8 @@ namespace ZedGraph
     /// <seealso cref="LinkEvent"/>
     // /// <seealso cref="ZedGraph.Web.IsImageMap"/>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( Keys.Alt ),
      Description( "Specify modifier key for clicking on linkable objects" )]
-    public Keys LinkModifierKeys
-    {
-      get { return _linkModifierKeys; }
-      set { _linkModifierKeys = value; }
-    }
+    public Keys LinkModifierKeys { get; set; } = Keys.Alt;
 
   #endregion
 
@@ -347,10 +280,9 @@ namespace ZedGraph
         // Just return the first GraphPane in the list
         lock ( this )
         {
-          if ( _masterPane != null && _masterPane.PaneList.Count > 0 )
-            return _masterPane[0];
-          else
-            return null;
+          return _masterPane != null && _masterPane.PaneList.Count > 0
+            ? _masterPane[0]
+            : null;
         }
       }
 
@@ -359,11 +291,9 @@ namespace ZedGraph
         lock ( this )
         {
           //Clear the list, and replace it with the specified Graphpane
-          if ( _masterPane != null )
-          {
-            _masterPane.PaneList.Clear();
-            _masterPane.Add( value );
-          }
+          if (_masterPane == null) return;
+          _masterPane.PaneList.Clear();
+          _masterPane.Add( value );
         }
       }
     }
@@ -396,13 +326,8 @@ namespace ZedGraph
     /// may be overridden by <see cref="IsShowCursorValues" />.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( false ),
      Description( "true to display tooltips when the mouse hovers over data points" )]
-    public bool IsShowPointValues
-    {
-      get { return _isShowPointValues; }
-      set { _isShowPointValues = value; }
-    }
+    public bool IsShowPointValues { get; set; }
 
     /// <summary>
     /// Gets or sets a value that determines whether or not tooltips will be displayed
@@ -414,13 +339,8 @@ namespace ZedGraph
     /// value is set to true, it overrides the <see cref="IsShowPointValues" /> setting.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( false ),
      Description( "true to display tooltips showing the current mouse position within the Chart area" )]
-    public bool IsShowCursorValues
-    {
-      get { return _isShowCursorValues; }
-      set { _isShowCursorValues = value; }
-    }
+    public bool IsShowCursorValues { get; set; }
 
     /// <summary>
     /// Gets or sets a value that determines whether or not editing of point data is allowed in
@@ -436,13 +356,8 @@ namespace ZedGraph
     /// <seealso cref="EditModifierKeys" />
     /// <seealso cref="IsEnableVEdit" />
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( false ),
      Description( "true to allow horizontal editing by alt-left-click-drag" )]
-    public bool IsEnableHEdit
-    {
-      get { return _isEnableHEdit; }
-      set { _isEnableHEdit = value; }
-    }
+    public bool IsEnableHEdit { get; set; }
 
     /// <summary>
     /// Gets or sets a value that determines whether or not editing of point data is allowed in
@@ -455,13 +370,8 @@ namespace ZedGraph
     /// <see cref="EditModifierKeys" />.
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( false ),
      Description( "true to allow vertical editing by alt-left-click-drag" )]
-    public bool IsEnableVEdit
-    {
-      get { return _isEnableVEdit; }
-      set { _isEnableVEdit = value; }
-    }
+    public bool IsEnableVEdit { get; set; }
 
     /// <summary>
     /// Gets or sets a value that determines whether or not zooming is allowed for the control.
@@ -475,7 +385,7 @@ namespace ZedGraph
      Description( "true to allow horizontal and vertical zooming by left-click-drag" )]
     public bool IsEnableZoom
     {
-      set { _isEnableHZoom = value; _isEnableVZoom = value; }
+      set { IsEnableHZoom = value; IsEnableVZoom = value; }
     }
     /// <summary>
     /// Gets or sets a value that determines whether or not zooming is allowed for the control in
@@ -488,11 +398,8 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to allow horizontal zooming by left-click-drag" )]
-    public bool IsEnableHZoom
-    {
-      get { return _isEnableHZoom; }
-      set { _isEnableHZoom = value; }
-    }
+    public bool IsEnableHZoom { get; set; } = true;
+
     /// <summary>
     /// Gets or sets a value that determines whether or not zooming is allowed for the control in
     /// the vertical direction.
@@ -504,11 +411,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to allow vertical zooming by left-click-drag" )]
-    public bool IsEnableVZoom
-    {
-      get { return _isEnableVZoom; }
-      set { _isEnableVZoom = value; }
-    }
+    public bool IsEnableVZoom { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value that determines whether or not zooming is allowed via the mouse wheel.
@@ -521,11 +424,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to allow zooming with the mouse wheel" )]
-    public bool IsEnableWheelZoom
-    {
-      get { return _isEnableWheelZoom; }
-      set { _isEnableWheelZoom = value; }
-    }
+    public bool IsEnableWheelZoom { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value that determines whether or not panning is allowed for the control in
@@ -540,11 +439,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to allow horizontal panning by middle-mouse-drag or shift-left-drag" )]
-    public bool IsEnableHPan
-    {
-      get { return _isEnableHPan; }
-      set { _isEnableHPan = value; }
-    }
+    public bool IsEnableHPan { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value that determines whether or not panning is allowed for the control in
@@ -559,11 +454,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to allow vertical panning by middle-mouse-drag or shift-left-drag" )]
-    public bool IsEnableVPan
-    {
-      get { return _isEnableVPan; }
-      set { _isEnableVPan = value; }
-    }
+    public bool IsEnableVPan { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value that determines whether or not the context menu will be available.
@@ -576,11 +467,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to enable the right mouse button context menu" )]
-    public bool IsShowContextMenu
-    {
-      get { return _isShowContextMenu; }
-      set { _isShowContextMenu = value; }
-    }
+    public bool IsShowContextMenu { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value that determines whether or not a message box will be shown
@@ -593,11 +480,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to show a message box after a 'Copy' context menu action completes" )]
-    public bool IsShowCopyMessage
-    {
-      get { return _isShowCopyMessage; }
-      set { _isShowCopyMessage = value; }
-    }
+    public bool IsShowCopyMessage { get; set; } = true;
 
     /// <summary>
     /// Gets or sets the <see cref="SaveFileDialog" /> instance that will be used
@@ -612,13 +495,8 @@ namespace ZedGraph
      Description( "Provides access to the SaveFileDialog for the 'Save As' menu item" )]
     public SaveFileDialog SaveFileDialog
     {
-            get
-            {
-                if (_saveFileDialog == null)
-                    _saveFileDialog = new SaveFileDialog();
-                return _saveFileDialog;
-            }
-            set { _saveFileDialog = value; }
+      get { return _saveFileDialog ?? (_saveFileDialog = new SaveFileDialog()); }
+      set { _saveFileDialog = value; }
     }
 
     /// <summary>
@@ -629,11 +507,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to preserve the displayed aspect ratio when printing" )]
-    public bool IsPrintKeepAspectRatio
-    {
-      get { return _isPrintKeepAspectRatio; }
-      set { _isPrintKeepAspectRatio = value; }
-    }
+    public bool IsPrintKeepAspectRatio { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value that determines whether or not the <see cref="MasterPane" />
@@ -648,11 +522,8 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to resize to fill the page when printing" )]
-    public bool IsPrintFillPage
-    {
-      get { return _isPrintFillPage; }
-      set { _isPrintFillPage = value; }
-    }
+    public bool IsPrintFillPage { get; set; } = true;
+
     /// <summary>
     /// Gets or sets a value that determines whether the settings of
     /// <see cref="ZedGraph.PaneBase.IsFontsScaled" /> and <see cref="PaneBase.IsPenWidthScaled" />
@@ -673,11 +544,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( true ),
      Description( "true to force font and pen width scaling when printing" )]
-    public bool IsPrintScaleAll
-    {
-      get { return _isPrintScaleAll; }
-      set { _isPrintScaleAll = value; }
-    }
+    public bool IsPrintScaleAll { get; set; } = true;
 
     /// <summary>
     /// Gets or sets a value that controls whether or not the axis value range for the scroll
@@ -700,11 +567,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( false ),
      Description( "true to automatically set the scroll bar range to the actual data range" )]
-    public bool IsAutoScrollRange
-    {
-      get { return _isAutoScrollRange; }
-      set { _isAutoScrollRange = value; }
-    }
+    public bool IsAutoScrollRange { get; set; }
 
     /// <summary>
     /// Set a "grace" value that leaves a buffer area around the data when
@@ -715,11 +578,7 @@ namespace ZedGraph
     /// axis ranges from 0 to 100, then a 0.05 value for ScrollGrace would set the scroll range
     /// to -5 to 105.
     /// </remarks>
-    public double ScrollGrace
-    {
-      get { return _scrollGrace; }
-      set { _scrollGrace = value; }
-    }
+    public double ScrollGrace { get; set; } = 0.00;
 
     /// <summary>
     /// Gets or sets a value that determines if the horizontal scroll bar will be visible.
@@ -841,21 +700,16 @@ namespace ZedGraph
      Description( "true to scroll the Y2 axis along with the Y axis" )]
     public bool IsScrollY2
     {
-      get
-      {
-        if ( _y2ScrollRangeList != null && _y2ScrollRangeList.Count > 0 )
-          return _y2ScrollRangeList[0].IsScrollable;
-        else
-          return false;
+      get {
+        return Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0 &&
+               Y2ScrollRangeList[0].IsScrollable;
       }
       set
       {
-        if ( _y2ScrollRangeList != null && _y2ScrollRangeList.Count > 0 )
-        {
-          ScrollRange tmp = _y2ScrollRangeList[0];
-          tmp.IsScrollable = value;
-          _y2ScrollRangeList[0] = tmp;
-        }
+        if (Y2ScrollRangeList == null || Y2ScrollRangeList.Count <= 0) return;
+        var tmp = Y2ScrollRangeList[0];
+        tmp.IsScrollable = value;
+        Y2ScrollRangeList[0] = tmp;
       }
     }
 
@@ -870,12 +724,9 @@ namespace ZedGraph
     /// </remarks>
     /// <seealso cref="ScrollMinY" />
     /// <seealso cref="ScrollMaxY" />
-    [Bindable( true ), Category( "Display" ), NotifyParentProperty( true )]
-    [Description( "Sets the manual scroll bar ranges for the collection of Y axes" )]
-    public ScrollRangeList YScrollRangeList
-    {
-      get { return _yScrollRangeList; }
-    }
+    [Bindable(true), Category("Display"), NotifyParentProperty(true)]
+    [Description("Sets the manual scroll bar ranges for the collection of Y axes")]
+    public ScrollRangeList YScrollRangeList { get; } = new ScrollRangeList();
 
     /// <summary>
     /// Access the <see cref="ScrollRangeList" /> for the Y2 axes.
@@ -888,12 +739,9 @@ namespace ZedGraph
     /// </remarks>
     /// <seealso cref="ScrollMinY2" />
     /// <seealso cref="ScrollMaxY2" />
-    [Bindable( true ), Category( "Display" ), NotifyParentProperty( true )]
-    [Description( "Sets the manual scroll bar ranges for the collection of Y2 axes" )]
-    public ScrollRangeList Y2ScrollRangeList
-    {
-      get { return _y2ScrollRangeList; }
-    }
+    [Bindable(true), Category("Display"), NotifyParentProperty(true)]
+    [Description("Sets the manual scroll bar ranges for the collection of Y2 axes")]
+    public ScrollRangeList Y2ScrollRangeList { get; } = new ScrollRangeList();
 
     /// <summary>
     /// The minimum value for the X axis scroll range.
@@ -952,21 +800,17 @@ namespace ZedGraph
      Description( "Sets the manual scroll minimum value for the Y axis" )]
     public double ScrollMinY
     {
-      get
-      {
-        if ( _yScrollRangeList != null && _yScrollRangeList.Count > 0 )
-          return _yScrollRangeList[0].Min;
-        else
-          return double.NaN;
+      get {
+        return YScrollRangeList != null && YScrollRangeList.Count > 0
+          ? YScrollRangeList[0].Min
+          : double.NaN;
       }
       set
       {
-        if ( _yScrollRangeList != null && _yScrollRangeList.Count > 0 )
-        {
-          ScrollRange tmp = _yScrollRangeList[0];
-          tmp.Min = value;
-          _yScrollRangeList[0] = tmp;
-        }
+        if (YScrollRangeList == null || YScrollRangeList.Count <= 0) return;
+        var tmp = YScrollRangeList[0];
+        tmp.Min = value;
+        YScrollRangeList[0] = tmp;
       }
     }
     /// <summary>
@@ -988,21 +832,17 @@ namespace ZedGraph
      Description( "Sets the manual scroll maximum value for the Y axis" )]
     public double ScrollMaxY
     {
-      get
-      {
-        if ( _yScrollRangeList != null && _yScrollRangeList.Count > 0 )
-          return _yScrollRangeList[0].Max;
-        else
-          return double.NaN;
+      get {
+        return YScrollRangeList != null && YScrollRangeList.Count > 0
+          ? YScrollRangeList[0].Max
+          : double.NaN;
       }
       set
       {
-        if ( _yScrollRangeList != null && _yScrollRangeList.Count > 0 )
-        {
-          ScrollRange tmp = _yScrollRangeList[0];
-          tmp.Max = value;
-          _yScrollRangeList[0] = tmp;
-        }
+        if (YScrollRangeList == null || YScrollRangeList.Count <= 0) return;
+        ScrollRange tmp = YScrollRangeList[0];
+        tmp.Max = value;
+        YScrollRangeList[0] = tmp;
       }
     }
     /// <summary>
@@ -1026,18 +866,18 @@ namespace ZedGraph
     {
       get
       {
-        if ( _y2ScrollRangeList != null && _y2ScrollRangeList.Count > 0 )
-          return _y2ScrollRangeList[0].Min;
+        if ( Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0 )
+          return Y2ScrollRangeList[0].Min;
         else
           return double.NaN;
       }
       set
       {
-        if ( _y2ScrollRangeList != null && _y2ScrollRangeList.Count > 0 )
+        if ( Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0 )
         {
-          ScrollRange tmp = _y2ScrollRangeList[0];
+          ScrollRange tmp = Y2ScrollRangeList[0];
           tmp.Min = value;
-          _y2ScrollRangeList[0] = tmp;
+          Y2ScrollRangeList[0] = tmp;
         }
       }
     }
@@ -1060,21 +900,17 @@ namespace ZedGraph
      Description( "Sets the manual scroll maximum value for the Y2 axis" )]
     public double ScrollMaxY2
     {
-      get
-      {
-        if ( _y2ScrollRangeList != null && _y2ScrollRangeList.Count > 0 )
-          return _y2ScrollRangeList[0].Max;
-        else
-          return double.NaN;
+      get {
+        return Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0
+          ? Y2ScrollRangeList[0].Max
+          : double.NaN;
       }
       set
       {
-        if ( _y2ScrollRangeList != null && _y2ScrollRangeList.Count > 0 )
-        {
-          ScrollRange tmp = _y2ScrollRangeList[0];
-          tmp.Max = value;
-          _y2ScrollRangeList[0] = tmp;
-        }
+        if (Y2ScrollRangeList == null || Y2ScrollRangeList.Count <= 0) return;
+        var tmp = Y2ScrollRangeList[0];
+        tmp.Max = value;
+        Y2ScrollRangeList[0] = tmp;
       }
     }
 
@@ -1086,18 +922,8 @@ namespace ZedGraph
     /// This method just tests ScrollBar.Capture to see if the
     /// mouse has been captured by the scroll bar.  If so, scrolling is active.
     /// </remarks>
-    public Boolean IsScrolling
-    {
-      get
-      {
-        if ( hScrollBar1 != null && vScrollBar1 != null )
-          return hScrollBar1.Capture || vScrollBar1.Capture;
-        else
-          return false;
-      }
-    }
-
-
+    public Boolean IsScrolling => hScrollBar1 != null && vScrollBar1 != null &&
+                                  (hScrollBar1.Capture || vScrollBar1.Capture);
     /// <summary>
     /// Gets or sets the format for displaying tooltip values.
     /// This format is passed to <see cref="PointPairBase.ToString(string)"/>.
@@ -1109,11 +935,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( PointPair.DefaultFormat ),
      Description( "Sets the numeric display format string for the point value tooltips" )]
-    public string PointValueFormat
-    {
-      get { return _pointValueFormat; }
-      set { _pointValueFormat = value; }
-    }
+    public string PointValueFormat { get; set; } = PointPair.DefaultFormat;
 
     /// <summary>
     /// Gets or sets the format for displaying tooltip values.
@@ -1126,11 +948,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( XDate.DefaultFormatStr ),
      Description( "Sets the date display format for the point value tooltips" )]
-    public string PointDateFormat
-    {
-      get { return _pointDateFormat; }
-      set { _pointDateFormat = value; }
-    }
+    public string PointDateFormat { get; set; } = XDate.DefaultFormatStr;
 
     /// <summary>
     /// Gets or sets the step size fraction for panning with the mouse wheel.
@@ -1141,33 +959,16 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( 0.1 ),
      Description( "Sets the step size fraction for zooming with the mouse wheel" )]
-    public double PanStep
-    {
-      get { return _zoomStepFraction; }
-      set { _zoomStepFraction = value; }
-    }
+    public double ZoomStepFraction { get; set; } = 0.1;
 
     /// <summary>
-    /// Gets or sets the type of PanStep's value.
-    /// A value of 0.1 will result in a 10% zoom step for each mouse wheel movement.
-    /// </summary>
-    [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( StepKind.Percentage ),
-     Description("Sets the step size fraction for zooming with the mouse wheel")]
-    public StepKind PanStepKind { get; set; }
-
-    /// <summary>
-    /// Gets or sets the step size fraction for zooming with the mouse wheel.
-    /// A value of 0.1 will result in a 10% zoom step for each mouse wheel movement.
+    /// Gets or sets the step size in display units for panning with the mouse wheel.
+    /// A value of 100 will result in a 100 pixel pan step for each mouse wheel movement.
     /// </summary>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( 0.1 ),
-     Description( "Sets the step size fraction for zooming with the mouse wheel" )]
-    public double ZoomStepFraction
-    {
-      get { return _zoomStepFraction; }
-      set { _zoomStepFraction = value; }
-    }
+     Description( "Sets the step size fraction for panning with the mouse wheel" )]
+    public int PanStep { get; set; } = 4;
 
     /// <summary>
     /// Gets or sets a boolean value that determines if zooming with the wheel mouse
@@ -1221,69 +1022,52 @@ namespace ZedGraph
     /// <summary>
     /// Readonly property that gets the list of selected CurveItems
     /// </summary>
-    public Selection Selection
-    {
-      get { return _selection; }
-    }
+    public Selection Selection { get; } = new Selection();
 
     /// <summary>
     /// Gets or sets a value that determines whether or not selection is allowed for the control.
     /// </summary>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-      DefaultValue( false ),
       Description( "true to allow selecting Curves" )]
-    public bool IsEnableSelection
-    {
-      get { return _isEnableSelection; }
-      set
-      {
-        _isEnableSelection = value;
+    public bool IsEnableSelection { get; set; }
 
-        /*
-        if ( value )
-        {
-          this.Cursor = Cursors.Default;
-          this.IsEnableZoom = false;
-        }
-        else
-        {
-          this.Cursor = Cursors.Cross;
-          this.IsEnableZoom = true;
-        }
-        */
-      }
-    }
-
-        /// <summary>
+    /// <summary>
     /// Gets or sets a value that determines whether or not editing of graph object.
     /// </summary>
     /// <remarks>
     [Bindable(true), Category("Display"), NotifyParentProperty(true),
-         DefaultValue(false),
-         Description("true to allow editing the graph object")]
-        public bool IsEnableGraphEdit
-        {
-            get { return _isEnableGraphEdit; }
-            set { _isEnableGraphEdit = value; }
-        }
+     Description("true to allow editing the graph object")]
+    public bool IsEnableGraphEdit { get; set; }
 
-        /// <summary>
-        /// Readonly property to get selected graph
-        /// </summary>
-        public GraphObj SelectedGraph
-        {
-            get
-            {
-                if (_graphDragState.Obj != null && _graphDragState.Obj.IsSelected)
-                    return _graphDragState.Obj;
-                return null;
-            }
-        }
-
-        public void ResetSelectedGraph()
-        {
-            _graphDragState.Reset();
-        }
-  #endregion
+    /// <summary>
+    /// Readonly property to get selected graph
+    /// </summary>
+    public GraphObj SelectedGraph
+    {
+      get
+      {
+        if (_graphDragState.Obj != null && _graphDragState.Obj.IsSelected)
+          return _graphDragState.Obj;
+        return null;
+      }
     }
+
+    /// <summary>
+    /// Type of cross hair to display
+    /// </summary>
+    public CrossHairType CrossHairType { get; set; } = CrossHairType.CurrentPane;
+
+    /// <summary>
+    /// When true - the chart shows crosshair
+    /// </summary>
+    public bool IsShowCrossHair { get; set; }
+
+    public Pen CrossHairPen { get; set; } = new Pen(Color.Silver) { DashStyle = DashStyle.Dash };
+
+    public void ResetSelectedGraph()
+    {
+      _graphDragState.Reset();
+    }
+  #endregion
+  }
 }

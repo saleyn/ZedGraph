@@ -324,8 +324,8 @@ namespace ZedGraph
         for ( int j = 0; j < height; j++ )
           usedArray[i, j] = false;
 
-      xAxis.Scale.SetupScaleData( pane, xAxis );
-      yAxis.Scale.SetupScaleData( pane, yAxis );
+      xAxis.Scale.SetupScaleData( pane );
+      yAxis.Scale.SetupScaleData( pane );
 
       int n = _filterMode < 0 ? 0 : _filterMode;
       int left = (int)pane.Chart.Rect.Left;

@@ -809,10 +809,10 @@ namespace ZedGraph
 
       if ( isBoundedRanges )
       {
-        xLBound = xAxis._scale._lBound;
-        xUBound = xAxis._scale._uBound;
-        yLBound = yAxis._scale._lBound;
-        yUBound = yAxis._scale._uBound;
+        xLBound = xAxis.Scale._lBound;
+        xUBound = xAxis.Scale._uBound;
+        yLBound = yAxis.Scale._lBound;
+        yUBound = yAxis.Scale._uBound;
       }
 
 

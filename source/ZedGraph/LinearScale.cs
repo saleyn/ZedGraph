@@ -136,6 +136,7 @@ namespace ZedGraph
       base.PickScale( pane, g, scaleFactor );
 
       // Test for trivial condition of range = 0 and pick a suitable default
+      // FIXME: comment out this block: https://sourceforge.net/p/zedgraph/bugs/123/
       if ( _max - _min < 1.0e-30 )
       {
         if ( _maxAuto )
@@ -147,14 +148,11 @@ namespace ZedGraph
       // This is the zero-lever test.  If minVal is within the zero lever fraction
       // of the data range, then use zero.
 
-      if ( _minAuto && _min > 0 &&
-        _min / ( _max - _min ) < Default.ZeroLever )
+      if ( _minAuto && _min > 0 && _min / ( _max - _min ) < Default.ZeroLever )
         _min = 0;
 
       // Repeat the zero-lever test for cases where the maxVal is less than zero
-      if ( _maxAuto && _max < 0 &&
-        Math.Abs( _max / ( _max - _min ) ) <
-        Default.ZeroLever )
+      if ( _maxAuto && _max < 0 && Math.Abs( _max / ( _max - _min ) ) < Default.ZeroLever )
         _max = 0;
 
       // Calculate the new step size
@@ -169,7 +167,7 @@ namespace ZedGraph
         if ( _isPreventLabelOverlap )
         {
           // Calculate the maximum number of labels
-          double maxLabels = (double) this.CalcMaxLabels( g, pane, scaleFactor );
+          double maxLabels = CalcMaxLabels( g, pane, scaleFactor );
 
           if ( maxLabels < ( _max - _min ) / _majorStep )
             _majorStep = CalcBoundedStepSize( _max - _min, maxLabels );

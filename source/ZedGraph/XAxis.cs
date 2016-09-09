@@ -25,6 +25,11 @@ using System.Security.Permissions;
 namespace ZedGraph
 {
   /// <summary>
+  /// XAxis implements this interface
+  /// </summary>
+  public interface IXAxis {};
+
+  /// <summary>
   /// <see cref="XAxis"/> inherits from <see cref="Axis"/>, and defines the
   /// special characteristics of a horizontal axis, specifically located at
   /// the bottom of the <see cref="Chart.Rect"/> of the <see cref="GraphPane"/>
@@ -34,7 +39,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.16 $ $Date: 2007-04-16 00:03:02 $ </version>
   [Serializable]
-  public class XAxis : Axis, ICloneable, ISerializable
+  public class XAxis : Axis, ICloneable, IXAxis
   {
 
     #region Defaults
@@ -81,9 +86,9 @@ namespace ZedGraph
     public XAxis( string title )
       : base( title )
     {
-      _isVisible = Default.IsVisible;
-      _majorGrid._isZeroLine = Default.IsZeroLine;
-      _scale._fontSpec.Angle = 0F;
+      IsVisible = Default.IsVisible;
+      MajorGrid._isZeroLine = Default.IsZeroLine;
+      Scale._fontSpec.Angle = 0F;
     }
 
     /// <summary>
@@ -211,7 +216,7 @@ namespace ZedGraph
     {
       double effCross = EffectiveCrossValue( pane );
 
-      if ( !_crossAuto )
+      if ( !CrossAuto )
         return pane.YAxis.Scale.Transform( effCross ) - pane.YAxis.Scale._maxPix;
       else
         return 0;

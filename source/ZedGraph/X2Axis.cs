@@ -34,7 +34,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.1 $ $Date: 2007-04-16 00:03:07 $ </version>
   [Serializable]
-  public class X2Axis : Axis, ICloneable, ISerializable
+  public class X2Axis : Axis, ICloneable, IXAxis
   {
 
     #region Defaults
@@ -81,10 +81,10 @@ namespace ZedGraph
     public X2Axis( string title )
       : base( title )
     {
-      _isVisible = Default.IsVisible;
-      _majorGrid._isZeroLine = Default.IsZeroLine;
-      _scale._fontSpec.Angle = 180F;
-      _title._fontSpec.Angle = 180F;
+      IsVisible = Default.IsVisible;
+      MajorGrid._isZeroLine = Default.IsZeroLine;
+      Scale._fontSpec.Angle = 180F;
+      Title._fontSpec.Angle = 180F;
     }
 
     /// <summary>
@@ -216,7 +216,7 @@ namespace ZedGraph
     {
       double effCross = EffectiveCrossValue( pane );
 
-      if ( !_crossAuto )
+      if ( !CrossAuto )
         return pane.YAxis.Scale.Transform( effCross ) - pane.YAxis.Scale._maxPix;
       else
         return 0;

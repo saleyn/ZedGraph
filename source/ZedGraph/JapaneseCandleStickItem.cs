@@ -57,7 +57,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.6 $ $Date: 2007-12-31 00:23:05 $ </version>
   [Serializable]
-  public class JapaneseCandleStickItem : CurveItem, ICloneable, ISerializable
+  public class JapaneseCandleStickItem : CurveItem, ICloneable, IBarItem
   {
   #region Fields
 
@@ -320,8 +320,8 @@ namespace ZedGraph
       double low = pt.Z;
 
       if ( !pt.IsInvalid3D &&
-          ( date > 0 || !baseAxis._scale.IsLog ) &&
-          ( ( high > 0 && low > 0 ) || !valueAxis._scale.IsLog ) )
+          ( date > 0 || !baseAxis.Scale.IsLog ) &&
+          ( ( high > 0 && low > 0 ) || !valueAxis.Scale.IsLog ) )
       {
         float pixBase, pixHigh, pixLow;
         pixBase = baseAxis.Scale.Transform( _isOverrideOrdinal, i, date );

@@ -26,6 +26,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Collections;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -744,13 +745,7 @@ namespace ZedGraph
     /// null if no <see cref="GraphPane"/> was found.</returns>
     public GraphPane FindPane( PointF mousePt )
     {
-      foreach ( GraphPane pane in _paneList )
-      {
-        if ( pane.Rect.Contains( mousePt ) )
-          return pane;
-      }
-      
-      return null;
+      return _paneList.FirstOrDefault(pane => pane.Rect.Contains(mousePt));
     }
 
     /// <summary>
@@ -762,13 +757,7 @@ namespace ZedGraph
     /// null if no <see cref="GraphPane"/> was found.</returns>
     public GraphPane FindChartRect( PointF mousePt )
     {
-      foreach ( GraphPane pane in _paneList )
-      {
-        if ( pane.Chart._rect.Contains( mousePt ) )
-          return pane;
-      }
-      
-      return null;
+      return _paneList.FirstOrDefault(pane => pane.Chart._rect.Contains(mousePt));
     }
 
   #endregion

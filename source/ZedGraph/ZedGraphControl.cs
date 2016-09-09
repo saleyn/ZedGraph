@@ -69,159 +69,15 @@ namespace ZedGraph
     /// </summary>
     private MasterPane _masterPane;
 
-    /// <summary>
-    /// private field that determines whether or not tooltips will be displayed
-    /// when the mouse hovers over data values.  Use the public property
-    /// <see cref="IsShowPointValues"/> to access this value.
-    /// </summary>
-    private bool _isShowPointValues = false;
-    /// <summary>
-    /// private field that determines whether or not tooltips will be displayed
-    /// showing the scale values while the mouse is located within the ChartRect.
-    /// Use the public property <see cref="IsShowCursorValues"/> to access this value.
-    /// </summary>
-    private bool _isShowCursorValues = false;
-    /// <summary>
-    /// private field that determines the format for displaying tooltip values.
-    /// This format is passed to <see cref="PointPairBase.ToString(string)"/>.
-    /// Use the public property <see cref="PointValueFormat"/> to access this
-    /// value.
-    /// </summary>
-    private string _pointValueFormat = PointPair.DefaultFormat;
-
-    /// <summary>
-    /// private field that determines whether or not the context menu will be available.  Use the
-    /// public property <see cref="IsShowContextMenu"/> to access this value.
-    /// </summary>
-    private bool _isShowContextMenu = true;
-
-    /// <summary>
-    /// private field that determines whether or not a message box will be shown in response to
-    /// a context menu "Copy" command.  Use the
-    /// public property <see cref="IsShowCopyMessage"/> to access this value.
-    /// </summary>
-    /// <remarks>
-    /// Note that, if this value is set to false, the user will receive no indicative feedback
-    /// in response to a Copy action.
-    /// </remarks>
-    private bool _isShowCopyMessage = true;
-
-        private SaveFileDialog _saveFileDialog;
-
-    /// <summary>
-    /// private field that determines whether the settings of
-    /// <see cref="ZedGraph.PaneBase.IsFontsScaled" /> and <see cref="PaneBase.IsPenWidthScaled" />
-    /// will be overridden to true during printing operations.
-    /// </summary>
-    /// <remarks>
-    /// Printing involves pixel maps that are typically of a dramatically different dimension
-    /// than on-screen pixel maps.  Therefore, it becomes more important to scale the fonts and
-    /// lines to give a printed image that looks like what is shown on-screen.  The default
-    /// setting for <see cref="ZedGraph.PaneBase.IsFontsScaled" /> is true, but the default
-    /// setting for <see cref="PaneBase.IsPenWidthScaled" /> is false.
-    /// </remarks>
-    /// <value>
-    /// A value of true will cause both <see cref="ZedGraph.PaneBase.IsFontsScaled" /> and
-    /// <see cref="PaneBase.IsPenWidthScaled" /> to be temporarily set to true during
-    /// printing operations.
-    /// </value>
-    private bool _isPrintScaleAll = true;
-    /// <summary>
-    /// private field that determines whether or not the visible aspect ratio of the
-    /// <see cref="MasterPane" /> <see cref="PaneBase.Rect" /> will be preserved
-    /// when printing this <see cref="ZedGraphControl" />.
-    /// </summary>
-    private bool _isPrintKeepAspectRatio = true;
-    /// <summary>
-    /// private field that determines whether or not the <see cref="MasterPane" />
-    /// <see cref="PaneBase.Rect" /> dimensions will be expanded to fill the
-    /// available space when printing this <see cref="ZedGraphControl" />.
-    /// </summary>
-    /// <remarks>
-    /// If <see cref="IsPrintKeepAspectRatio" /> is also true, then the <see cref="MasterPane" />
-    /// <see cref="PaneBase.Rect" /> dimensions will be expanded to fit as large
-    /// a space as possible while still honoring the visible aspect ratio.
-    /// </remarks>
-    private bool _isPrintFillPage = true;
-
-    /// <summary>
-    /// private field that determines the format for displaying tooltip date values.
-    /// This format is passed to <see cref="XDate.ToString(string)"/>.
-    /// Use the public property <see cref="PointDateFormat"/> to access this
-    /// value.
-    /// </summary>
-    private string _pointDateFormat = XDate.DefaultFormatStr;
-
-    /// <summary>
-    /// private value that determines whether or not zooming is enabled for the control in the
-    /// vertical direction.  Use the public property <see cref="IsEnableVZoom"/> to access this
-    /// value.
-    /// </summary>
-    private bool _isEnableVZoom = true;
-    /// <summary>
-    /// private value that determines whether or not zooming is enabled for the control in the
-    /// horizontal direction.  Use the public property <see cref="IsEnableHZoom"/> to access this
-    /// value.
-    /// </summary>
-    private bool _isEnableHZoom = true;
-
-    /// <summary>
-    /// private value that determines whether or not zooming is enabled with the mousewheel.
-    /// Note that this property is used in combination with the <see cref="IsEnableHZoom"/> and
-    /// <see cref="IsEnableVZoom" /> properties to control zoom options.
-    /// </summary>
-    private bool _isEnableWheelZoom = true;
-
-    /// <summary>
-    /// private value that determines whether or not point editing is enabled in the
-    /// vertical direction.  Use the public property <see cref="IsEnableVEdit"/> to access this
-    /// value.
-    /// </summary>
-    private bool _isEnableVEdit = false;
-    /// <summary>
-    /// private value that determines whether or not point editing is enabled in the
-    /// horizontal direction.  Use the public property <see cref="IsEnableHEdit"/> to access this
-    /// value.
-    /// </summary>
-    private bool _isEnableHEdit = false;
-
-    /// <summary>
-    /// private value that determines whether or not panning is allowed for the control in the
-    /// horizontal direction.  Use the
-    /// public property <see cref="IsEnableHPan"/> to access this value.
-    /// </summary>
-    private bool _isEnableHPan = true;
-    /// <summary>
-    /// private value that determines whether or not panning is allowed for the control in the
-    /// vertical direction.  Use the
-    /// public property <see cref="IsEnableVPan"/> to access this value.
-    /// </summary>
-    private bool _isEnableVPan = true;
+    private SaveFileDialog _saveFileDialog;
 
     // Revision: JCarpenter 10/06
-    /// <summary>
-    /// Internal variable that indicates if the control can manage selections. 
-    /// </summary>
-    private bool _isEnableSelection = false;
-
-        /// <summary>
-        /// Internal variable that indicates if the graph object can be moving, resizing.
-        /// </summary>
-        private bool _isEnableGraphEdit = false;
-
-    private double _zoomStepFraction = 0.1;
 
     private ScrollRange _xScrollRange;
-
-    private ScrollRangeList _yScrollRangeList;
-    private ScrollRangeList _y2ScrollRangeList;
 
     private bool _isShowHScrollBar = false;
     private bool _isShowVScrollBar = false;
     //private bool    isScrollY2 = false;
-    private bool _isAutoScrollRange = false;
-
-    private double _scrollGrace = 0.00; //0.05;
 
     private bool _isSynchronizeXAxes = false;
     private bool _isSynchronizeYAxes = false;
@@ -247,188 +103,19 @@ namespace ZedGraph
     //private PrinterSettings printSave = null;
     //private PageSettings pageSave = null;
 
-    /// <summary>
-    /// This private field contains a list of selected CurveItems.
-    /// </summary>
-    //private List<CurveItem> _selection = new List<CurveItem>();
-    private Selection _selection = new Selection();
-
-  #endregion
+    #endregion
 
   #region Fields: Buttons & Keys Properties
 
-    /// <summary>
-    /// Gets or sets a value that determines which Mouse button will be used to click on
-    /// linkable objects
-    /// </summary>
-    /// <seealso cref="LinkModifierKeys" />
-    private MouseButtons _linkButtons = MouseButtons.Left;
-    /// <summary>
-    /// Gets or sets a value that determines which modifier keys will be used to click
-    /// on linkable objects
-    /// </summary>
-    /// <seealso cref="LinkButtons" />
-    private Keys _linkModifierKeys = Keys.Alt;
-
-    /// <summary>
-    /// Gets or sets a value that determines which Mouse button will be used to edit point
-    /// data values
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHEdit" /> and/or
-    /// <see cref="IsEnableVEdit" /> are true.
-    /// </remarks>
-    /// <seealso cref="EditModifierKeys" />
-    private MouseButtons _editButtons = MouseButtons.Right;
-    /// <summary>
-    /// Gets or sets a value that determines which modifier keys will be used to edit point
-    /// data values
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHEdit" /> and/or
-    /// <see cref="IsEnableVEdit" /> are true.
-    /// </remarks>
-    /// <seealso cref="EditButtons" />
-    private Keys _editModifierKeys = Keys.Alt;
-
-    /// <summary>
-    /// Gets or sets a value that determines which mouse button will be used to select
-    /// <see cref="CurveItem" />'s.
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableSelection" /> is true.
-    /// </remarks>
-    /// <seealso cref="SelectModifierKeys" />
-    private MouseButtons _selectButtons = MouseButtons.Left;
-    /// <summary>
-    /// Gets or sets a value that determines which modifier keys will be used to select
-    /// <see cref="CurveItem" />'s.
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableSelection" /> is true.
-    /// </remarks>
-    /// <seealso cref="SelectButtons" />
-    private Keys _selectModifierKeys = Keys.Shift;
-
-    private Keys _selectAppendModifierKeys = Keys.Shift | Keys.Control;
-
-    /// <summary>
-    /// Gets or sets a value that determines which Mouse button will be used to perform
-    /// zoom operations
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHZoom" /> and/or
-    /// <see cref="IsEnableVZoom" /> are true.
-    /// </remarks>
-    /// <seealso cref="ZoomModifierKeys" />
-    /// <seealso cref="ZoomButtons2" />
-    /// <seealso cref="ZoomModifierKeys2" />
-    private MouseButtons _zoomButtons = MouseButtons.Left;
-    /// <summary>
-    /// Gets or sets a value that determines which modifier keys will be used to perform
-    /// zoom operations
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHZoom" /> and/or
-    /// <see cref="IsEnableVZoom" /> are true.
-    /// </remarks>
-    /// <seealso cref="ZoomButtons" />
-    /// <seealso cref="ZoomButtons2" />
-    /// <seealso cref="ZoomModifierKeys2" />
-    private Keys _zoomModifierKeys = Keys.None;
-
-    /// <summary>
-    /// Gets or sets a value that determines which Mouse button will be used as a
-    /// secondary option to perform zoom operations
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHZoom" /> and/or
-    /// <see cref="IsEnableVZoom" /> are true.
-    /// </remarks>
-    /// <seealso cref="ZoomModifierKeys2" />
-    /// <seealso cref="ZoomButtons" />
-    /// <seealso cref="ZoomModifierKeys" />
-    private MouseButtons _zoomButtons2 = MouseButtons.None;
-    /// <summary>
-    /// Gets or sets a value that determines which modifier keys will be used as a
-    /// secondary option to perform zoom operations
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHZoom" /> and/or
-    /// <see cref="IsEnableVZoom" /> are true.
-    /// </remarks>
-    /// <seealso cref="ZoomButtons" />
-    /// <seealso cref="ZoomButtons2" />
-    /// <seealso cref="ZoomModifierKeys2" />
-    private Keys _zoomModifierKeys2 = Keys.None;
-
-    /// <summary>
-    /// Gets or sets a value that determines which Mouse button will be used to perform
-    /// panning operations
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHPan" /> and/or
-    /// <see cref="IsEnableVPan" /> are true.  A Pan operation (dragging the graph with
-    /// the mouse) should not be confused with a scroll operation (using a scroll bar to
-    /// move the graph).
-    /// </remarks>
-    /// <seealso cref="PanModifierKeys" />
-    /// <seealso cref="PanButtons2" />
-    /// <seealso cref="PanModifierKeys2" />
-    private MouseButtons _panButtons = MouseButtons.Left;
+    // Setting this field to Keys.Shift here
+    // causes an apparent bug to crop up in VS 2003, by which it will have the value:
+    // "System.Windows.Forms.Keys.Shift+None", which won't compile
 
     // Setting this field to Keys.Shift here
     // causes an apparent bug to crop up in VS 2003, by which it will have the value:
     // "System.Windows.Forms.Keys.Shift+None", which won't compile
-    /// <summary>
-    /// Gets or sets a value that determines which modifier keys will be used to perform
-    /// panning operations
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHPan" /> and/or
-    /// <see cref="IsEnableVPan" /> are true.  A Pan operation (dragging the graph with
-    /// the mouse) should not be confused with a scroll operation (using a scroll bar to
-    /// move the graph).
-    /// </remarks>
-    /// <seealso cref="PanButtons" />
-    /// <seealso cref="PanButtons2" />
-    /// <seealso cref="PanModifierKeys2" />
-    private Keys _panModifierKeys = Keys.Control;
 
-    /// <summary>
-    /// Gets or sets a value that determines which Mouse button will be used as a
-    /// secondary option to perform panning operations
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHPan" /> and/or
-    /// <see cref="IsEnableVPan" /> are true.  A Pan operation (dragging the graph with
-    /// the mouse) should not be confused with a scroll operation (using a scroll bar to
-    /// move the graph).
-    /// </remarks>
-    /// <seealso cref="PanModifierKeys2" />
-    /// <seealso cref="PanButtons" />
-    /// <seealso cref="PanModifierKeys" />
-    private MouseButtons _panButtons2 = MouseButtons.Middle;
-
-    // Setting this field to Keys.Shift here
-    // causes an apparent bug to crop up in VS 2003, by which it will have the value:
-    // "System.Windows.Forms.Keys.Shift+None", which won't compile
-    /// <summary>
-    /// Gets or sets a value that determines which modifier keys will be used as a
-    /// secondary option to perform panning operations
-    /// </summary>
-    /// <remarks>
-    /// This setting only applies if <see cref="IsEnableHPan" /> and/or
-    /// <see cref="IsEnableVPan" /> are true.  A Pan operation (dragging the graph with
-    /// the mouse) should not be confused with a scroll operation (using a scroll bar to
-    /// move the graph).
-    /// </remarks>
-    /// <seealso cref="PanButtons2" />
-    /// <seealso cref="PanButtons" />
-    /// <seealso cref="PanModifierKeys" />
-    private Keys _panModifierKeys2 = Keys.None;
-
-  #endregion
+    #endregion
 
   #region Fields: Temporary state variables
 
@@ -455,7 +142,7 @@ namespace ZedGraph
     /// Internal variable that stores the <see cref="GraphPane"/> reference for the Pane that is
     /// currently being zoomed or panned.
     /// </summary>
-    private GraphPane _dragPane = null;
+    private GraphPane _currentPane = null;
     /// <summary>
     /// Internal variable that stores a rectangle which is either the zoom rectangle, or the incremental
     /// pan amount since the last mousemove event.
@@ -472,17 +159,17 @@ namespace ZedGraph
     private ZoomState _zoomState;
     private ZoomStateStack _zoomStateStack;
 
-        /// <summary>
-        /// private field that stores the state of drag graph
-        /// </summary>
-        private GraphDragState _graphDragState;
-        private bool _isGraphDragging = false;
+    /// <summary>
+    /// private field that stores the state of drag graph
+    /// </summary>
+    private GraphDragState _graphDragState;
+    private bool _isGraphDragging = false;
 
-        //temporarily save the location of a context menu click so we can use it for reference
-        // Note that Control.MousePosition ends up returning the position after the mouse has
-        // moved to the menu item within the context menu.  Therefore, this point is saved so
-        // that we have the point at which the context menu was first right-clicked
-        internal Point _menuClickPt;
+    //temporarily save the location of a context menu click so we can use it for reference
+    // Note that Control.MousePosition ends up returning the position after the mouse has
+    // moved to the menu item within the context menu.  Therefore, this point is saved so
+    // that we have the point at which the context menu was first right-clicked
+    internal Point _menuClickPt;
 
   #endregion
 
@@ -495,7 +182,7 @@ namespace ZedGraph
     {
       InitializeComponent();
       InitializeComponentPartial();
-      this.tooltip = ValuesToolTip.Create(this, this.pointToolTip);
+      this._tooltip = ValuesToolTip.Create(this, this.pointToolTip);
 
       // These commands do nothing, but they get rid of the compiler warnings for
       // unused events
@@ -543,11 +230,9 @@ namespace ZedGraph
       this.vScrollBar1.Value = 0;
 
       _xScrollRange = new ScrollRange( true );
-      _yScrollRangeList = new ScrollRangeList();
-      _y2ScrollRangeList = new ScrollRangeList();
 
-      _yScrollRangeList.Add( new ScrollRange( true ) );
-      _y2ScrollRangeList.Add( new ScrollRange( false ) );
+      YScrollRangeList.Add( new ScrollRange( true ) );
+      Y2ScrollRangeList.Add( new ScrollRange( false ) );
 
       _zoomState = null;
       _zoomStateStack = new ZoomStateStack();
@@ -591,11 +276,11 @@ namespace ZedGraph
           return;
 
         if ( hScrollBar1 != null && this.GraphPane != null &&
-          vScrollBar1 != null && _yScrollRangeList != null )
+          vScrollBar1 != null && YScrollRangeList != null )
         {
           SetScroll( hScrollBar1, this.GraphPane.XAxis, _xScrollRange.Min, _xScrollRange.Max );
-          SetScroll( vScrollBar1, this.GraphPane.YAxis, _yScrollRangeList[0].Min,
-            _yScrollRangeList[0].Max );
+          SetScroll( vScrollBar1, this.GraphPane.YAxis, YScrollRangeList[0].Min,
+            YScrollRangeList[0].Max );
         }
 
         base.OnPaint( e );
@@ -603,6 +288,26 @@ namespace ZedGraph
         // Add a try/catch pair since the users of the control can't catch this one
         try { _masterPane.Draw( e.Graphics ); }
         catch { }
+
+        if (IsShowCrossHair && _mouseInBounds && !_lastCrosshairPoint.IsEmpty)
+        {
+          var g = e.Graphics;
+          if (CrossHairType == CrossHairType.MasterPane)
+          {
+            var sz = this.ClientSize;
+            g.DrawLine(CrossHairPen, _lastCrosshairPoint.X, 0, _lastCrosshairPoint.X, sz.Height);
+            g.DrawLine(CrossHairPen, 0, _lastCrosshairPoint.Y, sz.Width, _lastCrosshairPoint.Y);
+          }
+          else if (_currentPane != null && _currentPane.Chart.Rect.Contains(_lastCrosshairPoint))
+          {
+            // Invalidate new cross-hair location
+            var rect = _currentPane.Chart.Rect;
+            g.SetClip(rect);
+            g.DrawLine(CrossHairPen, (int)rect.Left, _lastCrosshairPoint.Y, (int)rect.Right, _lastCrosshairPoint.Y);
+            g.DrawLine(CrossHairPen, _lastCrosshairPoint.X, (int)rect.Top, _lastCrosshairPoint.X, (int)rect.Bottom);
+            g.ResetClip();
+          }
+        }
       }
 
 /*
@@ -725,7 +430,7 @@ namespace ZedGraph
           //g.Dispose();
         }
 
-        if ( _isAutoScrollRange )
+        if ( IsAutoScrollRange )
           SetScrollRangeFromData();
       }
     }
