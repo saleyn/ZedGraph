@@ -606,10 +606,10 @@ namespace ZedGraph
 
       // For the MasterPane, All GraphItems go behind the GraphPanes, except those that
       // are explicity declared as ZOrder.AInFront
-      _graphObjList.Draw( g, this, scaleFactor, ZOrder.G_BehindChartFill );
-      _graphObjList.Draw( g, this, scaleFactor, ZOrder.E_BehindCurves );
-      _graphObjList.Draw( g, this, scaleFactor, ZOrder.D_BehindAxis );
-      _graphObjList.Draw( g, this, scaleFactor, ZOrder.C_BehindChartBorder );
+      GraphObjList.Draw( g, this, scaleFactor, ZOrder.G_BehindChartFill );
+      GraphObjList.Draw( g, this, scaleFactor, ZOrder.E_BehindCurves );
+      GraphObjList.Draw( g, this, scaleFactor, ZOrder.D_BehindAxis );
+      GraphObjList.Draw( g, this, scaleFactor, ZOrder.C_BehindChartBorder );
 
       // Reset the clipping
       g.ResetClip();
@@ -623,7 +623,7 @@ namespace ZedGraph
       // Clip everything to the rect
       g.SetClip( _rect );
 
-      _graphObjList.Draw( g, this, scaleFactor, ZOrder.B_BehindLegend );
+      GraphObjList.Draw( g, this, scaleFactor, ZOrder.B_BehindLegend );
       
       // Recalculate the legend rect, just in case it has not yet been done
       // innerRect is the area for the GraphPane's
@@ -633,7 +633,7 @@ namespace ZedGraph
       
       _legend.Draw( g, this, scaleFactor );
 
-      _graphObjList.Draw( g, this, scaleFactor, ZOrder.A_InFront );
+      GraphObjList.Draw( g, this, scaleFactor, ZOrder.A_InFront );
       
       // Reset the clipping
       g.ResetClip();

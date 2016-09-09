@@ -36,7 +36,7 @@ namespace ZedGraph
     private Axis             _mouseHoveredAxis;
     private int              _mouseHoveredYAxisIndex;
     private RectangleF       _mouseHoveredAxisRect;
-    public  Point            _lastCrosshairPoint;
+    internal Point           _lastCrosshairPoint;
   #endregion
 
   #region Events

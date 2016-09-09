@@ -593,7 +593,7 @@ namespace ZedGraph
         _isIgnoreInitial, _isBoundedRanges, this );
 
       // Determine the scale factor
-      var scaleFactor = this.CalcScaleFactor();
+      this.CalcScaleFactor();
 
       // For pie charts, go ahead and turn off the axis displays if it's only pies
       if ( this.CurveList.IsPieOnly )
@@ -616,16 +616,19 @@ namespace ZedGraph
       // size (using 75% of Rect -- code is in Axis.CalcMaxLabels() )
       // With the scale picked, call CalcChartRect() so calculate a real ChartRect
       // then let the scales re-calculate to make sure that the assumption was ok
+
+      // Pick new scales based on the range
+      PickScale( g, CalcScaleFactor() );
+      var rect = CalcChartRect(g);
+
       if ( _chart._isRectAuto )
       {
-        PickScale( g, scaleFactor );
-
-        _chart._rect = CalcChartRect( g );
+        _chart._rect = rect;
         //this.pieRect = PieItem.CalcPieRect( g, this, scaleFactor, this.chartRect );
       }
 
       // Pick new scales based on the range
-      PickScale( g, scaleFactor );
+      //PickScale( g, CalcScaleFactor() );
 
       // Set the ClusterScaleWidth, if needed
       _barSettings.CalcClusterScaleWidth();
@@ -703,8 +706,7 @@ namespace ZedGraph
       // Clip everything to the rect
       g.SetClip( _rect );
 
-      // calculate scaleFactor on "normal" pane size (BaseDimension)
-      var scaleFactor = this.CalcScaleFactor();
+      var scaleFactor = CalcScaleFactor();
 
       // if the size of the ChartRect is determined automatically, then do so
       // otherwise, calculate the legendrect, scalefactor, hstack, and legendwidth parameters
@@ -740,7 +742,7 @@ namespace ZedGraph
 
       // Draw the GraphItems that are behind the Axis objects
       if ( showGraf )
-        _graphObjList.Draw( g, this, scaleFactor, ZOrder.G_BehindChartFill );
+        GraphObjList.Draw( g, this, scaleFactor, ZOrder.G_BehindChartFill );
 
       // Fill the axis background
       _chart.Fill.Draw( g, _chart._rect );
@@ -748,12 +750,12 @@ namespace ZedGraph
       if ( showGraf )
       {
         // Draw the GraphItems that are behind the CurveItems
-        _graphObjList.Draw( g, this, scaleFactor, ZOrder.F_BehindGrid );
+        GraphObjList.Draw( g, this, scaleFactor, ZOrder.F_BehindGrid );
 
         DrawGrid( g, scaleFactor );
 
         // Draw the GraphItems that are behind the CurveItems
-        _graphObjList.Draw( g, this, scaleFactor, ZOrder.E_BehindCurves );
+        GraphObjList.Draw( g, this, scaleFactor, ZOrder.E_BehindCurves );
 
         // Clip the points to the actual plot area
         g.SetClip(CurveClipRect, CombineMode.Intersect);
@@ -763,7 +765,7 @@ namespace ZedGraph
         g.SetClip( _rect );
 
         // Draw the GraphItems that are behind the Axis objects
-        _graphObjList.Draw( g, this, scaleFactor, ZOrder.D_BehindAxis );
+        GraphObjList.Draw( g, this, scaleFactor, ZOrder.D_BehindAxis );
 
         // Draw the Axes
         _xAxis.Draw( g, this, scaleFactor, 0.0f );
@@ -784,7 +786,7 @@ namespace ZedGraph
         }
 
         // Draw the GraphItems that are behind the Axis border
-        _graphObjList.Draw( g, this, scaleFactor, ZOrder.C_BehindChartBorder );
+        GraphObjList.Draw( g, this, scaleFactor, ZOrder.C_BehindChartBorder );
       }
 
       // Border the axis itself
@@ -793,12 +795,12 @@ namespace ZedGraph
       if ( showGraf )
       {
         // Draw the GraphItems that are behind the Legend object
-        _graphObjList.Draw( g, this, scaleFactor, ZOrder.B_BehindLegend );
+        GraphObjList.Draw( g, this, scaleFactor, ZOrder.B_BehindLegend );
 
         _legend.Draw( g, this, scaleFactor );
 
         // Draw the GraphItems that are in front of all other items
-        _graphObjList.Draw( g, this, scaleFactor, ZOrder.A_InFront );
+        GraphObjList.Draw( g, this, scaleFactor, ZOrder.A_InFront );
       }
 
       // Reset the clipping
@@ -890,7 +892,7 @@ namespace ZedGraph
     /// </param>
     /// <param name="scaleFactor">
     /// The scaling factor for the features of the graph based on the <see cref="PaneBase.BaseDimension"/>.  This
-    /// scaling factor is calculated by the <see cref="PaneBase.CalcScaleFactor"/> method.  The scale factor
+    /// scaling factor is calculated by the <see cref="PaneBase.CalcScaleFactor()"/> method.  The scale factor
     /// represents a linear multiple to be applied to font sizes, symbol sizes, etc.
     /// </param>
     /// <returns>The calculated chart rect, in pixel coordinates.</returns>
@@ -899,7 +901,7 @@ namespace ZedGraph
     {
       // chart rect starts out at the full pane rect less the margins
       //   and less space for the Pane title
-      RectangleF clientRect = this.CalcClientRect( g, scaleFactor );
+      var clientRect = this.CalcClientRect( g, scaleFactor );
 
       //float minSpaceX = 0;
       //float minSpaceY = 0;
@@ -1926,7 +1928,7 @@ namespace ZedGraph
         if ( saveZOrder <= ZOrder.H_BehindAll && _title._isVisible )
         {
           tmpRect = new RectangleF( ( _rect.Left + _rect.Right - paneTitleBox.Width ) / 2,
-            _rect.Top + _margin.Top * scaleFactor,
+            _rect.Top + Margin.Top * scaleFactor,
             paneTitleBox.Width, paneTitleBox.Height );
           if ( tmpRect.Contains( mousePt ) )
           {
@@ -2356,7 +2358,7 @@ namespace ZedGraph
       index = -1;
 
       // First look for graph objects that lie in front of the data points
-      foreach ( GraphObj graphObj in _graphObjList )
+      foreach ( GraphObj graphObj in GraphObjList )
       {
         link = graphObj._link;
 
@@ -2382,7 +2384,7 @@ namespace ZedGraph
       }
 
       // Third, look for graph objects that lie behind the data points
-      foreach ( GraphObj graphObj in _graphObjList )
+      foreach ( GraphObj graphObj in GraphObjList )
       {
         link = graphObj._link;
 
