@@ -17,6 +17,7 @@
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================
 
+using System;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Windows.Forms;
@@ -306,6 +307,28 @@ namespace ZedGraph
             g.DrawLine(CrossHairPen, (int)rect.Left, _lastCrosshairPoint.Y, (int)rect.Right, _lastCrosshairPoint.Y);
             g.DrawLine(CrossHairPen, _lastCrosshairPoint.X, (int)rect.Top, _lastCrosshairPoint.X, (int)rect.Bottom);
             g.ResetClip();
+            
+            var xaxis = _currentPane.XAxis.Scale.Valid ? (Axis)_currentPane.XAxis : _currentPane.X2Axis;
+            var yaxis = _currentPane.YAxis.Scale.Valid ? (Axis)_currentPane.YAxis : _currentPane.Y2Axis;
+
+            // FIXME: This is experimental support of drawing crosshair values
+            int index;
+            CurveItem curve;
+            // See if it's a data point
+            if (_currentPane.FindNearestPoint(_lastCrosshairPoint, out curve, out index))
+            {
+              //g.SetClip(xaxis.Rect);
+              var pp = curve.Points[index];
+              var val = pp.LowValue.ToString();
+              using (Brush brush = xaxis.Scale.FontSpec.Fill.MakeBrush(rect, pp))
+                g.DrawString(val, xaxis.Scale.FontSpec.Font, brush, _lastCrosshairPoint.X, 10);
+              /*
+              xaxis.Scale.DrawLabel(g, _currentPane, index, curve.Points[index].LowValue, _lastCrosshairPoint.X,
+                _lastCrosshairPoint.X - _currentPane.Chart.Rect.Left, 50, 10, xaxis.Scale.FontSpec.Font.Height,
+                _currentPane.ScaleFactor, xaxis.Scale.FontSpec);
+              */
+              //g.ResetClip();
+            }
           }
         }
       }
