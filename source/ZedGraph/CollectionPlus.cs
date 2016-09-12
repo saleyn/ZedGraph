@@ -46,13 +46,6 @@ namespace ZedGraph
   public class CollectionPlus : CollectionBase
   {
     /// <summary>
-    /// Default Constructor
-    /// </summary>
-    public CollectionPlus() : base()
-    {
-    }
-
-    /// <summary>
     /// Return the zero-based position index of the specified object
     /// in the collection.
     /// </summary>
@@ -112,7 +105,7 @@ namespace ZedGraph
     {
       if ( index < 0 || index >= List.Count )
         return -1;
-      object obj = List[index];
+      var obj = List[index];
       List.RemoveAt( index );
       index += relativePos;
       if ( index < 0 )

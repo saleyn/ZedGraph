@@ -47,7 +47,8 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the
     /// data point to be accessed.</param>
     /// <value>A <see cref="PointPair"/> object instance.</value>
-    PointPair this[ int index ]  { get; }
+    PointPair this[int index]  { get; }
+
     /// <summary>
     /// Gets the number of points available in the list.
     /// </summary>

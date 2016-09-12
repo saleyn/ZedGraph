@@ -451,26 +451,24 @@ namespace ZedGraph
     /// </returns>
     public Pen GetPen( PaneBase pane, float scaleFactor, PointPair dataValue )
     {
-      Color color = _color;
+      var color = _color;
       if ( _gradientFill.IsGradientValueType )
         color = _gradientFill.GetGradientColor( dataValue );
 
-      Pen pen = new Pen( color, pane.ScaledPenWidth( _width, scaleFactor ) );
-
-      pen.DashStyle = _style;
+      var pen = new Pen(color, pane.ScaledPenWidth(_width, scaleFactor))
+      {
+        DashStyle = _style
+      };
 
       if (_style != DashStyle.Custom) return pen;
 
-      if ( _dashOff > 1e-10 && _dashOn > 1e-10 )
+      if (_dashOff <= 1e-10 || _dashOn <= 1e-10)
+        pen.DashStyle = DashStyle.Solid;
+      else
       {
         pen.DashStyle = DashStyle.Custom;
-        float[] pattern = new float[2];
-        pattern[0] = _dashOn;
-        pattern[1] = _dashOff;
-        pen.DashPattern = pattern;
+        pen.DashPattern = new[] {_dashOn, _dashOff};
       }
-      else
-        pen.DashStyle = DashStyle.Solid;
 
       return pen;
     }

@@ -70,7 +70,7 @@ namespace ZedGraph
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      Description( "Determines which modifier key used as the primary for zooming" )]
-    public Keys ZoomModifierKeys { get; set; } = Keys.Shift;
+    public Keys ZoomModifierKeys { get; set; } = Keys.Control;
 
     /// <summary>
     /// Gets or sets a value that determines which modifier keys will be used as a secondary option
@@ -131,7 +131,7 @@ namespace ZedGraph
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      Description( "Determines which modifier key is used as the primary for panning" )]
-    public Keys PanModifierKeys { get; set; } = Keys.Control;
+    public Keys PanModifierKeys { get; set; } = Keys.Shift;
 
     /// <summary>
     /// Gets or sets a value that determines which modifier keys will be used as a secondary option

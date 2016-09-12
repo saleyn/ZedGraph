@@ -2950,6 +2950,11 @@ namespace ZedGraph
       return value.CompareTo(min) < 0 ? min : value.CompareTo(max) > 0 ? max : value;
     }
 
+    public static T MinMaxInclusive<T>(T min, T value, T max) where T : IComparable
+    {
+      return value.CompareTo(min) <= 0 ? min : value.CompareTo(max) >= 0 ? max : value;
+    }
+
     #endregion
 
 

@@ -38,8 +38,6 @@ namespace ZedGraph
   [Serializable]
   public class DataSourcePointList : IPointList
   {
-    private BindingSource _bindingSource;
-
     //private object _dataSource = null; 
     private string _xDataMember = null;
     private string _yDataMember = null;
@@ -59,10 +57,10 @@ namespace ZedGraph
     {
       get
       {
-        if ( index < 0 || index >= _bindingSource.Count )
+        if ( index < 0 || index >= BindingSource.Count )
           throw new System.ArgumentOutOfRangeException( "Error: Index out of range" );
 
-        object row = _bindingSource[index];
+        object row = BindingSource[index];
 
         double x = GetDouble( row, _xDataMember, index );
         double y = GetDouble( row, _yDataMember, index );
@@ -78,16 +76,7 @@ namespace ZedGraph
     /// <summary> 
     /// gets the number of points available in the list 
     /// </summary> 
-    public int Count
-    {
-      get
-      {
-        if ( _bindingSource != null )
-          return _bindingSource.Count;
-        else
-          return 0;
-      }
-    }
+    public int Count => BindingSource?.Count ?? 0;
 
     /// <summary> 
     /// The <see cref="BindingSource" /> object from which to get the bound data 
@@ -99,10 +88,7 @@ namespace ZedGraph
     /// to the name of the datatable within the 
     /// <see cref="System.Windows.Forms.BindingSource.DataSource" />, 
     /// if applicable.</remarks> 
-    public BindingSource BindingSource
-    {
-      get { return _bindingSource; }
-    }
+    public BindingSource BindingSource { get; }
 
     /// <summary> 
     /// The table or list object from which to extract the data values. 
@@ -113,8 +99,8 @@ namespace ZedGraph
     /// </remarks> 
     public object DataSource
     {
-      get { return _bindingSource.DataSource; }
-      set { _bindingSource.DataSource = value; }
+      get { return BindingSource.DataSource; }
+      set { BindingSource.DataSource = value; }
     }
 
     /// <summary> 
@@ -176,7 +162,7 @@ namespace ZedGraph
     /// </summary> 
     public DataSourcePointList()
     {
-      _bindingSource = new BindingSource();
+      BindingSource = new BindingSource();
       _xDataMember = string.Empty;
       _yDataMember = string.Empty;
       _zDataMember = string.Empty;
@@ -190,7 +176,7 @@ namespace ZedGraph
     public DataSourcePointList( DataSourcePointList rhs )
       : this()
     {
-      _bindingSource.DataSource = rhs._bindingSource.DataSource;
+      BindingSource.DataSource = rhs.BindingSource.DataSource;
       if ( rhs._xDataMember != null )
         _xDataMember = (string)rhs._xDataMember.Clone();
       if ( rhs._yDataMember != null )

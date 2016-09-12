@@ -682,47 +682,45 @@ namespace ZedGraph
 
       Scale.SetupScaleData(pane);
 
-      if (IsVisible)
-      {
-        var smode = g.SmoothingMode;
-        g.SmoothingMode = SmoothingMode.None;
+      if (!IsVisible) return;
 
-        SetTransformMatrix(g, pane, scaleFactor);
+      var smode = g.SmoothingMode;
+      g.SmoothingMode = SmoothingMode.None;
 
-        shiftPos = CalcTotalShift(pane, scaleFactor, shiftPos);
+      SetTransformMatrix(g, pane, scaleFactor);
 
-        Scale.Draw(g, pane, scaleFactor, shiftPos);
+      shiftPos = CalcTotalShift(pane, scaleFactor, shiftPos);
 
-        //DrawTitle( g, pane, scaleFactor );
+      Scale.Draw(g, pane, scaleFactor, shiftPos);
 
-        // Draw horizontal lines and label
-        LineHObjs?.Draw(g, pane, this, saveMatrix, scaleFactor, shiftPos);
+      //DrawTitle( g, pane, scaleFactor );
 
-        g.Transform = saveMatrix;
+      // Draw horizontal lines and label
+      LineHObjs?.Draw(g, pane, this, saveMatrix, scaleFactor, shiftPos);
 
-        g.SmoothingMode = smode;
-      }
+      g.Transform = saveMatrix;
+
+      g.SmoothingMode = smode;
     }
 
     internal void DrawGrid(Graphics g, GraphPane pane, float scaleFactor, float shiftPos)
     {
-      if (IsVisible)
-      {
-        var saveMatrix = g.Transform;
-        SetTransformMatrix(g, pane, scaleFactor);
+      if (!IsVisible) return;
 
-        var baseVal = Scale.CalcBaseTic();
-        float topPix, rightPix;
-        Scale.GetTopRightPix(pane, out topPix, out rightPix);
+      var saveMatrix = g.Transform;
+      SetTransformMatrix(g, pane, scaleFactor);
 
-        shiftPos = CalcTotalShift(pane, scaleFactor, shiftPos);
+      var baseVal = Scale.CalcBaseTic();
+      float topPix, rightPix;
+      Scale.GetTopRightPix(pane, out topPix, out rightPix);
 
-        Scale.DrawGrid(g, pane, baseVal, topPix, scaleFactor);
+      shiftPos = CalcTotalShift(pane, scaleFactor, shiftPos);
 
-        DrawMinorTics(g, pane, baseVal, shiftPos, scaleFactor, topPix);
+      Scale.DrawGrid(g, pane, baseVal, topPix, scaleFactor);
 
-        g.Transform = saveMatrix;
-      }
+      DrawMinorTics(g, pane, baseVal, shiftPos, scaleFactor, topPix);
+
+      g.Transform = saveMatrix;
     }
 
     /// <summary>
@@ -838,11 +836,8 @@ namespace ZedGraph
       var max = crossAxis.Scale.Linearize(crossAxis.Scale._max);
 
       if (CrossAuto)
-      {
-        if (crossAxis.Scale.IsReverse == (this is Y2Axis || this is X2Axis))
-          return max;
-        return min;
-      }
+        return crossAxis.Scale.IsReverse == (this is Y2Axis || this is X2Axis) ? max : min;
+
       if (Cross < min)
         return min;
       if (Cross > max)

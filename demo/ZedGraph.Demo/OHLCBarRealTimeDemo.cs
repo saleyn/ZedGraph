@@ -368,6 +368,9 @@ namespace ZedGraph.Demo
         pt.Close = m_Open + m_Rand.NextDouble() * 10.0 - 5.0;
         pt.High  = Math.Max(pt.High, Math.Max(m_Open, pt.Close) + m_Rand.NextDouble() * 5.0);
         pt.Low   = Math.Min(pt.Low,  Math.Min(m_Open, pt.Close) - m_Rand.NextDouble() * 5.0);
+
+        m_Pane.Y2Axis.Scale.Min = Math.Min(m_Pane.Y2Axis.Scale.Min, pt.Low * 0.85);
+        m_Pane.Y2Axis.Scale.Max = Math.Max(m_Pane.Y2Axis.Scale.Max, pt.High * 1.05);
       }
 
       if (m_Line != null)

@@ -92,35 +92,33 @@ namespace ZedGraph
     {
       get
       {
-        double xVal = PointPair.Missing;
-        double yVal = PointPair.Missing;
-        if (index >= 0 && index < this.Count)
-        {
-          int fIndex = _filtdInds[index];
-          if (fIndex < _x.Count)
-          {
-            xVal = _x[fIndex];
-            yVal = _y[fIndex];
-          }
-          xVal = _x[_filtdInds[index]];
-          yVal = _y[_filtdInds[index]];
+        var xVal = PointPair.Missing;
+        var yVal = PointPair.Missing;
+        if (index < 0 || index >= this.Count)
+          return new PointPair(xVal, yVal, PointPair.Missing, null);
 
+        var fIndex = _filtdInds[index];
+        if (fIndex < _x.Count)
+        {
+          xVal = _x[fIndex];
+          yVal = _y[fIndex];
         }
+        xVal = _x[_filtdInds[index]];
+        yVal = _y[_filtdInds[index]];
 
         return new PointPair(xVal, yVal, PointPair.Missing, null);
       }
       set
       {
-        int ind = _x.BinarySearch(value.X);
+        var ind = _x.BinarySearch(value.X);
 
         if (ind < 0)
           ind = ~ind;
 
-        if (ind <= _x.Count)
-        {
-          _x.Insert(ind, value.X);
-          _y.Insert(ind, value.Y);
-        }
+        if (ind > _x.Count) return;
+
+        _x.Insert(ind, value.X);
+        _y.Insert(ind, value.Y);
       }
     }
 
@@ -253,7 +251,7 @@ namespace ZedGraph
     /// best results.</param>
     /// <param name="filterOnlyNewData">True to filter only new data since the 
     /// last time FilterData was called, plus last filter subrange.</param>
-    public void FilterData(double min, double max, int maxPts, bool filterOnlyNewData)
+    public void FilterData(double min, double max, int maxPts = -1, bool filterOnlyNewData = false)
     {
       MaxPts = maxPts;
 
@@ -265,7 +263,7 @@ namespace ZedGraph
       if (!filterOnlyNewData)
         _filtdInds.Clear();
 
-      int elemsToFilter = (MaxBoundIndex - MinBoundIndex) + 1; // +1 for last pt to touch Y2Axis
+      var elemsToFilter = (MaxBoundIndex - MinBoundIndex) + 1; // +1 for last pt to touch Y2Axis
 
       // if too few points (or we've been asked not to filter), don't filter
       if (_x.Count > 0 && (elemsToFilter < maxPts || maxPts == -1))
@@ -279,16 +277,16 @@ namespace ZedGraph
 
       // each segment will contain 4 points,
       // the first, {min then max or max then min}, and last. 
-      double segmentWidth = ((max - min) * POINTS_PER_SEGMENT) / maxPts;
+      var segmentWidth = ((max - min) * POINTS_PER_SEGMENT) / maxPts;
 
-      int ind = MinBoundIndex;
+      var ind = MinBoundIndex;
 
       // if filterOnlyNewData, delete the last segment and
       // move ind to the start of the (empty) last segment
       if (filterOnlyNewData && _filtdInds.Count >= POINTS_PER_SEGMENT)
       {
         // remove last segment (i.e. 4 points)
-        for (int i = 0; i < POINTS_PER_SEGMENT; i++)
+        for (var i = 0; i < POINTS_PER_SEGMENT; i++)
           _filtdInds.RemoveAt(_filtdInds.Count - 1);
 
         ind = _filtdInds[_filtdInds.Count - 1] + 1;
@@ -296,7 +294,7 @@ namespace ZedGraph
 
       while (ind <= MaxBoundIndex)
       {
-        double nextSegmentStart = _x[ind] + segmentWidth;
+        var nextSegmentStart = _x[ind] + segmentWidth;
 
         if (IsApplyHighLowLogic)
         {
@@ -320,7 +318,7 @@ namespace ZedGraph
         {
           // we need to add 4 elements in this segment and we are not applying
           // highLowLogic so we add the first, the 1/4th, the middle and 3/4th
-          for (int i = 1; i <= POINTS_PER_SEGMENT; i++)
+          for (var i = 1; i <= POINTS_PER_SEGMENT; i++)
           {
             // add the next point of this segment
             _filtdInds.Add(ind);
@@ -442,19 +440,14 @@ namespace ZedGraph
     {
       // find the index of the start and end of the bounded range
       int first = _x.BinarySearch(min);
-      int last = _x.BinarySearch(max);
+      int last  = _x.BinarySearch(max);
 
       // Make sure the bounded indices are legitimate
       // if BinarySearch() doesn't find the value, it returns the bitwise
       // complement of the index of the 1st element larger than the sought value
 
       if (first < 0)
-      {
-        if (first == -1)
-          first = 0;
-        else
-          first = ~(first + 1);
-      }
+        first = first == -1 ? 0 : ~(first + 1);
 
       if (last < 0)
         last = ~last;
