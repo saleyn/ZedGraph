@@ -18,11 +18,18 @@
 //=============================================================================
 
 using System;
-using System.Drawing;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ZedGraph
 {
+  internal struct DoubleComparer : IComparer<double>
+  {
+    public int Compare(double x, double y) { return Math.Abs(x - y) < 1e-9 ? 0 : x > y ? 1 : -1; }
+
+    public static bool LT(double x, double y) { return x < y || (y - x) < 1e-9; }
+  }
+
   /// <summary>
   /// A collection class containing a list of <see cref="StockPt"/> objects
   /// that define the set of points to be displayed on the curve.
@@ -31,9 +38,11 @@ namespace ZedGraph
   /// <author> John Champion based on code by Jerry Vos</author>
   /// <version> $Revision: 3.4 $ $Date: 2007-02-18 05:51:54 $ </version>
   [Serializable]
-  public class StockPointList : List<StockPt>, IPointList, IPointListEdit
+  public class StockPointList : List<StockPt>, IOrdinalPointListEdit
   {
-
+    private readonly List<Tuple<double,int>> _dateIndex;
+    private int                              _offset;
+     
   #region Properties
 
     /// <summary>
@@ -46,18 +55,45 @@ namespace ZedGraph
     public new PointPair this[int index]
     {
       get { return base[index]; }
-      set { base[index] = new StockPt( value ); }
+      set
+      {
+        var v = new StockPt(value);
+        if (_dateIndex != null)
+        {
+          if (Math.Abs(base[index].Date - v.Date) > 1e-9)
+            throw new ArgumentException
+              ($"Cannot change date on item#{index}: {new XDate(base[index].Date)} to {new XDate(v.Date)}");
+        }
+        base[index] = v;
+      }
     }
 
-  #endregion
+    /// <summary>
+    /// Indexer for getting the index that corresponds to given date
+    /// if the list contains ordinal dates.
+    /// </summary>
+    int IOrdinalPointListEdit.this[double date]
+    {
+      get
+      {
+        var idx = indexOf(date);
+        if (idx < 0 || idx == _dateIndex.Count) return -1;
+        return _dateIndex[idx].Item2 - _offset;
+      }
+    } 
 
-  #region Constructors
+    #endregion
+
+    #region Constructors
 
     /// <summary>
     /// Default constructor for the collection class
     /// </summary>
-    public StockPointList()
+    public StockPointList(bool ordinal = false)
     {
+      _offset = 0;
+      if (ordinal)
+        _dateIndex = new List<Tuple<double, int>>();
     }
 
     /// <summary>
@@ -65,11 +101,17 @@ namespace ZedGraph
     /// </summary>
     /// <param name="rhs">The StockPointList from which to copy</param>
     public StockPointList( StockPointList rhs )
+      : this(rhs._dateIndex != null)
     {
-      for ( int i = 0; i < rhs.Count; i++ )
+      _offset = 0;
+
+      foreach (var pp in rhs.Select(p => new StockPt(p)))
       {
-        StockPt pt = new StockPt( rhs[i] );
-        this.Add( pt );
+        Add(pp);
+
+        if (rhs._dateIndex == null) continue;
+
+        _dateIndex.Add(new Tuple<double, int>(pp.Date, Count-1));
       }
     }
 
@@ -80,7 +122,7 @@ namespace ZedGraph
     /// <returns>A deep copy of this object</returns>
     object ICloneable.Clone()
     {
-      return this.Clone();
+      return Clone();
     }
 
     /// <summary>
@@ -104,6 +146,13 @@ namespace ZedGraph
     new public void Add( StockPt point )
     {
       base.Add( new StockPt( point ) );
+      if (_dateIndex == null) return;
+
+      var date = point.Date;
+      if (_dateIndex.Count == 0 || date > _dateIndex[_dateIndex.Count-1].Item1)
+        _dateIndex.Add(new Tuple<double, int>(date, _offset + Count-1));
+      else
+        throw new ArgumentException($"Dates in time-series must be chronologically increasing ({date})");
     }
 
     /// <summary>
@@ -127,8 +176,8 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add( double date, double high )
     {
-      Add( new StockPt( date, high, PointPair.Missing, PointPair.Missing,
-        PointPair.Missing, PointPair.Missing ) );
+      Add(new StockPt( date, high, PointPair.Missing, PointPair.Missing,
+        PointPair.Missing, PointPair.Missing));
     }
 
     /// <summary>
@@ -143,8 +192,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add( double date, double high, double low, double open, double close, double vol )
     {
-      StockPt point = new StockPt( date, high, low, open, close, vol );
-      Add( point );
+      Add(new StockPt(date, high, low, open, close, vol));
     }
 
     /// <summary>
@@ -164,8 +212,63 @@ namespace ZedGraph
       return base[index];
     }
 
-  #endregion
+    public new void RemoveAt(int index)
+    {
+      if (_dateIndex != null)
+      {
+        if (index > 0 || index < Count - 1)
+          throw new ArgumentException
+            ($"Cannot remove intermediate data points (index={index}, offset={_offset}, count={Count})");
+
+        var point = this[index];
+        var date  = point.X;
+
+        var idx   = indexOf(date);
+        if (idx > -1 && idx < _dateIndex.Count)
+          _dateIndex.RemoveAt(idx);
+
+        if (index == 0)
+          _offset++;
+      }
+
+      base.RemoveAt(index);
+    }
+
+    public new void Clear()
+    {
+      base.Clear();
+      _dateIndex?.Clear();
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Returns an index of the first element which does not compare less than date value.
+    /// </summary>
+    public StockPt IndexOf(double date)
+    {
+      var idx = indexOf(date);
+      if (idx < 0 || idx == _dateIndex.Count) return null;
+      var i = _dateIndex[idx].Item2 - _offset;
+      return base[i];
+    }
+
+    private int indexOf(double date)
+    {
+      if (_dateIndex == null)    return -1;
+      if (_dateIndex.Count == 0) return  0;
+
+      //var comp = Comparer<T>.Default;
+      int    lo = 0, hi = Count-1;
+      while (lo < hi)
+      {
+        var m = lo + (hi - lo) / 2;
+        if (DoubleComparer.LT(_dateIndex[m].Item1, date))
+          lo = m + 1;
+        else
+          hi = m - 1;
+      }
+      return DoubleComparer.LT(_dateIndex[lo].Item1, date) ? lo+1 : lo;
+    }
   }
 }
-
-

@@ -147,12 +147,8 @@ namespace ZedGraph
     /// <param name="rhs">The basis for the copy.</param>
     public PointPair( PointPair rhs ) : base( rhs )
     {
-      this.Z = rhs.Z;
-
-      if ( rhs.Tag is ICloneable )
-        this.Tag = ((ICloneable) rhs.Tag).Clone();
-      else
-        this.Tag = rhs.Tag;
+      this.Z  = rhs.Z;
+      this.Tag = rhs.Tag is ICloneable ? ((ICloneable)rhs.Tag).Clone() : rhs.Tag;
     }
 
     /// <summary>
@@ -223,20 +219,15 @@ namespace ZedGraph
     /// Infinity, or NaN.
     /// </summary>
     /// <returns>true if any value is invalid</returns>
-    public bool IsInvalid3D
-    {
-      get { return  this.X == PointPair.Missing ||
-              this.Y == PointPair.Missing ||
-              this.Z == PointPair.Missing ||
-              double.IsInfinity( this.X ) ||
-              double.IsInfinity( this.Y ) ||
-              double.IsInfinity( this.Z ) ||
-              double.IsNaN( this.X ) ||
-              double.IsNaN( this.Y ) ||
-              double.IsNaN( this.Z );
-        }
-    }
-
+    public bool IsInvalid3D => this.X == PointPair.Missing ||
+                               this.Y == PointPair.Missing ||
+                               this.Z == PointPair.Missing ||
+                               double.IsInfinity( this.X ) ||
+                               double.IsInfinity( this.Y ) ||
+                               double.IsInfinity( this.Z ) ||
+                               double.IsNaN( this.X ) ||
+                               double.IsNaN( this.Y ) ||
+                               double.IsNaN( this.Z );
     /// <summary>
     /// The "low" value for this point (lower dependent-axis value).
     /// This is really just an alias for <see cref="PointPair.Z"/>.
@@ -244,8 +235,8 @@ namespace ZedGraph
     /// <value>The lower dependent value for this <see cref="PointPair"/>.</value>
     public double LowValue
     {
-      get { return this.Z; }
-      set { this.Z = value; }
+      get { return Z; }
+      set { Z = value; }
     }
 
     /// <summary>

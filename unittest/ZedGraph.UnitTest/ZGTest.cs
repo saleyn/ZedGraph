@@ -2,7 +2,6 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using ZedGraph;
 using NUnit.Framework;
 
 namespace ZedGraph.UnitTest
@@ -1395,7 +1394,7 @@ namespace ZedGraph.UnitTest
 		Form form2;
 		GraphPane testee;
 
-		[OneTimeSetUp]
+		[TestFixtureSetUp]
 		public void SetUp()
 		{
 			TestUtils.SetUp();

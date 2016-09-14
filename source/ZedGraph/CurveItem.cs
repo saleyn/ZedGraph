@@ -104,6 +104,8 @@ namespace ZedGraph
     [CLSCompliant(false)]
     protected IPointList _points;
 
+    protected Dictionary<double, PointPair> _ordinalIndex;
+     
     /// <summary>
     /// A tag object for use by the user.  This can be used to store additional
     /// information associated with the <see cref="CurveItem"/>.  ZedGraph does
@@ -530,7 +532,7 @@ namespace ZedGraph
     /// <see cref="CurveItem"/> object, which is the number of points in the
     /// <see cref="Points"/> data collection.
     /// </summary>
-    public int NPts => _points == null ? 0 : _points.Count;
+    public int NPts => _points?.Count ?? 0;
 
     /// <summary>
     /// The <see cref="IPointList"/> of X,Y point sets that represent this
@@ -547,7 +549,7 @@ namespace ZedGraph
     /// Index is the ordinal reference (zero based) of the point.
     /// </summary>
     public PointPair this[int index] =>
-      _points == null ? new PointPair( PointPair.Missing, PointPair.Missing ) : ( _points )[index];
+      _points == null ? new PointPair( PointPair.Missing, PointPair.Missing ) : _points[index];
 
     /// <summary>
     /// Gets or sets the hyperlink information for this <see cref="CurveItem" />.

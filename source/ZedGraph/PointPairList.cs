@@ -18,7 +18,6 @@
 //=============================================================================
 
 using System;
-using System.Drawing;
 using System.Collections.Generic;
 
 namespace ZedGraph
@@ -34,7 +33,7 @@ namespace ZedGraph
   /// modified by John Champion</author>
   /// <version> $Revision: 3.37 $ $Date: 2007/06/29 15:39:07 $ </version>
   [Serializable]
-  public class PointPairList : List<PointPair>, IPointList, IPointListEdit
+  public class PointPairList : List<PointPair>, IPointListEdit
   {
     #region Fields
     /// <summary>Private field to maintain the sort status of this
@@ -63,10 +62,8 @@ namespace ZedGraph
     /// true if the list is currently sorted.
     /// </summary>
     /// <seealso cref="Sort()"/>
-    public bool Sorted
-    {
-      get { return _sorted; }
-    }
+    public bool Sorted => _sorted;
+
     #endregion
 
     #region Constructors
@@ -186,31 +183,24 @@ namespace ZedGraph
     /// or -1 if no points were added.</returns>
     public void Add(double[] x, double[] y)
     {
-      int len = 0;
+      var len = 0;
 
       if (x != null)
         len = x.Length;
       if (y != null && y.Length > len)
         len = y.Length;
 
-      for (int i = 0; i < len; i++)
+      for (var i = 0; i < len; i++)
       {
-        PointPair point = new PointPair(0, 0, 0);
-        if (x == null)
-          point.X = (double)i + 1.0;
-        else if (i < x.Length)
-          point.X = x[i];
-        else
-          point.X = PointPair.Missing;
+        var xx = x == null    ? (double)i + 1.0 :
+                 i < x.Length ? x[i]            :
+                 PointPairBase.Missing;
 
-        if (y == null)
-          point.Y = (double)i + 1.0;
-        else if (i < y.Length)
-          point.Y = y[i];
-        else
-          point.Y = PointPair.Missing;
+        var yy = y == null    ? (double)i + 1.0 :
+                 i < y.Length ? y[i]            :
+                 PointPairBase.Missing;
 
-        base.Add(point);
+        base.Add(new PointPair(xx, yy, 0));
       }
 
       _sorted = false;
@@ -242,30 +232,19 @@ namespace ZedGraph
 
       for (int i = 0; i < len; i++)
       {
-        PointPair point = new PointPair();
+        var xx = x == null    ? (double)i + 1.0 :
+                 i < x.Length ? x[i]            :
+                 PointPairBase.Missing;
 
-        if (x == null)
-          point.X = (double)i + 1.0;
-        else if (i < x.Length)
-          point.X = x[i];
-        else
-          point.X = PointPair.Missing;
+        var yy = y == null    ? (double)i + 1.0 :
+                 i < y.Length ? y[i]            :
+                 PointPairBase.Missing;
 
-        if (y == null)
-          point.Y = (double)i + 1.0;
-        else if (i < y.Length)
-          point.Y = y[i];
-        else
-          point.Y = PointPair.Missing;
+        var zz = z == null    ? (double)i + 1.0 :
+                 i < z.Length ? z[i]            :
+                 PointPairBase.Missing;
 
-        if (z == null)
-          point.Z = (double)i + 1.0;
-        else if (i < z.Length)
-          point.Z = z[i];
-        else
-          point.Z = PointPair.Missing;
-
-        base.Add(point);
+        base.Add(new PointPair(xx, yy, zz));
       }
 
       _sorted = false;
@@ -416,15 +395,7 @@ namespace ZedGraph
     /// or -1 if the <see cref="PointPair"/> is not in the list</returns>
     public int IndexOfTag(string label)
     {
-      int iPt = 0;
-      foreach (PointPair p in this)
-      {
-        if (p.Tag is string && String.Compare((string)p.Tag, label, true) == 0)
-          return iPt;
-        iPt++;
-      }
-
-      return -1;
+      return FindIndex(p => string.Compare((string)p.Tag, label, StringComparison.Ordinal) == 0);
     }
 
     /// <summary>
@@ -442,10 +413,8 @@ namespace ZedGraph
         return false;
 
       for (int i = 0; i < this.Count; i++)
-      {
         if (!this[i].Equals(rhs[i]))
           return false;
-      }
 
       return true;
     }
@@ -537,10 +506,8 @@ namespace ZedGraph
     public void SetY(double[] y)
     {
       for (int i = 0; i < y.Length; i++)
-      {
         if (i < this.Count)
           this[i].Y = y[i];
-      }
 
       _sorted = false;
     }
@@ -563,10 +530,8 @@ namespace ZedGraph
     public void SetZ(double[] z)
     {
       for (int i = 0; i < z.Length; i++)
-      {
         if (i < this.Count)
           this[i].Z = z[i];
-      }
 
       _sorted = false;
     }
@@ -582,10 +547,8 @@ namespace ZedGraph
     public void SumY(PointPairList sumList)
     {
       for (int i = 0; i < this.Count; i++)
-      {
         if (i < sumList.Count)
           this[i].Y += sumList[i].Y;
-      }
 
       //sorted = false;
     }
@@ -601,10 +564,8 @@ namespace ZedGraph
     public void SumX(PointPairList sumList)
     {
       for (int i = 0; i < this.Count; i++)
-      {
         if (i < sumList.Count)
           this[i].X += sumList[i].X;
-      }
 
       _sorted = false;
     }
@@ -657,8 +618,8 @@ namespace ZedGraph
           throw new Exception("Error: Infinite loop in interpolation");
       }
 
-      return (xTarget - this[lo].X) / (this[hi].X - this[lo].X) *
-          (this[hi].Y - this[lo].Y) + this[lo].Y;
+      return (xTarget    - this[lo].X) / (this[hi].X - this[lo].X) *
+             (this[hi].Y - this[lo].Y) +  this[lo].Y;
 
     }
 

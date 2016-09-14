@@ -35,7 +35,7 @@ namespace ZedGraph.Demo
              "OHLCBar Real-Time Demo", DemoType.Financial)
     {
       m_Timer   = new Timer { Interval = 500, Enabled = false };
-      m_Data    = new StockPointList();
+      m_Data    = new StockPointList(true);
       m_FilteredData = new DynFilteredPointList(new [] {0.0}, new [] {0.0});
       m_EMAData = new PointPairList();
       m_Rand    = new Random();
@@ -168,17 +168,24 @@ namespace ZedGraph.Demo
       //------------------------------------------------------------------------
       // Add OHCL time series
       //------------------------------------------------------------------------
-      OHLCBarItem myCurve           = m_Pane.AddOHLCBar("trades", m_Data, Color.Black);
-      myCurve.Bar.Width             = 2;
-      myCurve.Bar.IsAutoSize        = true;
-      myCurve.Bar.Color             = Color.DodgerBlue;
-      myCurve.IsY2Axis              = true; // Associate this curve with the Y2 axis
-      myCurve.YAxisIndex            = 0;    // Associate this curve with the first Y2 axis (this is actually default)
-      myCurve.IsSelectable          = true;
-      curve.IsSelected              = true;
+      //OHLCBarItem myCurve           = m_Pane.AddOHLCBar("trades", m_Data, Color.Black);
+      //      myCurve.Bar.Width             = 2;
+      //      myCurve.Bar.IsAutoSize        = true;
+      //      myCurve.Bar.Color             = Color.DodgerBlue;
+      var myCurve                       = m_Pane.AddJapaneseCandleStick("trades", m_Data);
+      myCurve.Stick.FallingColor        = Color.White;
+      myCurve.Stick.Color               = Color.White;
+      myCurve.Stick.RisingFill.Color    = Color.DarkOliveGreen;
+      myCurve.Stick.FallingFill.Color   = Color.Black;
+      myCurve.Stick.FallingBorder.Color = Color.AntiqueWhite;
+      myCurve.Stick.RisingBorder.Color  = Color.AntiqueWhite;
+      myCurve.IsY2Axis                  = true; // Associate this curve with the Y2 axis
+      myCurve.YAxisIndex                = 0;    // Associate this curve with the first Y2 axis (this is actually default)
+      myCurve.IsSelectable              = true;
+      curve.IsSelected                  = true;
 
-      m_Pane.IsAlignGrids           = true;
-      m_Pane.IsFontsScaled          = false;
+      m_Pane.IsAlignGrids               = true;
+      m_Pane.IsFontsScaled              = false;
 
       //------------------------------------------------------------------------
       // Add a line to track last close
@@ -258,6 +265,7 @@ namespace ZedGraph.Demo
       //ZedGraphControl.IsEnableVZoom = true;
       ZedGraphControl.IsAutoScrollRange = true;
       ZedGraphControl.ZoomResolution = 0.001;
+      m_DistanceMeasurer.Coord = CoordType.AxisXY2Scale;
     }
 
     public override void Deactivate()
@@ -267,6 +275,7 @@ namespace ZedGraph.Demo
       //ZedGraphControl.IsEnableHZoom = true;
       //ZedGraphControl.IsEnableVZoom = true;
       ZedGraphControl.IsAutoScrollRange = false;
+      m_DistanceMeasurer.Coord = CoordType.AxisXYScale;
     }
 
     private readonly Timer m_Timer;
@@ -323,9 +332,13 @@ namespace ZedGraph.Demo
         {
           //m_Pane.XAxis.Scale.Max = now + 5;
           //m_Pane.XAxis.Scale.Min += diff;
-          var window = (int)(m_Pane.XAxis.Scale.Max - m_Pane.XAxis.Scale.Min);
-          m_Pane.XAxis.Scale.Max = m_Data.Count + 1;
-          m_Pane.XAxis.Scale.Min = m_Pane.XAxis.Scale.Max - window;
+
+          if (Math.Abs(Math.Round(m_Pane.XAxis.Scale.Max) - m_Data.Count) < 5 )
+          {
+            var window = (int)(m_Pane.XAxis.Scale.Max - m_Pane.XAxis.Scale.Min);
+            m_Pane.XAxis.Scale.Max = m_Data.Count + 1;
+            m_Pane.XAxis.Scale.Min = m_Pane.XAxis.Scale.Max - window;
+          }
 
           double min = double.MaxValue, max = double.MinValue;
           var xMin = Scale.MinMax(0, (int)m_Pane.XAxis.Scale.Min, m_Data.Count - 1);

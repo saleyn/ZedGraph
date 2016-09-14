@@ -85,4 +85,14 @@ namespace ZedGraph
     void Clear();
 
   }
+
+  public interface IOrdinalPointListEdit : IPointListEdit
+  {
+    /// <summary>
+    /// Get a data point index by the X coordinate value.
+    /// E.g. for ordinal date this function would retrieve the index of the date
+    /// in the underlying collection based on the date value.
+    /// </summary>
+    int this[double xValue] { get; }
+  }
 }

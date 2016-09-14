@@ -18,8 +18,6 @@
 //=============================================================================
 
 using System;
-using System.Collections;
-using System.Text;
 using System.Drawing;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -41,7 +39,7 @@ namespace ZedGraph
   /// <author> John Champion  </author>
   /// <version> $Revision: 1.13 $ $Date: 2007-11-28 02:38:22 $ </version>
   [Serializable]
-  class DateAsOrdinalScale : Scale, ISerializable //, ICloneable
+  class DateAsOrdinalScale : Scale
   {
 
   #region constructors
@@ -86,10 +84,7 @@ namespace ZedGraph
     /// Return the <see cref="AxisType" /> for this <see cref="Scale" />, which is
     /// <see cref="AxisType.DateAsOrdinal" />.
     /// </summary>
-    public override AxisType Type
-    {
-      get { return AxisType.DateAsOrdinal; }
-    }
+    public override AxisType Type => AxisType.DateAsOrdinal;
 
     /// <summary>
     /// Gets or sets the minimum value for this scale.
@@ -192,74 +187,72 @@ namespace ZedGraph
 
     internal void SetDateFormat( GraphPane pane )
     {
-      if ( _formatAuto )
+      if (!_formatAuto) return;
+
+      double range = 10;
+
+      if ( pane.CurveList.Count > 0 && pane.CurveList[0].Points.Count > 1 )
       {
-        double range = 10;
+        double val1, val2;
 
-        if ( pane.CurveList.Count > 0 && pane.CurveList[0].Points.Count > 1 )
+        var pt1 = pane.CurveList[0].Points[0];
+        var pt2 = pane.CurveList[0].Points[pane.CurveList[0].Points.Count - 1];
+        var pc  = pane.CurveList[0].Points.Count;
+        if ( pane.IsBoundedRanges )
         {
-          double val1, val2;
-
-          PointPair pt1 = pane.CurveList[0].Points[0];
-          PointPair pt2 = pane.CurveList[0].Points[pane.CurveList[0].Points.Count - 1];
-          int p1 = 1;
-          int p2 = pane.CurveList[0].Points.Count;
-          if ( pane.IsBoundedRanges )
+          var p1 = (int) Math.Floor( _ownerAxis.Scale.Min );
+          var p2 = (int) Math.Ceiling( _ownerAxis.Scale.Max );
+          p1 = Scale.MinMax(1, p1, pc);
+          p2 = Scale.MinMax(1, p2, pc);
+          if ( p2 > p1 )
           {
-            p1 = (int) Math.Floor( _ownerAxis.Scale.Min );
-            p2 = (int) Math.Ceiling( _ownerAxis.Scale.Max );
-            p1 = Math.Min( Math.Max( p1, 1 ), pane.CurveList[0].Points.Count );
-            p2 = Math.Min( Math.Max( p2, 1 ), pane.CurveList[0].Points.Count );
-            if ( p2 > p1 )
-            {
-              pt1 = pane.CurveList[0].Points[p1-1];
-              pt2 = pane.CurveList[0].Points[p2-1];
-            }
+            pt1 = pane.CurveList[0].Points[p1-1];
+            pt2 = pane.CurveList[0].Points[p2-1];
           }
-          if ( _ownerAxis is IXAxis )
-          {
-            val1 = pt1.X;
-            val2 = pt2.X;
-          }
-          else
-          {
-            val1 = pt1.Y;
-            val2 = pt2.Y;
-          }
-
-          if (  val1 != PointPair.Missing &&
-              val2 != PointPair.Missing &&
-              !Double.IsNaN( val1 ) &&
-              !Double.IsNaN( val2 ) &&
-              !Double.IsInfinity( val1 ) &&
-              !Double.IsInfinity( val2 ) &&
-              Math.Abs( val2 - val1 ) > 1e-10 )
-            range = Math.Abs( val2 - val1 );
+        }
+        if ( _ownerAxis is IXAxis )
+        {
+          val1 = pt1.X;
+          val2 = pt2.X;
+        }
+        else
+        {
+          val1 = pt1.Y;
+          val2 = pt2.Y;
         }
 
-        if ( range > Default.RangeYearYear )
-          _format = Default.FormatYearYear;
-        else if ( range > Default.RangeYearMonth )
-          _format = Default.FormatYearMonth;
-        else if ( range > Default.RangeMonthMonth )
-          _format = Default.FormatMonthMonth;
-        else if ( range > Default.RangeDayDay )
-          _format = Default.FormatDayDay;
-        else if ( range > Default.RangeDayHour )
-          _format = Default.FormatDayHour;
-        else if ( range > Default.RangeHourHour )
-          _format = Default.FormatHourHour;
-        else if ( range > Default.RangeHourMinute )
-          _format = Default.FormatHourMinute;
-        else if ( range > Default.RangeMinuteMinute )
-          _format = Default.FormatMinuteMinute;
-        else if ( range > Default.RangeMinuteSecond )
-          _format = Default.FormatMinuteSecond;
-        else if ( range > Default.RangeSecondSecond )
-          _format = Default.FormatSecondSecond;
-        else // MilliSecond
-          _format = Default.FormatMillisecond;
+        if (  val1 != PointPair.Missing &&
+              val2 != PointPair.Missing &&
+              !double.IsNaN( val1 ) &&
+              !double.IsNaN( val2 ) &&
+              !double.IsInfinity( val1 ) &&
+              !double.IsInfinity( val2 ) &&
+              Math.Abs( val2 - val1 ) > 1e-10 )
+          range = Math.Abs( val2 - val1 );
       }
+
+      if ( range > Default.RangeYearYear )
+        _format = Default.FormatYearYear;
+      else if ( range > Default.RangeYearMonth )
+        _format = Default.FormatYearMonth;
+      else if ( range > Default.RangeMonthMonth )
+        _format = Default.FormatMonthMonth;
+      else if ( range > Default.RangeDayDay )
+        _format = Default.FormatDayDay;
+      else if ( range > Default.RangeDayHour )
+        _format = Default.FormatDayHour;
+      else if ( range > Default.RangeHourHour )
+        _format = Default.FormatHourHour;
+      else if ( range > Default.RangeHourMinute )
+        _format = Default.FormatHourMinute;
+      else if ( range > Default.RangeMinuteMinute )
+        _format = Default.FormatMinuteMinute;
+      else if ( range > Default.RangeMinuteSecond )
+        _format = Default.FormatMinuteSecond;
+      else if ( range > Default.RangeSecondSecond )
+        _format = Default.FormatSecondSecond;
+      else // MilliSecond
+        _format = Default.FormatMillisecond;
     }
 
     /// <summary>
@@ -284,25 +277,26 @@ namespace ZedGraph
       if ( _format == null )
         _format = Scale.Default.Format;
 
-      double val;
+      var tmpIndex = (int)(dVal - 1);
 
-      int tmpIndex = (int) dVal - 1;
-
-      if ( pane.CurveList.Count > 0 && pane.CurveList[0].Points.Count > tmpIndex )
-      {
-        if ( _ownerAxis is XAxis || _ownerAxis is X2Axis )
-        val = pane.CurveList[0].Points[tmpIndex].X;
-        else
-          val = pane.CurveList[0].Points[tmpIndex].Y;
-        return XDate.ToString( val, _format );
-      }
-      else
+      if (pane.CurveList.Count == 0 || tmpIndex >= pane.CurveList[0].Points.Count)
         return string.Empty;
+
+      var val = Value(pane, tmpIndex, dVal);
+
+      return XDate.ToString( val, _format );
     }
 
-  #endregion
+    override internal double Value(GraphPane pane, int index, double dVal)
+    {
+      var data = pane.CurveList[0].Points;
+      var pp   = data[MinMax(0, index, data.Count-1)];
+      return _ownerAxis is IXAxis ? pp.X : pp.Y;
+    }
 
-  #region Serialization
+    #endregion
+
+    #region Serialization
     /// <summary>
     /// Current schema value that defines the version of the serialized file
     /// </summary>

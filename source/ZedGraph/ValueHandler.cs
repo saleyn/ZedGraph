@@ -102,20 +102,17 @@ namespace ZedGraph
     public static bool GetValues( GraphPane pane, CurveItem curve, int iPt,
               out double baseVal, out double lowVal, out double hiVal )
     {
-      hiVal = PointPair.Missing;
-      lowVal = PointPair.Missing;
-      baseVal = PointPair.Missing;
+      hiVal   = PointPairBase.Missing;
+      lowVal  = PointPairBase.Missing;
+      baseVal = PointPairBase.Missing;
 
       if ( curve == null || curve.Points.Count <= iPt || !curve.IsVisible )
         return false;
 
-      Axis baseAxis = curve.BaseAxis( pane );
-      Axis valueAxis = curve.ValueAxis( pane );
+      var baseAxis  = curve.BaseAxis( pane );
+      var valueAxis = curve.ValueAxis( pane );
 
-      if ( baseAxis is XAxis || baseAxis is X2Axis )
-        baseVal = curve.Points[iPt].X;
-      else
-        baseVal = curve.Points[iPt].Y;
+      baseVal = baseAxis is IXAxis ? curve.Points[iPt].X : curve.Points[iPt].Y;
 
       // is it a stacked bar type?
       if ( curve is BarItem && ( pane._barSettings.Type == BarType.Stack ||
@@ -123,80 +120,79 @@ namespace ZedGraph
       {
         double positiveStack = 0;
         double negativeStack = 0;
-        double curVal;
 
         // loop through all the curves, summing up the values to get a total (only
         // for the current ordinal position iPt)
         foreach ( CurveItem tmpCurve in pane.CurveList )
         {
           // Sum the value for the current curve only if it is a bar
-          if ( tmpCurve.IsBar && tmpCurve.IsVisible )
+          if (!tmpCurve.IsBar || !tmpCurve.IsVisible) continue;
+
+          var curVal = PointPair.Missing;
+          // For non-ordinal curves, find a matching base value (must match exactly)
+          if ( curve.IsOverrideOrdinal || !baseAxis.Scale.IsAnyOrdinal )
           {
-            curVal = PointPair.Missing;
-            // For non-ordinal curves, find a matching base value (must match exactly)
-            if ( curve.IsOverrideOrdinal || !baseAxis.Scale.IsAnyOrdinal )
-            {
-              IPointList points = tmpCurve.Points;
+            var points = tmpCurve.Points;
 
-              for ( int i=0; i<points.Count; i++ )
+            for ( var i=0; i<points.Count; i++ )
+            {
+              if ( ( baseAxis is IXAxis ) && points[i].X == baseVal )
               {
-                if ( ( baseAxis is XAxis || baseAxis is X2Axis ) && points[i].X == baseVal )
-                {
-                  curVal = points[i].Y;
-                  break;
-                }
-                else if ( !(baseAxis is XAxis || baseAxis is X2Axis) && points[i].Y == baseVal )
-                {
-                  curVal = points[i].X;
-                  break;
-                }
+                curVal = points[i].Y;
+                break;
+              }
+
+              if ( !(baseAxis is IXAxis) && points[i].Y == baseVal )
+              {
+                curVal = points[i].X;
+                break;
               }
             }
-            // otherwise, it's an ordinal type so use the value at the same ordinal position
-            else if ( iPt < tmpCurve.Points.Count )
-            {
-              // Get the value for the appropriate value axis
-              if ( baseAxis is XAxis || baseAxis is X2Axis )
-                curVal = tmpCurve.Points[iPt].Y;
-              else
-                curVal = tmpCurve.Points[iPt].X;
-            }
-
-            // If it's a missing value, skip it
-            if ( curVal == PointPair.Missing )
-            {
-              positiveStack = PointPair.Missing;
-              negativeStack = PointPair.Missing;
-            }
-
-            // the current curve is the target curve, save the summed values for later
-            if ( tmpCurve == curve )
-            {
-              // if the value is positive, use the positive stack
-              if ( curVal >= 0 )
-              {
-                lowVal = positiveStack;
-                hiVal = ( curVal == PointPair.Missing || positiveStack == PointPair.Missing ) ?
-                    PointPair.Missing : positiveStack + curVal;
-              }
-              // otherwise, use the negative stack
-              else
-              {
-                hiVal = negativeStack;
-                lowVal = ( curVal == PointPair.Missing || negativeStack == PointPair.Missing ) ?
-                    PointPair.Missing : negativeStack + curVal;
-              }
-            }
-
-            // Add all positive values to the positive stack, and negative values to the
-            // negative stack
-            if ( curVal >= 0 )
-              positiveStack = ( curVal == PointPair.Missing || positiveStack == PointPair.Missing ) ?
-                    PointPair.Missing : positiveStack + curVal;
-            else
-              negativeStack = ( curVal == PointPair.Missing || negativeStack == PointPair.Missing ) ?
-                    PointPair.Missing : negativeStack + curVal;
           }
+          // otherwise, it's an ordinal type so use the value at the same ordinal position
+          else if ( iPt < tmpCurve.Points.Count )
+          {
+            // Get the value for the appropriate value axis
+            if ( baseAxis is XAxis || baseAxis is X2Axis )
+              curVal = tmpCurve.Points[iPt].Y;
+            else
+              curVal = tmpCurve.Points[iPt].X;
+          }
+
+          // If it's a missing value, skip it
+          if ( curVal == PointPair.Missing )
+          {
+            positiveStack = PointPair.Missing;
+            negativeStack = PointPair.Missing;
+          }
+
+          // the current curve is the target curve, save the summed values for later
+          if ( tmpCurve == curve )
+          {
+            // if the value is positive, use the positive stack
+            if ( curVal >= 0 )
+            {
+              lowVal = positiveStack;
+              hiVal = ( curVal == PointPair.Missing || positiveStack == PointPair.Missing ) ?
+                        PointPair.Missing : positiveStack + curVal;
+            }
+            // otherwise, use the negative stack
+            else
+            {
+              hiVal = negativeStack;
+              lowVal = ( curVal == PointPair.Missing || negativeStack == PointPair.Missing ) ?
+                         PointPair.Missing : negativeStack + curVal;
+            }
+          }
+
+          // Add all positive values to the positive stack, and negative values to the
+          // negative stack
+          if ( curVal >= 0 )
+            positiveStack = ( curVal == PointPair.Missing || positiveStack == PointPair.Missing ) ?
+                              PointPair.Missing : positiveStack + curVal;
+          else
+            negativeStack = ( curVal == PointPair.Missing || negativeStack == PointPair.Missing ) ?
+                              PointPair.Missing : negativeStack + curVal;
         }
 
         // if the curve is a PercentStack type, then calculate the percent for this bar

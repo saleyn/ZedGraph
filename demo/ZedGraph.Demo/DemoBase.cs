@@ -80,7 +80,7 @@ namespace ZedGraph.Demo
 
     #region ZedGraphDemo Members
 
-    private DistanceMeasurer m_DistanceMeasurer;
+    protected DistanceMeasurer m_DistanceMeasurer;
 
     /// <summary>
     /// The graph pane the chart is show in.

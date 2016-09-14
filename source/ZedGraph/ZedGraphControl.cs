@@ -312,22 +312,18 @@ namespace ZedGraph
             var yaxis = _currentPane.YAxis.Scale.Valid ? (Axis)_currentPane.YAxis : _currentPane.Y2Axis;
 
             // FIXME: This is experimental support of drawing crosshair values
-            int index;
-            CurveItem curve;
-            // See if it's a data point
-            if (_currentPane.FindNearestPoint(_lastCrosshairPoint, out curve, out index))
+            using (Brush brush = xaxis.Scale.FontSpec.Fill.MakeBrush(rect, null))
             {
-              //g.SetClip(xaxis.Rect);
-              var pp = curve.Points[index];
-              var val = pp.LowValue.ToString();
-              using (Brush brush = xaxis.Scale.FontSpec.Fill.MakeBrush(rect, pp))
-                g.DrawString(val, xaxis.Scale.FontSpec.Font, brush, _lastCrosshairPoint.X, 10);
-              /*
-              xaxis.Scale.DrawLabel(g, _currentPane, index, curve.Points[index].LowValue, _lastCrosshairPoint.X,
-                _lastCrosshairPoint.X - _currentPane.Chart.Rect.Left, 50, 10, xaxis.Scale.FontSpec.Font.Height,
-                _currentPane.ScaleFactor, xaxis.Scale.FontSpec);
-              */
-              //g.ResetClip();
+              var x = (int)Math.Round(xaxis.ReverseTransform(_currentPane, _lastCrosshairPoint.X));
+              var text = xaxis.Scale.MakeLabel(_currentPane, 0, x);
+              g.DrawString(text, xaxis.Scale.FontSpec.Font, brush, _lastCrosshairPoint.X, 5);
+              var y = (int)Math.Round(yaxis.ReverseTransform(_currentPane, _lastCrosshairPoint.Y));
+              text = yaxis.Scale.MakeLabel(_currentPane, 0, y);
+              //yaxis.Scale.FontSpec.Draw(g, _currentPane, text,
+              //  /*rect.Width*/ 0, _lastCrosshairPoint.Y - yaxis.Scale.FontSpec.Font.Height / 2,
+              //  yaxis.Scale.AlignH, yaxis.Scale.AlignV, _currentPane.ScaleFactor);
+              g.DrawString(text, yaxis.Scale.FontSpec.Font, brush, rect.Width,
+                _lastCrosshairPoint.Y - yaxis.Scale.FontSpec.Font.Height / 2);
             }
           }
         }

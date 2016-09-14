@@ -172,9 +172,14 @@ namespace ZedGraph
       set { _fallingColor = value; }
     }
 
-  #endregion
+    /// <summary>
+    /// Factor used to divide bar width
+    /// </summary>
+    public override double WidthDivisor => 2.0f;
 
-  #region Constructors
+    #endregion
+
+    #region Constructors
 
     /// <summary>
     /// Default constructor that sets all <see cref="JapaneseCandleStick"/> properties to
@@ -327,37 +332,36 @@ namespace ZedGraph
     {
       //float halfSize = (int) ( _size * scaleFactor / 2.0f + 0.5f );
 
-      if ( pixBase != PointPair.Missing && Math.Abs( pixLow ) < 1000000 &&
-            Math.Abs( pixHigh ) < 1000000)
+      if (pixBase == PointPair.Missing || Math.Abs(pixLow) >= 1000000 ||
+          Math.Abs(pixHigh) >= 1000000)
+        return;
+      RectangleF rect;
+      if ( isXBase )
       {
-        RectangleF rect;
-        if ( isXBase )
-        {
-          rect = new RectangleF( pixBase - halfSize, Math.Min( pixOpen, pixClose ),
-                halfSize * 2.0f, Math.Abs( pixOpen - pixClose ) );
+        rect = new RectangleF( pixBase - halfSize, Math.Min( pixOpen, pixClose ),
+                               halfSize * 2.0f,    Math.Abs( pixOpen - pixClose ) );
 
-          g.DrawLine( pen, pixBase, pixHigh, pixBase, pixLow );
-        }
-        else
-        {
-          rect = new RectangleF( Math.Min( pixOpen, pixClose ), pixBase - halfSize,
-                Math.Abs( pixOpen - pixClose ), halfSize * 2.0f );
-
-          g.DrawLine( pen, pixHigh, pixBase, pixLow, pixBase );
-        }
-
-        if ( _isOpenCloseVisible && Math.Abs( pixOpen ) < 1000000 &&
-              Math.Abs( pixClose ) < 1000000 )
-        {
-          if ( rect.Width == 0 )
-            rect.Width = 1;
-          if ( rect.Height == 0 )
-            rect.Height = 1;
-
-          fill.Draw( g, rect, pt );
-          border.Draw( g, pane, scaleFactor, rect );
-        }
+        g.DrawLine( pen, pixBase, pixHigh, pixBase, pixLow );
       }
+      else
+      {
+        rect = new RectangleF( Math.Min( pixOpen, pixClose ), pixBase - halfSize,
+                               Math.Abs( pixOpen - pixClose ), halfSize * 2.0f );
+
+        g.DrawLine( pen, pixHigh, pixBase, pixLow, pixBase );
+      }
+
+      if (!_isOpenCloseVisible || Math.Abs(pixOpen) >= 1000000 ||
+          Math.Abs(pixClose) >= 1000000)
+        return;
+
+      if ( rect.Width == 0 )
+        rect.Width = 1;
+      if ( rect.Height == 0 )
+        rect.Height = 1;
+
+      fill.Draw( g, rect, pt );
+      border.Draw( g, pane, scaleFactor, rect );
     }
 
 
@@ -397,84 +401,78 @@ namespace ZedGraph
         //float halfSize = _size * scaleFactor;
         float halfSize = GetBarWidth( pane, baseAxis, scaleFactor );
 
-        Color tColor = _color;
-        Color tFallingColor = _fallingColor;
-        float tPenWidth = _width;
-        Fill tRisingFill = _risingFill;
-        Fill tFallingFill = _fallingFill;
-        Border tRisingBorder = _risingBorder;
+        Color  tColor         = _color;
+        Color  tFallingColor  = _fallingColor;
+        float  tPenWidth      = _width;
+        Fill   tRisingFill    = _risingFill;
+        Fill   tFallingFill   = _fallingFill;
+        Border tRisingBorder  = _risingBorder;
         Border tFallingBorder = _fallingBorder;
         if ( curve.IsSelected )
         {
-          tColor = Selection.Border.Color;
-          tFallingColor = Selection.Border.Color;
-          tPenWidth = Selection.Border.Width;
-          tRisingFill = Selection.Fill;
-          tFallingFill = Selection.Fill;
-          tRisingBorder = Selection.Border;
+          tColor         = Selection.Border.Color;
+          tFallingColor  = Selection.Border.Color;
+          tPenWidth      = Selection.Border.Width;
+          tRisingFill    = Selection.Fill;
+          tFallingFill   = Selection.Fill;
+          tRisingBorder  = Selection.Border;
           tFallingBorder = Selection.Border;
-
         }
 
-        using ( Pen risingPen = new Pen(  tColor, tPenWidth ) )
+        using ( Pen risingPen  = new Pen( tColor, tPenWidth ) )
         using ( Pen fallingPen = new Pen( tFallingColor, tPenWidth ) )
         {
           // Loop over each defined point              
           for ( int i = 0; i < curve.Points.Count; i++ )
           {
-            PointPair pt = curve.Points[i];
-            double date = pt.X;
-            double high = pt.Y;
-            double low = pt.Z;
-            double open = PointPair.Missing;
-            double close = PointPair.Missing;
-            if ( pt is StockPt )
-            {
-              open = ( pt as StockPt ).Open;
-              close = ( pt as StockPt ).Close;
-            }
+            var    pt = curve.Points[i];
+            double date;
+            double open;
+            double high;
+            double low;
+            double close;
+            GetOHLC(pt, out date, out open, out high, out low, out close);
 
             // Any value set to double max is invalid and should be skipped
             // This is used for calculated values that are out of range, divide
             //   by zero, etc.
             // Also, any value <= zero on a log scale is invalid
 
-            if ( !curve.Points[i].IsInvalid3D &&
-                ( date > 0 || !baseAxis.Scale.IsLog ) &&
-                ( ( high > 0 && low > 0 ) || !valueAxis.Scale.IsLog ) )
+            if (curve.Points[i].IsInvalid3D || (!(date > 0) && baseAxis.Scale.IsLog) ||
+                ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
+              continue;
+
+            pixBase = (int) ( baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, date ) + 0.5 );
+            //pixBase = baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, date );
+            pixHigh = valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, high );
+            pixLow  = valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, low );
+            pixOpen = PointPair.IsValueInvalid( open )
+                    ? float.MaxValue
+                    : valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, open );
+
+            pixClose = PointPair.IsValueInvalid( close ) 
+                     ? float.MaxValue
+                     : valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, close );
+
+            bool rising = close > open;
+
+            if ( !curve.IsSelected && this._gradientFill.IsGradientValueType )
             {
-              pixBase = (int) ( baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, date ) + 0.5 );
-              //pixBase = baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, date );
-              pixHigh = valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, high );
-              pixLow = valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, low );
-              if ( PointPair.IsValueInvalid( open ) )
-                pixOpen = Single.MaxValue;
-              else
-                pixOpen = valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, open );
-
-              if ( PointPair.IsValueInvalid( close ) )
-                pixClose = Single.MaxValue;
-              else
-                pixClose = valueAxis.Scale.Transform( curve.IsOverrideOrdinal, i, close );
-
-              if ( !curve.IsSelected && this._gradientFill.IsGradientValueType )
-              {
-                using ( Pen tPen = GetPen( pane, scaleFactor, pt ) )
-                  Draw( g, pane, baseAxis is XAxis || baseAxis is X2Axis,
+              using ( Pen tPen = GetPen( pane, scaleFactor, pt ) )
+                Draw( g, pane, baseAxis is XAxis || baseAxis is X2Axis,
+                      pixBase, pixHigh, pixLow, pixOpen,
+                      pixClose, halfSize, scaleFactor,
+                      ( tPen ),
+                      ( rising ? tRisingFill   : tFallingFill ),
+                      ( rising ? tRisingBorder : tFallingBorder ), pt );
+            }
+            else
+              Draw( g, pane, baseAxis is XAxis || baseAxis is X2Axis,
                     pixBase, pixHigh, pixLow, pixOpen,
                     pixClose, halfSize, scaleFactor,
-                    ( tPen ),
-                    ( close > open ? tRisingFill : tFallingFill ),
-                    ( close > open ? tRisingBorder : tFallingBorder ), pt );
-              }
-              else
-                Draw( g, pane, baseAxis is XAxis || baseAxis is X2Axis,
-                  pixBase, pixHigh, pixLow, pixOpen,
-                  pixClose, halfSize, scaleFactor,
-                  ( close > open ? risingPen : fallingPen ),
-                  ( close > open ? tRisingFill : tFallingFill ),
-                  ( close > open ? tRisingBorder : tFallingBorder ), pt );
-            }
+                    ( rising ? risingPen     : fallingPen ),
+                    ( rising ? tRisingFill   : tFallingFill ),
+                    ( rising ? tRisingBorder : tFallingBorder ), pt );
           }
         }
       }

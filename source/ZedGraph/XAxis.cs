@@ -72,10 +72,7 @@ namespace ZedGraph
     /// Default constructor that sets all <see cref="XAxis"/> properties to
     /// default values as defined in the <see cref="Default"/> class
     /// </summary>
-    public XAxis()
-      : this( "X Axis" )
-    {
-    }
+    public XAxis() : this( "X Axis" ) {}
 
     /// <summary>
     /// Default constructor that sets all <see cref="XAxis"/> properties to
@@ -95,8 +92,7 @@ namespace ZedGraph
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The XAxis object from which to copy</param>
-    public XAxis( XAxis rhs )
-      : base( rhs )
+    public XAxis( XAxis rhs ) : base( rhs )
     {
     }
 
@@ -214,13 +210,10 @@ namespace ZedGraph
     /// <returns>The shift amount measured in pixels</returns>
     internal override float CalcCrossShift( GraphPane pane )
     {
-      double effCross = EffectiveCrossValue( pane );
-
-      if ( !CrossAuto )
-        return pane.YAxis.Scale.Transform( effCross ) - pane.YAxis.Scale._maxPix;
-      else
-        return 0;
+      var    effCross  = EffectiveCrossValue( pane );
+      return CrossAuto ? 0 : pane.YAxis.Scale.Transform(effCross) - pane.YAxis.Scale._maxPix;
     }
+
     /*
         override internal bool IsCrossed( GraphPane pane )
         {
@@ -255,6 +248,3 @@ namespace ZedGraph
     #endregion
   }
 }
-
-
-

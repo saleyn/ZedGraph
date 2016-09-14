@@ -1021,19 +1021,23 @@ namespace ZedGraph
     /// <summary>
     /// True if this scale is <see cref="AxisType.Log" />, false otherwise.
     /// </summary>
-    public bool IsLog { get { return this is LogScale; } }
+    public bool IsLog => this is LogScale;
+
     /// <summary>
     /// True if this scale is <see cref="AxisType.Exponent" />, false otherwise.
     /// </summary>
-    public bool IsExponent { get { return this is ExponentScale; } }
+    public bool IsExponent => this is ExponentScale;
+
     /// <summary>
     /// True if this scale is <see cref="AxisType.Date" />, false otherwise.
     /// </summary>
-    public bool IsDate { get { return this is DateScale; } }
+    public bool IsDate => this is DateScale;
+
     /// <summary>
     /// True if this scale is <see cref="AxisType.Text" />, false otherwise.
     /// </summary>
-    public bool IsText { get { return this is TextScale; } }
+    public bool IsText => this is TextScale;
+
     /// <summary>
     /// True if this scale is <see cref="AxisType.Ordinal" />, false otherwise.
     /// </summary>
@@ -1044,7 +1048,7 @@ namespace ZedGraph
     /// or <see cref="AxisType.DateAsOrdinal" />.  Use the <see cref="IsAnyOrdinal" />
     /// as a "catchall" for all ordinal type axes.
     /// </remarks>
-    public bool IsOrdinal { get { return this is OrdinalScale; } }
+    public bool IsOrdinal => this is OrdinalScale;
 
     /// <summary>
     /// Gets a value that indicates if this <see cref="Scale" /> is of any of the
@@ -1055,12 +1059,16 @@ namespace ZedGraph
     {
       get
       {
-        AxisType type = this.Type;
-
-        return type == AxisType.Ordinal ||
-              type == AxisType.Text ||
-              type == AxisType.LinearAsOrdinal ||
-              type == AxisType.DateAsOrdinal;
+        switch (Type)
+        {
+          case AxisType.Ordinal:
+          case AxisType.Text:
+          case AxisType.LinearAsOrdinal:
+          case AxisType.DateAsOrdinal:
+            return true;
+          default:
+            return false;
+        }
       }
     }
     /*
@@ -1496,7 +1504,7 @@ namespace ZedGraph
       set { _align = value; }
     }
 
-    /// <summary> Controls the alignment of the <see cref="Axis"/> tic labels.
+    /// <summary> Controls the horizontal alignment of the <see cref="Axis"/> tic labels.
     /// </summary>
     /// <remarks>
     /// This property controls whether the left, center, or right edges of the
@@ -1507,6 +1515,15 @@ namespace ZedGraph
       get { return _alignH; }
       set { _alignH = value; }
     }
+
+    /// <summary>
+    /// Controls the vertical <see cref="Axis"/> alignment of the tic labels.
+    /// </summary>
+    internal AlignV AlignV =>
+      _alignH == AlignH.Left  ? AlignV.Top    :
+      _alignH == AlignH.Right ? AlignV.Bottom :
+      AlignV.Center;
+
 
     /// <summary>
     /// Gets a reference to the <see cref="ZedGraph.FontSpec"/> class used to render
@@ -1771,6 +1788,18 @@ namespace ZedGraph
     {
       return val;
     }
+
+    /// <summary>
+    /// Get value associated 
+    /// </summary>
+    /// <param name="i"></param>
+    /// <param name="dVal"></param>
+    /// <returns></returns>
+    virtual internal double Value(GraphPane pane, int index, double dVal)
+    {
+      return dVal;
+    }
+
     /*
         /// <summary>
         /// Make a value label for the axis at the specified ordinal position.
@@ -1994,15 +2023,11 @@ namespace ZedGraph
     /// </returns>
     virtual internal double CalcBaseTic()
     {
-      if (_baseTic != PointPair.Missing)
-        return _baseTic;
-      if (IsAnyOrdinal)
-        // basetic is always 1 for ordinal types
-        return 1;
-
-      // default behavior is linear or ordinal type
-      // go to the nearest even multiple of the step size
-      return Math.Ceiling(_min / _majorStep - 0.00000001) * _majorStep;
+      return _baseTic != PointPair.Missing  ? _baseTic :
+             IsAnyOrdinal                   ? 1        : // basetic is always 1 for ordinal types
+            // default behavior is linear or ordinal type
+            // go to the nearest even multiple of the step size
+            Math.Ceiling(_min / _majorStep - 0.00000001) * _majorStep;
     }
 
     /// <summary>
@@ -2040,16 +2065,14 @@ namespace ZedGraph
     internal void DrawLabels(Graphics g, GraphPane pane, double baseVal, int nTics,
             float topPix, float shift, float scaleFactor)
     {
-      MajorTic tic = _ownerAxis.MajorTic;
+      var tic = _ownerAxis.MajorTic;
       //      MajorGrid grid = _ownerAxis._majorGrid;
 
-      double dVal, dVal2;
-      float pixVal, pixVal2;
-      float scaledTic = tic.ScaledTic(scaleFactor);
+      var scaledTic = tic.ScaledTic(scaleFactor);
 
       //double scaleMult = Math.Pow((double)10.0, _mag);
 
-      using (Pen ticPen = tic.GetPen(pane, scaleFactor))
+      using (var ticPen = tic.GetPen(pane, scaleFactor))
       //      using ( Pen gridPen = grid.GetPen( pane, scaleFactor ) )
       {
         // get the Y position of the center of the axis labels
@@ -2071,7 +2094,7 @@ namespace ZedGraph
         // loop for each major tic
         for (int i = firstTic; i < nTics + firstTic; i++)
         {
-          dVal = CalcMajorTicValue(baseVal, i);
+          var dVal = CalcMajorTicValue(baseVal, i);
 
           // If we're before the start of the scale, just go to the next tic
           if (dVal < _minLinTemp)
@@ -2081,14 +2104,16 @@ namespace ZedGraph
             break;
 
           // convert the value to a pixel position
-          pixVal = LocalTransform(dVal);
+          var pixVal = LocalTransform(dVal);
 
           // see if the tic marks will be drawn between the labels instead of at the labels
           // (this applies only to AxisType.Text
+          float pixVal2;
           if (tic._isBetweenLabels && IsText)
           {
             // We need one extra tic in order to draw the tics between labels
             // so provide an exception here
+            double dVal2;
             if (i == 0)
             {
               dVal2 = CalcMajorTicValue(baseVal, -0.5);
@@ -2159,9 +2184,9 @@ namespace ZedGraph
         //        float maxSpace = maxLabelSize.Height;
 
         //        float edgeTolerance = Default.EdgeTolerance * scaleFactor;
-        double rangeTol = (_maxLinTemp - _minLinTemp) * 0.001;
+        var rangeTol = (_maxLinTemp - _minLinTemp) * 0.001;
 
-        int firstTic = (int)((_minLinTemp - baseVal) / _majorStep + 0.99);
+        var firstTic = (int)((_minLinTemp - baseVal) / _majorStep + 0.99);
         if (firstTic < 0)
           firstTic = 0;
 
@@ -2251,13 +2276,19 @@ namespace ZedGraph
 
       textCenter = _isLabelsInside ? shift - textCenter
                                    : shift + textCenter;
-      var av = AlignV.Center;
-      var ah = AlignH.Center;
+      AlignV av;
+      AlignH ah;
 
-      if (_ownerAxis is XAxis || _ownerAxis is X2Axis)
+      if (_ownerAxis is IXAxis)
+      {
         ah = _alignH;
+        av = AlignV.Center;
+      }
       else
-        av = _alignH == AlignH.Left ? AlignV.Top : (_alignH == AlignH.Right ? AlignV.Bottom : AlignV.Center);
+      {
+        ah = AlignH.Center;
+        av = AlignV;
+      }
 
       if (this.IsLog && _isUseTenPower)
         fontSpec.DrawTenPower(g, pane, tmpStr,
@@ -2948,11 +2979,6 @@ namespace ZedGraph
     public static T MinMax<T>(T min, T value, T max) where T : IComparable
     {
       return value.CompareTo(min) < 0 ? min : value.CompareTo(max) > 0 ? max : value;
-    }
-
-    public static T MinMaxInclusive<T>(T min, T value, T max) where T : IComparable
-    {
-      return value.CompareTo(min) <= 0 ? min : value.CompareTo(max) >= 0 ? max : value;
     }
 
     #endregion

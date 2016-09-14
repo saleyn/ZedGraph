@@ -374,12 +374,7 @@ namespace ZedGraph
           break;
       }
 
-      if ( nTics < 1 )
-        nTics = 1;
-      else if ( nTics > 1000 )
-        nTics = 1000;
-
-      return nTics;
+      return MinMax(1, nTics, 1000);
     }
 
     /// <summary>

@@ -37,7 +37,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.5 $ $Date: 2007-04-16 00:03:02 $ </version>
   [Serializable]
-  public class OHLCBar : LineBase, ICloneable, ISerializable
+  public class OHLCBar : LineBase, ICloneable
   {
     #region Fields
 
@@ -47,23 +47,20 @@ namespace ZedGraph
     /// property <see cref="IsOpenCloseVisible"/> to access this value.  If this value is
     /// false, the wings will not be shown.
     /// </summary>
-    [CLSCompliant(false)]
-    protected bool _isOpenCloseVisible;
+    [CLSCompliant(false)] protected bool _isOpenCloseVisible;
 
     /// <summary>
     /// Private field that stores the total width for the Opening/Closing line
     /// segments.  Use the public property <see cref="Size"/> to access this value.
     /// </summary>
-    [CLSCompliant(false)]
-    protected float _size;
+    [CLSCompliant(false)] protected float _size;
 
     /// <summary>
     /// Private field that determines if the <see cref="Size" /> property will be
     /// calculated automatically based on the minimum axis scale step size between
     /// bars.  Use the public property <see cref="IsAutoSize" /> to access this value.
     /// </summary>
-    [CLSCompliant(false)]
-    protected Boolean _isAutoSize;
+    [CLSCompliant(false)] protected Boolean _isAutoSize;
 
     /// <summary>
     /// The result of the autosize calculation, which is the size of the bars in
@@ -79,7 +76,7 @@ namespace ZedGraph
     /// A simple struct that defines the
     /// default property values for the <see cref="ZedGraph.OHLCBar"/> class.
     /// </summary>
-    new public struct Default
+    public new struct Default
     {
       // Default Symbol properties
       /// <summary>
@@ -87,6 +84,7 @@ namespace ZedGraph
       /// in units of points.
       /// </summary>
       public static float Size = 12;
+
       /// <summary>
       /// The default display mode for symbols (<see cref="OHLCBar.IsOpenCloseVisible"/> property).
       /// true to display symbols, false to hide them.
@@ -134,7 +132,11 @@ namespace ZedGraph
     public float Size
     {
       get { return _size; }
-      set { _size = value; _isAutoSize = false; }
+      set
+      {
+        _size = value;
+        _isAutoSize = false;
+      }
     }
 
     /// <summary>
@@ -142,11 +144,16 @@ namespace ZedGraph
     /// calculated automatically based on the minimum axis scale step size between
     /// bars.
     /// </summary>
-    public Boolean IsAutoSize
+    public bool IsAutoSize
     {
       get { return _isAutoSize; }
       set { _isAutoSize = value; }
     }
+
+    /// <summary>
+    /// Factor used to divide bar width
+    /// </summary>
+    public virtual double WidthDivisor => 1.5f;
 
     #endregion
 
@@ -156,9 +163,7 @@ namespace ZedGraph
     /// Default constructor that sets all <see cref="OHLCBar"/> properties to
     /// default values as defined in the <see cref="Default"/> class.
     /// </summary>
-    public OHLCBar() : this(LineBase.Default.Color)
-    {
-    }
+    public OHLCBar() : this(LineBase.Default.Color) {}
 
     /// <summary>
     /// Default constructor that sets the
@@ -233,6 +238,7 @@ namespace ZedGraph
       _size = info.GetSingle("size");
       _isAutoSize = info.GetBoolean("isAutoSize");
     }
+
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
     /// </summary>
@@ -283,9 +289,9 @@ namespace ZedGraph
     /// <param name="pen">A pen with attributes of <see cref="Color"/> and
     /// <see cref="LineBase.Width"/> for this <see cref="OHLCBar"/></param>
     public void Draw(Graphics g, GraphPane pane, bool isXBase,
-                float pixBase, float pixHigh, float pixLow,
-                float pixOpen, float pixClose,
-                float halfSize, Pen pen)
+                     float pixBase, float pixHigh, float pixLow,
+                     float pixOpen, float pixClose,
+                     float halfSize, Pen pen)
     {
       if (pixBase != PointPair.Missing)
       {
@@ -336,76 +342,64 @@ namespace ZedGraph
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
     public void Draw(Graphics g, GraphPane pane, OHLCBarItem curve,
-              Axis baseAxis, Axis valueAxis, float scaleFactor)
+                     Axis baseAxis, Axis valueAxis, float scaleFactor)
     {
       //ValueHandler valueHandler = new ValueHandler( pane, false );
 
-      if (curve.Points != null)
-      {
-        //float halfSize = _size * scaleFactor;
-        float halfSize = GetBarWidth(pane, baseAxis, scaleFactor);
+      if (curve.Points == null) return;
 
-        using (Pen pen = !curve.IsSelected ? new Pen(_color, _width) :
-            new Pen(Selection.Border.Color, Selection.Border.Width))
+      //float halfSize = _size * scaleFactor;
+      var halfSize = GetBarWidth(pane, baseAxis, scaleFactor);
+
+      using (var pen = !curve.IsSelected
+                         ? new Pen(_color, _width)
+                         : new Pen(Selection.Border.Color, Selection.Border.Width))
         //        using ( Pen pen = new Pen( _color, _penWidth ) )
+      {
+        // Loop over each defined point              
+        for (int i = 0; i < curve.Points.Count; i++)
         {
-          // Loop over each defined point              
-          for (int i = 0; i < curve.Points.Count; i++)
+          var pt = curve.Points[i];
+          double date;
+          double open;
+          double high;
+          double low;
+          double close;
+          GetOHLC(pt, out date, out open, out high, out low, out close);
+
+          // Any value set to double max is invalid and should be skipped
+          // This is used for calculated values that are out of range, divide
+          //   by zero, etc.
+          // Also, any value <= zero on a log scale is invalid
+
+          if (curve.Points[i].IsInvalid3D || (!(date > 0) && baseAxis.Scale.IsLog) ||
+              ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
+            continue;
+
+          var pixBase =
+            (int)(baseAxis.Scale.Transform(curve.IsOverrideOrdinal, i, date) + 0.5);
+          //pixBase = baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, date );
+          var pixHigh = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, high);
+          var pixLow = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, low);
+          var pixOpen = PointPairBase.IsValueInvalid(open)
+                          ? float.MaxValue
+                          : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, open);
+
+          var pixClose = PointPair.IsValueInvalid(close)
+                          ? float.MaxValue
+                          : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, close);
+
+          if (!curve.IsSelected && this._gradientFill.IsGradientValueType)
           {
-            var pt = curve.Points[i];
-            double date = pt.X;
-            double open;
-            double high;
-            double low;
-            double close;
-            if (pt is StockPt)
-            {
-              var p = (StockPt)pt;
-              open = p.Open;
-              high = p.High;
-              low = p.Low;
-              close = p.Close;
-            }
-            else
-            {
-              high = pt.Y;
-              low = pt.Z;
-              open = PointPair.Missing;
-              close = PointPair.Missing;
-            }
-
-            // Any value set to double max is invalid and should be skipped
-            // This is used for calculated values that are out of range, divide
-            //   by zero, etc.
-            // Also, any value <= zero on a log scale is invalid
-
-            if (curve.Points[i].IsInvalid3D || (!(date > 0) && baseAxis.Scale.IsLog) ||
-                ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
-              continue;
-
-            var pixBase = (int)(baseAxis.Scale.Transform(curve.IsOverrideOrdinal, i, date) + 0.5);
-            //pixBase = baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, date );
-            var pixHigh = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, high);
-            var pixLow = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, low);
-            var pixOpen = PointPairBase.IsValueInvalid(open)
-              ? float.MaxValue : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, open);
-
-            var pixClose = PointPair.IsValueInvalid(close)
-              ? float.MaxValue
-              : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, close);
-
-            if (!curve.IsSelected && this._gradientFill.IsGradientValueType)
-            {
-              using (var tPen = GetPen(pane, scaleFactor, pt))
-                Draw(g, pane, baseAxis is IXAxis,
-                      pixBase, pixHigh, pixLow, pixOpen,
-                      pixClose, halfSize, tPen);
-            }
-            else
+            using (var tPen = GetPen(pane, scaleFactor, pt))
               Draw(g, pane, baseAxis is IXAxis,
-                    pixBase, pixHigh, pixLow, pixOpen,
-                    pixClose, halfSize, pen);
+                   pixBase, pixHigh, pixLow, pixOpen,
+                   pixClose, halfSize, tPen);
           }
+          else
+            Draw(g, pane, baseAxis is IXAxis,
+                 pixBase, pixHigh, pixLow, pixOpen,
+                 pixClose, halfSize, pen);
         }
       }
     }
@@ -427,9 +421,9 @@ namespace ZedGraph
     public float GetBarWidth(GraphPane pane, Axis baseAxis, float scaleFactor)
     {
       var width = _isAutoSize
-        ? baseAxis.Scale.GetClusterWidth(_userScaleSize) /
-          (1.0F + pane._barSettings.MinClusterGap) / 1.2f
-        : _size * scaleFactor / 1.2f;
+                    ? baseAxis.Scale.GetClusterWidth(_userScaleSize)/
+                      (1.0F + pane._barSettings.MinClusterGap) / WidthDivisor
+                    : _size*scaleFactor / WidthDivisor;
 
       // use integral size
       return (int)(width + 0.5f);
@@ -437,5 +431,25 @@ namespace ZedGraph
 
     #endregion
 
+    protected static void GetOHLC(PointPair pt, out double date, out double o,
+                                  out double h, out double l, out double c)
+    {
+      date = pt.X;
+      if (pt is StockPt)
+      {
+        var p = (StockPt)pt;
+        o = p.Open;
+        h = p.High;
+        l = p.Low;
+        c = p.Close;
+      }
+      else
+      {
+        o = PointPair.Missing;
+        h = pt.Y;
+        l = pt.Z;
+        c = PointPair.Missing;
+      }
+    }
   }
 }

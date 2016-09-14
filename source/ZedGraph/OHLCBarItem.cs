@@ -279,7 +279,7 @@ namespace ZedGraph
       using ( var pen = new Pen( _bar.Color, _bar._width ) )
       {
         _bar.Draw( g, pane, pane._barSettings.Base == BarBase.X, pixBase, pixHigh,
-                pixLow, pixOpen, pixClose, halfSize, pen );
+                   pixLow, pixOpen, pixClose, halfSize, pen );
       }
     }
 

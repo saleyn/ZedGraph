@@ -49,15 +49,19 @@ namespace ZedGraph
     // =========================================================================
     // Internal Variables
     // =========================================================================
-  
+
     /// <summary>
-    /// The actual date value in MS Excel format.  This is the only data field in
-    /// the <see cref="XDate"/> struct.
+    /// DateTime that corresponds to UNIX epoch
     /// </summary>
-    private double _xlDate;
-    
+    private readonly static DateTime UnixEpoch      = new DateTime(1970,1,1,0,0,0,0, System.DateTimeKind.Utc);
+    /// <summary>
+    /// XDate that corresponds to UNIX epoch
+    /// </summary>
+    private readonly static double   UnixEpochXDate = new XDate(UnixEpoch);
+
     /// <summary>
     /// The Astronomical Julian Day number that corresponds to XL Date 0.0
+    /// (the number of days since 1900-01-01)
     /// </summary>
     public const double XLDay1 = 2415018.5;
 
@@ -111,14 +115,24 @@ namespace ZedGraph
     /// </summary>
     public const double MillisecondsPerDay = 86400000.0;
     /// <summary>
+    /// The number of nanoseconds in a day
+    /// </summary>
+    public const long NanosecondsPerDay = 86400000000000L;
+    /// <summary>
     /// The default format string to be used in <see cref="ToString()"/> when
     /// no format is provided
     /// </summary>
 //    public const string DefaultFormatStr = "&d-&mmm-&yy &hh:&nn";
-    public const string DefaultFormatStr = "g";
-  #endregion
-  
-  #region Constructors
+//    public const string DefaultFormatStr = "g";
+    public const string DefaultFormatStr = "yyyy-MM-dd HH:MM:ss.ffffff";
+
+    private const long  DoubleDateOffset = 599264352000000000L;
+    private const long  MicrosecsPerDay  = 86400000000L;
+    private const long  UnixEpochOffset  = 25569;
+
+    #endregion
+
+    #region Constructors
     // =========================================================================
     // Constructors
     // =========================================================================
@@ -131,7 +145,7 @@ namespace ZedGraph
     /// </param>
     public XDate( double xlDate )
     {
-      _xlDate = xlDate;
+      XLDate = xlDate;
     }
 
     /// <summary>
@@ -142,11 +156,9 @@ namespace ZedGraph
     /// </param>
     public XDate( DateTime dateTime )
     {
-      _xlDate = CalendarDateToXLDate( dateTime.Year, dateTime.Month,
-              dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second,
-              dateTime.Millisecond );
+      XLDate = DateTimeToXLDate(dateTime);
     }
-    
+
     /// <summary>
     /// Construct a date class from a calendar date (year, month, day).  Assumes the time
     /// of day is 00:00 hrs
@@ -160,7 +172,7 @@ namespace ZedGraph
     /// which will rollover to the previous or next year.</param>
     public XDate( int year, int month, int day )
     {
-      _xlDate = CalendarDateToXLDate( year, month, day, 0, 0, 0 );
+      XLDate = CalendarDateToXLDate( year, month, day, 0, 0, 0 );
     }
     
     /// <summary>
@@ -184,9 +196,8 @@ namespace ZedGraph
     /// It is permissible to have second values outside the 0-59 range, which
     /// will rollover to the previous or next minute.</param>
     public XDate( int year, int month, int day, int hour, int minute, int second )
-    {
-      _xlDate = CalendarDateToXLDate( year, month, day, hour, minute, second );
-    }
+      : this(year, month, day, hour, minute, (double)second)
+    {}
     
     /// <summary>
     /// Construct a date class from a calendar date and time (year, month, day, hour, minute,
@@ -209,9 +220,8 @@ namespace ZedGraph
     /// It is permissible to have second values outside the 0-59 range, which
     /// will rollover to the previous or next minute.</param>
     public XDate( int year, int month, int day, int hour, int minute, double second )
-    {
-      _xlDate = CalendarDateToXLDate( year, month, day, hour, minute, second );
-    }
+      : this(year, month, day, hour, minute, (int)second, (int)(second * 1000) % 1000)
+    {}
     
     /// <summary>
     /// Construct a date class from a calendar date and time (year, month, day, hour, minute,
@@ -238,7 +248,7 @@ namespace ZedGraph
     /// will rollover to the previous or next second.</param>
     public XDate( int year, int month, int day, int hour, int minute, int second, int millisecond )
     {
-      _xlDate = CalendarDateToXLDate( year, month, day, hour, minute, second, millisecond );
+      XLDate = CalendarDateToXLDate( year, month, day, hour, minute, second, millisecond );
     }
     
     /// <summary>
@@ -247,28 +257,8 @@ namespace ZedGraph
     /// <param name="rhs">The GraphPane object from which to copy</param>
     public XDate( XDate rhs )
     {
-      _xlDate = rhs._xlDate;
+      XLDate = rhs.XLDate;
     }
-/*
-    /// <summary>
-    /// Implement the <see cref="ICloneable" /> interface in a typesafe manner by just
-    /// calling the typed version of <see cref="Clone" />
-    /// </summary>
-    /// <returns>A deep copy of this object</returns>
-    object ICloneable.Clone()
-    {
-      return this.Clone();
-    }
-
-    /// <summary>
-    /// Typesafe, deep-copy clone method.
-    /// </summary>
-    /// <returns>A new, independent copy of this class</returns>
-    public XDate Clone()
-    {
-      return new XDate( this );
-    }
-*/
 
   #endregion
   
@@ -280,29 +270,49 @@ namespace ZedGraph
     /// <summary>
     /// Gets or sets the date value for this item in MS Excel format.
     /// </summary>
-    public double XLDate
-    {
-      get { return _xlDate; }
-      set { _xlDate = value; }
-    }
+    public double XLDate { get; set; }
 
     /// <summary>
     /// Returns true if this <see cref="XDate" /> struct is in the valid date range
     /// </summary>
-    public bool IsValidDate
-    {
-      get { return _xlDate >= XLDayMin && _xlDate <= XLDayMax; }
-    }
-    
+    public bool IsValidDate => XLDate >= XLDayMin && XLDate <= XLDayMax;
+
     /// <summary>
     /// Gets or sets the date value for this item in .Net DateTime format.
     /// </summary>
     public DateTime DateTime
     {
-      get { return XLDateToDateTime( _xlDate ); }
-      set { _xlDate = DateTimeToXLDate( value ); }
+      get { return XLDateToDateTime( XLDate ); }
+      set { XLDate = DateTimeToXLDate( value ); }
     }
-    
+
+    /// <summary>
+    /// Gets or sets the date value in seconds since Unix Epoch
+    /// </summary>
+    public long UnixEpochSeconds
+    {
+      get { return (long)((XLDate - UnixEpochOffset) + (XLDate >= 0 ? 0.5 : -0.5)); }
+      set { XLDate = value + UnixEpochOffset; }
+    }
+
+    /// <summary>
+    /// Gets or sets the date value in milliseconds since Unix Epoch
+    /// </summary>
+    public long UnixEpochMilliseconds
+    {
+      get { return (long)((XLDate - UnixEpochOffset)*1000.0 + (XLDate >= 0 ? 0.5 : -0.5)); }
+      set { XLDate = value/1000.0 + UnixEpochOffset; }
+    }
+
+    /// <summary>
+    /// Gets or sets the date value in microseconds since Unix Epoch
+    /// </summary>
+    public long UnixEpochMicroseconds
+    {
+      get { return (long)((XLDate - UnixEpochOffset)*1000000.0 + (XLDate >= 0 ? 0.5 : -0.5)); }
+      set { XLDate = value/1000000.0 + UnixEpochOffset; }
+    }
+
     /// <summary>
     /// Gets or sets the date value for this item in Julain day format.  This is the
     /// Astronomical Julian Day number, so a value of 0.0 corresponds to noon GMT on
@@ -311,8 +321,8 @@ namespace ZedGraph
     /// </summary>
     public double JulianDay
     {
-      get { return XLDateToJulianDay( _xlDate ); }
-      set { _xlDate = JulianDayToXLDate( value ); }
+      get { return XLDateToJulianDay( XLDate ); }
+      set { XLDate = JulianDayToXLDate( value ); }
     }
     
     /// <summary>
@@ -320,8 +330,8 @@ namespace ZedGraph
     /// </summary>
     public double DecimalYear
     {
-      get { return XLDateToDecimalYear( _xlDate ); }
-      set { _xlDate = DecimalYearToXLDate( value ); }
+      get { return XLDateToDecimalYear( XLDate ); }
+      set { XLDate = DecimalYearToXLDate( value ); }
     }
   #endregion
   
@@ -363,7 +373,7 @@ namespace ZedGraph
     {
       int hour, minute, second;
       
-      XLDateToCalendarDate( _xlDate, out year, out month, out day, out hour, out minute, out second );
+      XLDateToCalendarDate( XLDate, out year, out month, out day, out hour, out minute, out second );
     }
     
     /// <summary>
@@ -375,7 +385,7 @@ namespace ZedGraph
     /// 8 for August.</param>
     public void SetDate( int year, int month, int day )
     {
-      _xlDate = CalendarDateToXLDate( year, month, day, 0, 0, 0 );
+      XLDate = CalendarDateToXLDate( year, month, day, 0, 0, 0 );
     }
     
     /// <summary>
@@ -392,7 +402,7 @@ namespace ZedGraph
     public void GetDate( out int year, out int month, out int day,
             out int hour, out int minute, out int second )
     {
-      XLDateToCalendarDate( _xlDate, out year, out month, out day, out hour, out minute, out second );
+      XLDateToCalendarDate( XLDate, out year, out month, out day, out hour, out minute, out second );
     }
 
     /// <summary>
@@ -407,7 +417,7 @@ namespace ZedGraph
     /// <param name="second">An integer value for the second, e.g. 35.</param>
     public void SetDate( int year, int month, int day, int hour, int minute, int second )
     {
-      _xlDate = CalendarDateToXLDate( year, month, day, hour, minute, second );
+      XLDate = CalendarDateToXLDate( year, month, day, hour, minute, second );
     }
     
     /// <summary>
@@ -417,7 +427,7 @@ namespace ZedGraph
     /// <returns>The day of the year in floating point double format.</returns>
     public double GetDayOfYear()
     {
-      return XLDateToDayOfYear( _xlDate );
+      return XLDateToDayOfYear( XLDate );
     }
   #endregion
   
@@ -778,17 +788,16 @@ namespace ZedGraph
     
       if ( month <= 2 )
       {
-        year -= 1;
+        year  -=  1;
         month += 12;
       }
     
-      double A = Math.Floor( (double) year / 100.0 );
-      double B = 2 - A + Math.Floor( A / 4.0 );
+      var A = Math.Floor( (double) year / 100.0 );
+      var B = 2 - A + Math.Floor( A / 4.0 );
     
-      return  Math.Floor( 365.25 * ( (double) year + 4716.0 ) ) +
-          Math.Floor( 30.6001 * (double) ( month + 1 ) ) +
-          (double) day + B - 1524.5 +
-          hour  / HoursPerDay + minute / MinutesPerDay + second / SecondsPerDay +
+      return Math.Floor( 365.25 * ( year + 4716.0 ) ) +
+          Math.Floor( 30.6001 * (month + 1) ) + day + B - 1524.5 +
+          hour / HoursPerDay + minute / MinutesPerDay + second / SecondsPerDay +
           millisecond / MillisecondsPerDay;
     
     }
@@ -1139,12 +1148,35 @@ namespace ZedGraph
     /// <returns>The corresponding date in the form of a .Net DateTime struct</returns>
     public static DateTime XLDateToDateTime( double xlDate )
     {
+      const double OADateMinAsDouble = -657435.0;
+      const double OADateMaxAsDouble = 2958466.0;
+
+      // Note: we can't return DateTime.FromOADate(xlDate), because it does milliseconds rounding,
+      // but we want nanoseconds precision:
+      if (xlDate >= OADateMaxAsDouble || xlDate <= OADateMinAsDouble)
+        throw new ArgumentException($"Date invalid: {xlDate}");
+
+      var usecs = (long)(xlDate * MicrosecsPerDay + (xlDate >= 0 ? 0.5 : -0.5));
+      // When you have a value like 12.5 it all positive 12 days and 12 hours from 01/01/1899
+      // However if you have a value of -12.25 it is minus 12 days but still positive 6 hours,
+      // almost as though you meant -11.75 all negative 
+      // This line below fixes up the nsec in the negative case
+      if (usecs < 0)
+        usecs -= (usecs % MicrosecsPerDay) * 2;
+
+      usecs += DoubleDateOffset / 10;
+
+      if (usecs < 0) throw new ArgumentException($"Date scale error: {xlDate}");
+      return new DateTime(usecs * 10);
+
+      /*
       int year, month, day, hour, minute, second, millisecond;
       XLDateToCalendarDate( xlDate, out year, out month, out day,
                   out hour, out minute, out second, out millisecond );
       return new DateTime( year, month, day, hour, minute, second, millisecond );
+      */
     }
-    
+
     /// <summary>
     /// Convert a .Net DateTime struct to an XL Format date
     /// </summary>
@@ -1155,8 +1187,25 @@ namespace ZedGraph
     /// floating point format</returns>
     public static double DateTimeToXLDate( DateTime dt )
     {
-      return CalendarDateToXLDate( dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second,
-                    dt.Millisecond );
+      const long OADateMinAsTicks = 31241376000000000L;
+
+      // Note: we can't return dt.ToOADate(), because it does milliseconds rounding,
+      // but we want nanoseconds precision:
+      var value = dt.Ticks;
+      if (value == 0)
+        return 0.0;
+      if (value < 86400000L * 10000) // This is a fix for VB. They want the default day to be 1/1/0001 rathar then 12/30/1899.
+        value += DoubleDateOffset;
+      if (value < OADateMinAsTicks)
+        throw new OverflowException($"Date invalid: {dt}");
+
+      var usec = (value - DoubleDateOffset) / 10;
+      if (usec < 0)
+      {
+        var frac = usec % MicrosecsPerDay;
+        if (frac != 0) usec -= (MicrosecsPerDay + frac) * 2;
+      }
+      return (double)usec / MicrosecsPerDay;
     }
   #endregion
   
@@ -1173,7 +1222,7 @@ namespace ZedGraph
     /// </param>
     public void AddMilliseconds( double dMilliseconds )
     {
-      _xlDate += dMilliseconds / MillisecondsPerDay;
+      XLDate += dMilliseconds / MillisecondsPerDay;
     }
 
     /// <summary>
@@ -1184,7 +1233,7 @@ namespace ZedGraph
     /// </param>
     public void AddSeconds( double dSeconds )
     {
-      _xlDate += dSeconds / SecondsPerDay;
+      XLDate += dSeconds / SecondsPerDay;
     }
 
     /// <summary>
@@ -1195,7 +1244,7 @@ namespace ZedGraph
     /// </param>
     public void AddMinutes( double dMinutes )
     {
-      _xlDate += dMinutes / MinutesPerDay;
+      XLDate += dMinutes / MinutesPerDay;
     }
     
     /// <summary>
@@ -1206,7 +1255,7 @@ namespace ZedGraph
     /// </param>
     public void AddHours( double dHours )
     {
-      _xlDate += dHours / HoursPerDay;
+      XLDate += dHours / HoursPerDay;
     }
     
     /// <summary>
@@ -1217,7 +1266,7 @@ namespace ZedGraph
     /// </param>
     public void AddDays( double dDays )
     {
-      _xlDate += dDays;
+      XLDate += dDays;
     }
     
     /// <summary>
@@ -1234,17 +1283,17 @@ namespace ZedGraph
       
       int year, month, day, hour, minute, second;
       
-      XLDateToCalendarDate( _xlDate, out year, out month, out day, out hour, out minute, out second );
+      XLDateToCalendarDate( XLDate, out year, out month, out day, out hour, out minute, out second );
       if ( iMon != 0 )
       {
         month += iMon;
-        _xlDate = CalendarDateToXLDate( year, month, day, hour, minute, second );
+        XLDate = CalendarDateToXLDate( year, month, day, hour, minute, second );
       }
       
       if ( sMon != 0 )
       {
         double xlDate2 = CalendarDateToXLDate( year, month+sMon, day, hour, minute, second );
-        _xlDate += (xlDate2 - _xlDate) * monFrac;
+        XLDate += (xlDate2 - XLDate) * monFrac;
       }
     }
     
@@ -1262,17 +1311,17 @@ namespace ZedGraph
       
       int year, month, day, hour, minute, second;
       
-      XLDateToCalendarDate( _xlDate, out year, out month, out day, out hour, out minute, out second );
+      XLDateToCalendarDate( XLDate, out year, out month, out day, out hour, out minute, out second );
       if ( iYear != 0 )
       {
         year += iYear;
-        _xlDate = CalendarDateToXLDate( year, month, day, hour, minute, second );
+        XLDate = CalendarDateToXLDate( year, month, day, hour, minute, second );
       }
       
       if ( sYear != 0 )
       {
         double xlDate2 = CalendarDateToXLDate( year+sYear, month, day, hour, minute, second );
-        _xlDate += (xlDate2 - _xlDate) * yearFrac;
+        XLDate += (xlDate2 - XLDate) * yearFrac;
       }
     }
   #endregion
@@ -1303,7 +1352,7 @@ namespace ZedGraph
     /// <returns>An XDate with the rhs number of days subtracted</returns>
     public static XDate operator -( XDate lhs, double rhs )
     {
-      lhs._xlDate -= rhs;
+      lhs.XLDate -= rhs;
       return lhs;
     }
     
@@ -1316,7 +1365,7 @@ namespace ZedGraph
     /// <returns>An XDate with the rhs number of days added</returns>
     public static XDate operator +( XDate lhs, double rhs )
     {
-      lhs._xlDate += rhs;
+      lhs.XLDate += rhs;
       return lhs;
     }
 
@@ -1326,7 +1375,7 @@ namespace ZedGraph
     /// </summary>
     public static XDate operator +(XDate lhs, int seconds)
     {
-      lhs._xlDate += seconds / SecondsPerDay;
+      lhs.XLDate += seconds / SecondsPerDay;
       return lhs;
     }
 
@@ -1336,7 +1385,7 @@ namespace ZedGraph
     /// </summary>
     public static XDate operator +(XDate lhs, long seconds)
     {
-      lhs._xlDate += seconds / SecondsPerDay;
+      lhs.XLDate += seconds / SecondsPerDay;
       return lhs;
     }
 
@@ -1346,7 +1395,7 @@ namespace ZedGraph
     /// </summary>
     public static XDate operator -(XDate lhs, int seconds)
     {
-      lhs._xlDate -= seconds / SecondsPerDay;
+      lhs.XLDate -= seconds / SecondsPerDay;
       return lhs;
     }
 
@@ -1356,7 +1405,7 @@ namespace ZedGraph
     /// </summary>
     public static XDate operator -(XDate lhs, long seconds)
     {
-      lhs._xlDate -= seconds / SecondsPerDay;
+      lhs.XLDate -= seconds / SecondsPerDay;
       return lhs;
     }
 
@@ -1367,7 +1416,7 @@ namespace ZedGraph
     /// <returns>An XDate one day later than the specified date</returns>
     public static XDate operator ++( XDate xDate )
     {
-      xDate._xlDate += 1.0;
+      xDate.XLDate += 1.0;
       return xDate;
     }
     
@@ -1378,7 +1427,7 @@ namespace ZedGraph
     /// <returns>An XDate one day prior to the specified date</returns>
     public static XDate operator --( XDate xDate )
     {
-      xDate._xlDate -= 1.0;
+      xDate.XLDate -= 1.0;
       return xDate;
     }
     
@@ -1389,7 +1438,7 @@ namespace ZedGraph
     /// <returns>A double floating point value representing the XL Date</returns>
     public static implicit operator double( XDate xDate )
     {
-      return xDate._xlDate;
+      return xDate.XLDate;
     }
     
     /// <summary>
@@ -1399,7 +1448,7 @@ namespace ZedGraph
     /// <returns>A double floating point value representing the XL Date</returns>
     public static implicit operator float( XDate xDate )
     {
-      return (float) xDate._xlDate;
+      return (float) xDate.XLDate;
     }
     
     /// <summary>
@@ -1451,18 +1500,11 @@ namespace ZedGraph
     /// instance; otherwise, <c>false</c></returns>
     public override bool Equals( object obj )
     {
-      if ( obj is XDate )
-      {
-        return ((XDate) obj)._xlDate == _xlDate;
-      }
-      else if ( obj is double )
-      {
-        return ((double) obj) == _xlDate;
-      }
-      else
-        return false;
+      return obj is XDate
+               ? ((XDate)obj).XLDate == XLDate
+               : obj is double && ((double)obj) == XLDate;
     }
-    
+
     /// <summary>
     /// Returns the hash code for this <see cref="XDate"/> structure.  In this case, the
     /// hash code is simply the equivalent hash code for the floating point double date value.
@@ -1470,7 +1512,7 @@ namespace ZedGraph
     /// <returns>An integer representing the hash code for this XDate value</returns>
     public override int GetHashCode()
     {
-      return _xlDate.GetHashCode();
+      return XLDate.GetHashCode();
     }
 
     /// <summary>
@@ -1486,10 +1528,10 @@ namespace ZedGraph
     /// 1 if <paramref name="target"/> is greater than the current instance.</returns>
     public int CompareTo( object target )
     {
-      if ( ! (target is XDate) )
+      if (!(target is XDate))
         throw new ArgumentException();
-
-      return ( this.XLDate ).CompareTo( ((XDate)target).XLDate );
+      var    diff  = Math.Abs(this.XLDate - ((XDate)target).XLDate);
+      return diff <= 1e-9 ? 0 : (this.XLDate).CompareTo(((XDate)target).XLDate);
     }
 
   #endregion
@@ -1541,7 +1583,7 @@ namespace ZedGraph
     /// <returns>A string representation of the date</returns>
     public override string ToString()
     {
-      return ToString( _xlDate, DefaultFormatStr );
+      return ToString( XLDate, DefaultFormatStr );
     }
     
     /// <summary>
@@ -1598,11 +1640,15 @@ namespace ZedGraph
     /// <returns>A string representation of the date</returns>
     public static string ToString( double xlDate, string fmtStr )
     {
-      int    year, month, day, hour, minute, second, millisecond;
+      //int    year, month, day, hour, minute, second, millisecond;
 
       if ( !CheckValidDate( xlDate ) )
         return "Date Error";
 
+      var dt = XLDateToDateTime(xlDate);
+      return dt.ToString(fmtStr);
+
+      /*
       XLDateToCalendarDate( xlDate, out year, out month, out day, out hour, out minute,
                       out second, out millisecond );
       if ( year <= 0 )
@@ -1650,123 +1696,124 @@ namespace ZedGraph
         year = 9999;
       DateTime dt = new DateTime( year, month, day, hour, minute, second, millisecond );
       return dt.ToString( fmtStr );
+      */
     }
 
-/*
-    /// <summary>
-    /// Format this XDate value using the specified format string
-    /// </summary>
-    /// <param name="fmtStr">
-    /// The formatting string to be used for the date.  The following formatting elements
-    /// will be replaced with the corresponding date values:
-    /// <list type="table">
-    ///    <listheader>
-    ///       <term>Variable</term>
-    ///       <description>Description</description>
-    ///    </listheader>
-    ///    <item><term>&amp;mmmm</term><description>month name (e.g., January)</description></item>
-    ///    <item><term>&amp;mmm</term><description>month abbreviation (e.g., Apr)</description></item>
-    ///    <item><term>&amp;mm</term><description>padded month number (e.g. 04)</description></item>
-    ///    <item><term>&amp;m</term><description>non-padded month number (e.g., 4)</description></item>
-    ///    <item><term>&amp;dd</term><description>padded day number (e.g., 09)</description></item>
-    ///    <item><term>&amp;d</term><description>non-padded day number (e.g., 9)</description></item>
-    ///    <item><term>&amp;yyyy</term><description>4 digit year number (e.g., 1995)</description></item>
-    ///    <item><term>&amp;yy</term><description>two digit year number (e.g., 95)</description></item>
-    ///    <item><term>&amp;hh</term><description>padded 24 hour time value (e.g., 08)</description></item>
-    ///    <item><term>&amp;h</term><description>non-padded 12 hour time value (e.g., 8)</description></item>
-    ///    <item><term>&amp;nn</term><description>padded minute value (e.g, 05)</description></item>
-    ///    <item><term>&amp;n</term><description>non-padded minute value (e.g., 5)</description></item>
-    ///    <item><term>&amp;ss</term><description>padded second value (e.g., 03)</description></item>
-    ///    <item><term>&amp;s</term><description>non-padded second value (e.g., 3)</description></item>
-    ///    <item><term>&amp;a</term><description>"am" or "pm"</description></item>
-    ///    <item><term>&amp;wwww</term><description>day of week (e.g., Wednesday)</description></item>
-    ///    <item><term>&amp;www</term><description>day of week abbreviation (e.g., Wed)</description></item>
-    /// </list>
-    /// </param>
-    /// <example>
-    ///   <para>"&amp;wwww, &amp;mmmm &amp;dd, &amp;yyyy &amp;h:&amp;nn &amp;a" ==> "Sunday, February 12, 1956 4:23 pm"</para>
-    ///   <para>"&amp;dd-&amp;mmm-&amp;yy" ==> 12-Feb-56</para>
-    /// </example>
-    /// <returns>A string representation of the date</returns>
-    public string ToString( string fmtStr )
-    {
-      return ToString( this.xlDate, fmtStr );
-    }
+    /*
+        /// <summary>
+        /// Format this XDate value using the specified format string
+        /// </summary>
+        /// <param name="fmtStr">
+        /// The formatting string to be used for the date.  The following formatting elements
+        /// will be replaced with the corresponding date values:
+        /// <list type="table">
+        ///    <listheader>
+        ///       <term>Variable</term>
+        ///       <description>Description</description>
+        ///    </listheader>
+        ///    <item><term>&amp;mmmm</term><description>month name (e.g., January)</description></item>
+        ///    <item><term>&amp;mmm</term><description>month abbreviation (e.g., Apr)</description></item>
+        ///    <item><term>&amp;mm</term><description>padded month number (e.g. 04)</description></item>
+        ///    <item><term>&amp;m</term><description>non-padded month number (e.g., 4)</description></item>
+        ///    <item><term>&amp;dd</term><description>padded day number (e.g., 09)</description></item>
+        ///    <item><term>&amp;d</term><description>non-padded day number (e.g., 9)</description></item>
+        ///    <item><term>&amp;yyyy</term><description>4 digit year number (e.g., 1995)</description></item>
+        ///    <item><term>&amp;yy</term><description>two digit year number (e.g., 95)</description></item>
+        ///    <item><term>&amp;hh</term><description>padded 24 hour time value (e.g., 08)</description></item>
+        ///    <item><term>&amp;h</term><description>non-padded 12 hour time value (e.g., 8)</description></item>
+        ///    <item><term>&amp;nn</term><description>padded minute value (e.g, 05)</description></item>
+        ///    <item><term>&amp;n</term><description>non-padded minute value (e.g., 5)</description></item>
+        ///    <item><term>&amp;ss</term><description>padded second value (e.g., 03)</description></item>
+        ///    <item><term>&amp;s</term><description>non-padded second value (e.g., 3)</description></item>
+        ///    <item><term>&amp;a</term><description>"am" or "pm"</description></item>
+        ///    <item><term>&amp;wwww</term><description>day of week (e.g., Wednesday)</description></item>
+        ///    <item><term>&amp;www</term><description>day of week abbreviation (e.g., Wed)</description></item>
+        /// </list>
+        /// </param>
+        /// <example>
+        ///   <para>"&amp;wwww, &amp;mmmm &amp;dd, &amp;yyyy &amp;h:&amp;nn &amp;a" ==> "Sunday, February 12, 1956 4:23 pm"</para>
+        ///   <para>"&amp;dd-&amp;mmm-&amp;yy" ==> 12-Feb-56</para>
+        /// </example>
+        /// <returns>A string representation of the date</returns>
+        public string ToString( string fmtStr )
+        {
+          return ToString( this.xlDate, fmtStr );
+        }
 
-    /// <summary>
-    /// Format the specified XL Date value using the specified format string
-    /// </summary>
-    /// <param name="xlDate">
-    /// The XL date value to be formatted in floating point double format.
-    /// </param>
-    /// <param name="fmtStr">
-    /// The formatting string to be used for the date.  The following formatting elements
-    /// will be replaced with the corresponding date values:
-    /// <list type="table">
-    ///    <listheader>
-    ///       <term>Variable</term>
-    ///       <description>Description</description>
-    ///    </listheader>
-    ///    <item><term>&amp;mmmm</term><description>month name (e.g., January)</description></item>
-    ///    <item><term>&amp;mmm</term><description>month abbreviation (e.g., Apr)</description></item>
-    ///    <item><term>&amp;mm</term><description>padded month number (e.g. 04)</description></item>
-    ///    <item><term>&amp;m</term><description>non-padded month number (e.g., 4)</description></item>
-    ///    <item><term>&amp;dd</term><description>padded day number (e.g., 09)</description></item>
-    ///    <item><term>&amp;d</term><description>non-padded day number (e.g., 9)</description></item>
-    ///    <item><term>&amp;yyyy</term><description>4 digit year number (e.g., 1995)</description></item>
-    ///    <item><term>&amp;yy</term><description>two digit year number (e.g., 95)</description></item>
-    ///    <item><term>&amp;hh</term><description>padded 24 hour time value (e.g., 08)</description></item>
-    ///    <item><term>&amp;h</term><description>non-padded 12 hour time value (e.g., 8)</description></item>
-    ///    <item><term>&amp;nn</term><description>padded minute value (e.g, 05)</description></item>
-    ///    <item><term>&amp;n</term><description>non-padded minute value (e.g., 5)</description></item>
-    ///    <item><term>&amp;ss</term><description>padded second value (e.g., 03)</description></item>
-    ///    <item><term>&amp;s</term><description>non-padded second value (e.g., 3)</description></item>
-    ///    <item><term>&amp;a</term><description>"am" or "pm"</description></item>
-    ///    <item><term>&amp;wwww</term><description>day of week (e.g., Wednesday)</description></item>
-    ///    <item><term>&amp;www</term><description>day of week abbreviation (e.g., Wed)</description></item>
-    /// </list>
-    /// </param>
-    /// <example>
-    ///   <para>"&amp;wwww, &amp;mmmm &amp;dd, &amp;yyyy &amp;h:&amp;nn &amp;a" ==> "Sunday, February 12, 1956 4:23 pm"</para>
-    ///   <para>"&amp;dd-&amp;mmm-&amp;yy" ==> 12-Feb-56</para>
-    /// </example>
-    /// <returns>A string representation of the date</returns>
-    public static string ToString( double xlDate, string fmtStr )
-    {
-      string[] longMonth = { "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December" };
-      string[] shortMonth = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-      string[] longDoW = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-                "Friday", "Saturday" };
-      string[] shortDoW = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-            
-      int year, month, day, hour, minute, second;
-      XLDateToCalendarDate( xlDate, out year, out month, out day, out hour, out minute, out second );
-      
-      string resultStr = fmtStr.Replace( "&mmmm", longMonth[ month - 1 ] );
-      resultStr = resultStr.Replace( "&mmm", shortMonth[ month - 1 ] );
-      resultStr = resultStr.Replace( "&mm", month.ToString( "d2" ) );
-      resultStr = resultStr.Replace( "&m", month.ToString( "d" ) );
-      resultStr = resultStr.Replace( "&yyyy", year.ToString( "d" ) );
-      resultStr = resultStr.Replace( "&yy", (year%100).ToString( "d2" ) );
-      resultStr = resultStr.Replace( "&dd", day.ToString( "d2" ) );
-      resultStr = resultStr.Replace( "&d", day.ToString( "d" ) );
-      resultStr = resultStr.Replace( "&hh", hour.ToString( "d2" ) );
-      resultStr = resultStr.Replace( "&h", (((hour+11)%12)+1).ToString( "d" ) );
-      resultStr = resultStr.Replace( "&nn", minute.ToString( "d2" ) );
-      resultStr = resultStr.Replace( "&n", minute.ToString( "d" ) );
-      resultStr = resultStr.Replace( "&ss", second.ToString( "d2" ) );
-      resultStr = resultStr.Replace( "&s", second.ToString( "d" ) );
-      resultStr = resultStr.Replace( "&a", (hour>=12) ? "pm" : "am" );
-      resultStr = resultStr.Replace( "&wwww", longDoW[ XLDateToDayOfWeek( xlDate ) ] );
-      resultStr = resultStr.Replace( "&www", shortDoW[ XLDateToDayOfWeek( xlDate ) ] );
-      
-      
-      return resultStr;
-    }
-*/    
+        /// <summary>
+        /// Format the specified XL Date value using the specified format string
+        /// </summary>
+        /// <param name="xlDate">
+        /// The XL date value to be formatted in floating point double format.
+        /// </param>
+        /// <param name="fmtStr">
+        /// The formatting string to be used for the date.  The following formatting elements
+        /// will be replaced with the corresponding date values:
+        /// <list type="table">
+        ///    <listheader>
+        ///       <term>Variable</term>
+        ///       <description>Description</description>
+        ///    </listheader>
+        ///    <item><term>&amp;mmmm</term><description>month name (e.g., January)</description></item>
+        ///    <item><term>&amp;mmm</term><description>month abbreviation (e.g., Apr)</description></item>
+        ///    <item><term>&amp;mm</term><description>padded month number (e.g. 04)</description></item>
+        ///    <item><term>&amp;m</term><description>non-padded month number (e.g., 4)</description></item>
+        ///    <item><term>&amp;dd</term><description>padded day number (e.g., 09)</description></item>
+        ///    <item><term>&amp;d</term><description>non-padded day number (e.g., 9)</description></item>
+        ///    <item><term>&amp;yyyy</term><description>4 digit year number (e.g., 1995)</description></item>
+        ///    <item><term>&amp;yy</term><description>two digit year number (e.g., 95)</description></item>
+        ///    <item><term>&amp;hh</term><description>padded 24 hour time value (e.g., 08)</description></item>
+        ///    <item><term>&amp;h</term><description>non-padded 12 hour time value (e.g., 8)</description></item>
+        ///    <item><term>&amp;nn</term><description>padded minute value (e.g, 05)</description></item>
+        ///    <item><term>&amp;n</term><description>non-padded minute value (e.g., 5)</description></item>
+        ///    <item><term>&amp;ss</term><description>padded second value (e.g., 03)</description></item>
+        ///    <item><term>&amp;s</term><description>non-padded second value (e.g., 3)</description></item>
+        ///    <item><term>&amp;a</term><description>"am" or "pm"</description></item>
+        ///    <item><term>&amp;wwww</term><description>day of week (e.g., Wednesday)</description></item>
+        ///    <item><term>&amp;www</term><description>day of week abbreviation (e.g., Wed)</description></item>
+        /// </list>
+        /// </param>
+        /// <example>
+        ///   <para>"&amp;wwww, &amp;mmmm &amp;dd, &amp;yyyy &amp;h:&amp;nn &amp;a" ==> "Sunday, February 12, 1956 4:23 pm"</para>
+        ///   <para>"&amp;dd-&amp;mmm-&amp;yy" ==> 12-Feb-56</para>
+        /// </example>
+        /// <returns>A string representation of the date</returns>
+        public static string ToString( double xlDate, string fmtStr )
+        {
+          string[] longMonth = { "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December" };
+          string[] shortMonth = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+          string[] longDoW = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+                    "Friday", "Saturday" };
+          string[] shortDoW = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
-  #endregion
+          int year, month, day, hour, minute, second;
+          XLDateToCalendarDate( xlDate, out year, out month, out day, out hour, out minute, out second );
+
+          string resultStr = fmtStr.Replace( "&mmmm", longMonth[ month - 1 ] );
+          resultStr = resultStr.Replace( "&mmm", shortMonth[ month - 1 ] );
+          resultStr = resultStr.Replace( "&mm", month.ToString( "d2" ) );
+          resultStr = resultStr.Replace( "&m", month.ToString( "d" ) );
+          resultStr = resultStr.Replace( "&yyyy", year.ToString( "d" ) );
+          resultStr = resultStr.Replace( "&yy", (year%100).ToString( "d2" ) );
+          resultStr = resultStr.Replace( "&dd", day.ToString( "d2" ) );
+          resultStr = resultStr.Replace( "&d", day.ToString( "d" ) );
+          resultStr = resultStr.Replace( "&hh", hour.ToString( "d2" ) );
+          resultStr = resultStr.Replace( "&h", (((hour+11)%12)+1).ToString( "d" ) );
+          resultStr = resultStr.Replace( "&nn", minute.ToString( "d2" ) );
+          resultStr = resultStr.Replace( "&n", minute.ToString( "d" ) );
+          resultStr = resultStr.Replace( "&ss", second.ToString( "d2" ) );
+          resultStr = resultStr.Replace( "&s", second.ToString( "d" ) );
+          resultStr = resultStr.Replace( "&a", (hour>=12) ? "pm" : "am" );
+          resultStr = resultStr.Replace( "&wwww", longDoW[ XLDateToDayOfWeek( xlDate ) ] );
+          resultStr = resultStr.Replace( "&www", shortDoW[ XLDateToDayOfWeek( xlDate ) ] );
+
+
+          return resultStr;
+        }
+    */
+
+    #endregion
   }
 }
