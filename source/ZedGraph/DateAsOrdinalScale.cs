@@ -39,7 +39,7 @@ namespace ZedGraph
   /// <author> John Champion  </author>
   /// <version> $Revision: 1.13 $ $Date: 2007-11-28 02:38:22 $ </version>
   [Serializable]
-  class DateAsOrdinalScale : Scale
+  class DateAsOrdinalScale : Scale, IOrdinalScale
   {
 
   #region constructors
@@ -97,7 +97,7 @@ namespace ZedGraph
     public override double Min
     {
       get { return _min; }
-      set { _min = XDate.MakeValidDate( value ); _minAuto = false; }
+      set { _min = XDate.MakeValidDate( value ); MinAuto = false; }
     }
 
     /// <summary>
@@ -111,7 +111,7 @@ namespace ZedGraph
     public override double Max
     {
       get { return _max; }
-      set { _max = XDate.MakeValidDate( value ); _maxAuto = false; }
+      set { _max = XDate.MakeValidDate( value ); MaxAuto = false; }
     }
 
   #endregion
@@ -187,7 +187,7 @@ namespace ZedGraph
 
     internal void SetDateFormat( GraphPane pane )
     {
-      if (!_formatAuto) return;
+      if (!FormatAuto) return;
 
       double range = 10;
 

@@ -42,7 +42,7 @@ namespace ZedGraph
   /// <author> John Champion  </author>
   /// <version> $Revision: 1.10 $ $Date: 2007-04-16 00:03:02 $ </version>
   [Serializable]
-  class LinearAsOrdinalScale : Scale, ISerializable //, ICloneable
+  class LinearAsOrdinalScale : Scale, IOrdinalScale
   {
 
   #region constructors
@@ -133,8 +133,8 @@ namespace ZedGraph
       base.PickScale( pane, g, scaleFactor );
 
       // First, get the date ranges from the first curve in the list
-      double xMin; // = Double.MaxValue;
-      double xMax; // = Double.MinValue;
+      double xMin = 0; // = Double.MaxValue;
+      double xMax = int.MaxValue; // = Double.MinValue;
       double yMin; // = Double.MaxValue;
       double yMax; // = Double.MinValue;
       double tMin = 0;

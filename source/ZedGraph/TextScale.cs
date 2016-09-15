@@ -40,7 +40,7 @@ namespace ZedGraph
   /// <author> John Champion  </author>
   /// <version> $Revision: 1.8 $ $Date: 2006-08-25 05:19:09 $ </version>
   [Serializable]
-  class TextScale : Scale, ISerializable //, ICloneable
+  class TextScale : Scale, IOrdinalScale
   {
 
   #region constructors
@@ -116,8 +116,8 @@ namespace ZedGraph
     /// </returns>
     override internal double CalcBaseTic()
     {
-      if ( _baseTic != PointPair.Missing )
-        return _baseTic;
+      if ( BaseTic != PointPair.Missing )
+        return BaseTic;
       else
         return 1.0;
 
@@ -134,10 +134,10 @@ namespace ZedGraph
       int nTics = 1;
 
       // If no array of labels is available, just assume 10 labels so we don't blow up.
-      if ( _textLabels == null )
+      if ( TextLabels == null )
         nTics = 10;
       else
-        nTics = _textLabels.Length;
+        nTics = TextLabels.Length;
 
       if ( nTics < 1 )
         nTics = 1;
@@ -196,36 +196,36 @@ namespace ZedGraph
       base.PickScale( pane, g, scaleFactor );
 
       // if text labels are provided, then autorange to the number of labels
-      if ( _textLabels != null )
+      if ( TextLabels != null )
       {
-        if ( _minAuto )
+        if ( MinAuto )
           _min = 0.5;
-        if ( _maxAuto )
-          _max = _textLabels.Length + 0.5;
+        if ( MaxAuto )
+          _max = TextLabels.Length + 0.5;
       }
       else
       {
-        if ( _minAuto )
+        if ( MinAuto )
           _min -= 0.5;
-        if ( _maxAuto )
+        if ( MaxAuto )
           _max += 0.5;
       }
       // Test for trivial condition of range = 0 and pick a suitable default
       if ( _max - _min < .1 )
       {
-        if ( _maxAuto )
+        if ( MaxAuto )
           _max = _min + 10.0;
         else
           _min = _max - 10.0;
       }
 
-      if ( _majorStepAuto )
+      if ( MajorStepAuto )
       {
-        if ( !_isPreventLabelOverlap )
+        if ( !IsPreventLabelOverlap )
         {
           _majorStep = 1;
         }
-        else if ( _textLabels != null )
+        else if ( TextLabels != null )
         {
           // Calculate the maximum number of labels
           double maxLabels = (double) this.CalcMaxLabels( g, pane, scaleFactor );
@@ -248,7 +248,7 @@ namespace ZedGraph
           _majorStep = 1.0;
       }
 
-      if ( _minorStepAuto )
+      if ( MinorStepAuto )
       {
         _minorStep = _majorStep / 10;
 
@@ -282,10 +282,10 @@ namespace ZedGraph
         _format = Scale.Default.Format;
 
       index *= (int) _majorStep;
-      if ( _textLabels == null || index < 0 || index >= _textLabels.Length )
+      if ( TextLabels == null || index < 0 || index >= TextLabels.Length )
         return string.Empty;
       else
-        return _textLabels[index];
+        return TextLabels[index];
     }
 
 

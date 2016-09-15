@@ -24,29 +24,6 @@ using System.Windows.Forms;
 
 namespace ZedGraph
 {
-/*
-  /// <summary>
-  /// 
-  /// </summary>
-  public struct DrawingThreadData
-  {
-    /// <summary>
-    /// 
-    /// </summary>
-    public Graphics _g;
-    /// <summary>
-    /// 
-    /// </summary>
-    public MasterPane _masterPane;
-
-//    public DrawingThread( Graphics g, MasterPane masterPane )
-//    {
-//      _g = g;
-//      _masterPane = masterPane;
-//    }
-  }
-*/
-
   /// <summary>
   /// The ZedGraphControl class provides a UserControl interface to the
   /// <see cref="ZedGraph"/> class library.  This allows ZedGraph to be installed
@@ -338,59 +315,7 @@ namespace ZedGraph
           }
         }
       }
-
-/*
-      // first, see if an old thread is still running
-      if ( t != null && t.IsAlive )
-      {
-        t.Abort();
-      }
-
-      //dt = new DrawingThread( e.Graphics, _masterPane );
-      //g = e.Graphics;
-
-      // Fire off the new thread
-      t = new Thread( new ParameterizedThreadStart( DoDrawingThread ) );
-      //ct.ApartmentState = ApartmentState.STA;
-      //ct.SetApartmentState( ApartmentState.STA );
-      DrawingThreadData dtd;
-      dtd._g = e.Graphics;
-      dtd._masterPane = _masterPane;
-
-      t.Start( dtd );
-      //ct.Join();
-*/
     }
-
-//    Thread t = null;
-    //DrawingThread dt = null;
-
-/*
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="dtdobj"></param>
-    public void DoDrawingThread( object dtdobj )
-    {
-      try
-      {
-        DrawingThreadData dtd = (DrawingThreadData) dtdobj;
-
-        if ( dtd._g != null && dtd._masterPane != null )
-          dtd._masterPane.Draw( dtd._g );
-
-        //        else
-        //        {
-        //          using ( Graphics g2 = CreateGraphics() )
-        //            _masterPane.Draw( g2 );
-        //        }
-      }
-      catch
-      {
-
-      }
-    }
-*/
 
     /// <summary>
     /// Called when the control has been resized.

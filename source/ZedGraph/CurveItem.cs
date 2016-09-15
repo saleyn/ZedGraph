@@ -785,7 +785,7 @@ namespace ZedGraph
     /// owner of this object.
     /// </param>
     /// <seealso cref="GraphPane.IsBoundedRanges"/>
-    virtual public void GetRange(   out double xMin, out double xMax,
+    virtual public void GetRange(out double xMin, out double xMax,
                     out double yMin, out double yMax,
                     bool ignoreInitial,
                     bool isBoundedRanges,
@@ -826,58 +826,70 @@ namespace ZedGraph
       bool isYOrdinal = yAxis.Scale.IsAnyOrdinal;
       bool isZOrdinal = ( isXIndependent ? yAxis : xAxis ).Scale.IsAnyOrdinal;
 
+      int from, to;
+
+      if (false) //isXOrdinal)
+      {
+        //from = xAxis.Scale.MinAuto ? 0            : Scale.MinMax(0, (int)xAxis.Scale.Min, Points.Count-1);
+        //to   = xAxis.Scale.MaxAuto ? Points.Count : Scale.MinMax(0, (int)xAxis.Scale.Max+1, Points.Count);
+        from = Scale.MinMax((int)Math.Round(xMin), (int)Math.Round(xAxis.Scale.Min), Points.Count-1);
+        to   = Scale.MinMax((int)Math.Round(xMax), (int)Math.Round(xAxis.Scale.Max)+1, Points.Count);
+      }
+      else
+      {
+        from = 0;
+        to   = Points.Count;
+      }
+
       // Loop over each point in the arrays
       //foreach ( PointPair point in this.Points )
-      for ( int i=0; i<this.Points.Count; i++ )
+      for ( var i=from; i < to; i++ )
       {
-        PointPair point = this.Points[i];
+        var point = Points[i];
 
         double curX = isXOrdinal ? i + 1 : point.X;
         double curY = isYOrdinal ? i + 1 : point.Y;
-        double curZ = isZOrdinal ? i + 1 : point.Z;
+        double loZ  = isZOrdinal ? i + 1 : Math.Min(point.LowValue, point.HighValue); //point.Z;
+        double hiZ  = isZOrdinal ? i + 1 : Math.Max(point.LowValue, point.HighValue);//point.Z;
 
         bool outOfBounds = curX < xLBound || curX > xUBound ||
-          curY < yLBound || curY > yUBound ||
-          ( isZIncluded && isXIndependent && ( curZ < yLBound || curZ > yUBound ) ) ||
-          ( isZIncluded && !isXIndependent && ( curZ < xLBound || curZ > xUBound ) ) ||
-          ( curX <= 0 && isXLog ) || ( curY <= 0 && isYLog );
+                           curY < yLBound || curY > yUBound ||
+                          ( isZIncluded && ((isXIndependent  && (loZ < yLBound || hiZ > yUBound))   ||
+                                            (!isXIndependent && (loZ < xLBound || hiZ > xUBound)))) ||
+                          ( curX <= 0 && isXLog ) || ( curY <= 0 && isYLog );
       
         // ignoreInitial becomes false at the first non-zero
         // Y value
         if (  ignoreInitial && curY != 0 &&
             curY != PointPair.Missing )
           ignoreInitial = false;
-      
-        if (   !ignoreInitial &&
-            !outOfBounds &&
-            curX != PointPair.Missing &&
-            curY != PointPair.Missing )
-        {
-          if ( curX < xMin )
-            xMin = curX;
-          if ( curX > xMax )
-            xMax = curX;
-          if ( curY < yMin )
-            yMin = curY;
-          if ( curY > yMax )
-            yMax = curY;
 
-          if ( isZIncluded && isXIndependent && curZ != PointPair.Missing )
-          {
-            if ( curZ < yMin )
-              yMin = curZ;
-            if ( curZ > yMax )
-              yMax = curZ;
-          }
-          else if ( isZIncluded && curZ != PointPair.Missing )
-          {
-            if ( curZ < xMin )
-              xMin = curZ;
-            if ( curZ > xMax )
-              xMax = curZ;
-          }
+        if (ignoreInitial || outOfBounds || curX == PointPair.Missing ||
+            curY == PointPair.Missing)
+          continue;
+
+        if (curX < xMin) xMin = curX;
+        if (curX > xMax) xMax = curX;
+        if (curY < yMin) yMin = curY;
+        if (curY > yMax) yMax = curY;
+
+        if (!isZIncluded) continue;
+
+        if (isXIndependent)
+        {
+          if (loZ == PointPair.Missing && hiZ == PointPair.Missing) continue;
+
+          if (loZ < yMin) yMin = loZ;
+          if (hiZ > yMax) yMax = hiZ;
         }
-      }  
+        else
+        {
+          if (loZ == PointPair.Missing && hiZ == PointPair.Missing) continue;
+
+          if (loZ < xMin) xMin = loZ;
+          if (hiZ > xMax) xMax = hiZ;
+        }
+      }
     }
 
     /// <summary>Returns a reference to the <see cref="Axis"/> object that is the "base"

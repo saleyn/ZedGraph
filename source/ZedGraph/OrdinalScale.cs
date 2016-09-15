@@ -27,6 +27,11 @@ using System.Security.Permissions;
 namespace ZedGraph
 {
   /// <summary>
+  /// Interface for all ordinal scales
+  /// </summary>
+  public interface IOrdinalScale {};
+
+  /// <summary>
   /// The OrdinalScale class inherits from the <see cref="Scale" /> class, and implements
   /// the features specific to <see cref="AxisType.Ordinal" />.
   /// </summary>
@@ -40,7 +45,7 @@ namespace ZedGraph
   /// <author> John Champion  </author>
   /// <version> $Revision: 1.8 $ $Date: 2007-04-16 00:03:02 $ </version>
   [Serializable]
-  class OrdinalScale : Scale, ISerializable //, ICloneable
+  class OrdinalScale : Scale, IOrdinalScale
   {
 
   #region constructors
@@ -146,7 +151,7 @@ namespace ZedGraph
       // Test for trivial condition of range = 0 and pick a suitable default
       if ( scale._max - scale._min < 1.0 )
       {
-        if ( scale._maxAuto )
+        if ( scale.MaxAuto )
           scale._max = scale._min + 0.5;
         else
           scale._min = scale._max - 0.5;
@@ -154,7 +159,7 @@ namespace ZedGraph
       else
       {
         // Calculate the new step size
-        if ( scale._majorStepAuto )
+        if ( scale.MajorStepAuto )
         {
           // Calculate the step size based on targetSteps
           scale._majorStep = Scale.CalcStepSize( scale._max - scale._min,
@@ -181,14 +186,14 @@ namespace ZedGraph
           scale._majorStep = 1.0;
 
         // Calculate the new minor step size
-        if ( scale._minorStepAuto )
+        if ( scale.MinorStepAuto )
           scale._minorStep = Scale.CalcStepSize( scale._majorStep,
             ( scale._ownerAxis is IXAxis ) ?
                 Default.TargetMinorXSteps : Default.TargetMinorYSteps );
 
-        if ( scale._minAuto )
+        if ( scale.MinAuto )
           scale._min -= 0.5;
-        if ( scale._maxAuto )
+        if ( scale.MaxAuto )
           scale._max += 0.5;
       }
     }

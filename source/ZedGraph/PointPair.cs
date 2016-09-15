@@ -233,11 +233,14 @@ namespace ZedGraph
     /// This is really just an alias for <see cref="PointPair.Z"/>.
     /// </summary>
     /// <value>The lower dependent value for this <see cref="PointPair"/>.</value>
-    public double LowValue
-    {
-      get { return Z; }
-      set { Z = value; }
-    }
+    public virtual double LowValue => Z;
+
+    /// <summary>
+    /// The "high" value for this point (lower dependent-axis value).
+    /// This is really just an alias for <see cref="PointPair.Z"/>.
+    /// </summary>
+    /// <value>The lower dependent value for this <see cref="PointPair"/>.</value>
+    public virtual double HighValue => Z;
 
     /// <summary>
     /// The ColorValue property is just an alias for the <see cref="PointPair.Z" />

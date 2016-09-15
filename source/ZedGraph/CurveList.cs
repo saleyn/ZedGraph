@@ -20,6 +20,7 @@
 using System;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ZedGraph
 {
@@ -427,127 +428,113 @@ namespace ZedGraph
     /// <seealso cref="GraphPane.IsBoundedRanges"/>
     public void GetRange( bool bIgnoreInitial, bool isBoundedRanges, GraphPane pane )
     {
-      double  tXMinVal,
-            tXMaxVal,
-            tYMinVal,
-            tYMaxVal;
-
       InitScale( pane.XAxis.Scale, isBoundedRanges );
       InitScale( pane.X2Axis.Scale, isBoundedRanges );
 
-      foreach ( YAxis axis in pane.YAxisList )
+      foreach ( var axis in pane.YAxisList )
         InitScale( axis.Scale, isBoundedRanges );
 
-      foreach ( Y2Axis axis in pane.Y2AxisList )
+      foreach ( var axis in pane.Y2AxisList )
         InitScale( axis.Scale, isBoundedRanges );
 
       maxPts = 1;
-      
+
+
       // Loop over each curve in the collection and examine the data ranges
-      foreach ( CurveItem curve in this )
+      foreach (var curve in this.Where(curve => curve.IsVisible))
       {
-        if ( curve.IsVisible )
+        // For stacked types, use the GetStackRange() method which accounts for accumulated values
+        // rather than simple curve values.
+        double tXMinVal;
+        double tXMaxVal;
+        double tYMinVal;
+        double tYMaxVal;
+        if (((curve is BarItem) && (pane._barSettings.Type == BarType.Stack ||
+                                    pane._barSettings.Type == BarType.PercentStack)) ||
+            ((curve is LineItem) && pane.LineType == LineType.Stack))
         {
-          // For stacked types, use the GetStackRange() method which accounts for accumulated values
-          // rather than simple curve values.
-          if ( ( ( curve is BarItem ) && ( pane._barSettings.Type == BarType.Stack ||
-              pane._barSettings.Type == BarType.PercentStack ) ) ||
-            ( ( curve is LineItem ) && pane.LineType == LineType.Stack ) )
+          GetStackRange( pane, curve, out tXMinVal, out tYMinVal,
+                         out tXMaxVal, out tYMaxVal );
+        }
+        else
+        {
+          // Call the GetRange() member function for the current
+          // curve to get the min and max values
+          curve.GetRange( out tXMinVal, out tXMaxVal,
+                          out tYMinVal, out tYMaxVal, bIgnoreInitial, true, pane );
+        }
+
+        var yScale = curve.GetYAxis(pane).Scale;
+        var xScale = curve.GetXAxis(pane).Scale;
+        var isYOrd = yScale.IsAnyOrdinal;
+        var isXOrd = xScale.IsAnyOrdinal;
+
+        // For ordinal Axes, the data range is just 1 to Npts
+        if ( isYOrd && !curve.IsOverrideOrdinal )
+        {
+          tYMinVal = isBoundedRanges ? Math.Max(yScale._lBound, 1.0) : 1.0;
+          tYMaxVal = isBoundedRanges ? Math.Min(yScale._uBound, curve.NPts) : curve.NPts;
+        }
+        if ( isXOrd && !curve.IsOverrideOrdinal )
+        {
+          tXMinVal = isBoundedRanges ? Math.Max(xScale._lBound, 1.0) : 1.0;
+          tXMaxVal = isBoundedRanges ? Math.Min(xScale._uBound, curve.NPts) : curve.NPts;
+        }
+
+        // Bar types always include the Y=0 value
+        if (curve.IsBar)
+        {
+          if (pane._barSettings.Base == BarBase.X ||
+               pane._barSettings.Base == BarBase.X2)
           {
-            GetStackRange( pane, curve, out tXMinVal, out tYMinVal,
-                    out tXMaxVal, out tYMaxVal );
+            // Only force z=0 for BarItems, not HiLowBarItems
+            if (!(curve is HiLowBarItem))
+            {
+              if      (tYMinVal > 0) tYMinVal = 0;
+              else if (tYMaxVal < 0) tYMaxVal = 0;
+            }
+
+            // for non-ordinal axes, expand the data range slightly for bar charts to
+            // account for the fact that the bar clusters have a width
+            if (!isXOrd)
+            {
+              tXMinVal -= pane._barSettings._clusterScaleWidth / 2.0;
+              tXMaxVal += pane._barSettings._clusterScaleWidth / 2.0;
+            }
           }
           else
           {
-            // Call the GetRange() member function for the current
-            // curve to get the min and max values
-            curve.GetRange( out tXMinVal, out tXMaxVal,
-                    out tYMinVal, out tYMaxVal, bIgnoreInitial, true, pane );
-          }
-
-          // isYOrd is true if the Y axis is an ordinal type
-          Scale yScale = curve.GetYAxis( pane ).Scale;
-
-          Scale xScale = curve.GetXAxis( pane ).Scale;
-          bool isYOrd = yScale.IsAnyOrdinal;
-          // isXOrd is true if the X axis is an ordinal type
-          bool isXOrd = xScale.IsAnyOrdinal;
-
-          // For ordinal Axes, the data range is just 1 to Npts
-          if ( isYOrd && !curve.IsOverrideOrdinal )
-          {
-            tYMinVal = 1.0;
-            tYMaxVal = curve.NPts;
-          }
-          if ( isXOrd && !curve.IsOverrideOrdinal )
-          {
-            tXMinVal = 1.0;
-            tXMaxVal = curve.NPts;
-          }
-
-          // Bar types always include the Y=0 value
-          if ( curve.IsBar )
-          {
-            if ( pane._barSettings.Base == BarBase.X ||
-                pane._barSettings.Base == BarBase.X2 )
+            // Only force z=0 for BarItems, not HiLowBarItems
+            if (!(curve is HiLowBarItem))
             {
-              // Only force z=0 for BarItems, not HiLowBarItems
-              if ( ! (curve is HiLowBarItem)  )
-              {
-                if ( tYMinVal > 0 )
-                  tYMinVal = 0;
-                else if ( tYMaxVal < 0 )
-                  tYMaxVal = 0;
-              }
-
-              // for non-ordinal axes, expand the data range slightly for bar charts to
-              // account for the fact that the bar clusters have a width
-              if ( !isXOrd )
-              {
-                tXMinVal -= pane._barSettings._clusterScaleWidth / 2.0;
-                tXMaxVal += pane._barSettings._clusterScaleWidth / 2.0;
-              }
+              if      (tXMinVal > 0) tXMinVal = 0;
+              else if (tXMaxVal < 0) tXMaxVal = 0;
             }
-            else
-            {
-              // Only force z=0 for BarItems, not HiLowBarItems
-              if ( !( curve is HiLowBarItem ) )
-              {
-                if ( tXMinVal > 0 )
-                  tXMinVal = 0;
-                else if ( tXMaxVal < 0 )
-                  tXMaxVal = 0;
-              }
 
-              // for non-ordinal axes, expand the data range slightly for bar charts to
-              // account for the fact that the bar clusters have a width
-              if ( !isYOrd )
-              {
-                tYMinVal -= pane._barSettings._clusterScaleWidth / 2.0;
-                tYMaxVal += pane._barSettings._clusterScaleWidth / 2.0;
-              }
+            // for non-ordinal axes, expand the data range slightly for bar charts to
+            // account for the fact that the bar clusters have a width
+            if (!isYOrd)
+            {
+              tYMinVal -= pane._barSettings._clusterScaleWidth / 2.0;
+              tYMaxVal += pane._barSettings._clusterScaleWidth / 2.0;
             }
           }
-
-          // determine which curve has the maximum number of points
-          if ( curve.NPts > maxPts )
-            maxPts = curve.NPts;
-
-          // If the min and/or max values from the current curve
-          // are the absolute min and/or max, then save the values
-          // Also, differentiate between Y and Y2 values
-
-          if ( tYMinVal < yScale._rangeMin )
-            yScale._rangeMin = tYMinVal;
-          if ( tYMaxVal > yScale._rangeMax )
-            yScale._rangeMax = tYMaxVal;
-
-
-          if ( tXMinVal < xScale._rangeMin )
-            xScale._rangeMin = tXMinVal;
-          if ( tXMaxVal > xScale._rangeMax )
-            xScale._rangeMax = tXMaxVal;
         }
+
+        // determine which curve has the maximum number of points
+        if (curve.NPts > maxPts)
+          maxPts = curve.NPts;
+
+        // If the min and/or max values from the current curve
+        // are the absolute min and/or max, then save the values
+        // Also, differentiate between Y and Y2 values
+
+        if (tYMinVal < yScale._rangeMin) yScale._rangeMin = tYMinVal;
+        if (tYMaxVal > yScale._rangeMax) yScale._rangeMax = tYMaxVal;
+
+
+        if (tXMinVal < xScale._rangeMin) xScale._rangeMin = tXMinVal;
+        if (tXMaxVal > xScale._rangeMax) xScale._rangeMax = tXMaxVal;
       }
 
       pane.XAxis.Scale.SetRange(pane);
@@ -563,10 +550,8 @@ namespace ZedGraph
     {
       scale._rangeMin = double.MaxValue;
       scale._rangeMax = double.MinValue;
-      scale._lBound = ( isBoundedRanges && !scale._minAuto ) ?
-        scale._min : double.MinValue;
-      scale._uBound = ( isBoundedRanges && !scale._maxAuto ) ?
-        scale._max : double.MaxValue;
+      scale._lBound = ( isBoundedRanges && !scale.MinAuto ) ? scale._min : double.MinValue;
+      scale._uBound = ( isBoundedRanges && !scale.MaxAuto ) ? scale._max : double.MaxValue;
     }
 
     /// <summary>
@@ -594,43 +579,45 @@ namespace ZedGraph
       tXMinVal = tYMinVal = Double.MaxValue;
       tXMaxVal = tYMaxVal = Double.MinValue;
 
-      ValueHandler valueHandler = new ValueHandler( pane, false );
-      Axis baseAxis = curve.BaseAxis( pane );
-      bool isXBase = baseAxis is XAxis || baseAxis is X2Axis;
-
-      double lowVal, baseVal, hiVal;
+      var valueHandler = new ValueHandler( pane, false );
+      var baseAxis     = curve.BaseAxis( pane );
+      var isXBase      = baseAxis is IXAxis;
 
       for ( int i=0; i<curve.Points.Count; i++ )
       {
+        double lowVal;
+        double hiVal;
+        double baseVal;
         valueHandler.GetValues( curve, i, out baseVal, out lowVal, out hiVal );
-        double x = isXBase ? baseVal : hiVal;
-        double y = isXBase ? hiVal : baseVal;
+        var x = isXBase ? baseVal : hiVal;
+        var y = isXBase ? hiVal : baseVal;
 
-        if ( x != PointPair.Missing && y != PointPair.Missing && lowVal != PointPair.Missing )
+        if (x == PointPair.Missing || y == PointPair.Missing ||
+            lowVal == PointPair.Missing)
+          continue;
+
+        if ( x < tXMinVal )
+          tXMinVal = x;
+        if ( x > tXMaxVal )
+          tXMaxVal = x;
+        if ( y < tYMinVal )
+          tYMinVal = y;
+        if ( y > tYMaxVal )
+          tYMaxVal = y;
+
+        if ( !isXBase )
         {
-          if ( x < tXMinVal )
-            tXMinVal = x;
-          if ( x > tXMaxVal )
-            tXMaxVal = x;
-          if ( y < tYMinVal )
-            tYMinVal = y;
-          if ( y > tYMaxVal )
-            tYMaxVal = y;
-
-          if ( !isXBase )
-          {
-            if ( lowVal < tXMinVal )
-              tXMinVal = lowVal;
-            if ( lowVal > tXMaxVal )
-              tXMaxVal = lowVal;
-          }
-          else
-          {
-            if ( lowVal < tYMinVal )
-              tYMinVal = lowVal;
-            if ( lowVal > tYMaxVal )
-              tYMaxVal = lowVal;
-          }
+          if ( lowVal < tXMinVal )
+            tXMinVal = lowVal;
+          if ( lowVal > tXMaxVal )
+            tXMaxVal = lowVal;
+        }
+        else
+        {
+          if ( lowVal < tYMinVal )
+            tYMinVal = lowVal;
+          if ( lowVal > tYMaxVal )
+            tYMaxVal = lowVal;
         }
       }
     }
@@ -661,29 +648,30 @@ namespace ZedGraph
       //Bar.ResetBarStack();
 
       // Count the number of BarItems in the curvelist
-      int pos = this.NumBars;
+      int pos = NumBars;
       
       // sorted overlay bars are a special case, since they are sorted independently at each
       // ordinal position.
       if ( pane._barSettings.Type == BarType.SortedOverlay )
       {
         // First, create a new curveList with references (not clones) of the curves
-        CurveList tempList = new CurveList();
-        foreach ( CurveItem curve in this )
-          if ( curve.IsBar )
-            tempList.Add( (CurveItem) curve );
-        
+        var tempList = new CurveList();
+        tempList.AddRange(this.Where(curve => curve.IsBar));
+
         // Loop through the bars, graphing each ordinal position separately
         for ( int i=0; i<this.maxPts; i++ )
         {
           // At each ordinal position, sort the curves according to the value axis value
           tempList.Sort( pane._barSettings.Base == BarBase.X ? SortType.YValues : SortType.XValues, i );
           // plot the bars for the current ordinal position, in sorted order
-          foreach ( BarItem barItem in tempList )
+          foreach ( var curveItem in tempList )
+          {
+            var barItem = (BarItem)curveItem;
             barItem.Bar.DrawSingleBar( g, pane, barItem,
-              ((BarItem)barItem).BaseAxis( pane ),
-              ((BarItem)barItem).ValueAxis( pane ),
-              0, i, ( (BarItem)barItem ).GetBarWidth( pane ), scaleFactor );
+                                       barItem.BaseAxis( pane ),
+                                       barItem.ValueAxis( pane ),
+                                       0, i, barItem.GetBarWidth( pane ), scaleFactor );
+          }
         }
       }
 
@@ -725,12 +713,12 @@ namespace ZedGraph
           pane._barSettings.Type == BarType.PercentStack)
         return 0;
 
-      int i = 0;
-      foreach ( CurveItem curve in this )
+      var i = 0;
+      foreach (var curve in this)
       {
         if ( curve == barItem )
           return i;
-        else if ( curve is BarItem )
+        if ( curve is BarItem )
           i++;
       }
 

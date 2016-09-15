@@ -34,7 +34,7 @@ namespace ZedGraph.Demo
       : base("Demonstration of the OHLCBar Chart Type",
              "OHLCBar Real-Time Demo", DemoType.Financial)
     {
-      m_Timer   = new Timer { Interval = 500, Enabled = false };
+      m_Timer   = new Timer { Interval = 500, Enabled = false, SynchronizingObject = ZedGraphControl };
       m_Data    = new StockPointList(true);
       m_FilteredData = new DynFilteredPointList(new [] {0.0}, new [] {0.0});
       m_EMAData = new PointPairList();
@@ -120,7 +120,7 @@ namespace ZedGraph.Demo
       // Enable the Y2 axis display
       m_Pane.Y2Axis.IsVisible                  = true;
       m_Pane.Y2Axis.Title.IsVisible            = false;
-      //m_Pane.Y2Axis.MinSpace                 = 50;
+      m_Pane.Y2Axis.MinSpace                   = 50;
       m_Pane.Y2Axis.AxisGap                    = 5;
       m_Pane.Y2Axis.Scale.LabelGap             = 0;
       m_Pane.Y2Axis.MajorGrid.IsVisible        = true;
@@ -313,15 +313,24 @@ namespace ZedGraph.Demo
       var up = m_Rand.NextDouble() > 0.5;
       var val = up ? LastPoint.Low : LastPoint.High;
 
+      Action<double, double, bool> set_min_max = (min, max, absolute) =>
+      {
+        var grace = (m_Pane.Y2Axis.Scale.Max - m_Pane.Y2Axis.Scale.Min) * m_Pane.Y2Axis.Scale.MaxGrace;
+        var gap = grace; //m_Pane.Y2Axis.Scale.ReverseTransform(10) + grace;
+        m_Pane.Y2Axis.Scale.Min = absolute ? min-gap : Math.Min(m_Pane.Y2Axis.Scale.Min, min - gap);
+        m_Pane.Y2Axis.Scale.Max = absolute ? max+gap : Math.Max(m_Pane.Y2Axis.Scale.Max, max + gap);
+      };
+
       if (add)
       {
-        double open  = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        double close = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        double hi    = Math.Max(open, close) + m_Rand.NextDouble()*5.0;
-        double low   = Math.Min(open, close) - m_Rand.NextDouble()*5.0;
+        var open  = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
+        var close = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
+        var hi    = Math.Max(open, close) + m_Rand.NextDouble()*5.0;
+        var low   = Math.Min(open, close) - m_Rand.NextDouble()*5.0;
+        var vol   = m_Rand.NextDouble()*1000;
 
         var x = now.XLDate - (now.XLDate % diff);
-        pt = new StockPt(x, hi, low, open, close, 100000);
+        pt = new StockPt(x, hi, low, open, close, (int)vol);
 
         m_Data.Add(pt);
         m_Open = close;
@@ -337,23 +346,23 @@ namespace ZedGraph.Demo
           if (Math.Abs(Math.Round(m_Pane.XAxis.Scale.Max) - m_Data.Count) < 5 )
           {
             var window = (int)(m_Pane.XAxis.Scale.Max - m_Pane.XAxis.Scale.Min);
+            //m_Pane.XAxis.Scale.SetRange();
             m_Pane.XAxis.Scale.Max = m_Data.Count + 1;
             m_Pane.XAxis.Scale.Min = m_Pane.XAxis.Scale.Max - window;
-          }
 
-          double min = double.MaxValue, max = double.MinValue;
-          var xMin = Scale.MinMax(0, (int)m_Pane.XAxis.Scale.Min, m_Data.Count - 1);
-          var xMax = Scale.MinMax(0, (int)m_Pane.XAxis.Scale.Max, m_Data.Count - 1);
-          for (int i = xMin; i < xMax; ++i)
-          {
-            var d = (StockPt)m_Data[i];
-            min = Math.Min(d.Low,  min);
-            max = Math.Max(d.High, max);
-          }
+            double min = double.MaxValue, max = double.MinValue;
+            var xMin = Scale.MinMax(0, (int)m_Pane.XAxis.Scale.Min, m_Data.Count);
+            var xMax = Scale.MinMax(0, (int)m_Pane.XAxis.Scale.Max, m_Data.Count);
+            for (int i = xMin; i < xMax; ++i)
+            {
+              var d = (StockPt)m_Data[i];
+              min = Math.Min(d.Low, min);
+              max = Math.Max(d.High, max);
+            }
 
-          m_Pane.Y2Axis.Scale.Min = min * 0.90;
-          m_Pane.Y2Axis.Scale.Max = max * 1.05;
-          m_Pane.AxisChange();
+            set_min_max(min, max, true);
+            m_Pane.AxisChange();
+          }
 
           if (m_Data.Count%1 == 0)
           {
@@ -383,8 +392,8 @@ namespace ZedGraph.Demo
         pt.High  = Math.Max(pt.High, Math.Max(m_Open, pt.Close) + m_Rand.NextDouble() * 5.0);
         pt.Low   = Math.Min(pt.Low,  Math.Min(m_Open, pt.Close) - m_Rand.NextDouble() * 5.0);
 
-        m_Pane.Y2Axis.Scale.Min = Math.Min(m_Pane.Y2Axis.Scale.Min, pt.Low * 0.85);
-        m_Pane.Y2Axis.Scale.Max = Math.Max(m_Pane.Y2Axis.Scale.Max, pt.High * 1.05);
+        if (timer && Math.Abs(Math.Round(m_Pane.XAxis.Scale.Max) - m_Data.Count) < 5)
+          set_min_max(pt.Low, pt.High, false);
       }
 
       if (m_Line != null)

@@ -275,20 +275,38 @@ namespace ZedGraph
 
     /// <summary>
     /// Set zoom scale for a given <see cref="CurveItem"/> to fit the selected
-    /// range between filterMinX to filterMaxX
+    /// range between filterMinX to filterMaxX.  These filter values can be either
+    /// ordinal values (if the X scale is ordinal) or X values.
     /// </summary>
     /// <returns>true if any scales were adjusted.</returns>
-    internal bool SetZoomScale(GraphPane graphPane, CurveItem lineItem,
+    public bool SetZoomScale(GraphPane graphPane, CurveItem lineItem,
       double filterMinX = double.MinValue, double filterMaxX = double.MaxValue)
     {
       // Set the axes scales
-      var gap  = 0.0;
-      var maxY = double.MinValue;
-      var maxX = double.MinValue;
-      var minY = double.MaxValue;
-      var minX = double.MaxValue;
+      var gap   = 0.0;
+      var maxY  = double.MinValue;
+      var maxX  = double.MinValue;
+      var minY  = double.MaxValue;
+      var minX  = double.MaxValue;
 
-      for (var i = 0; i < lineItem.Points.Count; i++)
+      int from = 0, to = lineItem.Points.Count - 1;
+
+      if (filterMinX != double.MinValue || filterMaxX != double.MaxValue)
+      {
+        var xaxis = graphPane.XAxis.IsPrimary(graphPane) ? (Axis)graphPane.XAxis : graphPane.X2Axis;
+        if (xaxis.Scale.IsAnyOrdinal)
+        {
+          from = filterMinX == double.MinValue
+               ? 0 : ZedGraph.Scale.MinMax(0, (int)(filterMinX + 0.5), lineItem.Points.Count - 1);
+          to   = filterMaxX == double.MaxValue
+               ? lineItem.Points.Count - 1
+               : ZedGraph.Scale.MinMax(0, (int)(filterMaxX + 0.5), lineItem.Points.Count - 1);
+          filterMinX = double.MinValue;
+          filterMaxX = double.MaxValue;
+        }
+      }
+
+      for (var i = from; i <= to; i++)
       {
         var item = lineItem[i];
         if (item.X == PointPairBase.Missing || item.Y == PointPairBase.Missing)
@@ -304,31 +322,29 @@ namespace ZedGraph
         minX = Math.Min(item.X, minX);
       }
 
-      if (minY == PointPairBase.Missing ||
-          maxY == PointPairBase.Missing ||
-          minX == PointPairBase.Missing ||
-          maxX == PointPairBase.Missing)
+      if (minY == double.MaxValue ||
+          maxY == double.MinValue ||
+          minX == double.MaxValue ||
+          maxX == double.MinValue)
         return false;
 
       // Calculate the border gap and set the graph scale values.
-      gap = Math.Abs(maxY - minY);
-      gap = gap < float.Epsilon ? 0.5 : gap * 0.05;
 
-      if (lineItem.IsY2Axis)
-      {
-        graphPane.YAxisList[lineItem.YAxisIndex].Scale.Max = maxY + gap;
-        graphPane.YAxisList[lineItem.YAxisIndex].Scale.Min = ZoomToZeroYAxis ? 0.0 : minY + (gap * -1.0);
-      }
-      else
-      {
-        graphPane.YAxis.Scale.Max = maxY + gap;
-        graphPane.YAxis.Scale.Min = ZoomToZeroYAxis ? 0.0 : minY + (gap * -1.0);
-      }
+      //gap = Math.Abs(maxY - minY);
+      //gap = gap <= float.Epsilon ? 0.5 : gap * 0.05;
 
-      gap = Math.Abs(maxX - minX);
-      gap = gap < float.Epsilon ? 0.5 : gap * 0.05;
-      graphPane.XAxis.Scale.Max = maxX + gap;
-      graphPane.XAxis.Scale.Min = minX - gap;
+      var scale = lineItem.IsY2Axis ? graphPane.Y2AxisList[lineItem.YAxisIndex].Scale
+                                    : graphPane.YAxisList[lineItem.YAxisIndex].Scale;
+      var grace = (scale.Max - scale.Min) * scale.MaxGrace;
+      gap = scale.ReverseTransform(10) + grace;
+      scale.Max = maxY + gap;
+      scale.Min = ZoomToZeroYAxis ? 0.0 : minY + (gap * -1.0);
+
+      scale = lineItem.IsY2Axis ? graphPane.X2Axis.Scale : graphPane.XAxis.Scale;
+      grace = (scale.Max - scale.Min) * scale.MaxGrace;
+      gap = scale.ReverseTransform(10) + grace;
+      scale.Max = maxX + gap;
+      scale.Min = minX - gap;
 
       return true;
     }

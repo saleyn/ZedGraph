@@ -106,12 +106,12 @@ namespace ZedGraph
     {
       base.SetupScaleData( pane );
 
-      if (  _exponent > 0 )
+      if (  Exponent > 0 )
       {
         _minLinTemp = Linearize( _min );
         _maxLinTemp = Linearize( _max );
       }
-      else if ( _exponent < 0 )
+      else if ( Exponent < 0 )
       {
         _minLinTemp = Linearize( _max );
         _maxLinTemp = Linearize( _min );
@@ -129,7 +129,7 @@ namespace ZedGraph
     /// <param name="val">The value to be converted</param>
     override public double Linearize( double val )
     {
-      return SafeExp( val, _exponent );
+      return SafeExp( val, Exponent );
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ namespace ZedGraph
     /// <param name="val">The value to be converted</param>
     override public double DeLinearize( double val )
     {
-      return Math.Pow( val, 1 / _exponent );
+      return Math.Pow( val, 1 / Exponent );
     }
 
     /// <summary>
@@ -165,16 +165,16 @@ namespace ZedGraph
     /// </returns>
     override internal double CalcMajorTicValue( double baseVal, double tic )
     {
-      if ( _exponent > 0.0 )
+      if ( Exponent > 0.0 )
       {
         //return baseVal + Math.Pow ( (double) this.majorStep * tic, exp );
         //baseVal is got from CalBase..., and it is exp..
-        return Math.Pow( Math.Pow( baseVal, 1 / _exponent ) + _majorStep * tic, _exponent );
+        return Math.Pow( Math.Pow( baseVal, 1 / Exponent ) + _majorStep * tic, Exponent );
       }
-      else if ( _exponent < 0.0 )
+      else if ( Exponent < 0.0 )
       {
         //baseVal is got from CalBase..., and it is exp..
-        return Math.Pow( Math.Pow( baseVal, 1 / _exponent ) + _majorStep * tic, _exponent );
+        return Math.Pow( Math.Pow( baseVal, 1 / Exponent ) + _majorStep * tic, Exponent );
       }
 
       return 1.0;
@@ -199,7 +199,7 @@ namespace ZedGraph
     /// </returns>
     override internal double CalcMinorTicValue( double baseVal, int iTic )
     {
-      return baseVal + Math.Pow( (double) _majorStep * (double) iTic, _exponent );
+      return baseVal + Math.Pow( (double) _majorStep * (double) iTic, Exponent );
     }
 
     /// <summary>
@@ -215,7 +215,7 @@ namespace ZedGraph
     /// </returns>
     override internal int CalcMinorStart( double baseVal )
     {
-      return (int) ( ( Math.Pow( _min, _exponent ) - baseVal ) / Math.Pow( _minorStep, _exponent ) );
+      return (int) ( ( Math.Pow( _min, Exponent ) - baseVal ) / Math.Pow( _minorStep, Exponent ) );
     }
 
     /// <summary>
@@ -250,27 +250,27 @@ namespace ZedGraph
       // Test for trivial condition of range = 0 and pick a suitable default
       if ( _max - _min < 1.0e-20 )
       {
-        if ( _maxAuto )
+        if ( MaxAuto )
           _max = _max + 0.2 * ( _max == 0 ? 1.0 : Math.Abs( _max ) );
-        if ( _minAuto )
+        if ( MinAuto )
           _min = _min - 0.2 * ( _min == 0 ? 1.0 : Math.Abs( _min ) );
       }
 
       // This is the zero-lever test.  If minVal is within the zero lever fraction
       // of the data range, then use zero.
 
-      if ( _minAuto && _min > 0 &&
+      if ( MinAuto && _min > 0 &&
         _min / ( _max - _min ) < Default.ZeroLever )
         _min = 0;
 
       // Repeat the zero-lever test for cases where the maxVal is less than zero
-      if ( _maxAuto && _max < 0 &&
+      if ( MaxAuto && _max < 0 &&
         Math.Abs( _max / ( _max - _min ) ) <
         Default.ZeroLever )
         _max = 0;
 
       // Calculate the new step size
-      if ( _majorStepAuto )
+      if ( MajorStepAuto )
       {
         double targetSteps = ( _ownerAxis is XAxis || _ownerAxis is X2Axis ) ?
             Default.TargetXSteps : Default.TargetYSteps;
@@ -278,7 +278,7 @@ namespace ZedGraph
         // Calculate the step size based on target steps
         _majorStep = CalcStepSize( _max - _min, targetSteps );
 
-        if ( _isPreventLabelOverlap )
+        if ( IsPreventLabelOverlap )
         {
           // Calculate the maximum number of labels
           double maxLabels = (double) this.CalcMaxLabels( g, pane, scaleFactor );
@@ -289,22 +289,22 @@ namespace ZedGraph
       }
 
       // Calculate the new step size
-      if ( _minorStepAuto )
+      if ( MinorStepAuto )
         _minorStep = CalcStepSize( _majorStep,
           ( _ownerAxis is XAxis || _ownerAxis is X2Axis ) ?
               Default.TargetMinorXSteps : Default.TargetMinorYSteps );
 
       // Calculate the scale minimum
-      if ( _minAuto )
+      if ( MinAuto )
         _min = _min - MyMod( _min, _majorStep );
 
       // Calculate the scale maximum
-      if ( _maxAuto )
+      if ( MaxAuto )
         _max = MyMod( _max, _majorStep ) == 0.0 ? _max :
           _max + _majorStep - MyMod( _max, _majorStep );
 
       // set the scale magnitude if required
-      if ( _magAuto )
+      if ( MagAuto )
       {
         // Find the optimal scale display multiple
         double mag = 0;
@@ -326,7 +326,7 @@ namespace ZedGraph
       }
 
       // Calculate the appropriate number of dec places to display if required
-      if ( _formatAuto )
+      if ( FormatAuto )
       {
         int numDec = 0 - (int) ( Math.Floor( Math.Log10( _majorStep ) ) - _mag );
         if ( numDec < 0 )
@@ -357,7 +357,7 @@ namespace ZedGraph
         _format = Scale.Default.Format;
 
       double scaleMult = Math.Pow( (double) 10.0, _mag );
-      double val = Math.Pow( dVal, 1 / _exponent ) / scaleMult;
+      double val = Math.Pow( dVal, 1 / Exponent ) / scaleMult;
       return val.ToString( _format );
     }
 

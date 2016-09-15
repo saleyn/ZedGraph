@@ -1005,7 +1005,7 @@ namespace ZedGraph
       else if ( crossPix > 0 )
         axis._tmpSpace -= crossPix;
 
-      if ( axis.Scale._isLabelsInside && ( axis.IsPrimary( this ) || ( crossFrac != 0.0 && crossFrac != 1.0 ) ) )
+      if ( axis.Scale.IsLabelsInside && ( axis.IsPrimary( this ) || ( crossFrac != 0.0 && crossFrac != 1.0 ) ) )
         spaceAlt = axis._tmpSpace;
       else
         spaceNorm = axis._tmpSpace;

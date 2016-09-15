@@ -251,8 +251,8 @@ namespace ZedGraph
     /// </returns>
     override internal double CalcBaseTic()
     {
-      if ( _baseTic != PointPair.Missing )
-        return _baseTic;
+      if ( BaseTic != PointPair.Missing )
+        return BaseTic;
       else
       {
         // go to the nearest even multiple of the step size
@@ -334,7 +334,7 @@ namespace ZedGraph
       base.PickScale( pane, g, scaleFactor );
 
       // Majorstep is always 1 for log scales
-      if ( _majorStepAuto )
+      if ( MajorStepAuto )
         _majorStep = 1.0;
 
       _mag = 0;    // Never use a magnitude shift for log scales
@@ -358,17 +358,17 @@ namespace ZedGraph
       // Test for trivial condition of range = 0 and pick a suitable default
       if ( _max - _min < 1.0e-20 )
       {
-        if ( _maxAuto )
+        if ( MaxAuto )
           _max = _max * 2.0;
-        if ( _minAuto )
+        if ( MinAuto )
           _min = _min / 2.0;
       }
 
       // Get the nearest power of 10 (no partial log cycles allowed)
-      if ( _minAuto )
+      if ( MinAuto )
         _min = Math.Pow( (double) 10.0,
           Math.Floor( Math.Log10( _min ) ) );
-      if ( _maxAuto )
+      if ( MaxAuto )
         _max = Math.Pow( (double) 10.0,
           Math.Ceiling( Math.Log10( _max ) ) );
 
@@ -395,7 +395,7 @@ namespace ZedGraph
       if ( _format == null )
         _format = Scale.Default.Format;
 
-      if ( _isUseTenPower )
+      if ( IsUseTenPower )
         return string.Format( "{0:F0}", dVal );
       else
         return Math.Pow( 10.0, dVal ).ToString( _format );

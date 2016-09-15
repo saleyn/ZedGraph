@@ -230,7 +230,7 @@ namespace ZedGraph
       set { Z = value; }
     }
 
-    //public new double LowValue => Low;
+    public override double HighValue => High;
 
     /// <summary>
     /// The ColorValue property.  This is used with the

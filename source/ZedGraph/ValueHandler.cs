@@ -19,6 +19,7 @@
 using System;
 using System.Text;
 using System.Drawing;
+using System.Linq;
 
 namespace ZedGraph
 {
@@ -225,17 +226,16 @@ namespace ZedGraph
           return true;
       }
       // If the curve is a stacked line type, then sum up the values similar to the stacked bar type
-      else if ( curve is LineItem && pane.LineType == LineType.Stack )
+      else
       {
-        double stack = 0;
-        double curVal;
-
-        // loop through all the curves, summing up the values to get a total (only
-        // for the current ordinal position iPt)
-        foreach ( CurveItem tmpCurve in pane.CurveList )
+        if ( curve is LineItem && pane.LineType == LineType.Stack )
         {
-          // make sure the curve is a Line type
-          if ( tmpCurve is LineItem && tmpCurve.IsVisible )
+          double stack = 0;
+          double curVal;
+
+          // loop through all the line-type curves, summing up the values to get a total (only
+          // for the current ordinal position iPt)
+          foreach ( var tmpCurve in pane.CurveList.Where(i => i.IsVisible && i is LineItem) )
           {
             curVal = PointPair.Missing;
             // For non-ordinal curves, find a matching base value (must match exactly)
@@ -267,42 +267,32 @@ namespace ZedGraph
             if ( tmpCurve == curve )
             {
               lowVal = stack;
-//              if ( curVal < 0 && stack == 0 )
-//              {
-//                stack = curVal;
-//                lowVal = curVal;
-//                hiVal = curVal;
-//              }
-//              else
-                hiVal = ( curVal == PointPair.Missing || stack == PointPair.Missing ) ?
-                  PointPair.Missing : stack + curVal;
+              //              if ( curVal < 0 && stack == 0 )
+              //              {
+              //                stack = curVal;
+              //                lowVal = curVal;
+              //                hiVal = curVal;
+              //              }
+              //              else
+              hiVal = ( curVal == PointPair.Missing || stack == PointPair.Missing ) ?
+                        PointPair.Missing : stack + curVal;
             }
 
             // sum all the curves to a single total.  This includes both positive and
             // negative values (unlike the bar stack type).
             stack = ( curVal == PointPair.Missing || stack == PointPair.Missing ) ?
-                PointPair.Missing : stack + curVal;
+                      PointPair.Missing : stack + curVal;
           }
-        }
         
-        if ( baseVal == PointPair.Missing || lowVal == PointPair.Missing ||
-          hiVal == PointPair.Missing )
-          return false;
-        else
-          return true;
-      }
-      // otherwise, the curve is not a stacked type (not a stacked bar or stacked line)
-      else
-      {
-                if ((!(curve is HiLowBarItem)) && (!(curve is ErrorBarItem)))
-          lowVal = 0;
-        else
-          lowVal = curve.Points[iPt].LowValue;
+          return baseVal != PointPair.Missing && lowVal != PointPair.Missing && hiVal != PointPair.Missing;
+        }
 
-        if ( baseAxis is XAxis || baseAxis is X2Axis )
-          hiVal = curve.Points[iPt].Y;
-        else
-          hiVal = curve.Points[iPt].X;
+        // otherwise, the curve is not a stacked type (not a stacked bar or stacked line)
+        lowVal = (!(curve is HiLowBarItem)) && (!(curve is ErrorBarItem))
+                   ? 0
+                   : curve.Points[iPt].LowValue;
+
+        hiVal = baseAxis is IXAxis ? curve.Points[iPt].Y : curve.Points[iPt].X;
       }
 
       // Special Exception: Bars on log scales should always plot from the Min value upwards,
@@ -310,12 +300,8 @@ namespace ZedGraph
       if ( curve is BarItem && valueAxis.Scale.IsLog && lowVal == 0 )
         lowVal = valueAxis.Scale._min;
 
-      if ( baseVal == PointPair.Missing || hiVal == PointPair.Missing ||
-          ( lowVal == PointPair.Missing && ( curve is ErrorBarItem ||
-            curve is HiLowBarItem ) ) )
-        return false;
-      else
-        return true;
+      return baseVal != PointPair.Missing && hiVal != PointPair.Missing && 
+            (lowVal != PointPair.Missing || (!(curve is ErrorBarItem) && !(curve is HiLowBarItem)));
     }
 
     /// <summary>

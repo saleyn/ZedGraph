@@ -627,15 +627,15 @@ namespace ZedGraph
     /// <seealso cref="Scale.FormatAuto" />
     public void RestoreAutoScale(GraphPane pane, Graphics g, bool autoFormat = false)
     {
-      Scale._minAuto = true;
-      Scale._maxAuto = true;
-      Scale._majorStepAuto = true;
-      Scale._minorStepAuto = true;
+      Scale.MinAuto = true;
+      Scale.MaxAuto = true;
+      Scale.MajorStepAuto = true;
+      Scale.MinorStepAuto = true;
       CrossAuto = true;
-      Scale._magAuto = true;
+      Scale.MagAuto = true;
       //this.numDecAuto = true;
       if (autoFormat)
-        Scale._formatAuto = true;
+        Scale.FormatAuto = true;
       pane.AxisChange(g);
     }
 
@@ -898,7 +898,7 @@ namespace ZedGraph
       {
         // if it's the primary axis and the scale labels are on the inside, then we
         // don't need to save any room for the axis labels (they will be inside the chart rect)
-        if (IsPrimary(pane) && Scale._isLabelsInside)
+        if (IsPrimary(pane) && Scale.IsLabelsInside)
           return 1.0f;
           // otherwise, it's a secondary (outboard) axis and we always save room for the axis and labels.
         return 0.0f;
@@ -916,9 +916,9 @@ namespace ZedGraph
       float frac;
 
       if (((this is XAxis || this is YAxis) &&
-           Scale._isLabelsInside == crossAxis.Scale.IsReverse) ||
+           Scale.IsLabelsInside == crossAxis.Scale.IsReverse) ||
           ((this is X2Axis || this is Y2Axis) &&
-           Scale._isLabelsInside != crossAxis.Scale.IsReverse))
+           Scale.IsLabelsInside != crossAxis.Scale.IsReverse))
         frac = (float)((effCross - min)/(max - min));
       else
         frac = (float)((max - effCross)/(max - min));
@@ -947,7 +947,7 @@ namespace ZedGraph
 
           // if the scalelabels are on the inside, shift everything so the axis is drawn,
           // for example, to the left side of the available space for a YAxis type
-          if (Scale._isLabelsInside)
+          if (Scale.IsLabelsInside)
           {
             shiftPos += _tmpSpace;
 
@@ -1033,7 +1033,7 @@ namespace ZedGraph
       var ticSize        = MajorTic.ScaledTic(scaleFactor);
       // Scaled size (pixels) of the axis gap
       var axisGap        = AxisGap*scaleFactor;
-      var scaledLabelGap = Scale._labelGap*charHeight;
+      var scaledLabelGap = Scale.LabelGap*charHeight;
       var scaledTitleGap = Title.GetScaledGap(scaleFactor);
 
       // The minimum amount of space to reserve for the NORMAL position of the axis.  This would
@@ -1097,15 +1097,15 @@ namespace ZedGraph
       // for the Y axes, make sure that enough space is left to fit the first
       // and last X axis scale label
       if (IsPrimary(pane) &&
-         (((this is YAxis && ((!pane.XAxis.Scale._isSkipFirstLabel &&
-                               !pane.XAxis.Scale._isReverse) ||
-                              (!pane.XAxis.Scale._isSkipLastLabel &&
-                                pane.XAxis.Scale._isReverse))) ||
-          (this is Y2Axis && ((!pane.XAxis.Scale._isSkipFirstLabel &&
-                                pane.XAxis.Scale._isReverse) ||
-                              (!pane.XAxis.Scale._isSkipLastLabel &&
-                               !pane.XAxis.Scale._isReverse)))) &&
-        pane.XAxis.IsVisible && pane.XAxis.Scale._isVisible))
+         (((this is YAxis && ((!pane.XAxis.Scale.IsSkipFirstLabel &&
+                               !pane.XAxis.Scale.IsReverse) ||
+                              (!pane.XAxis.Scale.IsSkipLastLabel &&
+                                pane.XAxis.Scale.IsReverse))) ||
+          (this is Y2Axis && ((!pane.XAxis.Scale.IsSkipFirstLabel &&
+                                pane.XAxis.Scale.IsReverse) ||
+                              (!pane.XAxis.Scale.IsSkipLastLabel &&
+                               !pane.XAxis.Scale.IsReverse)))) &&
+        pane.XAxis.IsVisible && pane.XAxis.Scale.IsVisible))
       {
         // half the width of the widest item, plus a gap of 1/2 the charheight
         var tmp = pane.XAxis.Scale.GetScaleMaxSpace(g, pane, scaleFactor, true).Width/2.0F;
@@ -1299,7 +1299,7 @@ namespace ZedGraph
       //if ( _isVisible && _title._isVisible && str.Length > 0 )
       if (!IsVisible || !Title._isVisible || string.IsNullOrEmpty(str)) return;
 
-      var hasTic = (Scale._isLabelsInside
+      var hasTic = (Scale.IsLabelsInside
                  ? (MajorTic.IsInside || MajorTic._isCrossInside ||
                     MinorTic.IsInside || MinorTic._isCrossInside)
                  : (MajorTic.IsOutside || MajorTic._isCrossOutside ||
@@ -1309,7 +1309,7 @@ namespace ZedGraph
       var x = (Scale._maxPix - Scale._minPix)/2;
 
       var scaledTic      = MajorTic.ScaledTic(scaleFactor);
-      var scaledLabelGap = Scale._fontSpec.GetHeight(scaleFactor)*Scale._labelGap;
+      var scaledLabelGap = Scale._fontSpec.GetHeight(scaleFactor)*Scale.LabelGap;
       var scaledTitleGap = Title.GetScaledGap(scaleFactor);
 
       // The space for the scale labels is only reserved if the axis is not shifted due to the
@@ -1321,11 +1321,11 @@ namespace ZedGraph
 
       var gap = scaledTic*(hasTic ? 1.0f : 0.0f) +
                 Title.FontSpec.BoundingBox(g, str, scaleFactor).Height/2.0F;
-      var y = Scale._isVisible
+      var y = Scale.IsVisible
             ? Scale.GetScaleMaxSpace(g, pane, scaleFactor, true).Height + scaledLabelGap
             : 0;
 
-      y = Scale._isLabelsInside ? shiftPos - y - gap : shiftPos + y + gap;
+      y = Scale.IsLabelsInside ? shiftPos - y - gap : shiftPos + y + gap;
 
       if (!CrossAuto && !Title._isTitleAtCross)
         y = Math.Max(y, gap);

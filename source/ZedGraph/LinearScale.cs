@@ -139,32 +139,31 @@ namespace ZedGraph
       // FIXME: comment out this block: https://sourceforge.net/p/zedgraph/bugs/123/
       if ( _max - _min < 1.0e-30 )
       {
-        if ( _maxAuto )
+        if ( MaxAuto )
           _max = _max + 0.2 * ( _max == 0 ? 1.0 : Math.Abs( _max ) );
-        if ( _minAuto )
+        if ( MinAuto )
           _min = _min - 0.2 * ( _min == 0 ? 1.0 : Math.Abs( _min ) );
       }
 
       // This is the zero-lever test.  If minVal is within the zero lever fraction
       // of the data range, then use zero.
 
-      if ( _minAuto && _min > 0 && _min / ( _max - _min ) < Default.ZeroLever )
+      if ( MinAuto && _min > 0 && _min / ( _max - _min ) < Default.ZeroLever )
         _min = 0;
 
       // Repeat the zero-lever test for cases where the maxVal is less than zero
-      if ( _maxAuto && _max < 0 && Math.Abs( _max / ( _max - _min ) ) < Default.ZeroLever )
+      if ( MaxAuto && _max < 0 && Math.Abs( _max / ( _max - _min ) ) < Default.ZeroLever )
         _max = 0;
 
       // Calculate the new step size
-      if ( _majorStepAuto )
+      if ( MajorStepAuto )
       {
-        double targetSteps = ( _ownerAxis is XAxis || _ownerAxis is X2Axis ) ?
-              Default.TargetXSteps : Default.TargetYSteps;
+        var targetSteps = _ownerAxis is IXAxis ? Default.TargetXSteps : Default.TargetYSteps;
 
         // Calculate the step size based on target steps
         _majorStep = CalcStepSize( _max - _min, targetSteps );
 
-        if ( _isPreventLabelOverlap )
+        if ( IsPreventLabelOverlap )
         {
           // Calculate the maximum number of labels
           double maxLabels = CalcMaxLabels( g, pane, scaleFactor );
@@ -175,17 +174,17 @@ namespace ZedGraph
       }
 
       // Calculate the new step size
-      if ( _minorStepAuto )
+      if ( MinorStepAuto )
         _minorStep = CalcStepSize( _majorStep,
           ( _ownerAxis is XAxis || _ownerAxis is X2Axis ) ?
               Default.TargetMinorXSteps : Default.TargetMinorYSteps );
 
       // Calculate the scale minimum
-      if ( _minAuto )
+      if ( MinAuto )
         _min = _min - MyMod( _min, _majorStep );
 
       // Calculate the scale maximum
-      if ( _maxAuto )
+      if ( MaxAuto )
         _max = MyMod( _max, _majorStep ) == 0.0 ? _max :
           _max + _majorStep - MyMod( _max, _majorStep );
 

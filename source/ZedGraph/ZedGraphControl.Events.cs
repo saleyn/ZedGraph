@@ -720,7 +720,7 @@ namespace ZedGraph
       if ( axis.Scale.IsDate || axis.Scale.Type == AxisType.DateAsOrdinal )
         return XDate.ToString( val, PointDateFormat );
 
-      if (!axis.Scale.IsText || axis.Scale._textLabels == null)
+      if (!axis.Scale.IsText || axis.Scale.TextLabels == null)
         return axis.Scale.IsAnyOrdinal && axis.Scale.Type != AxisType.LinearAsOrdinal
                && !isOverrideOrdinal
                  ? iPt.ToString(PointValueFormat)
@@ -730,8 +730,8 @@ namespace ZedGraph
       if ( isOverrideOrdinal )
         i = (int)( val - 0.5 );
 
-      return i >= 0 && i < axis.Scale._textLabels.Length
-               ? axis.Scale._textLabels[i]
+      return i >= 0 && i < axis.Scale.TextLabels.Length
+               ? axis.Scale.TextLabels[i]
                : (i + 1).ToString();
     }
 
@@ -1125,8 +1125,8 @@ namespace ZedGraph
 
       //  }
 
-      scale._minAuto = false;
-      scale._maxAuto = false;
+      scale.MinAuto = false;
+      scale.MaxAuto = false;
     }
 
   #endregion
@@ -1248,8 +1248,8 @@ namespace ZedGraph
       scale._minLinearized += delta;
       scale._maxLinearized += delta;
 
-      scale._minAuto = false;
-      scale._maxAuto = false;
+      scale.MinAuto = false;
+      scale.MaxAuto = false;
 
       /*
                 if ( axis.Type == AxisType.Log )
@@ -1421,14 +1421,14 @@ namespace ZedGraph
           if (IsEnableHZoom)
           {
             _currentPane.XAxis.Scale._min = Math.Min(x1, x2);
-            _currentPane.XAxis.Scale._minAuto = false;
+            _currentPane.XAxis.Scale.MinAuto = false;
             _currentPane.XAxis.Scale._max = Math.Max(x1, x2);
-            _currentPane.XAxis.Scale._maxAuto = false;
+            _currentPane.XAxis.Scale.MaxAuto = false;
 
             _currentPane.X2Axis.Scale._min = Math.Min(xx1, xx2);
-            _currentPane.X2Axis.Scale._minAuto = false;
+            _currentPane.X2Axis.Scale.MinAuto = false;
             _currentPane.X2Axis.Scale._max = Math.Max(xx1, xx2);
-            _currentPane.X2Axis.Scale._maxAuto = false;
+            _currentPane.X2Axis.Scale.MaxAuto = false;
           }
 
           if (IsEnableVZoom)
@@ -1437,15 +1437,15 @@ namespace ZedGraph
             {
               _currentPane.YAxisList[i].Scale._min = Math.Min(y1[i], y2[i]);
               _currentPane.YAxisList[i].Scale._max = Math.Max(y1[i], y2[i]);
-              _currentPane.YAxisList[i].Scale._minAuto = false;
-              _currentPane.YAxisList[i].Scale._maxAuto = false;
+              _currentPane.YAxisList[i].Scale.MinAuto = false;
+              _currentPane.YAxisList[i].Scale.MaxAuto = false;
             }
             for (int i = 0; i < yy1.Length; i++)
             {
               _currentPane.Y2AxisList[i].Scale._min = Math.Min(yy1[i], yy2[i]);
               _currentPane.Y2AxisList[i].Scale._max = Math.Max(yy1[i], yy2[i]);
-              _currentPane.Y2AxisList[i].Scale._minAuto = false;
-              _currentPane.Y2AxisList[i].Scale._maxAuto = false;
+              _currentPane.Y2AxisList[i].Scale.MinAuto = false;
+              _currentPane.Y2AxisList[i].Scale.MaxAuto = false;
             }
           }
 

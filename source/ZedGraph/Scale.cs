@@ -52,98 +52,22 @@ namespace ZedGraph
     internal double _min,
                 _max,
                 _majorStep,
-                _minorStep,
-                _exponent,
-                _baseTic;
-
-    /// <summary> Private fields for the <see cref="Axis"/> automatic scaling modes.
-    /// Use the public properties <see cref="MinAuto"/>, <see cref="MaxAuto"/>,
-    /// <see cref="MajorStepAuto"/>, <see cref="MinorStepAuto"/>, 
-    /// <see cref="MagAuto"/> and <see cref="FormatAuto"/>
-    /// for access to these values.
-    /// </summary>
-    internal bool _minAuto,
-                _maxAuto,
-                _majorStepAuto,
-                _minorStepAuto,
-                _magAuto,
-                _formatAuto;
-
-    /// <summary> Private fields for the <see cref="Axis"/> "grace" settings.
-    /// These values determine how much extra space is left before the first data value
-    /// and after the last data value.
-    /// Use the public properties <see cref="MinGrace"/> and <see cref="MaxGrace"/>
-    /// for access to these values.
-    /// </summary>
-    internal double _minGrace,
-                _maxGrace;
-
+                _minorStep;
 
     /// <summary> Private field for the <see cref="Axis"/> scale value display.
     /// Use the public property <see cref="Mag"/> for access to this value.
     /// </summary>
     internal int _mag;
 
-    /// <summary> Private fields for the <see cref="Scale"/> attributes.
-    /// Use the public properties <see cref="Scale.IsReverse"/> and <see cref="Scale.IsUseTenPower"/>
-    /// for access to these values.
-    /// </summary>
-    internal bool _isReverse,
-                _isPreventLabelOverlap,
-                _isUseTenPower,
-                _isLabelsInside,
-                _isSkipFirstLabel,
-                _isSkipLastLabel,
-                _isSkipCrossLabel,
-                _isVisible;
-
-    /// <summary> Private <see cref="System.Collections.ArrayList"/> field for the <see cref="Axis"/> array of text labels.
-    /// This property is only used if <see cref="Type"/> is set to
-    /// <see cref="AxisType.Text"/> </summary>
-    internal string[] _textLabels;
-
     /// <summary> Private field for the format of the <see cref="Axis"/> tic labels.
     /// Use the public property <see cref="Format"/> for access to this value. </summary>
     /// <seealso cref="FormatAuto"/>
     internal string _format;
 
-    /// <summary>
-    /// Private fields for Unit types to be used for the major and minor tics.
-    /// See <see cref="MajorUnit"/> and <see cref="MinorUnit"/> for the corresponding
-    /// public properties.
-    /// These types only apply for date-time scales (<see cref="IsDate"/>).
-    /// </summary>
-    /// <value>The value of these types is of enumeration type <see cref="DateUnit"/>
-    /// </value>
-    internal DateUnit _majorUnit,
-                  _minorUnit;
-
-    /// <summary> Private field for the alignment of the <see cref="Axis"/> tic labels.
-    /// This fields controls whether the inside, center, or outside edges of the text labels are aligned.
-    /// Use the public property <see cref="Scale.Align"/>
-    /// for access to this value. </summary>
-    /// <seealso cref="FormatAuto"/>
-    internal AlignP _align;
-
-    /// <summary> Private field for the alignment of the <see cref="Axis"/> tic labels.
-    /// This fields controls whether the left, center, or right edges of the text labels are aligned.
-    /// Use the public property <see cref="Scale.AlignH"/>
-    /// for access to this value. </summary>
-    /// <seealso cref="FormatAuto"/>
-    internal AlignH _alignH;
-
-
     /// <summary> Private fields for the <see cref="Axis"/> font specificatios.
     /// Use the public properties <see cref="FontSpec"/> and
     /// <see cref="Scale.FontSpec"/> for access to these values. </summary>
     internal FontSpec _fontSpec;
-
-    /// <summary>
-    /// Internal field that stores the amount of space between the scale labels and the
-    /// major tics.  Use the public property <see cref="LabelGap" /> to access this
-    /// value.
-    /// </summary>
-    internal float _labelGap;
 
     /// <summary>
     /// Data range temporary values, used by GetRange().
@@ -176,7 +100,7 @@ namespace ZedGraph
 
     /// <summary>
     /// Tells how much space is required for the axis labels
-    /// </summary>
+    /// </summary>IsLabelsInside1
     internal SizeF _maxSpace;
 
     /// <summary>
@@ -667,37 +591,37 @@ namespace ZedGraph
       _max = 1.0;
       _majorStep = 0.1;
       _minorStep = 0.1;
-      _exponent = 1.0;
+      Exponent = 1.0;
       _mag = 0;
-      _baseTic = PointPairBase.Missing;
+      BaseTic = PointPairBase.Missing;
 
-      _minGrace = Default.MinGrace;
-      _maxGrace = Default.MaxGrace;
+      MinGrace = Default.MinGrace;
+      MaxGrace = Default.MaxGrace;
 
-      _minAuto = true;
-      _maxAuto = true;
-      _majorStepAuto = true;
-      _minorStepAuto = true;
-      _magAuto = true;
-      _formatAuto = true;
+      MinAuto = true;
+      MaxAuto = true;
+      MajorStepAuto = true;
+      MinorStepAuto = true;
+      MagAuto = true;
+      FormatAuto = true;
 
-      _isReverse = Default.IsReverse;
-      _isUseTenPower = true;
-      _isPreventLabelOverlap = true;
-      _isVisible = true;
-      _isSkipFirstLabel = false;
-      _isSkipLastLabel = false;
-      _isSkipCrossLabel = false;
+      IsReverse = Default.IsReverse;
+      IsUseTenPower = true;
+      IsPreventLabelOverlap = true;
+      IsVisible = true;
+      IsSkipFirstLabel = false;
+      IsSkipLastLabel = false;
+      IsSkipCrossLabel = false;
 
-      _majorUnit = DateUnit.Day;
-      _minorUnit = DateUnit.Day;
+      MajorUnit = DateUnit.Day;
+      MinorUnit = DateUnit.Day;
 
       _format = null;
-      _textLabels = null;
+      TextLabels = null;
 
-      _isLabelsInside = Default.IsLabelsInside;
-      _align = Default.Align;
-      _alignH = Default.AlignH;
+      IsLabelsInside = Default.IsLabelsInside;
+      Align = Default.Align;
+      AlignH = Default.AlignH;
 
       _fontSpec = new FontSpec(
         Default.FontFamily, Default.FontSize,
@@ -707,7 +631,7 @@ namespace ZedGraph
         Default.FillType);
 
       _fontSpec.Border.IsVisible = false;
-      _labelGap = Default.LabelGap;
+      LabelGap = Default.LabelGap;
     }
 
     /// <summary>
@@ -725,46 +649,46 @@ namespace ZedGraph
       _max = rhs._max;
       _majorStep = rhs._majorStep;
       _minorStep = rhs._minorStep;
-      _exponent = rhs._exponent;
-      _baseTic = rhs._baseTic;
+      Exponent = rhs.Exponent;
+      BaseTic = rhs.BaseTic;
 
-      _minAuto = rhs._minAuto;
-      _maxAuto = rhs._maxAuto;
-      _majorStepAuto = rhs._majorStepAuto;
-      _minorStepAuto = rhs._minorStepAuto;
-      _magAuto = rhs._magAuto;
-      _formatAuto = rhs._formatAuto;
+      MinAuto = rhs.MinAuto;
+      MaxAuto = rhs.MaxAuto;
+      MajorStepAuto = rhs.MajorStepAuto;
+      MinorStepAuto = rhs.MinorStepAuto;
+      MagAuto = rhs.MagAuto;
+      FormatAuto = rhs.FormatAuto;
 
-      _minGrace = rhs._minGrace;
-      _maxGrace = rhs._maxGrace;
+      MinGrace = rhs.MinGrace;
+      MaxGrace = rhs.MaxGrace;
 
       _mag = rhs._mag;
 
-      _isUseTenPower = rhs._isUseTenPower;
-      _isReverse = rhs._isReverse;
-      _isPreventLabelOverlap = rhs._isPreventLabelOverlap;
-      _isVisible = rhs._isVisible;
-      _isSkipFirstLabel = rhs._isSkipFirstLabel;
-      _isSkipLastLabel = rhs._isSkipLastLabel;
-      _isSkipCrossLabel = rhs._isSkipCrossLabel;
+      IsUseTenPower = rhs.IsUseTenPower;
+      IsReverse = rhs.IsReverse;
+      IsPreventLabelOverlap = rhs.IsPreventLabelOverlap;
+      IsVisible = rhs.IsVisible;
+      IsSkipFirstLabel = rhs.IsSkipFirstLabel;
+      IsSkipLastLabel = rhs.IsSkipLastLabel;
+      IsSkipCrossLabel = rhs.IsSkipCrossLabel;
 
-      _majorUnit = rhs._majorUnit;
-      _minorUnit = rhs._minorUnit;
+      MajorUnit = rhs.MajorUnit;
+      MinorUnit = rhs.MinorUnit;
 
       _format = rhs._format;
 
-      _isLabelsInside = rhs._isLabelsInside;
-      _align = rhs._align;
-      _alignH = rhs._alignH;
+      IsLabelsInside = rhs.IsLabelsInside;
+      Align = rhs.Align;
+      AlignH = rhs.AlignH;
 
       _fontSpec = (FontSpec)rhs._fontSpec.Clone();
 
-      _labelGap = rhs._labelGap;
+      LabelGap = rhs.LabelGap;
 
-      if (rhs._textLabels != null)
-        _textLabels = (string[])rhs._textLabels.Clone();
+      if (rhs.TextLabels != null)
+        TextLabels = (string[])rhs.TextLabels.Clone();
       else
-        _textLabels = null;
+        TextLabels = null;
     }
 
     /// <summary>
@@ -865,46 +789,46 @@ namespace ZedGraph
       _max = info.GetDouble("max");
       _majorStep = info.GetDouble("majorStep");
       _minorStep = info.GetDouble("minorStep");
-      _exponent = info.GetDouble("exponent");
-      _baseTic = info.GetDouble("baseTic");
+      Exponent = info.GetDouble("exponent");
+      BaseTic = info.GetDouble("baseTic");
 
 
-      _minAuto = info.GetBoolean("minAuto");
-      _maxAuto = info.GetBoolean("maxAuto");
-      _majorStepAuto = info.GetBoolean("majorStepAuto");
-      _minorStepAuto = info.GetBoolean("minorStepAuto");
-      _magAuto = info.GetBoolean("magAuto");
-      _formatAuto = info.GetBoolean("formatAuto");
+      MinAuto = info.GetBoolean("minAuto");
+      MaxAuto = info.GetBoolean("maxAuto");
+      MajorStepAuto = info.GetBoolean("majorStepAuto");
+      MinorStepAuto = info.GetBoolean("minorStepAuto");
+      MagAuto = info.GetBoolean("magAuto");
+      FormatAuto = info.GetBoolean("formatAuto");
 
-      _minGrace = info.GetDouble("minGrace");
-      _maxGrace = info.GetDouble("maxGrace");
+      MinGrace = info.GetDouble("minGrace");
+      MaxGrace = info.GetDouble("maxGrace");
 
       _mag = info.GetInt32("mag");
 
-      _isReverse = info.GetBoolean("isReverse");
-      _isPreventLabelOverlap = info.GetBoolean("isPreventLabelOverlap");
-      _isUseTenPower = info.GetBoolean("isUseTenPower");
+      IsReverse = info.GetBoolean("isReverse");
+      IsPreventLabelOverlap = info.GetBoolean("isPreventLabelOverlap");
+      IsUseTenPower = info.GetBoolean("isUseTenPower");
 
-      _isVisible = true;
-      _isVisible = info.GetBoolean("isVisible");
+      IsVisible = true;
+      IsVisible = info.GetBoolean("isVisible");
 
-      _isSkipFirstLabel = info.GetBoolean("isSkipFirstLabel");
-      _isSkipLastLabel = info.GetBoolean("isSkipLastLabel");
-      _isSkipCrossLabel = info.GetBoolean("isSkipCrossLabel");
+      IsSkipFirstLabel = info.GetBoolean("isSkipFirstLabel");
+      IsSkipLastLabel = info.GetBoolean("isSkipLastLabel");
+      IsSkipCrossLabel = info.GetBoolean("isSkipCrossLabel");
 
-      _textLabels = (string[])info.GetValue("textLabels", typeof(string[]));
+      TextLabels = (string[])info.GetValue("textLabels", typeof(string[]));
       _format = info.GetString("format");
 
-      _majorUnit = (DateUnit)info.GetValue("majorUnit", typeof(DateUnit));
-      _minorUnit = (DateUnit)info.GetValue("minorUnit", typeof(DateUnit));
+      MajorUnit = (DateUnit)info.GetValue("majorUnit", typeof(DateUnit));
+      MinorUnit = (DateUnit)info.GetValue("minorUnit", typeof(DateUnit));
 
-      _isLabelsInside = info.GetBoolean("isLabelsInside");
-      _align = (AlignP)info.GetValue("align", typeof(AlignP));
+      IsLabelsInside = info.GetBoolean("isLabelsInside");
+      Align = (AlignP)info.GetValue("align", typeof(AlignP));
       if (schema >= 11)
-        _alignH = (AlignH)info.GetValue("alignH", typeof(AlignH));
+        AlignH = (AlignH)info.GetValue("alignH", typeof(AlignH));
 
       _fontSpec = (FontSpec)info.GetValue("fontSpec", typeof(FontSpec));
-      _labelGap = info.GetSingle("labelGap");
+      LabelGap = info.GetSingle("labelGap");
 
     }
     /// <summary>
@@ -924,40 +848,40 @@ namespace ZedGraph
       info.AddValue("max", _max);
       info.AddValue("majorStep", _majorStep);
       info.AddValue("minorStep", _minorStep);
-      info.AddValue("exponent", _exponent);
-      info.AddValue("baseTic", _baseTic);
+      info.AddValue("exponent", Exponent);
+      info.AddValue("baseTic", BaseTic);
 
-      info.AddValue("minAuto", _minAuto);
-      info.AddValue("maxAuto", _maxAuto);
-      info.AddValue("majorStepAuto", _majorStepAuto);
-      info.AddValue("minorStepAuto", _minorStepAuto);
-      info.AddValue("magAuto", _magAuto);
-      info.AddValue("formatAuto", _formatAuto);
+      info.AddValue("minAuto", MinAuto);
+      info.AddValue("maxAuto", MaxAuto);
+      info.AddValue("majorStepAuto", MajorStepAuto);
+      info.AddValue("minorStepAuto", MinorStepAuto);
+      info.AddValue("magAuto", MagAuto);
+      info.AddValue("formatAuto", FormatAuto);
 
-      info.AddValue("minGrace", _minGrace);
-      info.AddValue("maxGrace", _maxGrace);
+      info.AddValue("minGrace", MinGrace);
+      info.AddValue("maxGrace", MaxGrace);
 
       info.AddValue("mag", _mag);
-      info.AddValue("isReverse", _isReverse);
-      info.AddValue("isPreventLabelOverlap", _isPreventLabelOverlap);
-      info.AddValue("isUseTenPower", _isUseTenPower);
-      info.AddValue("isVisible", _isVisible);
-      info.AddValue("isSkipFirstLabel", _isSkipFirstLabel);
-      info.AddValue("isSkipLastLabel", _isSkipLastLabel);
-      info.AddValue("isSkipCrossLabel", _isSkipCrossLabel);
+      info.AddValue("isReverse", IsReverse);
+      info.AddValue("isPreventLabelOverlap", IsPreventLabelOverlap);
+      info.AddValue("isUseTenPower", IsUseTenPower);
+      info.AddValue("isVisible", IsVisible);
+      info.AddValue("isSkipFirstLabel", IsSkipFirstLabel);
+      info.AddValue("isSkipLastLabel", IsSkipLastLabel);
+      info.AddValue("isSkipCrossLabel", IsSkipCrossLabel);
 
 
-      info.AddValue("textLabels", _textLabels);
+      info.AddValue("textLabels", TextLabels);
       info.AddValue("format", _format);
 
-      info.AddValue("majorUnit", _majorUnit);
-      info.AddValue("minorUnit", _minorUnit);
+      info.AddValue("majorUnit", MajorUnit);
+      info.AddValue("minorUnit", MinorUnit);
 
-      info.AddValue("isLabelsInside", _isLabelsInside);
-      info.AddValue("align", _align);
-      info.AddValue("alignH", _alignH);
+      info.AddValue("isLabelsInside", IsLabelsInside);
+      info.AddValue("align", Align);
+      info.AddValue("alignH", AlignH);
       info.AddValue("fontSpec", _fontSpec);
-      info.AddValue("labelGap", _labelGap);
+      info.AddValue("labelGap", LabelGap);
     }
 
 #if false
@@ -1056,25 +980,13 @@ namespace ZedGraph
 
     /// <summary>
     /// Gets a value that indicates if this <see cref="Scale" /> is of any of the
-    /// ordinal types in the <see cref="AxisType" /> enumeration.
+    /// ordinal types in the <see cref="AxisType" /> enumeration (i.e.
+    /// Ordinal, Text, LinearAsOrdinal, DateAsOrdinal)
     /// </summary>
     /// <seealso cref="Type" />
-    public bool IsAnyOrdinal
-    {
-      get
-      {
-        switch (Type)
-        {
-          case AxisType.Ordinal:
-          case AxisType.Text:
-          case AxisType.LinearAsOrdinal:
-          case AxisType.DateAsOrdinal:
-            return true;
-          default:
-            return false;
-        }
-      }
-    }
+    /// <seealso cref="IOrdinalScale" />
+    public bool IsAnyOrdinal => this is IOrdinalScale;
+
     /*
         /// <summary>
         /// The pixel position at the minimum value for this axis.  This read-only
@@ -1114,7 +1026,7 @@ namespace ZedGraph
     public virtual double Min
     {
       get { return _min; }
-      set { _min = value; _minAuto = false; }
+      set { _min = value; MinAuto = false; }
     }
     /// <summary>
     /// Gets or sets the maximum scale value for this <see cref="Scale" />.
@@ -1138,7 +1050,7 @@ namespace ZedGraph
     public virtual double Max
     {
       get { return _max; }
-      set { _max = value; _maxAuto = false; }
+      set { _max = value; MaxAuto = false; }
     }
     /// <summary>
     /// Gets or sets the scale step size for this <see cref="Scale" /> (the increment between
@@ -1168,12 +1080,12 @@ namespace ZedGraph
       {
         if (value < float.Epsilon)
         {
-          _majorStepAuto = true;
+          MajorStepAuto = true;
         }
         else
         {
           _majorStep = value;
-          _majorStepAuto = false;
+          MajorStepAuto = false;
         }
       }
     }
@@ -1200,12 +1112,12 @@ namespace ZedGraph
       {
         if (value < float.Epsilon)
         {
-          _minorStepAuto = true;
+          MinorStepAuto = true;
         }
         else
         {
           _minorStep = value;
-          _minorStepAuto = false;
+          MinorStepAuto = false;
         }
       }
     }
@@ -1220,11 +1132,7 @@ namespace ZedGraph
     /// <seealso cref="ZedGraph.Scale.Default.TargetYSteps"/>
     /// <seealso cref="ZedGraph.Scale.Default.ZeroLever"/>
     /// <seealso cref="ZedGraph.Scale.Default.MaxTextLabels"/>
-    public double Exponent
-    {
-      get { return _exponent; }
-      set { _exponent = value; }
-    }
+    public double Exponent { get; set; }
 
     /// <summary>
     /// Gets or sets the scale value at which the first major tic label will appear.
@@ -1249,11 +1157,7 @@ namespace ZedGraph
     /// <seealso cref="MajorStep"/>
     /// <seealso cref="MinorStep"/>
     /// <seealso cref="Axis.Cross"/>
-    public double BaseTic
-    {
-      get { return _baseTic; }
-      set { _baseTic = value; }
-    }
+    public double BaseTic { get; set; }
 
     /// <summary>
     /// Gets or sets the type of units used for the major step size (<see cref="MajorStep"/>).
@@ -1269,11 +1173,8 @@ namespace ZedGraph
     /// <seealso cref="MajorStep"/>
     /// <seealso cref="MinorStep"/>
     /// <seealso cref="MajorStepAuto"/>
-    public DateUnit MajorUnit
-    {
-      get { return _majorUnit; }
-      set { _majorUnit = value; }
-    }
+    public DateUnit MajorUnit { get; set; }
+
     /// <summary>
     /// Gets or sets the type of units used for the minor step size (<see cref="MinorStep"/>).
     /// </summary>
@@ -1288,11 +1189,7 @@ namespace ZedGraph
     /// <seealso cref="MajorStep"/>
     /// <seealso cref="MinorStep"/>
     /// <seealso cref="MinorStepAuto"/>
-    public DateUnit MinorUnit
-    {
-      get { return _minorUnit; }
-      set { _minorUnit = value; }
-    }
+    public DateUnit MinorUnit { get; set; }
 
     /// <summary>
     /// Gets the major unit multiplier for this scale type, if any.
@@ -1324,11 +1221,8 @@ namespace ZedGraph
     /// </remarks>
     /// <value>true for automatic mode, false for manual mode</value>
     /// <seealso cref="Min"/>
-    public bool MinAuto
-    {
-      get { return _minAuto; }
-      set { _minAuto = value; }
-    }
+    public bool MinAuto { get; set; }
+
     /// <summary>
     /// Gets or sets a value that determines whether or not the maximum scale value <see cref="Max"/>
     /// is set automatically.
@@ -1339,11 +1233,8 @@ namespace ZedGraph
     /// </remarks>
     /// <value>true for automatic mode, false for manual mode</value>
     /// <seealso cref="Max"/>
-    public bool MaxAuto
-    {
-      get { return _maxAuto; }
-      set { _maxAuto = value; }
-    }
+    public bool MaxAuto { get; set; }
+
     /// <summary>
     /// Gets or sets a value that determines whether or not the scale step size <see cref="MajorStep"/>
     /// is set automatically.
@@ -1354,11 +1245,8 @@ namespace ZedGraph
     /// </remarks>
     /// <value>true for automatic mode, false for manual mode</value>
     /// <seealso cref="MajorStep"/>
-    public bool MajorStepAuto
-    {
-      get { return _majorStepAuto; }
-      set { _majorStepAuto = value; }
-    }
+    public bool MajorStepAuto { get; set; }
+
     /// <summary>
     /// Gets or sets a value that determines whether or not the minor scale step size <see cref="MinorStep"/>
     /// is set automatically.
@@ -1369,11 +1257,7 @@ namespace ZedGraph
     /// </remarks>
     /// <value>true for automatic mode, false for manual mode</value>
     /// <seealso cref="MinorStep"/>
-    public bool MinorStepAuto
-    {
-      get { return _minorStepAuto; }
-      set { _minorStepAuto = value; }
-    }
+    public bool MinorStepAuto { get; set; }
 
     /// <summary>
     /// Determines whether or not the scale label format <see cref="Format"/>
@@ -1388,11 +1272,7 @@ namespace ZedGraph
     /// <seealso cref="Mag"/>
     /// <seealso cref="Format"/>
     /// <seealso cref="FontSpec"/>
-    public bool FormatAuto
-    {
-      get { return _formatAuto; }
-      set { _formatAuto = value; }
-    }
+    public bool FormatAuto { get; set; }
 
     /// <summary>
     /// The format of the <see cref="Axis"/> tic labels.
@@ -1414,7 +1294,7 @@ namespace ZedGraph
     public string Format
     {
       get { return _format; }
-      set { _format = value; _formatAuto = false; }
+      set { _format = value; FormatAuto = false; }
     }
 
     /// <summary>
@@ -1439,7 +1319,7 @@ namespace ZedGraph
     public int Mag
     {
       get { return _mag; }
-      set { _mag = value; _magAuto = false; }
+      set { _mag = value; MagAuto = false; }
     }
     /// <summary>
     /// Determines whether the <see cref="Mag"/> value will be set
@@ -1454,11 +1334,7 @@ namespace ZedGraph
     /// <seealso cref="AxisLabel.IsOmitMag"/>
     /// <seealso cref="Axis.Title"/>
     /// <seealso cref="Mag"/>
-    public bool MagAuto
-    {
-      get { return _magAuto; }
-      set { _magAuto = value; }
-    }
+    public bool MagAuto { get; set; }
 
     /// <summary> Gets or sets the "grace" value applied to the minimum data range.
     /// </summary>
@@ -1472,11 +1348,8 @@ namespace ZedGraph
     /// <seealso cref="Min"/>
     /// <seealso cref="ZedGraph.Scale.Default.MinGrace"/>
     /// <seealso cref="MaxGrace"/>
-    public double MinGrace
-    {
-      get { return _minGrace; }
-      set { _minGrace = value; }
-    }
+    public double MinGrace { get; set; }
+
     /// <summary> Gets or sets the "grace" value applied to the maximum data range.
     /// </summary>
     /// <remarks>
@@ -1490,11 +1363,7 @@ namespace ZedGraph
     /// <seealso cref="Max"/>
     /// <seealso cref="ZedGraph.Scale.Default.MaxGrace"/>
     /// <seealso cref="MinGrace"/>
-    public double MaxGrace
-    {
-      get { return _maxGrace; }
-      set { _maxGrace = value; }
-    }
+    public double MaxGrace { get; set; }
 
     /// <summary> Controls the alignment of the <see cref="Axis"/> tic labels.
     /// </summary>
@@ -1502,11 +1371,7 @@ namespace ZedGraph
     /// This property controls whether the inside, center, or outside edges of the
     /// text labels are aligned.
     /// </remarks>
-    public AlignP Align
-    {
-      get { return _align; }
-      set { _align = value; }
-    }
+    public AlignP Align { get; set; }
 
     /// <summary> Controls the horizontal alignment of the <see cref="Axis"/> tic labels.
     /// </summary>
@@ -1514,18 +1379,14 @@ namespace ZedGraph
     /// This property controls whether the left, center, or right edges of the
     /// text labels are aligned.
     /// </remarks>
-    public AlignH AlignH
-    {
-      get { return _alignH; }
-      set { _alignH = value; }
-    }
+    public AlignH AlignH { get; set; }
 
     /// <summary>
     /// Controls the vertical <see cref="Axis"/> alignment of the tic labels.
     /// </summary>
     internal AlignV AlignV =>
-      _alignH == AlignH.Left  ? AlignV.Top    :
-      _alignH == AlignH.Right ? AlignV.Bottom :
+      AlignH == AlignH.Left  ? AlignV.Top    :
+      AlignH == AlignH.Right ? AlignV.Bottom :
       AlignV.Center;
 
 
@@ -1553,11 +1414,7 @@ namespace ZedGraph
     /// <summary>
     /// The gap between the scale labels and the tics.
     /// </summary>
-    public float LabelGap
-    {
-      get { return _labelGap; }
-      set { _labelGap = value; }
-    }
+    public float LabelGap { get; set; }
 
     /// <summary>
     /// Gets or sets a value that causes the axis scale labels and title to appear on the
@@ -1573,11 +1430,7 @@ namespace ZedGraph
     /// </remarks>
     /// <seealso cref="IsReverse"/>
     /// <seealso cref="Axis.Cross"/>
-    public bool IsLabelsInside
-    {
-      get { return _isLabelsInside; }
-      set { _isLabelsInside = value; }
-    }
+    public bool IsLabelsInside { get; set; }
 
     /// <summary>
     /// Gets or sets a value that causes the first scale label for this <see cref="Axis"/> to be
@@ -1590,11 +1443,7 @@ namespace ZedGraph
     /// to true will hide any scale label that appears within <see cref="Scale.Default.EdgeTolerance"/> of the
     /// beginning of the <see cref="Axis"/>.
     /// </remarks>
-    public bool IsSkipFirstLabel
-    {
-      get { return _isSkipFirstLabel; }
-      set { _isSkipFirstLabel = value; }
-    }
+    public bool IsSkipFirstLabel { get; set; }
 
     /// <summary>
     /// Gets or sets a value that causes the last scale label for this <see cref="Axis"/> to be
@@ -1607,11 +1456,7 @@ namespace ZedGraph
     /// to true will hide any scale label that appears within <see cref="Scale.Default.EdgeTolerance"/> of the
     /// end of the <see cref="Axis"/>.
     /// </remarks>
-    public bool IsSkipLastLabel
-    {
-      get { return _isSkipLastLabel; }
-      set { _isSkipLastLabel = value; }
-    }
+    public bool IsSkipLastLabel { get; set; }
 
     /// <summary>
     /// Gets or sets a value that causes the scale label that is located at the <see cref="Axis.Cross" />
@@ -1622,11 +1467,7 @@ namespace ZedGraph
     /// is false), the scale label at the <see cref="Axis.Cross" /> value is overlapped by opposing axes.
     /// Use this property to hide the scale label to avoid the overlap.
     /// </remarks>
-    public bool IsSkipCrossLabel
-    {
-      get { return _isSkipCrossLabel; }
-      set { _isSkipCrossLabel = value; }
-    }
+    public bool IsSkipCrossLabel { get; set; }
 
     /// <summary>
     /// Determines if the scale values are reversed for this <see cref="Axis"/>
@@ -1634,11 +1475,8 @@ namespace ZedGraph
     /// <value>true for the X values to decrease to the right or the Y values to
     /// decrease upwards, false otherwise</value>
     /// <seealso cref="ZedGraph.Scale.Default.IsReverse"/>.
-    public bool IsReverse
-    {
-      get { return _isReverse; }
-      set { _isReverse = value; }
-    }
+    public bool IsReverse { get; set; }
+
     /// <summary>
     /// Determines if powers-of-ten notation will be used for the numeric value labels.
     /// </summary>
@@ -1649,11 +1487,7 @@ namespace ZedGraph
     /// </remarks>
     /// <value> boolean value; true to show the title as a power of ten, false to
     /// show a regular numeric value (e.g., "0.01", "10", "1000")</value>
-    public bool IsUseTenPower
-    {
-      get { return _isUseTenPower; }
-      set { _isUseTenPower = value; }
-    }
+    public bool IsUseTenPower { get; set; }
 
     /// <summary>
     /// Gets or sets a <see cref="bool"/> value that determines if ZedGraph will check to
@@ -1665,22 +1499,14 @@ namespace ZedGraph
     /// method call, and affects the selection of the major step size (<see cref="MajorStep"/>).
     /// </remarks>
     /// <value> boolean value; true to check for overlap, false otherwise</value>
-    public bool IsPreventLabelOverlap
-    {
-      get { return _isPreventLabelOverlap; }
-      set { _isPreventLabelOverlap = value; }
-    }
+    public bool IsPreventLabelOverlap { get; set; }
 
     /// <summary>
     /// Gets or sets a property that determines whether or not the scale values will be shown.
     /// </summary>
     /// <value>true to show the scale values, false otherwise</value>
     /// <seealso cref="Axis.IsVisible"/>.
-    public bool IsVisible
-    {
-      get { return _isVisible; }
-      set { _isVisible = value; }
-    }
+    public bool IsVisible { get; set; }
 
     /// <summary>
     /// The text labels for this <see cref="Axis"/>.
@@ -1689,11 +1515,7 @@ namespace ZedGraph
     /// This property is only
     /// applicable if <see cref="Type"/> is set to <see cref="AxisType.Text"/>.
     /// </remarks>
-    public string[] TextLabels
-    {
-      get { return _textLabels; }
-      set { _textLabels = value; }
-    }
+    public string[] TextLabels { get; set; }
 
     #endregion
     /*
@@ -1909,7 +1731,7 @@ namespace ZedGraph
     internal SizeF GetScaleMaxSpace(Graphics g, GraphPane pane, float scaleFactor,
               bool applyAngle)
     {
-      if (!_isVisible) return new SizeF(0, 0);
+      if (!IsVisible) return new SizeF(0, 0);
 
       //var scaleMult = Math.Pow( 10.0, _mag );
       int i;
@@ -1970,7 +1792,7 @@ namespace ZedGraph
     virtual internal double CalcMajorTicValue(double baseVal, double tic)
     {
       // Default behavior is a normal linear scale (also works for ordinal types)
-      return baseVal + (double)_majorStep * tic;
+      return baseVal + _majorStep * tic;
     }
 
     /// <summary>
@@ -1993,7 +1815,7 @@ namespace ZedGraph
     virtual internal double CalcMinorTicValue(double baseVal, int iTic)
     {
       // default behavior is a linear axis (works for ordinal types too
-      return baseVal + (double)_minorStep * (double)iTic;
+      return baseVal + _minorStep * iTic;
     }
 
     /// <summary>
@@ -2027,8 +1849,8 @@ namespace ZedGraph
     /// </returns>
     virtual internal double CalcBaseTic()
     {
-      return _baseTic != PointPair.Missing  ? _baseTic :
-             IsAnyOrdinal                   ? 1        : // basetic is always 1 for ordinal types
+      return BaseTic != PointPair.Missing  ? BaseTic :
+             IsAnyOrdinal                  ? 1       : // basetic is always 1 for ordinal types
             // default behavior is linear or ordinal type
             // go to the nearest even multiple of the step size
             Math.Ceiling(_min / _majorStep - 0.00000001) * _majorStep;
@@ -2146,19 +1968,19 @@ namespace ZedGraph
           var isMaxValueAtMaxPix = ((_ownerAxis is XAxis || _ownerAxis is Y2Axis) && !IsReverse) ||
                                     (_ownerAxis is Y2Axis && IsReverse);
 
-          var isSkipZone = (((_isSkipFirstLabel && isMaxValueAtMaxPix) ||
-                             (_isSkipLastLabel && !isMaxValueAtMaxPix)) &&
+          var isSkipZone = (((IsSkipFirstLabel && isMaxValueAtMaxPix) ||
+                             (IsSkipLastLabel && !isMaxValueAtMaxPix)) &&
                              pixVal < edgeTolerance) ||
-                           (((_isSkipLastLabel && isMaxValueAtMaxPix) ||
-                             (_isSkipFirstLabel && !isMaxValueAtMaxPix)) &&
+                           (((IsSkipLastLabel && isMaxValueAtMaxPix) ||
+                             (IsSkipFirstLabel && !isMaxValueAtMaxPix)) &&
                              pixVal > _maxPix - _minPix - edgeTolerance);
 
-          var isSkipCross = _isSkipCrossLabel && !_ownerAxis.CrossAuto &&
+          var isSkipCross = IsSkipCrossLabel && !_ownerAxis.CrossAuto &&
                             Math.Abs(_ownerAxis.Cross - dVal) < rangeTol * 10.0;
 
           isSkipZone = isSkipZone || isSkipCross;
 
-          if (!_isVisible || isSkipZone) continue;
+          if (!IsVisible || isSkipZone) continue;
 
           // For exponential scales, just skip any label that would overlap with the previous one
           // This is because exponential scales have varying label spacing
@@ -2249,8 +2071,8 @@ namespace ZedGraph
             FontSpec fontSpec = null, bool useMaxSpace = false)
     {
       var textTop = _ownerAxis.MajorTic.IsOutside
-                        ? scaledTic + charHeight*_labelGap
-                        : charHeight*_labelGap;
+                        ? scaledTic + charHeight*LabelGap
+                        : charHeight*LabelGap;
 
       if (fontSpec == null)
         fontSpec = _fontSpec;
@@ -2259,11 +2081,11 @@ namespace ZedGraph
       //string tmpStr = MakeLabel( pane, i, dVal );
       var tmpStr = _ownerAxis.MakeLabelEventWorks(pane, i, dVal);
 
-      var height = (this.IsLog && _isUseTenPower)
+      var height = (this.IsLog && IsUseTenPower)
                  ? fontSpec.BoundingBoxTenPower(g, tmpStr, scaleFactor).Height
                  : fontSpec.BoundingBox(g, tmpStr, scaleFactor).Height;
 
-      switch (_align)
+      switch (Align)
       {
         case AlignP.Center:
           _textCenter = textTop + maxSpace / 2.0F;
@@ -2276,14 +2098,14 @@ namespace ZedGraph
           break;
       }
 
-      _textCenter = _isLabelsInside ? shift - _textCenter
+      _textCenter = IsLabelsInside ? shift - _textCenter
                                     : shift + _textCenter;
       AlignV av;
       AlignH ah;
 
       if (_ownerAxis is IXAxis)
       {
-        ah = _alignH;
+        ah = AlignH;
         av = AlignV.Center;
       }
       else
@@ -2292,7 +2114,7 @@ namespace ZedGraph
         av = AlignV;
       }
 
-      if (this.IsLog && _isUseTenPower)
+      if (this.IsLog && IsUseTenPower)
         fontSpec.DrawTenPower(g, pane, tmpStr,
           pixVal, _textCenter, ah, av, scaleFactor);
       else
@@ -2477,37 +2299,37 @@ namespace ZedGraph
       var maxVal = _rangeMax;
 
       // Make sure that minVal and maxVal are legitimate values
-      if (double.IsInfinity(minVal) || double.IsNaN(minVal) || Math.Abs(minVal - double.MaxValue) < float.Epsilon)
+      if (minVal == double.MaxValue || double.IsInfinity(minVal) || double.IsNaN(minVal))
         minVal = 0.0;
-      if (double.IsInfinity(maxVal) || double.IsNaN(maxVal) || Math.Abs(maxVal - double.MaxValue) < float.Epsilon)
+      if (maxVal == double.MinValue || double.IsInfinity(maxVal) || double.IsNaN(maxVal))
         maxVal = 0.0;
 
       // if the scales are autoranged, use the actual data values for the range
       //double range = maxVal - minVal;
       // if (one of) the scales are autoranged, use the actual data values for the grace proportion
-      var range = (_maxAuto ? maxVal : _max) - (_minAuto ? minVal : _min);
+      var range = (MaxAuto ? maxVal : _max) - (MinAuto ? minVal : _min);
 
       // "Grace" is applied to the numeric axis types only
       var numType = !IsAnyOrdinal;
 
       // For autoranged values, assign the value.  If appropriate, adjust the value by the
       // "Grace" value.
-      if (_minAuto)
+      if (MinAuto)
       {
         _min = minVal;
         // Do not let the grace value extend the axis below zero when all the values were positive
-        if ((numType && (_min < 0 || minVal - _minGrace * range >= 0.0)) || _ownerAxis is IXAxis)
-          _min = minVal - _minGrace * range;
+        if ((numType && (_min < 0 || minVal - MinGrace * range >= 0.0)) || _ownerAxis is IXAxis)
+          _min = minVal - MinGrace * range;
       }
-      if (_maxAuto)
+      if (MaxAuto)
       {
         _max = maxVal;
         // Do not let the grace value extend the axis above zero when all the values were negative
-        if ((numType && (_max > 0 || maxVal + _maxGrace * range <= 0.0)) || _ownerAxis is IXAxis)
-          _max = maxVal + _maxGrace * range;
+        if ((numType && (_max > 0 || maxVal + MaxGrace * range <= 0.0)) || _ownerAxis is IXAxis)
+          _max = maxVal + MaxGrace * range;
       }
 
-      if (Math.Abs(_max - _min) < float.Epsilon && _maxAuto && _minAuto)
+      if (Math.Abs(_max - _min) < float.Epsilon && MaxAuto && MinAuto)
       {
         if (Math.Abs(_max) > float.Epsilon)
         {
@@ -2523,9 +2345,9 @@ namespace ZedGraph
 
       if (_max > _min) return;
 
-      if (_maxAuto)
+      if (MaxAuto)
         _max = _min + 1.0;
-      else if (_minAuto)
+      else if (MinAuto)
         _min = _max - 1.0;
     }
 
@@ -2562,11 +2384,10 @@ namespace ZedGraph
       //      if ( allowance > size.Width / 4 )
       //        allowance = size.Width / 4;
 
-
       float maxWidth = 1000;
-      float temp = 1000;
-      float costh = (float)Math.Abs(Math.Cos(_fontSpec.Angle * Math.PI / 180.0));
-      float sinth = (float)Math.Abs(Math.Sin(_fontSpec.Angle * Math.PI / 180.0));
+      float temp     = 1000;
+      float costh    = (float)Math.Abs(Math.Cos(_fontSpec.Angle * Math.PI / 180.0));
+      float sinth    = (float)Math.Abs(Math.Sin(_fontSpec.Angle * Math.PI / 180.0));
 
       if (costh > 0.001)
         maxWidth = size.Width / costh;
@@ -2603,10 +2424,10 @@ namespace ZedGraph
     }
 
     /// <summary>
-    /// Sets the Magnitude factor for the scale if the <see cref="_magAuto"/> is set to <c>true</c>.
+    /// Sets the Magnitude factor for the scale if the <see cref="MagAuto"/> is set to <c>true</c>.
     /// </summary>
     /// <remarks>
-    /// if <see cref="_formatAuto"/> is set to <c>true</c> then the label formatting will
+    /// if <see cref="FormatAuto"/> is set to <c>true</c> then the label formatting will
     /// be adjusted for the requried number of decimal places.
     /// </remarks>
     /// <param name="min">the minimum scale value.</param>
@@ -2615,7 +2436,7 @@ namespace ZedGraph
     internal void SetScaleMag(double min, double max, double step)
     {
       // set the scale magnitude if required
-      if (_magAuto)
+      if (MagAuto)
       {
         // Find the optimal scale display multiple
         var minMag = Math.Floor(Math.Log10(Math.Abs(_min)));
@@ -2632,7 +2453,7 @@ namespace ZedGraph
       }
 
       // Calculate the appropriate number of dec places to display if required
-      if (!_formatAuto) return;
+      if (!FormatAuto) return;
 
       var numDec = 0 - (int)(Math.Floor(Math.Log10(_majorStep)) - _mag);
       if (numDec < 0)
@@ -2760,17 +2581,18 @@ namespace ZedGraph
     /// <param name="pane">The <see cref="GraphPane"/> of interest</param>
     internal void SetRange(GraphPane pane)
     {
-      if (!Valid) return;
-
-      if (_ownerAxis is IXAxis)
+      if (!Valid)
       {
-        // just use 0 and 1
+        if (!(_ownerAxis is IXAxis)) return;
 
-        //_rangeMin = 0;
-        //_rangeMax = 1;
+        // just use 0 and 1
+        _rangeMin = 0;
+        _rangeMax = 1;
+        return;
       }
+
       // If this is a Y axis, and the main Y axis is valid, use it for defaults
-      else if (pane.YAxis.Scale.Valid)
+      if (_ownerAxis is IYAxis && pane.YAxis.Scale.Valid)
       {
         if (ReferenceEquals(this, pane.YAxis.Scale))
           return;
@@ -2778,7 +2600,7 @@ namespace ZedGraph
         _rangeMax = pane.YAxis.Scale._rangeMax;
       }
       // Otherwise, if this is a Y axis, and the main Y2 axis is valid, use it for defaults
-      else if (pane.Y2Axis.Scale.Valid)
+      else if (_ownerAxis is IYAxis && pane.Y2Axis.Scale.Valid)
       {
         if (ReferenceEquals(this, pane.Y2Axis.Scale))
           return;
@@ -2854,7 +2676,7 @@ namespace ZedGraph
       //     T          Y2Axis    _minPix + ...
       //     F          XAxis     _minPix + ...
 
-      return _isReverse == (_ownerAxis is IXAxis)
+      return IsReverse == (_ownerAxis is IXAxis)
         ? (float)(_maxPix - (_maxPix - _minPix) * ratio)
         : (float)(_minPix + (_maxPix - _minPix) * ratio);
     }
@@ -2912,7 +2734,7 @@ namespace ZedGraph
     public double ReverseTransform(float pixVal)
     {
       // see if the sign of the equation needs to be reversed
-      var val = _isReverse == (_ownerAxis is IXAxis)
+      var val = IsReverse == (_ownerAxis is IXAxis)
         ? (pixVal - _maxPix) / (_minPix - _maxPix)
           * (_maxLinTemp - _minLinTemp) + _minLinTemp
         : (pixVal - _minPix) / (_maxPix - _minPix)
@@ -2950,7 +2772,7 @@ namespace ZedGraph
       // to take the log here
       var ratio = (x - _minLinTemp) / (_maxLinTemp - _minLinTemp);
 
-      var rv = _isReverse == (_ownerAxis is YAxis || _ownerAxis is X2Axis)
+      var rv = IsReverse == (_ownerAxis is YAxis || _ownerAxis is X2Axis)
         ? (float)((_maxPix - _minPix) * ratio)
         : (float)((_maxPix - _minPix) * (1.0F - ratio));
 

@@ -90,10 +90,10 @@ namespace ZedGraph
       dest.Scale._max           = source.Scale._max;
       dest.Scale._majorStep     = source.Scale._majorStep;
       dest.Scale._minorStep     = source.Scale._minorStep;
-      dest.Scale._minAuto       = source.Scale._minAuto;
-      dest.Scale._maxAuto       = source.Scale._maxAuto;
-      dest.Scale._majorStepAuto = source.Scale._majorStepAuto;
-      dest.Scale._minorStepAuto = source.Scale._minorStepAuto;
+      dest.Scale.MinAuto       = source.Scale.MinAuto;
+      dest.Scale.MaxAuto       = source.Scale.MaxAuto;
+      dest.Scale.MajorStepAuto = source.Scale.MajorStepAuto;
+      dest.Scale.MinorStepAuto = source.Scale.MinorStepAuto;
     }
 
     private void hScrollBar1_Scroll( object sender, ScrollEventArgs e )
