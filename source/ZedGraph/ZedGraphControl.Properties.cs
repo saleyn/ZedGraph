@@ -1062,7 +1062,12 @@ namespace ZedGraph
     /// </summary>
     public bool IsShowCrossHair { get; set; }
 
+    /// <summary>
+    /// Pen used to draw crosshair
+    /// </summary>
     public Pen CrossHairPen { get; set; } = new Pen(Color.Silver) { DashStyle = DashStyle.Dash };
+
+    public FontSpec CrossHairFontSpec { get; }
 
     public void ResetSelectedGraph()
     {

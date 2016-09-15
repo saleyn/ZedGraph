@@ -210,6 +210,10 @@ namespace ZedGraph
     /// </summary>
     internal Axis _ownerAxis;
 
+    /// <summary>
+    /// Cached coordinate of the center of text label
+    /// </summary>
+    internal float _textCenter;
     #endregion
 
     #region Defaults
@@ -2244,11 +2248,9 @@ namespace ZedGraph
             float shift, float maxSpace, float scaledTic, float charHeight, float scaleFactor,
             FontSpec fontSpec = null, bool useMaxSpace = false)
     {
-      float textTop, textCenter;
-      if (_ownerAxis.MajorTic.IsOutside)
-        textTop = scaledTic + charHeight * _labelGap;
-      else
-        textTop = charHeight * _labelGap;
+      var textTop = _ownerAxis.MajorTic.IsOutside
+                        ? scaledTic + charHeight*_labelGap
+                        : charHeight*_labelGap;
 
       if (fontSpec == null)
         fontSpec = _fontSpec;
@@ -2264,18 +2266,18 @@ namespace ZedGraph
       switch (_align)
       {
         case AlignP.Center:
-          textCenter = textTop + maxSpace / 2.0F;
+          _textCenter = textTop + maxSpace / 2.0F;
           break;
         case AlignP.Outside:
-          textCenter = textTop + maxSpace - height / 2.0F;
+          _textCenter = textTop + maxSpace - height / 2.0F;
           break;
         default:
-          textCenter = textTop + height / 2.0F;
+          _textCenter = textTop + height / 2.0F;
           break;
       }
 
-      textCenter = _isLabelsInside ? shift - textCenter
-                                   : shift + textCenter;
+      _textCenter = _isLabelsInside ? shift - _textCenter
+                                    : shift + _textCenter;
       AlignV av;
       AlignH ah;
 
@@ -2292,10 +2294,10 @@ namespace ZedGraph
 
       if (this.IsLog && _isUseTenPower)
         fontSpec.DrawTenPower(g, pane, tmpStr,
-          pixVal, textCenter, ah, av, scaleFactor);
+          pixVal, _textCenter, ah, av, scaleFactor);
       else
         fontSpec.Draw(g, pane, tmpStr,
-          pixVal, textCenter, ah, av, scaleFactor);
+          pixVal, _textCenter, ah, av, scaleFactor);
     }
 
     /// <summary>

@@ -704,26 +704,22 @@ namespace ZedGraph
       if (_scaleFactor != 0)
         scaleFactor = _scaleFactor;
 
-      float newSize = size * scaleFactor;
-
-      float oldSize = (font == null) ? 0.0f : font.Size;
+      var newSize = size * scaleFactor;
+      var oldSize = font?.Size ?? 0.0f;
 
       // Regenerate the font only if the size has changed significantly
-      if (font == null ||
-              Math.Abs(newSize - oldSize) > 0.1 ||
-              font.Name != this.Family ||
-              font.Bold != _isBold ||
-              font.Italic != _isItalic ||
-              font.Underline != _isUnderline)
-      {
-        FontStyle style = FontStyle.Regular;
-        style = (_isBold ? FontStyle.Bold : style) |
-                    (_isItalic ? FontStyle.Italic : style) |
-                     (_isUnderline ? FontStyle.Underline : style);
+      if (font != null && !(Math.Abs(newSize - oldSize) > 0.1) && font.Name == this.Family &&
+          font.Bold == _isBold && font.Italic == _isItalic &&
+          font.Underline == _isUnderline)
+        return;
 
-        scaledSize = size * (float)scaleFactor;
-        font = new Font(_family, scaledSize, style, GraphicsUnit.World);
-      }
+      var style = FontStyle.Regular;
+      style = (_isBold      ? FontStyle.Bold      : style) |
+              (_isItalic    ? FontStyle.Italic    : style) |
+              (_isUnderline ? FontStyle.Underline : style);
+
+      scaledSize = size * scaleFactor;
+      font = new Font(_family, scaledSize, style, GraphicsUnit.World);
     }
 
     /// <summary>
@@ -820,7 +816,72 @@ namespace ZedGraph
     /// <param name="layoutArea">The limiting area (<see cref="SizeF"/>) into which the text
     /// must fit.  The actual rectangle may be smaller than this, but the text will be wrapped
     /// to accomodate the area.</param>
-    public void Draw(Graphics g, PaneBase pane, string text, float x,
+    internal void Draw(Graphics g, PaneBase pane, Axis axis, string text, float x, float y, SizeF offset)
+    {
+      // make sure the font size is properly scaled
+      //Remake( scaleFactor, this.Size, ref this.scaledSize, ref this.font );
+      
+      var sModeSave = g.SmoothingMode;
+      var sHintSave = g.TextRenderingHint;
+      if (_isAntiAlias)
+      {
+        g.SmoothingMode     = SmoothingMode.HighQuality;
+        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+      }
+
+      var scaleFactor = pane.CalcScaleFactor();
+      var sizeF = MeasureString(g, text, scaleFactor) + offset;
+
+      AlignH ah;
+      AlignV av;
+      if (axis is IXAxis)
+      {
+        ah = axis.Scale.AlignH;  
+        av = AlignV.Center;
+        y += axis.Scale._textCenter;
+      }
+      else
+      {
+        av = axis.Scale.AlignV;
+        ah = AlignH.Center;
+        x += axis.Scale._textCenter;
+      }
+
+      // Save the old transform matrix for later restoration
+      var saveMatrix = g.Transform;
+      g.Transform = SetupMatrix(g.Transform, x, y, sizeF, ah, av, axis.Scale.FontSpec.Angle);
+
+      // Create a rectangle representing the border around the
+      // text.  Note that, while the text is drawn based on the
+      // TopCenter position, the rectangle is drawn based on
+      // the TopLeft position.  Therefore, move the rectangle
+      // width/2 to the left to align it properly
+      var rectF = new RectangleF(-sizeF.Width / 2.0F, 0.0F,
+                                  sizeF.Width, sizeF.Height);
+
+      // If the background is to be filled, fill it
+      _fill.Draw(g, rectF);
+
+      // Draw the border around the text if required
+      _border.Draw(g, pane, scaleFactor, rectF);
+
+      // make a center justified StringFormat alignment
+      // for drawing the text
+      using (var strFormat = new StringFormat
+      {
+        Alignment = _stringAlignment,
+        LineAlignment = StringAlignment.Center
+      })
+      using (var brush = new SolidBrush(_fontColor))
+        g.DrawString(text, _font, brush, rectF, strFormat);
+
+      // Restore the transform matrix back to original
+      g.Transform         = saveMatrix;
+      g.SmoothingMode     = sModeSave;
+      g.TextRenderingHint = sHintSave;
+    }
+
+    internal void Draw(Graphics g, PaneBase pane, string text, float x,
         float y, AlignH alignH, AlignV alignV,
         float scaleFactor, SizeF layoutArea)
     {
@@ -849,7 +910,7 @@ namespace ZedGraph
       // the TopLeft position.  Therefore, move the rectangle
       // width/2 to the left to align it properly
       var rectF = new RectangleF(-sizeF.Width / 2.0F, 0.0F,
-                                   sizeF.Width, sizeF.Height);
+                                  sizeF.Width, sizeF.Height);
 
       // If the background is to be filled, fill it
       _fill.Draw(g, rectF);
@@ -859,46 +920,47 @@ namespace ZedGraph
 
       // make a center justified StringFormat alignment
       // for drawing the text
-      var strFormat = new StringFormat
+      using (var strFormat = new StringFormat
       {
         Alignment = _stringAlignment,
         LineAlignment = StringAlignment.Center
-      };
-      //          if ( this.stringAlignment == StringAlignment.Far )
-      //              g.TranslateTransform( sizeF.Width / 2.0F, 0F, MatrixOrder.Prepend );
-      //          else if ( this.stringAlignment == StringAlignment.Near )
-      //              g.TranslateTransform( -sizeF.Width / 2.0F, 0F, MatrixOrder.Prepend );
-
-
-      // Draw the drop shadow text.  Note that the coordinate system
-      // is set up such that 0,0 is at the location where the
-      // CenterTop of the text needs to be.
-      if (_isDropShadow)
+      })
       {
-        float xShift = (float)(Math.Cos(_dropShadowAngle) *
-                    _dropShadowOffset * _font.Height);
-        float yShift = (float)(Math.Sin(_dropShadowAngle) *
-                    _dropShadowOffset * _font.Height);
-        RectangleF rectD = rectF;
-        rectD.Offset(xShift, yShift);
-        // make a solid brush for rendering the font itself
-        using (SolidBrush brushD = new SolidBrush(_dropShadowColor))
-          g.DrawString(text, _font, brushD, rectD, strFormat);
-      }
+        //          if ( this.stringAlignment == StringAlignment.Far )
+        //              g.TranslateTransform( sizeF.Width / 2.0F, 0F, MatrixOrder.Prepend );
+        //          else if ( this.stringAlignment == StringAlignment.Near )
+        //              g.TranslateTransform( -sizeF.Width / 2.0F, 0F, MatrixOrder.Prepend );
 
-      // make a solid brush for rendering the font itself
-      using (SolidBrush brush = new SolidBrush(_fontColor))
-      {
-        // Draw the actual text.  Note that the coordinate system
+
+        // Draw the drop shadow text.  Note that the coordinate system
         // is set up such that 0,0 is at the location where the
         // CenterTop of the text needs to be.
-        //RectangleF layoutArea = new RectangleF( 0.0F, 0.0F, sizeF.Width, sizeF.Height );
-        g.DrawString(text, _font, brush, rectF, strFormat);
+        if (_isDropShadow)
+        {
+          var xShift = (float)(Math.Cos(_dropShadowAngle)*
+                               _dropShadowOffset*_font.Height);
+          var yShift = (float)(Math.Sin(_dropShadowAngle)*
+                               _dropShadowOffset*_font.Height);
+          var rectD = rectF;
+          rectD.Offset(xShift, yShift);
+          // make a solid brush for rendering the font itself
+          using (SolidBrush brushD = new SolidBrush(_dropShadowColor))
+            g.DrawString(text, _font, brushD, rectD, strFormat);
+        }
 
-        //System.Diagnostics.Trace.WriteLine(string.Format("draw {0} font size {1}",
-        //    text, _font.Size));
+        // make a solid brush for rendering the font itself
+        using (var brush = new SolidBrush(_fontColor))
+        {
+          // Draw the actual text.  Note that the coordinate system
+          // is set up such that 0,0 is at the location where the
+          // CenterTop of the text needs to be.
+          //RectangleF layoutArea = new RectangleF( 0.0F, 0.0F, sizeF.Width, sizeF.Height );
+          g.DrawString(text, _font, brush, rectF, strFormat);
+
+          //System.Diagnostics.Trace.WriteLine(string.Format("draw {0} font size {1}",
+          //    text, _font.Size));
+        }
       }
-
       // Restore the transform matrix back to original
       g.Transform = saveMatrix;
 
@@ -972,38 +1034,37 @@ namespace ZedGraph
 
       // make a center justified StringFormat alignment
       // for drawing the text
-      StringFormat strFormat = new StringFormat();
-      strFormat.Alignment = _stringAlignment;
-
-      // Create a rectangle representing the border around the
-      // text.  Note that, while the text is drawn based on the
-      // TopCenter position, the rectangle is drawn based on
-      // the TopLeft position.  Therefore, move the rectangle
-      // width/2 to the left to align it properly
-      RectangleF rectF = new RectangleF(-totSize.Width / 2.0F, 0.0F,
-          totSize.Width, totSize.Height);
-
-      // If the background is to be filled, fill it
-      _fill.Draw(g, rectF);
-
-      // Draw the border around the text if required
-      _border.Draw(g, pane, scaleFactor, rectF);
-
-      // make a solid brush for rendering the font itself
-      using (SolidBrush brush = new SolidBrush(_fontColor))
+      using (var strFormat = new StringFormat {Alignment = _stringAlignment})
       {
-        // Draw the actual text.  Note that the coordinate system
-        // is set up such that 0,0 is at the location where the
-        // CenterTop of the text needs to be.
-        g.DrawString("10", _font, brush,
-                        (-totSize.Width + size10.Width) / 2.0F,
-                        sizeText.Height * Default.SuperShift, strFormat);
-        g.DrawString(text, _superScriptFont, brush,
-                        (totSize.Width - sizeText.Width - charWidth) / 2.0F,
-                        0.0F,
-                        strFormat);
-      }
+        // Create a rectangle representing the border around the
+        // text.  Note that, while the text is drawn based on the
+        // TopCenter position, the rectangle is drawn based on
+        // the TopLeft position.  Therefore, move the rectangle
+        // width/2 to the left to align it properly
+        var rectF = new RectangleF(-totSize.Width/2.0F, 0.0F,
+                                    totSize.Width, totSize.Height);
 
+        // If the background is to be filled, fill it
+        _fill.Draw(g, rectF);
+
+        // Draw the border around the text if required
+        _border.Draw(g, pane, scaleFactor, rectF);
+
+        // make a solid brush for rendering the font itself
+        using (var brush = new SolidBrush(_fontColor))
+        {
+          // Draw the actual text.  Note that the coordinate system
+          // is set up such that 0,0 is at the location where the
+          // CenterTop of the text needs to be.
+          g.DrawString("10", _font, brush,
+                       (-totSize.Width + size10.Width)/2.0F,
+                       sizeText.Height*Default.SuperShift, strFormat);
+          g.DrawString(text, _superScriptFont, brush,
+                       (totSize.Width - sizeText.Width - charWidth)/2.0F,
+                       0.0F,
+                       strFormat);
+        }
+      }
       // Restore the transform matrix back to original
       g.Transform = saveMatrix;
 

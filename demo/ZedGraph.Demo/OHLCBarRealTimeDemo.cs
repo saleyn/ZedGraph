@@ -100,7 +100,7 @@ namespace ZedGraph.Demo
 //      m_Pane.XAxis.Scale.AlignH                = AlignH.Center;
 //      m_Pane.XAxis.Scale.Align                 = AlignP.Inside;
       m_Pane.XAxis.MajorTic.IsBetweenLabels    = true;
-      m_Pane.XAxis.MinorTic.Size               = 0;
+      m_Pane.XAxis.MinorTic.Size               = 2.5f;
       m_Pane.XAxis.MinorTic.IsInside           = false;
       m_Pane.XAxis.MajorTic.IsInside           = false;
       m_Pane.XAxis.MinorTic.IsOutside          = true;
@@ -195,7 +195,8 @@ namespace ZedGraph.Demo
       m_Line.DashOn  = 1;
       m_Line.DashOff = 3;
       m_Line.Width   = 1;
-      base.ZedGraphControl.AxisChange();
+      ZedGraphControl.AxisChange();
+      ZedGraphControl.Invalidate();
 
       m_Timer.Elapsed += (o, args) =>
       {

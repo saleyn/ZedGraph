@@ -239,6 +239,15 @@ namespace ZedGraph
       _zoomStateStack = new ZoomStateStack();
 
       _graphDragState = new GraphDragState();
+
+      CrossHairFontSpec = new FontSpec
+      {
+        FontColor = Color.Black,
+        Size      = 9,
+        Border    = { IsVisible = true    },
+        Fill      = { Color = Color.Beige }
+      };
+
     }
 
     /// <summary>
@@ -312,18 +321,19 @@ namespace ZedGraph
             var yaxis = _currentPane.YAxis.Scale.Valid ? (Axis)_currentPane.YAxis : _currentPane.Y2Axis;
 
             // FIXME: This is experimental support of drawing crosshair values
-            using (Brush brush = xaxis.Scale.FontSpec.Fill.MakeBrush(rect, null))
+            using (var brush = xaxis.Scale.FontSpec.Fill.MakeBrush(rect, null))
             {
               var x = (int)Math.Round(xaxis.ReverseTransform(_currentPane, _lastCrosshairPoint.X));
               var text = xaxis.Scale.MakeLabel(_currentPane, 0, x);
-              g.DrawString(text, xaxis.Scale.FontSpec.Font, brush, _lastCrosshairPoint.X, 5);
+
+              CrossHairFontSpec.Draw(g, _currentPane, xaxis, text, _lastCrosshairPoint.X, rect.Height,
+                new SizeF(0, -1));
+
               var y = (int)Math.Round(yaxis.ReverseTransform(_currentPane, _lastCrosshairPoint.Y));
               text = yaxis.Scale.MakeLabel(_currentPane, 0, y);
-              //yaxis.Scale.FontSpec.Draw(g, _currentPane, text,
-              //  /*rect.Width*/ 0, _lastCrosshairPoint.Y - yaxis.Scale.FontSpec.Font.Height / 2,
-              //  yaxis.Scale.AlignH, yaxis.Scale.AlignV, _currentPane.ScaleFactor);
-              g.DrawString(text, yaxis.Scale.FontSpec.Font, brush, rect.Width,
-                _lastCrosshairPoint.Y - yaxis.Scale.FontSpec.Font.Height / 2);
+
+              CrossHairFontSpec.Draw(g, _currentPane, yaxis, text, rect.Width, _lastCrosshairPoint.Y,
+                new SizeF(0, 0));
             }
           }
         }
