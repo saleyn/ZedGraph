@@ -26,6 +26,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Collections;
+using System.Linq;
 using ZedGraph;
 
 [assembly: TagPrefix( "ZedGraph", "zgw" )]
@@ -1064,14 +1065,14 @@ namespace ZedGraph.Web
 			if ( ( handler == null ) && ( CurveList.Count == 0 ) && ( GraphObjList.Count == 0 ) )
 			{
 				// default with the sample graph if no callback provided
-				foreach ( GraphPane p in mp.PaneList )
+				foreach ( var p in mp.PaneList.Where(p => p is GraphPane).Cast<GraphPane>())
 				{
-					ZedGraphWeb.RenderDemo( g, p );
+					RenderDemo( g, p );
 				}
 			}
 			else
 			{
-				foreach ( GraphPane p in mp.PaneList )
+				foreach ( var p in mp.PaneList.Where(p => p is GraphPane).Cast<GraphPane>())
 				{
 					// Add visual designer influences here - first!!
 					SetWebProperties( g, p );
@@ -1085,10 +1086,9 @@ namespace ZedGraph.Web
 
 				//TODO: verify callback regression test
 				// Add custom callback tweeking next
-				if ( handler != null )
-					handler( this, g, mp );
+			  handler?.Invoke( this, g, mp );
 
-				// Set the layout according to user preferences
+			  // Set the layout according to user preferences
 				mp.ReSize( g );
 			}
 		}
@@ -1667,60 +1667,56 @@ namespace ZedGraph.Web
 				}
 
 				// Now loop over each GraphPane
-				foreach ( GraphPane pane in masterPane.PaneList )
+				foreach ( var pane in masterPane.PaneList.Where(p => p is GraphPane).Cast<GraphPane>())
 				{
-					float scaleFactor = pane.CalcScaleFactor();
+				  float scaleFactor = pane.CalcScaleFactor();
 
 					// Next comes GraphPane GraphObjs in front of data points
 					foreach ( GraphObj obj in pane.GraphObjList )
 					{
-						if ( obj.Link.IsActive && obj.IsInFrontOfData )
-						{
-							obj.GetCoords( pane, g, scaleFactor, out shape, out coords );
-							MakeAreaTag( shape, coords, obj.Link.Url, obj.Link.Target,
-								obj.Link.Title, obj.Link.Tag, output );
-						}
+					  if (!obj.Link.IsActive || !obj.IsInFrontOfData) continue;
+					  obj.GetCoords( pane, g, scaleFactor, out shape, out coords );
+					  MakeAreaTag( shape, coords, obj.Link.Url, obj.Link.Target,
+					               obj.Link.Title, obj.Link.Tag, output );
 					}
 
 					// Then come the data points (CurveItems)
 					foreach ( CurveItem curve in pane.CurveList )
 					{
-						if ( curve.Link.IsActive && curve.IsVisible )
-						{
-							for ( int i=0; i < (curve is PieItem ? 1 : curve.Points.Count); i++ )
-							{
-								//if ( curve.GetCoords( pane, i, pane.Rect.Left, pane.Rect.Top, out coords ) )
-								if ( curve.GetCoords( pane, i, out coords ) )
-								{
-									if ( curve is PieItem )
-									{
-										MakeAreaTag( "poly", coords, curve.Link.Url,
-												curve.Link.Target, curve.Link.Title, curve.Link.Tag, output );
-										// only one point for PieItems
-										break;
-									}
-									else
-									{
-										// Add an "?index=4" type tag to the url to indicate which
-										// point was selected
-										string url;
-										if ( curve.Link.Url != string.Empty )
-											url = curve.Link.MakeCurveItemUrl( pane, curve, i );
-										else
-											url = "";
+					  if (!curve.Link.IsActive || !curve.IsVisible) continue;
 
-										string title = curve.Link.Title;
-										if ( curve.Points[i].Tag is string )
-											title = curve.Points[i].Tag as string;
-										MakeAreaTag( "rect", coords, url,
-												curve.Link.Target, title, curve.Points[i].Tag, output );
-									}
-								}
-							}
-						}
+					  for ( int i=0; i < (curve is PieItem ? 1 : curve.Points.Count); i++ )
+					  {
+					    //if ( curve.GetCoords( pane, i, pane.Rect.Left, pane.Rect.Top, out coords ) )
+					    if (!curve.GetCoords(pane, i, out coords)) continue;
+
+					    if ( curve is PieItem )
+					    {
+					      MakeAreaTag( "poly", coords, curve.Link.Url,
+					                   curve.Link.Target, curve.Link.Title, curve.Link.Tag, output );
+					      // only one point for PieItems
+					      break;
+					    }
+					    else
+					    {
+					      // Add an "?index=4" type tag to the url to indicate which
+					      // point was selected
+					      string url;
+					      if ( curve.Link.Url != string.Empty )
+					        url = curve.Link.MakeCurveItemUrl( pane, curve, i );
+					      else
+					        url = "";
+
+					      string title = curve.Link.Title;
+					      if ( curve.Points[i].Tag is string )
+					        title = curve.Points[i].Tag as string;
+					      MakeAreaTag( "rect", coords, url,
+					                   curve.Link.Target, title, curve.Points[i].Tag, output );
+					    }
+					  }
 					}
 
-					// Then comes the GraphObjs behind the data points
+				  // Then comes the GraphObjs behind the data points
 					foreach ( GraphObj obj in pane.GraphObjList )
 					{
 						if ( obj.Link.IsActive && !obj.IsInFrontOfData )

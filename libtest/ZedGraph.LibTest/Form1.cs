@@ -1847,10 +1847,7 @@ namespace ZedGraph.LibTest
 
 #endif
 
-			if ( master != null )
-				_crossAxis = master[0].Y2Axis;
-			else
-				_crossAxis = myPane.YAxisList[1];
+			_crossAxis = master != null ? (Axis)((GraphPane)master[0]).Y2Axis : myPane.YAxisList[1];
 
 			trackBar1.Minimum = 0;
 			trackBar1.Maximum = 100;
@@ -1859,9 +1856,7 @@ namespace ZedGraph.LibTest
 			SetSize();
 
 			//this.WindowState = FormWindowState.Maximized ;
-			if ( this.myPane != null )
-				this.myPane.AxisChange( this.CreateGraphics() );
-      
+		  myPane?.AxisChange( CreateGraphics() );
 		}
 
 		private void CreateGraph_BasicDate()
@@ -2573,6 +2568,9 @@ namespace ZedGraph.LibTest
 		private void trackBar1_Scroll(object sender, EventArgs e)
 		{
 			Axis controlAxis = myPane.XAxis;
+      if (_crossAxis == null)
+        _crossAxis = myPane.XAxis;
+
 			if ( _crossAxis is XAxis )
 				controlAxis = myPane.YAxis;
 
@@ -2617,7 +2615,7 @@ namespace ZedGraph.LibTest
 		{
 			GraphPane pane = myPane;
 			if ( master != null )
-				pane = master[0];
+				pane = master[0] as GraphPane;
 
 			Axis controlAxis = pane.XAxis;
 			if ( _crossAxis is XAxis )

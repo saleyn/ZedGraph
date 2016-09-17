@@ -592,7 +592,8 @@ namespace ZedGraph
     {
       if (_masterPane != null)
       {
-        var pane = _masterPane.FindPane(_menuClickPt);
+        var pane = _masterPane.FindPane(_menuClickPt) as GraphPane;
+        if (pane == null) return;
 
         var handler = ResetScale;
         if (handler != null)
@@ -657,7 +658,7 @@ namespace ZedGraph
         }
       }
 
-      GraphPane graphPane = sender.MasterPane.FindPane(mousePoint);
+      var graphPane = sender.MasterPane.FindPane(mousePoint) as GraphPane;
 
       // No graph pane was hit.
       if (graphPane == null)
@@ -720,7 +721,7 @@ namespace ZedGraph
         }
       }
 
-      var graphPane = sender.MasterPane.FindPane(mousePoint);
+      var graphPane = sender.MasterPane.FindPane(mousePoint) as GraphPane;
 
       // No graph pane was hit.
       if (graphPane == null)

@@ -57,6 +57,7 @@
     <Compile Include="ZedGraph.Demo\BarGraphBandDemo.cs" />
     <Compile Include="ZedGraph.Demo\BaseTicDemo.cs" />
     <Compile Include="ZedGraph.Demo\FilteredPointDemo.cs" />
+    <Compile Include="ZedGraph.Demo\MasterPaneWithSplitter.cs" />
     <Compile Include="ZedGraph.Demo\OHLCBarRealTimeDemo.cs" />
     <Compile Include="ZedGraph.Demo\OHLCBarDemo.cs" />
     <Compile Include="ZedGraph.Demo\ChartTabForm.cs">

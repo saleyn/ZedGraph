@@ -19,6 +19,7 @@
 
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -585,7 +586,7 @@ namespace ZedGraph
       // Get a brush for the legend label text
       using ( SolidBrush brushB = new SolidBrush( Color.Black ) )
       {
-        foreach ( GraphPane tmpPane in paneList )
+        foreach ( GraphPane tmpPane in paneList.Where(p => p is GraphPane).Cast<GraphPane>() )
         {
           // Loop for each curve in the CurveList collection
           //foreach ( CurveItem curve in tmpPane.CurveList )
@@ -656,7 +657,7 @@ namespace ZedGraph
       float maxCharHeight = defaultCharHeight;
 
       // Find the largest charHeight, just in case the curves have individual fonts defined
-      foreach ( GraphPane tmpPane in paneList )
+      foreach ( GraphPane tmpPane in paneList.Where(p => p is GraphPane) )
       {
         foreach ( CurveItem curve in tmpPane.CurveList )
         {
@@ -704,38 +705,35 @@ namespace ZedGraph
     {
       index = -1;
 
-      if ( _rect.Contains( mousePt ) )
+      if (!_rect.Contains(mousePt)) return false;
+
+      int j = (int)( ( mousePt.Y - _rect.Top ) / _legendItemHeight );
+      int i = (int)( ( mousePt.X - _rect.Left - _tmpSize / 2.0f ) / _legendItemWidth );
+      if ( i < 0 )
+        i = 0;
+      if ( i >= _hStack )
+        i = _hStack - 1;
+
+      int pos = i + j * _hStack;
+      index = 0;
+
+      PaneList paneList = GetPaneList( pane );
+
+      foreach ( var tmpPane in paneList.Where(p => p is GraphPane).Cast<GraphPane>())
       {
-        int j = (int)( ( mousePt.Y - _rect.Top ) / _legendItemHeight );
-        int i = (int)( ( mousePt.X - _rect.Left - _tmpSize / 2.0f ) / _legendItemWidth );
-        if ( i < 0 )
-          i = 0;
-        if ( i >= _hStack )
-          i = _hStack - 1;
-
-        int pos = i + j * _hStack;
-        index = 0;
-
-        PaneList paneList = GetPaneList( pane );
-
-        foreach ( GraphPane tmpPane in paneList )
+        foreach ( CurveItem curve in tmpPane.CurveList )
         {
-          foreach ( CurveItem curve in tmpPane.CurveList )
+          if ( curve._label._isVisible && curve._label._text != string.Empty )
           {
-            if ( curve._label._isVisible && curve._label._text != string.Empty )
-            {
-              if ( pos == 0 )
-                return true;
-              pos--;
-            }
-            index++;
+            if ( pos == 0 )
+              return true;
+            pos--;
           }
+          index++;
         }
-
-        return true;
       }
-      else
-        return false;
+
+      return true;
     }
 
     private PaneList GetPaneList( PaneBase pane )
@@ -807,7 +805,7 @@ namespace ZedGraph
           tmpWidth,
           gapPix = _gap * _tmpSize;
 
-      foreach ( GraphPane tmpPane in paneList )
+      foreach ( GraphPane tmpPane in paneList.Where(p => p is GraphPane) )
       {
         // Loop through each curve in the curve list
         // Find the maximum width of the legend labels

@@ -20,6 +20,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ZedGraph
@@ -120,7 +121,7 @@ namespace ZedGraph
     /// Internal variable that stores the <see cref="GraphPane"/> reference for the Pane that is
     /// currently being zoomed or panned.
     /// </summary>
-    private GraphPane _currentPane = null;
+    private PaneBase _currentPane = null;
     /// <summary>
     /// Internal variable that stores a rectangle which is either the zoom rectangle, or the incremental
     /// pan amount since the last mousemove event.
@@ -259,7 +260,7 @@ namespace ZedGraph
     {
       lock ( this )
       {
-        if ( BeenDisposed || _masterPane == null || this.GraphPane == null )
+        if ( BeenDisposed || _masterPane == null || GraphPane == null )
           return;
 
         if ( hScrollBar1 != null && this.GraphPane != null &&
@@ -273,8 +274,11 @@ namespace ZedGraph
         base.OnPaint( e );
 
         // Add a try/catch pair since the users of the control can't catch this one
-        try { _masterPane.Draw( e.Graphics ); }
-        catch { }
+        try { _masterPane.Draw(e.Graphics); }
+        catch (Exception er)
+        {
+          var s = er.ToString();
+        }
 
         if (IsShowCrossHair && _mouseInBounds && !_lastCrosshairPoint.IsEmpty)
         {
@@ -284,32 +288,37 @@ namespace ZedGraph
             var sz = this.ClientSize;
             g.DrawLine(CrossHairPen, _lastCrosshairPoint.X, 0, _lastCrosshairPoint.X, sz.Height);
             g.DrawLine(CrossHairPen, 0, _lastCrosshairPoint.Y, sz.Width, _lastCrosshairPoint.Y);
+            return;
           }
-          else if (_currentPane != null && _currentPane.Chart.Rect.Contains(_lastCrosshairPoint))
+
+          var pane = _currentPane as GraphPane;
+
+          if (pane != null && !pane.CurveList.Any(c => c.IsPie)
+                           && pane.Chart.Rect.Contains(_lastCrosshairPoint))
           {
             // Invalidate new cross-hair location
-            var rect = _currentPane.Chart.Rect;
+            var rect = pane.Chart.Rect;
             g.SetClip(rect);
             g.DrawLine(CrossHairPen, (int)rect.Left, _lastCrosshairPoint.Y, (int)rect.Right, _lastCrosshairPoint.Y);
             g.DrawLine(CrossHairPen, _lastCrosshairPoint.X, (int)rect.Top, _lastCrosshairPoint.X, (int)rect.Bottom);
             g.ResetClip();
             
-            var xaxis = _currentPane.XAxis.Scale.Valid ? (Axis)_currentPane.XAxis : _currentPane.X2Axis;
-            var yaxis = _currentPane.YAxis.Scale.Valid ? (Axis)_currentPane.YAxis : _currentPane.Y2Axis;
+            var xaxis = pane.XAxis.Scale.Valid ? (Axis)pane.XAxis : pane.X2Axis;
+            var yaxis = pane.YAxis.Scale.Valid ? (Axis)pane.YAxis : pane.Y2Axis;
 
             // FIXME: This is experimental support of drawing crosshair values
             using (var brush = xaxis.Scale.FontSpec.Fill.MakeBrush(rect, null))
             {
-              var x = (int)Math.Round(xaxis.ReverseTransform(_currentPane, _lastCrosshairPoint.X));
-              var text = xaxis.Scale.MakeLabel(_currentPane, 0, x);
+              var x = (int)Math.Round(xaxis.ReverseTransform(pane, _lastCrosshairPoint.X));
+              var text = xaxis.Scale.MakeLabel(pane, 0, x);
 
-              CrossHairFontSpec.Draw(g, _currentPane, xaxis, text, _lastCrosshairPoint.X, rect.Height,
+              CrossHairFontSpec.Draw(g, pane, xaxis, text, _lastCrosshairPoint.X, rect.Height,
                 new SizeF(0, -1));
 
-              var y = (int)Math.Round(yaxis.ReverseTransform(_currentPane, _lastCrosshairPoint.Y));
-              text = yaxis.Scale.MakeLabel(_currentPane, 0, y);
+              var y = (int)Math.Round(yaxis.ReverseTransform(pane, _lastCrosshairPoint.Y));
+              text = yaxis.Scale.MakeLabel(pane, 0, y);
 
-              CrossHairFontSpec.Draw(g, _currentPane, yaxis, text, rect.Width, _lastCrosshairPoint.Y,
+              CrossHairFontSpec.Draw(g, pane, yaxis, text, rect.Width, _lastCrosshairPoint.Y,
                 new SizeF(0, 0));
             }
           }
@@ -411,9 +420,9 @@ namespace ZedGraph
 
       if ( _isSynchronizeXAxes || _isSynchronizeYAxes )
       {
-        foreach ( GraphPane pane in _masterPane._paneList )
+        foreach ( var pane in _masterPane.PaneList.Where(p => p is GraphPane).Cast<GraphPane>())
         {
-          ZoomState state = new ZoomState( pane, type );
+          var state = new ZoomState( pane, type );
           if ( pane == primaryPane )
             _zoomState = state;
           _zoomStateStack.Add( state );
@@ -437,16 +446,14 @@ namespace ZedGraph
     /// are taking place</param>
     private void ZoomStateRestore( GraphPane primaryPane )
     {
-      if ( _isSynchronizeXAxes || _isSynchronizeYAxes )
+      if (_isSynchronizeXAxes || _isSynchronizeYAxes)
       {
-        for ( int i = 0; i < _masterPane._paneList.Count; i++ )
-        {
-          if ( i < _zoomStateStack.Count )
-            _zoomStateStack[i].ApplyState( _masterPane._paneList[i] );
-        }
+        for (var i = 0; i < _masterPane.PaneList.Count; i++)
+          if (i < _zoomStateStack.Count)
+            _zoomStateStack[i].ApplyState(_masterPane.PaneList[i] as GraphPane);
       }
-      else if ( _zoomState != null )
-        _zoomState.ApplyState( primaryPane );
+      else
+        _zoomState?.ApplyState(primaryPane);
 
       ZoomStateClear();
     }
@@ -464,18 +471,21 @@ namespace ZedGraph
     /// <returns>The <see cref="ZoomState" /> that corresponds to the
     /// <see paramref="primaryPane" />.
     /// </returns>
-    private void ZoomStatePush( GraphPane primaryPane )
+    private void ZoomStatePush( PaneBase primaryPane )
     {
+      var pane = primaryPane as GraphPane;
+      if (pane == null) return;
+
       if ( _isSynchronizeXAxes || _isSynchronizeYAxes )
       {
-        for ( int i = 0; i < _masterPane._paneList.Count; i++ )
+        for ( int i = 0; i < _masterPane.PaneList.Count; i++ )
         {
-          if ( i < _zoomStateStack.Count )
-            _masterPane._paneList[i].ZoomStack.Add( _zoomStateStack[i] );
+          if ( i < _zoomStateStack.Count && _masterPane.PaneList[i] is GraphPane)
+            ((GraphPane)_masterPane.PaneList[i]).ZoomStack.Add( _zoomStateStack[i] );
         }
       }
       else if ( _zoomState != null )
-        primaryPane.ZoomStack.Add( _zoomState );
+        pane.ZoomStack.Add( _zoomState );
 
       ZoomStateClear();
     }
@@ -494,7 +504,7 @@ namespace ZedGraph
     /// </summary>
     private void ZoomStatePurge()
     {
-      foreach ( GraphPane pane in _masterPane._paneList )
+      foreach ( var pane in _masterPane.PaneList.Where(p => p is GraphPane).Cast<GraphPane>())
         pane.ZoomStack.Clear();
     }
 

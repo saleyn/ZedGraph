@@ -167,6 +167,7 @@ namespace ZedGraph
     /// copied.</param>
     public void ApplyState( GraphPane pane )
     {
+      if (pane == null) return;
       _xAxis.ApplyScale( pane.XAxis );
       _x2Axis.ApplyScale( pane.X2Axis );
       _yAxis.ApplyScale( pane.YAxisList );
@@ -181,10 +182,11 @@ namespace ZedGraph
     /// <returns>true if the states are different, false otherwise</returns>
     public bool IsChanged( GraphPane pane )
     {
-      return _xAxis.IsChanged( pane.XAxis ) ||
-          _x2Axis.IsChanged( pane.X2Axis ) ||
-          _yAxis.IsChanged( pane.YAxisList ) ||
-          _y2Axis.IsChanged( pane.Y2AxisList );
+      return pane != null &&
+         (_xAxis.IsChanged(pane.XAxis) ||
+          _x2Axis.IsChanged(pane.X2Axis) ||
+          _yAxis.IsChanged(pane.YAxisList) ||
+          _y2Axis.IsChanged(pane.Y2AxisList));
     }
 
   }

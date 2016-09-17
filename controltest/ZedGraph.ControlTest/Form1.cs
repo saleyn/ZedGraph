@@ -15,6 +15,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using ZedGraph;
 
@@ -1019,7 +1020,7 @@ namespace ZedGraph.ControlTest
 			// ================================================
 
 			// Get a reference to the pane
-			GraphPane pane = master[0];
+			var pane = master[0] as GraphPane;
 
 			// Set the title and axis labels   
 			pane.Title.Text = "Open-High-Low-Close History";
@@ -1048,7 +1049,7 @@ namespace ZedGraph.ControlTest
 			// ================================================
 
 			// Get a reference to the pane
-			pane = master[1];
+			pane = master[1] as GraphPane;
 
 			// Set the title and axis labels   
 			pane.Title.Text = "Daily Volume";
@@ -1062,7 +1063,7 @@ namespace ZedGraph.ControlTest
 			// ================================================
 
 			// Get a reference to the pane
-			pane = master[2];
+			pane = master[2] as GraphPane;
 
 			// Set the title and axis labels   
 			pane.Title.Text = "Price Change";
@@ -1075,7 +1076,7 @@ namespace ZedGraph.ControlTest
 			// These settings are common to all three panes
 			// ================================================
 
-			foreach ( GraphPane paneT in master.PaneList )
+			foreach ( var paneT in master.PaneList.Where(p => p is GraphPane).Cast<GraphPane>())
 			{
 				// Use DateAsOrdinal to skip weekend gaps
 				paneT.XAxis.Type = AxisType.DateAsOrdinal;
@@ -2293,7 +2294,7 @@ namespace ZedGraph.ControlTest
 				master.Add( myPaneT );
 			}
 
-			using ( Graphics g = this.CreateGraphics() )
+			using ( var g = this.CreateGraphics() )
 			{
 				// Align the GraphPanes vertically
 				//master.SetLayout( g, false, new int[] { 3 }, new float[] { 1, 1, 1 } );
@@ -2304,8 +2305,8 @@ namespace ZedGraph.ControlTest
 				// call Draw() to force the ChartRect to be calculated
 				master.Draw( g );
 
-				float h1 = master[0].Chart.Rect.Height;
-				float h2 = master[1].Chart.Rect.Height;
+				float h1 = ((GraphPane)master[0]).Chart.Rect.Height;
+				float h2 = ((GraphPane)master[1]).Chart.Rect.Height;
 
 				RectangleF rect0 = master[0].Rect;
 				rect0.Height += h2 - h1;
@@ -2324,7 +2325,7 @@ namespace ZedGraph.ControlTest
 //				master.AxisChange( g );
 			}
 
-			GraphPane myPane = master[0];
+			GraphPane myPane = (GraphPane)master[0];
 
 			int position = myPane.CurveList.IndexOf( "Exact Name of Curve" );
 			if ( position >= 0 )
@@ -3347,7 +3348,7 @@ namespace ZedGraph.ControlTest
 		{
 			MasterPane master = z1.MasterPane;
 
-			GraphPane myPane = z1.MasterPane[0];
+			var myPane = z1.MasterPane[0] as GraphPane;
 
 			// Fill the background
 			master.Fill = new Fill( Color.White, Color.FromArgb( 220, 220, 255 ), 45.0f );
@@ -3591,7 +3592,7 @@ namespace ZedGraph.ControlTest
 		bool xz1_DoubleClickEvent( ZedGraphControl sender, MouseEventArgs e )
 		{
 			PointF pt = new PointF( e.X, e.Y );
-			GraphPane pane;
+			PaneBase foundPane;
 			string thing = "nothing";
 
 			using ( Graphics g = CreateGraphics() )
@@ -3599,16 +3600,16 @@ namespace ZedGraph.ControlTest
 				object obj;
 				int i;
 
-				if ( sender.MasterPane.FindNearestPaneObject( pt, g, out pane, out obj, out i ) )
+				if ( sender.MasterPane.FindNearestPaneObject( pt, g, out foundPane, out obj, out i ) )
 				{
 					if ( obj != null )
 						thing = obj.ToString();
 				}
-				else
+				else if (!(foundPane is GraphPane))
 				{
-					pane = sender.MasterPane.FindPane( pt );
+					var pane = sender.MasterPane.FindPane( pt );
 					if ( pane != null )
-						thing = "GraphPane";
+						thing = nameof(pane);
 				}
 			}
 
@@ -4060,7 +4061,7 @@ namespace ZedGraph.ControlTest
 
 		private void CreateGraph_Gantt2( ZedGraphControl zgc )
 		{
-			GraphPane myPane = zgc.MasterPane[0];
+			GraphPane myPane = zgc.MasterPane[0] as GraphPane;
 
 			// Set the title and axis labels 
 			myPane.Title.Text = "Tony's TimeLine";
@@ -5890,7 +5891,7 @@ namespace ZedGraph.ControlTest
 		*/
 		private void CreateGraph_DataSourcePointList( ZedGraphControl z1 )
 		{
-			GraphPane myPane = z1.MasterPane[0];
+			GraphPane myPane = z1.MasterPane[0] as GraphPane;
 
 			myPane.Title.Text = "Statistics";
 			myPane.XAxis.Title.Text = "Job";
@@ -6219,7 +6220,7 @@ namespace ZedGraph.ControlTest
 
 		private void CreateGraph_BarJunk4( ZedGraphControl zg1 )
 		{
-			GraphPane gp = zg1.MasterPane[0];
+			GraphPane gp = zg1.MasterPane[0] as GraphPane;
 			Random rnd = new Random();
 			DateTime entryDate = DateTime.Now;
 
@@ -6685,7 +6686,7 @@ namespace ZedGraph.ControlTest
 
 		private void CreateGraph_MulticolorFilledBarDemo( ZedGraphControl z1 )
 		{
-			GraphPane myPane = z1.MasterPane[0];
+			GraphPane myPane = z1.MasterPane[0] as GraphPane;
 
 //			string subChartName = ( SubReport.Visible ) ? " - " + SubReport.SelectedItem.Text : string.Empty;
 			myPane.Title.Text = "My Report Name";

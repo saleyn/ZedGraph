@@ -21,6 +21,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ZedGraph
@@ -277,13 +278,10 @@ namespace ZedGraph
     {
       get
       {
+        if (_masterPane == null) return null;
         // Just return the first GraphPane in the list
         lock ( this )
-        {
-          return _masterPane != null && _masterPane.PaneList.Count > 0
-            ? _masterPane[0]
-            : null;
-        }
+          return _masterPane.PaneList.Where(p => p is GraphPane).Cast<GraphPane>().FirstOrDefault();
       }
 
       set

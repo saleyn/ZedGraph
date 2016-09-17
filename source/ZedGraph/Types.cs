@@ -892,6 +892,8 @@ namespace ZedGraph
   [Flags]
   public enum MouseWheelActions
   {
+    None = 0,
+
     /// <summary>
     /// Pan current pane horizontally
     /// </summary>

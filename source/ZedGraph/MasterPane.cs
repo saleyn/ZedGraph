@@ -48,34 +48,6 @@ namespace ZedGraph
   #region Fields
 
     /// <summary>
-    /// Private field that holds a collection of <see cref="GraphPane"/> objects for inclusion
-    /// in this <see cref="MasterPane"/>.  Use the public property <see cref="PaneList"/>
-    /// to access this collection.
-    /// </summary>
-    internal PaneList _paneList;
-    /// <summary>
-    /// Private field that sets the amount of space between the GraphPanes.  Use the public property
-    /// <see cref="InnerPaneGap"/> to access this value;
-    /// </summary>
-    internal float _innerPaneGap;
-    /// <summary>
-    ///Private field that stores a boolean value which signifies whether all 
-    ///<see cref="ZedGraph.GraphPane"/>s in the chart use the same entries in their 
-    ///<see cref="Legend"/>  If set to true, only one set of entries will be displayed in 
-    ///this <see cref="Legend"/> instance.  If set to false, this instance will display all 
-    ///entries from all <see cref="ZedGraph.GraphPane"/>s.
-    /// </summary>
-    private bool _isUniformLegendEntries;
-    /// <summary>
-    /// private field that determines if the
-    /// <see cref="DoLayout(Graphics)" />
-    /// function will automatically set
-    /// the <see cref="PaneBase.BaseDimension" /> of each <see cref="GraphPane" /> in the
-    /// <see cref="PaneList" /> such that the scale factors have the same value.
-    /// </summary>
-    private bool _isCommonScaleFactor;
-
-    /// <summary>
     /// private field that saves the paneLayout format specified when
     /// <see cref="SetLayout(Graphics,PaneLayout)"/> was called. This value will
     /// default to <see cref="MasterPane.Default.PaneLayout"/> if
@@ -110,12 +82,6 @@ namespace ZedGraph
     private PaneLayoutMgr _paneLayoutMgr;
 */
     /// <summary>
-    /// private field that determines if anti-aliased drawing will be forced on.  Use the
-    /// public property <see cref="IsAntiAlias"/> to access this value.
-    /// </summary>
-    private bool _isAntiAlias = false;
-
-    /// <summary>
     /// The rectangle that is set to the the clipping area in the call to OnPaint.
     /// </summary>
     [CLSCompliant(false)]
@@ -143,13 +109,18 @@ namespace ZedGraph
       public static PaneLayout PaneLayout = PaneLayout.SquareColPreferred;
 
       /// <summary>
-      /// The default value for the <see cref="Default.InnerPaneGap"/> property.
+      /// The default value for the <see cref="MasterPane.InnerPaneGap"/> property.
       /// This is the size of the margin between adjacent <see cref="GraphPane"/>
       /// objects, in units of points (1/72 inch).
       /// </summary>
       /// <seealso cref="MasterPane.InnerPaneGap"/>
       public static float InnerPaneGap = 10;
-      
+    
+      /// <summary>
+      /// The default value for the <see cref="MasterPane.PaneSplitterSize"/> property.
+      /// </summary>
+      public static float PaneSplitterSize = 3;
+        
       /// <summary>
       /// The default value for the <see cref="Legend.IsVisible"/> property for
       /// the <see cref="MasterPane"/> class.
@@ -169,16 +140,12 @@ namespace ZedGraph
   #region Properties
 
     /// <summary>
-    /// Gets or sets the <see cref="PaneList"/> collection instance that holds the list of
+    /// Gets or sets the <see cref="ZedGraph.PaneList"/> collection instance that holds the list of
     /// <see cref="GraphPane"/> objects that are included in this <see cref="MasterPane"/>.
     /// </summary>
     /// <seealso cref="Add"/>
     /// <seealso cref="MasterPane.this[int]"/>
-    public PaneList PaneList
-    {
-      get { return _paneList; }
-      set { _paneList = value; }
-    }
+    public PaneList PaneList { get; set; }
 /*
     /// <summary>
     /// Gets the <see cref="PaneLayoutMgr" /> instance, which manages the pane layout
@@ -203,25 +170,23 @@ namespace ZedGraph
     /// <see cref="Default.InnerPaneGap"/>.
     /// </remarks>
     /// <value>The value is in points (1/72nd inch).</value>
-    public float InnerPaneGap
-    {
-      get { return _innerPaneGap; }
-      set { _innerPaneGap = value; }
-    }
+    public float InnerPaneGap { get; set; } = Default.InnerPaneGap;
+
+    /// <summary>
+    /// Gets or sets the size of the pane splitter
+    /// </summary>
+    public float PaneSplitterSize { get; set; } = Default.PaneSplitterSize;
+
     /// <summary>
     /// Gets or set the value of the   <see cref="IsUniformLegendEntries"/>
     /// </summary>
-    public bool IsUniformLegendEntries
-    {
-      get { return (_isUniformLegendEntries); }
-      set { _isUniformLegendEntries = value; } 
-    }
+    public bool IsUniformLegendEntries { get; set; } = Default.IsUniformLegendEntries;
 
     /// <summary>
     /// Gets or sets a value that determines if the
     /// <see cref="DoLayout(Graphics)" /> method will automatically set the
     /// <see cref="PaneBase.BaseDimension" />
-    /// of each <see cref="GraphPane" /> in the <see cref="PaneList" /> such that the
+    /// of each <see cref="GraphPane" /> in the <see cref="ZedGraph.PaneList" /> such that the
     /// scale factors have the same value.
     /// </summary>
     /// <remarks>
@@ -235,11 +200,7 @@ namespace ZedGraph
     /// <seealso cref="SetLayout(Graphics,bool,int[])" />
     /// <seealso cref="SetLayout(Graphics,bool,int[],float[])" />
     /// <seealso cref="ReSize(Graphics,RectangleF)" />
-    public bool IsCommonScaleFactor
-    {
-      get { return _isCommonScaleFactor; }
-      set { _isCommonScaleFactor = value; }
-    }
+    public bool IsCommonScaleFactor { get; set; } = Default.IsCommonScaleFactor;
 
     /// <summary>
     /// Gets or sets a value that determines if all drawing operations for this
@@ -248,11 +209,7 @@ namespace ZedGraph
     /// Otherwise, the sub-object settings (such as <see cref="FontSpec.IsAntiAlias"/>)
     /// will be honored.
     /// </summary>
-    public bool IsAntiAlias
-    {
-      get { return _isAntiAlias; }
-      set { _isAntiAlias = value; }
-    }
+    public bool IsAntiAlias { get; set; }
 
   #endregion
   
@@ -271,18 +228,13 @@ namespace ZedGraph
     /// </summary>
     public MasterPane( string title, RectangleF paneRect ) : base( title, paneRect )
     {
-      _innerPaneGap = Default.InnerPaneGap;
+      InnerPaneGap = Default.InnerPaneGap;
 
       //_paneLayoutMgr = new PaneLayoutMgr();
 
-      _isUniformLegendEntries = Default.IsUniformLegendEntries ;
-      _isCommonScaleFactor = Default.IsCommonScaleFactor;
-
-      _paneList = new PaneList();
+      PaneList = new PaneList();
 
       _legend.IsVisible = Default.IsShowLegend;
-
-      _isAntiAlias = false;
 
       InitLayout();
     }
@@ -303,18 +255,18 @@ namespace ZedGraph
     {
       // copy all the value types
       //_paneLayoutMgr = rhs._paneLayoutMgr.Clone();
-      _innerPaneGap = rhs._innerPaneGap;
-      _isUniformLegendEntries = rhs._isUniformLegendEntries;
-      _isCommonScaleFactor = rhs._isCommonScaleFactor;
+      InnerPaneGap = rhs.InnerPaneGap;
+      IsUniformLegendEntries = rhs.IsUniformLegendEntries;
+      IsCommonScaleFactor = rhs.IsCommonScaleFactor;
 
       // Then, fill in all the reference types with deep copies
-      _paneList = rhs._paneList.Clone();
+      PaneList = rhs.PaneList.Clone();
 
       _paneLayout = rhs._paneLayout;
       _countList = rhs._countList;
       _isColumnSpecified = rhs._isColumnSpecified;
       _prop = rhs._prop;
-      _isAntiAlias = rhs._isAntiAlias;
+      IsAntiAlias = rhs.IsAntiAlias;
     }
 
     /// <summary>
@@ -359,12 +311,12 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32( "schema2" );
 
-      _paneList = (PaneList) info.GetValue( "paneList", typeof(PaneList) );
+      PaneList = (PaneList) info.GetValue( "paneList", typeof(PaneList) );
       //_paneLayoutMgr = (PaneLayoutMgr) info.GetValue( "paneLayoutMgr", typeof(PaneLayoutMgr) );
-      _innerPaneGap = info.GetSingle( "innerPaneGap" );
+      InnerPaneGap = info.GetSingle( "innerPaneGap" );
 
-      _isUniformLegendEntries = info.GetBoolean( "isUniformLegendEntries" );
-      _isCommonScaleFactor = info.GetBoolean( "isCommonScaleFactor" );
+      IsUniformLegendEntries = info.GetBoolean( "isUniformLegendEntries" );
+      IsCommonScaleFactor = info.GetBoolean( "isCommonScaleFactor" );
 
       _paneLayout = (PaneLayout)info.GetValue( "paneLayout", typeof( PaneLayout ) );
       _countList = (int[])info.GetValue( "countList", typeof( int[] ) );
@@ -373,7 +325,7 @@ namespace ZedGraph
       _prop = (float[])info.GetValue( "prop", typeof( float[] ) );
 
       if ( sch >= 11 )
-        _isAntiAlias = info.GetBoolean( "isAntiAlias" );
+        IsAntiAlias = info.GetBoolean( "isAntiAlias" );
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -386,19 +338,19 @@ namespace ZedGraph
       base.GetObjectData( info, context );
       info.AddValue( "schema2", schema2 );
 
-      info.AddValue( "paneList", _paneList );
+      info.AddValue( "paneList", PaneList );
       //info.AddValue( "paneLayoutMgr", _paneLayoutMgr );
-      info.AddValue( "innerPaneGap", _innerPaneGap );
+      info.AddValue( "innerPaneGap", InnerPaneGap );
 
-      info.AddValue( "isUniformLegendEntries", _isUniformLegendEntries );
-      info.AddValue( "isCommonScaleFactor", _isCommonScaleFactor );
+      info.AddValue( "isUniformLegendEntries", IsUniformLegendEntries );
+      info.AddValue( "isCommonScaleFactor", IsCommonScaleFactor );
 
       info.AddValue( "paneLayout", _paneLayout );
       info.AddValue( "countList", _countList );
       info.AddValue( "isColumnSpecified", _isColumnSpecified );
       info.AddValue( "prop", _prop );
 
-      info.AddValue( "isAntiAlias", _isAntiAlias );
+      info.AddValue( "isAntiAlias", IsAntiAlias );
     }
 
     /// <summary>
@@ -415,44 +367,41 @@ namespace ZedGraph
 
   #region List Methods
     /// <summary>
-    /// Indexer to access the specified <see cref="GraphPane"/> object from <see cref="PaneList"/>
+    /// Indexer to access the specified <see cref="GraphPane"/> object from <see cref="ZedGraph.PaneList"/>
     /// by its ordinal position in the list.
     /// </summary>
     /// <param name="index">The ordinal position (zero-based) of the
     /// <see cref="GraphPane"/> object to be accessed.</param>
     /// <value>A <see cref="GraphPane"/> object reference.</value>
-    public GraphPane this[ int index ]  
+    public PaneBase this[ int index ]  
     {
-      get { return( (GraphPane) _paneList[index] ); }
-      set { _paneList[index] = value; }
+      get { return PaneList[index];  }
+      set { PaneList[index] = value; }
     }
 
     /// <summary>
-    /// Indexer to access the specified <see cref="GraphPane"/> object from <see cref="PaneList"/>
+    /// Indexer to access the specified <see cref="GraphPane"/> object from <see cref="ZedGraph.PaneList"/>
     /// by its <see cref="PaneBase.Title"/> string.
     /// </summary>
     /// <param name="title">The string title of the
     /// <see cref="GraphPane"/> object to be accessed.</param>
     /// <value>A <see cref="GraphPane"/> object reference.</value>
-    public GraphPane this[ string title ]  
-    {
-      get { return _paneList[title]; }
-    }
+    public PaneBase this[ string title ] => PaneList[title];
 
     /// <summary>
-    /// Add a <see cref="GraphPane"/> object to the <see cref="PaneList"/> collection at the end of the list.
+    /// Add a <see cref="GraphPane"/> object to the <see cref="ZedGraph.PaneList"/> collection at the end of the list.
     /// </summary>
     /// <param name="pane">A reference to the <see cref="GraphPane"/> object to
     /// be added</param>
     /// <seealso cref="IList.Add"/>
-    public void Add( GraphPane pane )
+    public void Add( PaneBase pane )
     {
-      _paneList.Add( pane );
+      PaneList.Add( pane );
     }
 
     /// <summary>
     /// Call <see cref="GraphPane.AxisChange()"/> for all <see cref="GraphPane"/> objects in the
-    /// <see cref="PaneList"/> list.
+    /// <see cref="ZedGraph.PaneList"/> list.
     /// </summary>
     /// <remarks>
     /// This overload of AxisChange just uses a throw-away bitmap as Graphics.
@@ -468,7 +417,7 @@ namespace ZedGraph
 
     /// <summary>
     /// Call <see cref="GraphPane.AxisChange()"/> for all <see cref="GraphPane"/> objects in the
-    /// <see cref="PaneList"/> list.
+    /// <see cref="ZedGraph.PaneList"/> list.
     /// </summary>
     /// <param name="g">
     /// A graphic device object to be drawn into.  This is normally e.Graphics from the
@@ -476,7 +425,7 @@ namespace ZedGraph
     /// </param>
     public void AxisChange( Graphics g )
     {
-      foreach ( GraphPane pane in _paneList )
+      foreach ( var pane in PaneList.Where(p => p is GraphPane).Cast<GraphPane>() )
         pane.AxisChange( g );
     }
 
@@ -532,7 +481,7 @@ namespace ZedGraph
     /// Method that forces the scale factor calculations
     /// (via <see cref="PaneBase.CalcScaleFactor" />),
     /// to give a common scale factor for all <see cref="GraphPane" /> objects in the
-    /// <see cref="PaneList" />.
+    /// <see cref="ZedGraph.PaneList" />.
     /// </summary>
     /// <remarks>
     /// This will make it such that a given font size will result in the same output font
@@ -543,28 +492,27 @@ namespace ZedGraph
     /// <seealso cref="IsCommonScaleFactor" />
     public void CommonScaleFactor()
     {
-      if ( _isCommonScaleFactor )
+      if (!IsCommonScaleFactor) return;
+      
+      // Find the maximum scaleFactor of all the GraphPanes
+      float maxFactor = 0;
+      foreach ( var pane in PaneList )
       {
-        // Find the maximum scaleFactor of all the GraphPanes
-        float maxFactor = 0;
-        foreach ( GraphPane pane in PaneList )
-        {
-          pane.BaseDimension = PaneBase.Default.BaseDimension;
-          float scaleFactor = pane.CalcScaleFactor();
-          maxFactor = scaleFactor > maxFactor ? scaleFactor : maxFactor;
-        }
+        pane.BaseDimension = PaneBase.Default.BaseDimension;
+        var scaleFactor = pane.CalcScaleFactor();
+        maxFactor = scaleFactor > maxFactor ? scaleFactor : maxFactor;
+      }
 
-        // Now, calculate the base dimension
-        foreach ( GraphPane pane in PaneList )
-        {
-          float scaleFactor = pane.CalcScaleFactor();
-          pane.BaseDimension *= scaleFactor / maxFactor;
-        }
+      // Now, calculate the base dimension
+      foreach ( var pane in PaneList )
+      {
+        var scaleFactor = pane.CalcScaleFactor();
+        pane.BaseDimension *= scaleFactor / maxFactor;
       }
     }
 
     /// <summary>
-    /// Render all the <see cref="GraphPane"/> objects in the <see cref="PaneList"/> to the
+    /// Render all the <see cref="GraphPane"/> objects in the <see cref="ZedGraph.PaneList"/> to the
     /// specified graphics device.
     /// </summary>
     /// <remarks>This method should be part of the Paint() update process.  Calling this routine
@@ -583,23 +531,21 @@ namespace ZedGraph
       _clipRectF = g.ClipBounds;
 
       // Save current AntiAlias mode
-      SmoothingMode sModeSave = g.SmoothingMode;
-      TextRenderingHint sHintSave = g.TextRenderingHint;
-      CompositingQuality sCompQual = g.CompositingQuality;
-      InterpolationMode sInterpMode = g.InterpolationMode;
+      var sModeSave = g.SmoothingMode;
+      var sHintSave = g.TextRenderingHint;
+      var sCompQual = g.CompositingQuality;
+      var sInterpMode = g.InterpolationMode;
 
-      SetAntiAliasMode(g, _isAntiAlias);
+      SetAntiAliasMode(g, IsAntiAlias);
 
       // Draw the pane border & background fill, the title, and the GraphObj objects that lie at
       // ZOrder.GBehindAll
       base.Draw( g );
 
-
-
       if ( _rect.Width <= 1 || _rect.Height <= 1 )
         return;
 
-      float scaleFactor = CalcScaleFactor();
+      var scaleFactor = CalcScaleFactor();
 
       // Clip everything to the rect
       g.SetClip( _rect );
@@ -614,9 +560,10 @@ namespace ZedGraph
       // Reset the clipping
       g.ResetClip();
 
-      foreach (GraphPane pane in _paneList)
+      foreach (PaneBase pane in PaneList)
       {
-        pane.CurveClipRect = _clipRectF;
+        if (pane is GraphPane)
+          ((GraphPane)pane).CurveClipRect = _clipRectF;
         pane.Draw(g);
       }
 
@@ -627,7 +574,7 @@ namespace ZedGraph
       
       // Recalculate the legend rect, just in case it has not yet been done
       // innerRect is the area for the GraphPane's
-      RectangleF innerRect = CalcClientRect( g, scaleFactor );
+      var innerRect = CalcClientRect( g, scaleFactor );
       _legend.CalcRect( g, this, scaleFactor, ref innerRect );
       //this.legend.SetLocation( this, 
       
@@ -643,7 +590,6 @@ namespace ZedGraph
       g.TextRenderingHint = sHintSave;
       g.CompositingQuality = sCompQual;
       g.InterpolationMode = sInterpMode;
-
     }
 
     /// <summary>
@@ -688,7 +634,7 @@ namespace ZedGraph
     /// index will be -1 if no data points are available.</param>
     /// <returns>true if a <see cref="GraphPane"/> was found, false otherwise.</returns>
     /// <seealso cref="GraphPane.FindNearestObject"/>
-    public bool FindNearestPaneObject( PointF mousePt, Graphics g, out GraphPane pane,
+    public bool FindNearestPaneObject( PointF mousePt, Graphics g, out PaneBase pane,
       out object nearestObj, out int index )
     {
       pane = null;
@@ -716,40 +662,35 @@ namespace ZedGraph
         }
       }
 
-      foreach ( GraphPane tPane in _paneList )
+      foreach ( var tPane in PaneList )
       {
-        if ( tPane.Rect.Contains( mousePt ) )
-        {
-          pane = tPane;
-          return tPane.FindNearestObject( mousePt, g, out nearestObj, out index );
-        }
+        if (!tPane.Rect.Contains(mousePt)) continue;
+        pane = tPane;
+        return tPane.FindNearestObject( mousePt, g, out nearestObj, out index );
       }
 
       // If no items were found in the GraphPanes, then return the item found on the MasterPane (if any)
-      if ( saveGraphItem != null )
-      {
-        nearestObj = saveGraphItem;
-        index = saveIndex;
-        return true;
-      }
+      if (saveGraphItem == null) return false;
 
-      return false;
+      nearestObj = saveGraphItem;
+      index = saveIndex;
+      return true;
     }
 
     /// <summary>
-    /// Find the <see cref="GraphPane"/> within the <see cref="PaneList"/> that contains the
+    /// Find the <see cref="GraphPane"/> within the <see cref="ZedGraph.PaneList"/> that contains the
     /// <see paramref="mousePt"/> within its <see cref="PaneBase.Rect"/>.
     /// </summary>
     /// <param name="mousePt">The mouse point location where you want to search</param>
     /// <returns>A <see cref="GraphPane"/> object that contains the mouse point, or
     /// null if no <see cref="GraphPane"/> was found.</returns>
-    public GraphPane FindPane( PointF mousePt )
+    public PaneBase FindPane( PointF mousePt )
     {
-      return _paneList.FirstOrDefault(pane => pane.Rect.Contains(mousePt));
+      return PaneList.FirstOrDefault(pane => pane.Rect.Contains(mousePt));
     }
 
     /// <summary>
-    /// Find the <see cref="GraphPane"/> within the <see cref="PaneList"/> that contains the
+    /// Find the <see cref="GraphPane"/> within the <see cref="ZedGraph.PaneList"/> that contains the
     /// <see paramref="mousePt"/> within its <see cref="Chart.Rect"/>.
     /// </summary>
     /// <param name="mousePt">The mouse point location where you want to search</param>
@@ -757,7 +698,8 @@ namespace ZedGraph
     /// null if no <see cref="GraphPane"/> was found.</returns>
     public GraphPane FindChartRect( PointF mousePt )
     {
-      return _paneList.FirstOrDefault(pane => pane.Chart._rect.Contains(mousePt));
+      return (GraphPane)PaneList.FirstOrDefault
+        (pane => pane is GraphPane && ((GraphPane)pane).Chart._rect.Contains(mousePt));
     }
 
   #endregion
@@ -828,7 +770,7 @@ namespace ZedGraph
       if ( columns < 1 )
         columns = 1;
 
-      int[] countList = new int[rows];
+      var countList = new int[rows];
 
       for ( int i = 0; i < rows; i++ )
         countList[i] = columns;
@@ -903,28 +845,27 @@ namespace ZedGraph
       InitLayout();
 
       // use defaults if the parameters are invalid
-      if ( countList != null && countList.Length > 0 )
+      if (countList == null || countList.Length <= 0) return;
+
+      _prop = new float[countList.Length];
+
+      // Sum up the total proportional factors
+      var sumProp = 0.0f;
+      for ( var i = 0; i < countList.Length; i++ )
       {
-        _prop = new float[countList.Length];
-
-        // Sum up the total proportional factors
-        float sumProp = 0.0f;
-        for ( int i = 0; i < countList.Length; i++ )
-        {
-          _prop[i] = ( proportion == null || proportion.Length <= i || proportion[i] < 1e-10 ) ?
-                        1.0f : proportion[i];
-          sumProp += _prop[i];
-        }
-
-        // Make prop sum to 1.0
-        for ( int i = 0; i < countList.Length; i++ )
-          _prop[i] /= sumProp;
-
-        _isColumnSpecified = isColumnSpecified;
-        _countList = countList;
-
-        DoLayout( g );
+        _prop[i] = ( proportion == null || proportion.Length <= i || proportion[i] < 1e-10 ) ?
+                     1.0f : proportion[i];
+        sumProp += _prop[i];
       }
+
+      // Make prop sum to 1.0
+      for ( int i = 0; i < countList.Length; i++ )
+        _prop[i] /= sumProp;
+
+      _isColumnSpecified = isColumnSpecified;
+      _countList = countList;
+
+      DoLayout( g );
     }
 
     /// <summary>
@@ -944,7 +885,7 @@ namespace ZedGraph
         DoLayout( g, _isColumnSpecified, _countList, _prop );
       else
       {
-        int count = _paneList.Count;
+        int count = PaneList.Count;
         if ( count == 0 )
           return;
 
@@ -1026,7 +967,7 @@ namespace ZedGraph
       if ( columns < 1 )
         columns = 1;
 
-      int[] countList = new int[rows];
+      var countList = new int[rows];
 
       for ( int i = 0; i < rows; i++ )
         countList[i] = columns;
@@ -1042,6 +983,8 @@ namespace ZedGraph
     internal void DoLayout( Graphics g, bool isColumnSpecified, int[] countList,
           float[] proportion )
     {
+      Func<PaneList, int, bool> isSplitter = (list, i) =>
+        i < list.Count && list[i] is SplitterPane;
 
       // calculate scaleFactor on "normal" pane size (BaseDimension)
       float scaleFactor = CalcScaleFactor();
@@ -1051,77 +994,142 @@ namespace ZedGraph
       _legend.CalcRect( g, this, scaleFactor, ref innerRect );
 
       // scaled InnerGap is the area between the GraphPane.Rect's
-      float scaledInnerGap = (float)( _innerPaneGap * scaleFactor );
+      var scaledInnerGap = InnerPaneGap * scaleFactor;
 
       int iPane = 0;
 
-      if ( isColumnSpecified )
+      if (isColumnSpecified)
       {
-        int rows = countList.Length;
+        var rows = countList.Length;
+        var y = innerRect.Y;
 
-        float y = 0.0f;
+        var rowSplitters = 0;
+        int iPaneCnt = 0;
 
-        for ( int rowNum = 0; rowNum < rows; rowNum++ )
+        for (var row = 0; row < rows; row++)
         {
-          float propFactor = _prop == null ? 1.0f / rows : _prop[rowNum];
+          var columns = Math.Max(1, countList[row]);
+          iPaneCnt += columns;
+          if (iPaneCnt < PaneList.Count && this[iPaneCnt] is SplitterPane)
+            rowSplitters++;
+        }
 
-          float height = ( innerRect.Height - (float)( rows - 1 ) * scaledInnerGap ) *
-                  propFactor;
+        for (var row = 0; row < rows; row++)
+        {
+          var cols = Math.Max(1, countList[row]);
+          var colSplitters = 0;
 
-          int columns = countList[rowNum];
-          if ( columns <= 0 )
-            columns = 1;
-          float width = ( innerRect.Width - (float)( columns - 1 ) * scaledInnerGap ) /
-                  (float)columns;
+          for (int col = 0; col < cols; col++)
+            if (this[iPane + col] is SplitterPane)
+              colSplitters++;
 
-          for ( int colNum = 0; colNum < columns; colNum++ )
+          var graphPanelRows = rows - rowSplitters;
+          var graphPanelCols = cols - colSplitters;
+          var graphPanelVGaps = graphPanelRows - rowSplitters - 1;
+          var graphPanelHGaps = graphPanelCols - colSplitters - 1;
+
+          var height = graphPanelRows == 0
+                     ? innerRect.Height
+                     : (innerRect.Height - graphPanelVGaps*scaledInnerGap -
+                        rowSplitters*PaneSplitterSize)
+                       * (_prop?[row] ?? 1.0f / graphPanelRows);
+          var width  = graphPanelCols == 0 
+                     ? innerRect.Width
+                     : (innerRect.Width  - graphPanelHGaps*scaledInnerGap -
+                        colSplitters*PaneSplitterSize) / graphPanelCols;
+
+          var thisHPaneSplitter = this[iPane] is SplitterPane;
+          var h = row > 0 && thisHPaneSplitter ? PaneSplitterSize : height;
+
+          var x = innerRect.X;
+
+          for (var col = 0; col < cols; col++)
           {
-            if ( iPane >= _paneList.Count )
+            if (iPane >= PaneList.Count)
               return;
 
-            this[iPane].Rect = new RectangleF(
-                      innerRect.X + colNum * ( width + scaledInnerGap ),
-                      innerRect.Y + y,
-                      width,
-                      height );
-            iPane++;
+            var thisVPaneSplittter = this[iPane] is SplitterPane;
+            var w = col > 0 && thisVPaneSplittter ? PaneSplitterSize : width;
+
+            this[iPane++].Rect = new RectangleF(x, y, w, h);
+
+            x += w;
+
+            if (!thisVPaneSplittter && !isSplitter(PaneList, iPane))
+              x += scaledInnerGap;
           }
 
-          y += height + scaledInnerGap;
+          y += h;
+
+          if (!thisHPaneSplitter && !isSplitter(PaneList, iPane))
+            y += scaledInnerGap;
         }
       }
       else
       {
-        int columns = countList.Length;
+        var cols = countList.Length;
+        var x    = innerRect.X;
+        var colSplitters = 0;
 
-        float x = 0.0f;
-
-        for ( int colNum = 0; colNum < columns; colNum++ )
+        var iPaneCnt = 0;
+        for (var col = 0; col < cols; col++)
         {
-          float propFactor = _prop == null ? 1.0f / columns : _prop[colNum];
+          var rows = Math.Max(1, countList[col]);
+          iPaneCnt += rows;
+          if (iPaneCnt < PaneList.Count && this[iPaneCnt] is SplitterPane)
+            colSplitters++;
+        }
 
-          float width = ( innerRect.Width - (float)( columns - 1 ) * scaledInnerGap ) *
-                  propFactor;
+        for (var col = 0; col < cols; col++)
+        {
+          var rows = Math.Max(1, countList[col]);
+          var rowSplitters = 0;
 
-          int rows = countList[colNum];
-          if ( rows <= 0 )
-            rows = 1;
-          float height = ( innerRect.Height - (float)( rows - 1 ) * scaledInnerGap ) / (float)rows;
+          for (var row = 0; row < rows; row++)
+            if (this[iPane + row] is SplitterPane)
+              rowSplitters++;
 
-          for ( int rowNum = 0; rowNum < rows; rowNum++ )
+          var graphPanelRows = rows - rowSplitters;
+          var graphPanelCols = cols - colSplitters;
+          var graphPanelVGaps = graphPanelRows - rowSplitters - 1;
+          var graphPanelHGaps = graphPanelCols - colSplitters - 1;
+
+          var height = graphPanelRows == 0
+                     ? innerRect.Height
+                     : (innerRect.Height -
+                        graphPanelVGaps * scaledInnerGap - 
+                        rowSplitters*PaneSplitterSize) / graphPanelRows;
+          var width = graphPanelCols == 0
+                     ? innerRect.Width
+                     : (innerRect.Width - graphPanelHGaps * scaledInnerGap -
+                        colSplitters*PaneSplitterSize)
+                       * (_prop?[col] ?? 1.0f / graphPanelCols);
+
+          var thisVPaneSplitter = this[iPane] is SplitterPane;
+          var w = col > 0 && thisVPaneSplitter ? PaneSplitterSize : width;
+
+          var y = innerRect.Y;
+
+          for (var row = 0; row < rows; row++)
           {
-            if ( iPane >= _paneList.Count )
+            if (iPane >= PaneList.Count)
               return;
 
-            this[iPane].Rect = new RectangleF(
-                      innerRect.X + x,
-                      innerRect.Y + rowNum * ( height + scaledInnerGap ),
-                      width,
-                      height );
-            iPane++;
+            var thisHPaneSplitter = this[iPane] is SplitterPane;
+            var h = row > 0 && thisHPaneSplitter ? PaneSplitterSize : height;
+
+            this[iPane++].Rect = new RectangleF(x, y, w, h);
+
+            y += h;
+
+            if (!thisHPaneSplitter && !isSplitter(PaneList, iPane))
+              y += scaledInnerGap;
           }
 
-          x += width + scaledInnerGap;
+          x += w;
+
+          if (!thisVPaneSplitter && !isSplitter(PaneList, iPane))
+            x += scaledInnerGap;
         }
       }
     }

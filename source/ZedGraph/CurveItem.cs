@@ -104,6 +104,7 @@ namespace ZedGraph
     [CLSCompliant(false)]
     protected IPointList _points;
 
+    [CLSCompliant(false)]
     protected Dictionary<double, PointPair> _ordinalIndex;
      
     /// <summary>
@@ -828,6 +829,7 @@ namespace ZedGraph
 
       int from, to;
 
+      /*
       if (false) //isXOrdinal)
       {
         //from = xAxis.Scale.MinAuto ? 0            : Scale.MinMax(0, (int)xAxis.Scale.Min, Points.Count-1);
@@ -836,6 +838,7 @@ namespace ZedGraph
         to   = Scale.MinMax((int)Math.Round(xMax), (int)Math.Round(xAxis.Scale.Max)+1, Points.Count);
       }
       else
+      */
       {
         from = 0;
         to   = Points.Count;

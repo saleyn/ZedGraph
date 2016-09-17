@@ -64,19 +64,6 @@ namespace ZedGraph
     protected Legend _legend;
 
     /// <summary>
-    /// Private field that controls whether or not pen widths are scaled according to the
-    /// size of the graph.  This value is only applicable if <see cref="IsFontsScaled"/>
-    /// is true.  If <see cref="IsFontsScaled"/> is false, then no scaling will be done,
-    /// regardless of the value of <see cref="IsPenWidthScaled"/>.
-    /// </summary>
-    /// <value>true to scale the pen widths according to the size of the graph,
-    /// false otherwise.</value>
-    /// <seealso cref="IsFontsScaled"/>
-    /// <seealso cref="ScaleFactor"/>
-    [CLSCompliant(false)]
-    protected bool _isPenWidthScaled;
-
-    /// <summary>
     /// Cached client space rectangle that respects all margins and is updated by
     /// CalcClientRect().
     /// </summary>
@@ -213,6 +200,16 @@ namespace ZedGraph
     }
 
     /// <summary>
+    /// Alias to Rect.Location
+    /// </summary>
+    public Point Location => new Point((int)Math.Round(Rect.X), (int)Math.Round(Rect.Y));
+
+    /// <summary>
+    /// Alias to Rect.Size
+    /// </summary>
+    public Size  Size     => new Size((int)Math.Round(Rect.Width), (int)Math.Round(Rect.Height));
+
+    /// <summary>
     /// Accesses the <see cref="Legend"/> for this <see cref="PaneBase"/>
     /// </summary>
     /// <value>A reference to a <see cref="Legend"/> object</value>
@@ -327,11 +324,8 @@ namespace ZedGraph
     /// false otherwise.</value>
     /// <seealso cref="IsFontsScaled"/>
     /// <seealso cref="ScaleFactor"/>
-    public bool IsPenWidthScaled
-    {
-      get { return _isPenWidthScaled; }
-      set { _isPenWidthScaled = value; }
-    }
+    [CLSCompliant(false)]
+    public bool IsPenWidthScaled { get; set; }
 
     /// <summary>
     /// Gets or sets mouse wheel action. Default action is zoom and pan.
@@ -358,7 +352,7 @@ namespace ZedGraph
     /// Default constructor for the <see cref="PaneBase"/> class.  Specifies the <see cref="Title"/> of
     /// the <see cref="PaneBase"/>, and the size of the <see cref="Rect"/>.
     /// </summary>
-    public PaneBase( string title, RectangleF paneRect )
+    protected PaneBase( string title, RectangleF paneRect )
     {
       _rect = paneRect;
 
@@ -369,7 +363,7 @@ namespace ZedGraph
       TitleGap = Default.TitleGap;
 
       IsFontsScaled = Default.IsFontsScaled;
-      _isPenWidthScaled = Default.IsPenWidthScaled;
+      IsPenWidthScaled = Default.IsPenWidthScaled;
       Fill = new Fill( Default.FillColor );
       Border = new Border( Default.IsBorderVisible, Default.BorderColor,
         Default.BorderPenWidth );
@@ -389,11 +383,11 @@ namespace ZedGraph
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The <see cref="PaneBase"/> object from which to copy</param>
-    public PaneBase( PaneBase rhs )
+    protected PaneBase( PaneBase rhs )
     {
       // copy over all the value types
       IsFontsScaled = rhs.IsFontsScaled;
-      _isPenWidthScaled = rhs._isPenWidthScaled;
+      IsPenWidthScaled = rhs.IsPenWidthScaled;
 
       TitleGap = rhs.TitleGap;
       BaseDimension = rhs.BaseDimension;
@@ -479,7 +473,7 @@ namespace ZedGraph
       _title = (GapLabel) info.GetValue( "title", typeof(GapLabel) );
       //this.isShowTitle = info.GetBoolean( "isShowTitle" );
       IsFontsScaled = info.GetBoolean( "isFontsScaled" );
-      _isPenWidthScaled = info.GetBoolean( "isPenWidthScaled" );
+      IsPenWidthScaled = info.GetBoolean( "isPenWidthScaled" );
       //this.fontSpec = (FontSpec) info.GetValue( "fontSpec" , typeof(FontSpec) );
       TitleGap = info.GetSingle( "titleGap" );
       Fill = (Fill) info.GetValue( "fill", typeof(Fill) );
@@ -506,7 +500,7 @@ namespace ZedGraph
       info.AddValue( "title", _title );
       //info.AddValue( "isShowTitle", isShowTitle );
       info.AddValue( "isFontsScaled", IsFontsScaled );
-      info.AddValue( "isPenWidthScaled", _isPenWidthScaled );
+      info.AddValue( "isPenWidthScaled", IsPenWidthScaled );
       info.AddValue( "titleGap", TitleGap );
 
       //info.AddValue( "fontSpec", fontSpec );
@@ -672,6 +666,16 @@ namespace ZedGraph
     }
 
     /// <summary>
+    /// Find nearest object within the pane given mouse coordinates
+    /// </summary>
+    public virtual bool FindNearestObject(PointF mousePt, Graphics g, out object nearestObj, out int index)
+    {
+      nearestObj = null;
+      index = -1;
+      return false;
+    }
+
+    /// <summary>
     /// Calculate the scaling factor based on the ratio of the current <see cref="Rect"/> dimensions and
     /// the <see cref="Default.BaseDimension"/>.
     /// </summary>
@@ -737,7 +741,7 @@ namespace ZedGraph
     /// <returns>The scaled pen width, in world pixels</returns>
     public float ScaledPenWidth( float penWidth, float scaleFactor )
     {
-      if ( _isPenWidthScaled )
+      if ( IsPenWidthScaled )
         return (float)( penWidth * scaleFactor );
       else
         return penWidth;
@@ -825,14 +829,12 @@ namespace ZedGraph
     /// <param name="isAntiAlias">true to render in anti-alias mode, false otherwise</param>
     internal void SetAntiAliasMode( Graphics g, bool isAntiAlias )
     {
-      if ( isAntiAlias )
-      {
-        g.SmoothingMode = SmoothingMode.HighQuality;
-        //g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-        g.CompositingQuality = CompositingQuality.HighQuality;
-        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-      }
+      if (!isAntiAlias) return;
+      g.SmoothingMode = SmoothingMode.HighQuality;
+      //g.SmoothingMode = SmoothingMode.AntiAlias;
+      g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+      g.CompositingQuality = CompositingQuality.HighQuality;
+      g.InterpolationMode = InterpolationMode.HighQualityBicubic;
     }
 
     private void MakeImage( Graphics g, int width, int height, bool antiAlias )

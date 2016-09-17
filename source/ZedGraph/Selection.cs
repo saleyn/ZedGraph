@@ -20,6 +20,7 @@
 using System;
 using System.Drawing;
 using System.Collections;
+using System.Linq;
 
 namespace ZedGraph
 {
@@ -181,19 +182,14 @@ namespace ZedGraph
     {
       this.Clear();
 
-      foreach ( GraphPane pane in master.PaneList )
-      {
+      foreach ( var pane in master.PaneList.Where(p => p is GraphPane).Cast<GraphPane>())
         foreach ( CurveItem ci in pane.CurveList )
         {
           ci.IsSelected = false;
         }
-      }
 
       if ( sendEvent )
-      {
-        if ( SelectionChangedEvent != null )
-          SelectionChangedEvent( this, new EventArgs() );
-      }
+        SelectionChangedEvent?.Invoke( this, new EventArgs() );
     }
 
     /// <summary>
@@ -209,16 +205,12 @@ namespace ZedGraph
         return;
       }
 
-      foreach ( GraphPane pane in master.PaneList )
+      foreach ( var pane in master.PaneList.Where(p => p is GraphPane).Cast<GraphPane>() )
       {
-        foreach ( CurveItem ci in pane.CurveList )
-        {
-          //Make it Inactive
-          ci.IsSelected = false;
-        }
-
+        //Make it Inactive
+        pane.CurveList.ForEach(ci => ci.IsSelected = false);
       }
-      foreach ( CurveItem ci in  this )
+      foreach ( var ci in this )
       {
         //Make Active
         ci.IsSelected = true;
@@ -228,27 +220,23 @@ namespace ZedGraph
 
         //Why only do this for Lines? ...Bar and Pie Curves are less likely to overlap, 
         //and adding and removing Pie elements changes thier display order
-        if ( ci.IsLine )
+        if (!ci.IsLine) continue;
+
+        //I don't know how to get a Pane, from a CurveItem, so I can only do it 
+        //if there is one and only one Pane, based on the assumption that the 
+        //Curve's Pane is MasterPane[0]
+
+        //If there is only one Pane
+        if ( master.PaneList.Count == 1 && master.PaneList[0] is GraphPane )
         {
-          //I don't know how to get a Pane, from a CurveItem, so I can only do it 
-          //if there is one and only one Pane, based on the assumption that the 
-          //Curve's Pane is MasterPane[0]
-
-          //If there is only one Pane
-          if ( master.PaneList.Count == 1 )
-          {
-            GraphPane pane = master.PaneList[0];
-            pane.CurveList.Remove( ci );
-            pane.CurveList.Insert( 0, ci );
-          }
-
+          var pane = (GraphPane)master.PaneList[0];
+          pane.CurveList.Remove( ci );
+          pane.CurveList.Insert( 0, ci );
         }
       }
 
       //Send Selection Changed Event
-      if ( SelectionChangedEvent != null )
-        SelectionChangedEvent( this, new EventArgs() );
-
+      SelectionChangedEvent?.Invoke( this, new EventArgs() );
     }
 
     #endregion

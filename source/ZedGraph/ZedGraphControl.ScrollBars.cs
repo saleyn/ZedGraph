@@ -69,7 +69,9 @@ namespace ZedGraph
     {
       if (!_isSynchronizeXAxes && !_isSynchronizeYAxes) return;
 
-      foreach (var pane in _masterPane._paneList.Where(pane => pane != primaryPane))
+      foreach (var pane in _masterPane.PaneList
+        .Where(pane => pane != primaryPane && pane is GraphPane)
+        .Cast<GraphPane>())
       {
         if (_isSynchronizeXAxes)
         {

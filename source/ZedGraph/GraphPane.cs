@@ -1885,7 +1885,7 @@ namespace ZedGraph
     /// index will be -1 if no data points are available.</param>
     /// <returns>true if an object was found, false otherwise.</returns>
     /// <seealso cref="FindNearestObject"/>
-    public bool FindNearestObject( PointF mousePt, Graphics g, 
+    public override bool FindNearestObject( PointF mousePt, Graphics g, 
       out object nearestObj, out int index )
     {
       nearestObj = null;
