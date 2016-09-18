@@ -19,6 +19,7 @@
 using System;
 using System.Drawing;
 using System.Collections;
+using System.Collections.Generic;
 using ZedGraph;
 
 namespace ZedGraph.Demo
@@ -49,16 +50,21 @@ namespace ZedGraph.Demo
 			ColorSymbolRotator rotator = new ColorSymbolRotator();
 
 			for ( int j = 0; j < 6; j++ )
-			{
 				master.Add( AddGraph( j, rotator ) );
-			}
 
 			using ( Graphics g = base.ZedGraphControl.CreateGraphics() )
 			{
 
-				//master.PaneLayoutMgr.SetLayout( PaneLayout.ExplicitRow32 );
-				//master.PaneLayoutMgr.SetLayout( 2, 4 );
-				master.SetLayout( g, false, new int[] { 1, 3, 2 }, new float[] { 2, 1, 3 } );
+        //master.PaneLayoutMgr.SetLayout( PaneLayout.ExplicitRow32 );
+        //master.PaneLayoutMgr.SetLayout( 2, 4 );
+        var prop = new[]
+        {
+          new Tuple<float, float[]>(2f, new[] {1f}),
+          new Tuple<float, float[]>(1f, new[] {1f, 1f, 1f}),
+          new Tuple<float, float[]>(3f, new[] {1f, 1f})
+        };
+
+        master.SetLayout( g, false, prop);
 				master.IsCommonScaleFactor = true;
 				base.ZedGraphControl.AxisChange();
 

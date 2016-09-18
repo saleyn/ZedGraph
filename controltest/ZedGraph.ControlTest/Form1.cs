@@ -2142,7 +2142,15 @@ namespace ZedGraph.ControlTest
 
 				//master.PaneLayoutMgr.SetLayout( PaneLayout.ExplicitRow32 );
 				//master.PaneLayoutMgr.SetLayout( 2, 4 );
-				master.SetLayout( g, false, new int[] { 1, 3, 2 }, new float[] { 2, 1, 3 } );
+        // Matrix rows: 1, 3, 2
+        var prop = new []
+        {
+          new Tuple<float, float[]>(2f, new[] {1f}),
+          new Tuple<float, float[]>(1f, new[] { 1f, 1f, 1f }),
+          new Tuple<float, float[]>(3f, new[] { 1f, 1f })
+        };
+
+        master.SetLayout( g, false, prop);
 				//master.SetLayout( PaneLayout.SingleColumn );
 				master.IsCommonScaleFactor = true;
 				z1.AxisChange();
@@ -2843,7 +2851,15 @@ namespace ZedGraph.ControlTest
 		{
 			//Create a Masterpane
 			MasterPane myMaster = zgc.MasterPane;
-			myMaster.SetLayout( zgc.CreateGraphics(), false, new int[] { 3 }, new float[] { 1, 1, 4 } );
+
+      var prop = new[]
+      {
+        new Tuple<float, float[]>(1f, null),
+        new Tuple<float, float[]>(1f, null),
+        new Tuple<float, float[]>(1f, null)
+      };
+
+      myMaster.SetLayout( zgc.CreateGraphics(), false, prop);
 			myMaster.IsFontsScaled = false;
 
 			myMaster.PaneList.Clear();

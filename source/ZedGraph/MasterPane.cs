@@ -26,6 +26,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -60,20 +61,16 @@ namespace ZedGraph
     /// <see cref="_countList"/> is specifying rows or columns.
     /// </summary>
     internal bool _isColumnSpecified;
-    /// <summary>
-    /// private field that stores the row/column item count that was specified to the
-    /// <see cref="SetLayout(Graphics,bool,int[],float[])"/> method.  This values will be
-    /// null if <see cref="SetLayout(Graphics,bool,int[],float[])"/> was never called.
-    /// </summary>
-    internal int[] _countList;
 
     /// <summary>
     /// private field that stores the row/column size proportional values as specified
     /// to the <see cref="SetLayout(Graphics,bool,int[],float[])"/> method.  This
     /// value will be null if <see cref="SetLayout(Graphics,bool,int[],float[])"/>
-    /// was never called.  
+    /// was never called. The first element of each tuple corresponds to the proportion
+    /// of the corresponding row/column in the <see cref="_countList"/>, and the second
+    /// element contains proportions of columns/rows in the I'th row/column.
     /// </summary>
-    internal float[] _prop;
+    internal Tuple<float,float[]>[] _prop;
 
 /*    /// <summary>
     /// private field to store the <see cref="PaneLayoutMgr" /> instance, which
@@ -242,7 +239,6 @@ namespace ZedGraph
     private void InitLayout()
     {
       _paneLayout = Default.PaneLayout;
-      _countList = null;
       _isColumnSpecified = false;
       _prop = null;
     }
@@ -263,7 +259,6 @@ namespace ZedGraph
       PaneList = rhs.PaneList.Clone();
 
       _paneLayout = rhs._paneLayout;
-      _countList = rhs._countList;
       _isColumnSpecified = rhs._isColumnSpecified;
       _prop = rhs._prop;
       IsAntiAlias = rhs.IsAntiAlias;
@@ -296,7 +291,7 @@ namespace ZedGraph
     /// </summary>
     // schema changed to 2 with addition of 'prop'
     // schema changed to 11 with addition of 'isAntiAlias'
-    public const int schema2 = 11;
+    public const int schema2 = 12;
 
     /// <summary>
     /// Constructor for deserializing objects
@@ -309,23 +304,22 @@ namespace ZedGraph
     {
       // The schema value is just a file version parameter.  You can use it to make future versions
       // backwards compatible as new member variables are added to classes
-      int sch = info.GetInt32( "schema2" );
+      int sch = info.GetInt32("schema2");
 
-      PaneList = (PaneList) info.GetValue( "paneList", typeof(PaneList) );
+      PaneList = (PaneList)info.GetValue("paneList", typeof(PaneList));
       //_paneLayoutMgr = (PaneLayoutMgr) info.GetValue( "paneLayoutMgr", typeof(PaneLayoutMgr) );
-      InnerPaneGap = info.GetSingle( "innerPaneGap" );
+      InnerPaneGap = info.GetSingle("innerPaneGap");
 
-      IsUniformLegendEntries = info.GetBoolean( "isUniformLegendEntries" );
-      IsCommonScaleFactor = info.GetBoolean( "isCommonScaleFactor" );
+      IsUniformLegendEntries = info.GetBoolean("isUniformLegendEntries");
+      IsCommonScaleFactor = info.GetBoolean("isCommonScaleFactor");
 
-      _paneLayout = (PaneLayout)info.GetValue( "paneLayout", typeof( PaneLayout ) );
-      _countList = (int[])info.GetValue( "countList", typeof( int[] ) );
+      _paneLayout = (PaneLayout)info.GetValue("paneLayout", typeof(PaneLayout));
 
-      _isColumnSpecified = info.GetBoolean( "isColumnSpecified" );
-      _prop = (float[])info.GetValue( "prop", typeof( float[] ) );
+      _isColumnSpecified = info.GetBoolean("isColumnSpecified");
+      _prop = (Tuple<float, float[]>[])info.GetValue("prop", typeof(Tuple<float, float[]>[]));
 
-      if ( sch >= 11 )
-        IsAntiAlias = info.GetBoolean( "isAntiAlias" );
+      if (sch >= 11)
+        IsAntiAlias = info.GetBoolean("isAntiAlias");
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -335,22 +329,21 @@ namespace ZedGraph
     [SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
     public override void GetObjectData( SerializationInfo info, StreamingContext context )
     {
-      base.GetObjectData( info, context );
-      info.AddValue( "schema2", schema2 );
+      base.GetObjectData(info, context);
+      info.AddValue("schema2", schema2);
 
-      info.AddValue( "paneList", PaneList );
+      info.AddValue("paneList", PaneList);
       //info.AddValue( "paneLayoutMgr", _paneLayoutMgr );
-      info.AddValue( "innerPaneGap", InnerPaneGap );
+      info.AddValue("innerPaneGap", InnerPaneGap);
 
-      info.AddValue( "isUniformLegendEntries", IsUniformLegendEntries );
-      info.AddValue( "isCommonScaleFactor", IsCommonScaleFactor );
+      info.AddValue("isUniformLegendEntries", IsUniformLegendEntries);
+      info.AddValue("isCommonScaleFactor", IsCommonScaleFactor);
 
-      info.AddValue( "paneLayout", _paneLayout );
-      info.AddValue( "countList", _countList );
-      info.AddValue( "isColumnSpecified", _isColumnSpecified );
-      info.AddValue( "prop", _prop );
+      info.AddValue("paneLayout", _paneLayout);
+      info.AddValue("isColumnSpecified", _isColumnSpecified);
+      info.AddValue("prop", _prop);
 
-      info.AddValue( "isAntiAlias", IsAntiAlias );
+      info.AddValue("isAntiAlias", IsAntiAlias);
     }
 
     /// <summary>
@@ -734,13 +727,13 @@ namespace ZedGraph
     /// <seealso cref="SetLayout(Graphics,int,int)" />
     /// <seealso cref="SetLayout(Graphics,bool,int[])" />
     /// <seealso cref="SetLayout(Graphics,bool,int[],float[])" />
-    public void SetLayout( Graphics g, PaneLayout paneLayout )
+    public void SetLayout(Graphics g, PaneLayout paneLayout)
     {
       InitLayout();
 
       _paneLayout = paneLayout;
 
-      DoLayout( g );
+      DoLayout(g);
     }
 
     /// <summary>
@@ -770,38 +763,7 @@ namespace ZedGraph
       if ( columns < 1 )
         columns = 1;
 
-      var countList = new int[rows];
-
-      for ( int i = 0; i < rows; i++ )
-        countList[i] = columns;
-
-      SetLayout( g, true, countList, null );
-    }
-
-    /// <summary>
-    /// Automatically set all of the <see cref="GraphPane"/> <see cref="PaneBase.Rect"/>'s in
-    /// the list to the specified configuration.
-    /// </summary>
-    /// <remarks>This method specifies the number of rows in each column, or the number of
-    /// columns in each row, allowing for irregular layouts.  Overloads are available that
-    /// provide other layout options.
-    /// </remarks>
-    /// <param name="g">
-    /// A graphic device object to be drawn into.  This is normally created with a call to
-    /// the CreateGraphics() method of the Control or Form.
-    /// </param>
-    /// <param name="isColumnSpecified">Specifies whether the number of columns in each row, or
-    /// the number of rows in each column will be specified.  A value of true indicates the
-    /// number of columns in each row are specified in <see paramref="countList"/>.</param>
-    /// <param name="countList">An integer array specifying either the number of columns in
-    /// each row or the number of rows in each column, depending on the value of
-    /// <see paramref="isColumnSpecified"/>.</param>
-    /// <seealso cref="SetLayout(Graphics,PaneLayout)" />
-    /// <seealso cref="SetLayout(Graphics,int,int)" />
-    /// <seealso cref="SetLayout(Graphics,bool,int[],float[])" />
-    public void SetLayout( Graphics g, bool isColumnSpecified, int[] countList )
-    {
-      SetLayout( g, isColumnSpecified, countList, null );
+      setLayout(g, true, doProportions(rows, columns));
     }
 
     /// <summary>
@@ -840,32 +802,146 @@ namespace ZedGraph
     /// <seealso cref="SetLayout(Graphics,PaneLayout)" />
     /// <seealso cref="SetLayout(Graphics,int,int)" />
     /// <seealso cref="SetLayout(Graphics,bool,int[])" />
-    public void SetLayout( Graphics g, bool isColumnSpecified, int[] countList, float[] proportion )
+    public void SetLayout(Graphics g, bool isColumnSpecified, int[] countList)
+    {
+      SetLayout(g, isColumnSpecified, doProportions(countList));
+    }
+
+    public void SetLayout(Graphics g, bool isColumnSpecified, float[] proportions)
+    {
+      setLayout(g, isColumnSpecified,
+        proportions.Aggregate(
+          new List<Tuple<float, float[]>>(),
+          (list, f) => { list.Add(new Tuple<float, float[]>(f, null)); return list; }).ToArray()
+      );
+    }
+
+    public void SetLayout(Graphics g, bool isColumnSpecified, Tuple<float, float[]>[] proportions)
+    {
+      setLayout(g, isColumnSpecified, proportions);
+    }
+
+    private void setLayout(Graphics g, bool isColumnSpecified, Tuple<float,float[]>[] proportions)
     {
       InitLayout();
 
-      // use defaults if the parameters are invalid
-      if (countList == null || countList.Length <= 0) return;
+      // Validation check
+      var cells = proportions.Aggregate(0, (a, tuple) => a + (tuple.Item2?.Length ?? 0));
+      var rows  = proportions.Length;
+      var splitters = PaneList.Count(p => p is SplitterPane);
+      var panes = PaneList.Count - splitters;
 
-      _prop = new float[countList.Length];
+      if (cells != panes)
+        throw new ArgumentException
+          ($"Invalid number of pane rows/cells: {rows}/{cells} (graphic panes: {panes})");
 
-      // Sum up the total proportional factors
-      var sumProp = 0.0f;
-      for ( var i = 0; i < countList.Length; i++ )
+      var pane = 0;
+      foreach (var p in proportions)
       {
-        _prop[i] = ( proportion == null || proportion.Length <= i || proportion[i] < 1e-10 ) ?
-                     1.0f : proportion[i];
-        sumProp += _prop[i];
+        if (p.Item1 != 0.0 && PaneList[pane] is SplitterPane)
+          throw new ArgumentException($"Pane#{pane} is not expected to be a splitter!");
+        if (p.Item1 == 0.0 && !(PaneList[pane] is SplitterPane))
+          throw new ArgumentException($"Pane#{pane} is expected to be a splitter!");
+
+        if (p.Item2 == null)
+          pane++;
+        else
+          foreach (var pr in p.Item2)
+          {
+            if (pr != 0.0 && PaneList[pane] is SplitterPane)
+              throw new ArgumentException($"Pane#{pane} is not expected to be a splitter!");
+            if (pr == 0.0 && !(PaneList[pane] is SplitterPane))
+              throw new ArgumentException($"Pane#{pane} is expected to be a splitter!");
+            pane++;
+          }
       }
 
+      // Sum up the total proportional factors
+      var sumDim1 = proportions.Aggregate(0f, (a, tuple) => a + tuple.Item1);
       // Make prop sum to 1.0
-      for ( int i = 0; i < countList.Length; i++ )
-        _prop[i] /= sumProp;
+      if (sumDim1 > 0f)
+        for (var j = 0; j < proportions.Length; ++j)
+          if (proportions[j].Item2 != null) // It can be null if the row j is a splitter
+          {
+            var sumDim2 = proportions[j].Item2.Aggregate(0f, (a, f) => a + f);
+            if (sumDim2 > 0f)
+              proportions[j] = new Tuple<float, float[]>(
+                proportions[j].Item1 / sumDim1,
+                proportions[j].Item2.Select(f => f / sumDim2).ToArray()
+              );
+          }
 
       _isColumnSpecified = isColumnSpecified;
-      _countList = countList;
+      _prop = proportions;
 
-      DoLayout( g );
+      doLayout(g);
+    }
+
+    private Tuple<float, float[]>[] doProportions(int rows, int cols)
+    {
+      return doProportions(Enumerable.Repeat(cols, rows).ToArray());
+    }
+
+    private Tuple<float, float[]>[] doProportions(IReadOnlyList<int> countList)
+    {
+      var cells     = countList.Aggregate(0, (a, n) => a + n);
+      var rows      = countList.Count;
+      var splitters = PaneList.Count(p => p is SplitterPane);
+      var panes     = PaneList.Count - splitters;
+
+      if (cells != panes)
+        throw new ArgumentException
+          ($"Invalid number of pane rows/cells: {rows}/{cells} (graphic panes: {panes})");
+
+      if (panes == 1)
+        return new[] { new Tuple<float, float[]>(1f, null) };
+
+      var prop = new List<Tuple<float, float[]>>();
+      int pane = 0, i = 0;
+      while (i < rows && pane < PaneList.Count)
+      {
+        if (PaneList[pane] is SplitterPane)
+        {
+          pane++;
+          prop.Add(new Tuple<float, float[]>(0f, null));
+        }
+        else
+        {
+          var j = 0;
+          var list = new List<float>();
+          while (j < countList[i] && pane < PaneList.Count)
+          {
+            if (PaneList[pane++] is SplitterPane)
+              list.Add(0f);
+            else
+            {
+              list.Add(1f);
+              j++;
+            }
+          }
+          // Enumerable.Repeat(1.0f, cols).ToArray()
+          prop.Add(new Tuple<float, float[]>(1f, list.ToArray()));
+          i++;
+        }
+      }
+
+      if (pane != PaneList.Count)
+        throw new ArgumentException
+          ($"Invalid number of splitters: countList={countList}, panes={panes}, splitters={splitters}");
+
+      // Sum up the total proportional factors
+      var sumDim1 = prop.Aggregate(0f, (a, tuple) => a + tuple.Item1);
+      // Make prop sum to 1.0
+      if (sumDim1 > 0f)
+        for (var j = 0; j < prop.Count; ++j)
+          if (prop[j].Item2 != null) // It can be null if the row j is a splitter
+          {
+            var sumDim2 = prop[j].Item2.Aggregate(0f, (a, f) => a + f);
+            if (sumDim2 > 0f)
+              prop[j] = new Tuple<float, float[]>(prop[j].Item1 / sumDim1, prop[j].Item2.Select(f => f / sumDim2).ToArray());
+          }
+
+      return prop.ToArray();
     }
 
     /// <summary>
@@ -881,98 +957,74 @@ namespace ZedGraph
     /// <seealso cref="SetLayout(Graphics,bool,int[],float[])" />
     public void DoLayout( Graphics g )
     {
-      if ( _countList != null )
-        DoLayout( g, _isColumnSpecified, _countList, _prop );
-      else
+      if ( _prop == null )
       {
-        int count = PaneList.Count;
+        var count = PaneList.Count(p => !(p is SplitterPane));
         if ( count == 0 )
           return;
 
-        int rows,
-            cols,
-            root = (int)( Math.Sqrt( (double)count ) + 0.9999999 );
-
-        //float[] widthList = new float[5];
+        int rows, cols, root = (int)(Math.Sqrt(count) + 0.9999999);
 
         switch ( _paneLayout )
         {
           case PaneLayout.ForceSquare:
-            rows = root;
-            cols = root;
-            DoLayout( g, rows, cols );
+            _prop = doProportions(root, root);
             break;
           case PaneLayout.SingleColumn:
-            rows = count;
-            cols = 1;
-            DoLayout( g, rows, cols );
+            _isColumnSpecified = true;
+            _prop = doProportions(count, 1);
             break;
           case PaneLayout.SingleRow:
-            rows = 1;
-            cols = count;
-            DoLayout( g, rows, cols );
+            _isColumnSpecified = false;
+            _prop = doProportions(1, count);
             break;
           default:
           case PaneLayout.SquareColPreferred:
-            rows = root;
+            rows = count <= root * (root - 1) ? root-1 : root;
             cols = root;
-            if ( count <= root * ( root - 1 ) )
-              rows--;
-            DoLayout( g, rows, cols );
+            _prop = doProportions(rows, cols);
             break;
           case PaneLayout.SquareRowPreferred:
             rows = root;
-            cols = root;
-            if ( count <= root * ( root - 1 ) )
-              cols--;
-            DoLayout( g, rows, cols );
+            cols = count <= root * (root - 1) ? root - 1 : root;
+            _prop = doProportions(rows, cols);
             break;
           case PaneLayout.ExplicitCol12:
-            DoLayout( g, true, new int[2] { 1, 2 }, null );
+            _isColumnSpecified = true;
+            _prop = doProportions(new[] { 1, 2 });
             break;
           case PaneLayout.ExplicitCol21:
-            DoLayout( g, true, new int[2] { 2, 1 }, null );
+            _isColumnSpecified = true;
+            _prop = doProportions(new[] { 2, 1 });
             break;
           case PaneLayout.ExplicitCol23:
-            DoLayout( g, true, new int[2] { 2, 3 }, null );
+            _isColumnSpecified = true;
+            _prop = doProportions(new[] { 2, 3 });
             break;
           case PaneLayout.ExplicitCol32:
-            DoLayout( g, true, new int[2] { 3, 2 }, null );
+            _isColumnSpecified = true;
+            _prop = doProportions(new[] { 3, 2 });
             break;
           case PaneLayout.ExplicitRow12:
-            DoLayout( g, false, new int[2] { 1, 2 }, null );
+            _isColumnSpecified = false;
+            _prop = doProportions(new[] { 1, 2 });
             break;
           case PaneLayout.ExplicitRow21:
-            DoLayout( g, false, new int[2] { 2, 1 }, null );
+            _isColumnSpecified = false;
+            _prop = doProportions(new[] { 2, 1 });
             break;
           case PaneLayout.ExplicitRow23:
-            DoLayout( g, false, new int[2] { 2, 3 }, null );
+            _isColumnSpecified = false;
+            _prop = doProportions(new[] { 2, 3 });
             break;
           case PaneLayout.ExplicitRow32:
-            DoLayout( g, false, new int[2] { 3, 2 }, null );
+            _isColumnSpecified = false;
+            _prop = doProportions(new[] { 3, 2 });
             break;
         }
       }
-    }
 
-    /// <summary>
-    /// Internal method that applies a previously set layout with a specific
-    /// row and column count.  This method is only called by
-    /// <see cref="DoLayout(Graphics)" />.
-    /// </summary>
-    internal void DoLayout( Graphics g, int rows, int columns )
-    {
-      if ( rows < 1 )
-        rows = 1;
-      if ( columns < 1 )
-        columns = 1;
-
-      var countList = new int[rows];
-
-      for ( int i = 0; i < rows; i++ )
-        countList[i] = columns;
-
-      DoLayout( g, true, countList, null );
+      doLayout(g);
     }
 
     /// <summary>
@@ -980,66 +1032,57 @@ namespace ZedGraph
     /// columns per row configuration.  This method is only called by
     /// <see cref="DoLayout(Graphics)" />.
     /// </summary>
-    internal void DoLayout( Graphics g, bool isColumnSpecified, int[] countList,
-          float[] proportion )
+    private void doLayout(Graphics g)
     {
       Func<PaneList, int, bool> isSplitter = (list, i) =>
         i < list.Count && list[i] is SplitterPane;
 
       // calculate scaleFactor on "normal" pane size (BaseDimension)
-      float scaleFactor = CalcScaleFactor();
+      var scaleFactor = CalcScaleFactor();
 
       // innerRect is the area for the GraphPane's
-      RectangleF innerRect = CalcClientRect( g, scaleFactor );
+      var innerRect = CalcClientRect( g, scaleFactor );
       _legend.CalcRect( g, this, scaleFactor, ref innerRect );
 
       // scaled InnerGap is the area between the GraphPane.Rect's
       var scaledInnerGap = InnerPaneGap * scaleFactor;
 
-      int iPane = 0;
+      var iPane = 0;
 
-      if (isColumnSpecified)
+      if (_isColumnSpecified)
       {
-        var rows = countList.Length;
-        var y = innerRect.Y;
+        var rows = _prop.Length;
+        var y    = innerRect.Y;
 
-        var rowSplitters = 0;
-        int iPaneCnt = 0;
-
-        for (var row = 0; row < rows; row++)
+        var rowSplitters = _prop.Count(tuple => Math.Abs(tuple.Item1) < float.Epsilon);
+        var row = 0;
+        foreach (var prow in _prop)
         {
-          var columns = Math.Max(1, countList[row]);
-          iPaneCnt += columns;
-          if (iPaneCnt < PaneList.Count && this[iPaneCnt] is SplitterPane)
-            rowSplitters++;
-        }
+          var cols = prow.Item2?.Length ?? 1;
+          var colSplitters = prow.Item2?.Count(n => Math.Abs(n) < float.Epsilon) ?? 0;
 
-        for (var row = 0; row < rows; row++)
-        {
-          var cols = Math.Max(1, countList[row]);
-          var colSplitters = 0;
+          var graphPaneRows  = rows - rowSplitters;
+          var graphPaneCols  = cols - colSplitters;
+          var graphPaneVGaps = graphPaneRows - rowSplitters - 1;
+          var graphPaneHGaps = graphPaneCols - colSplitters - 1;
 
-          for (int col = 0; col < cols; col++)
-            if (this[iPane + col] is SplitterPane)
-              colSplitters++;
-
-          var graphPanelRows = rows - rowSplitters;
-          var graphPanelCols = cols - colSplitters;
-          var graphPanelVGaps = graphPanelRows - rowSplitters - 1;
-          var graphPanelHGaps = graphPanelCols - colSplitters - 1;
-
-          var height = graphPanelRows == 0
+          var height = graphPaneRows == 0
                      ? innerRect.Height
-                     : (innerRect.Height - graphPanelVGaps*scaledInnerGap -
+                     : (innerRect.Height - graphPaneVGaps*scaledInnerGap -
                         rowSplitters*PaneSplitterSize)
-                       * (_prop?[row] ?? 1.0f / graphPanelRows);
-          var width  = graphPanelCols == 0 
+                       * prow.Item1; //(prow[row] ?? 1.0f / graphPanelRows);
+          var width  = graphPaneCols == 0 
                      ? innerRect.Width
-                     : (innerRect.Width  - graphPanelHGaps*scaledInnerGap -
-                        colSplitters*PaneSplitterSize) / graphPanelCols;
+                     : (innerRect.Width  - graphPaneHGaps*scaledInnerGap -
+                        colSplitters*PaneSplitterSize); // / graphPanelCols;
+
+          var defWidth = width / graphPaneCols;
+
 
           var thisHPaneSplitter = this[iPane] is SplitterPane;
-          var h = row > 0 && thisHPaneSplitter ? PaneSplitterSize : height;
+          if (thisHPaneSplitter)
+            ((SplitterPane)this[iPane]).PaneIndex = iPane;
+          var h = row > 0 && (thisHPaneSplitter || prow.Item2 == null) ? PaneSplitterSize : height;
 
           var x = innerRect.X;
 
@@ -1048,14 +1091,16 @@ namespace ZedGraph
             if (iPane >= PaneList.Count)
               return;
 
-            var thisVPaneSplittter = this[iPane] is SplitterPane;
-            var w = col > 0 && thisVPaneSplittter ? PaneSplitterSize : width;
-
+            var thisVPaneSplitter = this[iPane] is SplitterPane;
+            if (thisVPaneSplitter)
+              ((SplitterPane)this[iPane]).PaneIndex = iPane;
+            var w = col > 0 && thisVPaneSplitter ? PaneSplitterSize : (width * prow.Item2?[col] ?? defWidth);
+            
             this[iPane++].Rect = new RectangleF(x, y, w, h);
 
             x += w;
 
-            if (!thisVPaneSplittter && !isSplitter(PaneList, iPane))
+            if (!thisVPaneSplitter && !isSplitter(PaneList, iPane))
               x += scaledInnerGap;
           }
 
@@ -1063,50 +1108,45 @@ namespace ZedGraph
 
           if (!thisHPaneSplitter && !isSplitter(PaneList, iPane))
             y += scaledInnerGap;
+
+          row++;
         }
       }
       else
       {
-        var cols = countList.Length;
+        var cols = _prop.Length;
         var x    = innerRect.X;
-        var colSplitters = 0;
+        var colSplitters = _prop.Count(tuple => Math.Abs(tuple.Item1) < float.Epsilon);
 
-        var iPaneCnt = 0;
-        for (var col = 0; col < cols; col++)
+        var col = 0;
+        foreach (var pcol in _prop)
         {
-          var rows = Math.Max(1, countList[col]);
-          iPaneCnt += rows;
-          if (iPaneCnt < PaneList.Count && this[iPaneCnt] is SplitterPane)
-            colSplitters++;
-        }
+          var rows = pcol.Item2?.Length ?? 1;
+          var rowSplitters = pcol.Item2?.Count(n => Math.Abs(n) < float.Epsilon) ?? 0;
 
-        for (var col = 0; col < cols; col++)
-        {
-          var rows = Math.Max(1, countList[col]);
-          var rowSplitters = 0;
+          var graphPaneRows  = rows - rowSplitters;
+          var graphPaneCols  = cols - colSplitters;
+          var graphPaneVGaps = graphPaneRows - rowSplitters - 1;
+          var graphPaneHGaps = graphPaneCols - colSplitters - 1;
 
-          for (var row = 0; row < rows; row++)
-            if (this[iPane + row] is SplitterPane)
-              rowSplitters++;
-
-          var graphPanelRows = rows - rowSplitters;
-          var graphPanelCols = cols - colSplitters;
-          var graphPanelVGaps = graphPanelRows - rowSplitters - 1;
-          var graphPanelHGaps = graphPanelCols - colSplitters - 1;
-
-          var height = graphPanelRows == 0
+          var height = graphPaneRows == 0
                      ? innerRect.Height
                      : (innerRect.Height -
-                        graphPanelVGaps * scaledInnerGap - 
-                        rowSplitters*PaneSplitterSize) / graphPanelRows;
-          var width = graphPanelCols == 0
+                        graphPaneVGaps * scaledInnerGap - 
+                        rowSplitters*PaneSplitterSize); // / graphPanelRows;
+
+          var defHeight = height / graphPaneRows;
+                      
+          var width = graphPaneCols == 0
                      ? innerRect.Width
-                     : (innerRect.Width - graphPanelHGaps * scaledInnerGap -
+                     : (innerRect.Width - graphPaneHGaps * scaledInnerGap -
                         colSplitters*PaneSplitterSize)
-                       * (_prop?[col] ?? 1.0f / graphPanelCols);
+                       * pcol.Item1; //(_prop?[col] ?? 1.0f / graphPanelCols);
 
           var thisVPaneSplitter = this[iPane] is SplitterPane;
-          var w = col > 0 && thisVPaneSplitter ? PaneSplitterSize : width;
+          if (thisVPaneSplitter)
+            ((SplitterPane)this[iPane]).PaneIndex = iPane;
+          var w = col > 0 && (thisVPaneSplitter || pcol.Item2 == null) ? PaneSplitterSize : width;
 
           var y = innerRect.Y;
 
@@ -1116,7 +1156,9 @@ namespace ZedGraph
               return;
 
             var thisHPaneSplitter = this[iPane] is SplitterPane;
-            var h = row > 0 && thisHPaneSplitter ? PaneSplitterSize : height;
+            if (thisHPaneSplitter)
+              ((SplitterPane)this[iPane]).PaneIndex = iPane;
+            var h = row > 0 && thisHPaneSplitter ? PaneSplitterSize : (height * pcol.Item2?[row] ?? defHeight);
 
             this[iPane++].Rect = new RectangleF(x, y, w, h);
 

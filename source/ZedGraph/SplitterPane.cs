@@ -112,6 +112,11 @@ namespace ZedGraph
     }
 
     /// <summary>
+    /// Index of the splitter pane updated by master pane during layout
+    /// </summary>
+    public int PaneIndex { get; internal set; }
+
+    /// <summary>
     /// Mouse cursor to display when mouse hovers over this pane
     /// </summary>
     public Cursor Cursor { get; private set; }
@@ -137,18 +142,22 @@ namespace ZedGraph
     private Point     m_Start;
     internal void OnMouseDown(ZedGraphControl sender, MouseEventArgs e)
     {
-      if ((e.Button == MouseButtons.Left) && (e.Clicks == 1))
+      if (e.Button != MouseButtons.Left || e.Clicks != 1) return;
+
+      m_HighLight?.Hide();
+
+      var loc = Location;
+      loc.Offset(sender.PointToScreen(sender.ClientRectangle.Location));
+
+      m_HighLight = new HighLight(loc, Size);
+      m_Start     = e.Location;
+
+      if (PaneIndex > 0 && sender.MasterPane != null && PaneIndex < sender.MasterPane.PaneList.Count-1)
       {
-        m_HighLight?.Hide();
-        var client = sender.MasterPane.ClientRect;
-        var loc = new Point((int)(client.Location.X + Rect.X), (int)(client.Location.Y + Rect.Y));
-        var sz  = Size;
-        m_Start = loc;
-        m_HighLight = new HighLight() { Location = loc, Size = sz };
-        m_HighLight.ShowInactiveTopmost();
-        m_HighLight.Height = sz.Height;
-        m_HighLight.Width  = sz.Width;
-        return; //SplitBegin(e.X, e.Y);
+        var before = sender.MasterPane.PaneList[PaneIndex-1];
+        var after  = sender.MasterPane.PaneList[PaneIndex+1];
+
+
       }
     }
 
@@ -156,76 +165,26 @@ namespace ZedGraph
     {
       m_HighLight?.Close();
       m_HighLight = null;
-      /*
-      if (splitTarget == null) return;
-      CalcSplitLine(GetSplitSize(e.X, e.Y), 0);
-      SplitEnd(true);
-      */
     }
 
     internal void OnMouseMove(ZedGraphControl sender, MouseEventArgs e)
     {
       if (m_HighLight == null)
         return;
+      if (e.Location == m_Start)
+        return;
 
-      var client = sender.MasterPane.ClientRect;
-      var x = Vertical ? (int)(e.X + client.Location.X) : m_Start.X;
-      var y = Vertical ? m_Start.Y : (int)(e.Y + client.Location.Y);
+      var offset = Vertical
+                 ? new Point(e.X - m_Start.X, 0)
+                 : new Point(0, e.Y - m_Start.Y);
+      var loc = m_HighLight.Location;
+      loc.Offset(offset);
+      m_HighLight.Location = loc;
 
-      m_HighLight.Location = new Point(x, y);
-
-      /*
-      if (splitTarget != null)
-      {
-        int x = e.X + base.Left;
-        int y = e.Y + base.Top;
-        var rectangle = CalcSplitLine(GetSplitSize(e.X, e.Y), 0);
-        int splitX = rectangle.X;
-        int splitY = rectangle.Y;
-        OnSplitterMoving(new SplitterEventArgs(x, y, splitX, splitY));
-      }
-      */
+      m_Start = e.Location;
     }
 
     #endregion
-
-    #region Private Methods
-    /*
-    internal void SplitBegin(int x, int y)
-    {
-      var data = CalcSplitBounds();
-      if (minSize >= maxSize) return;
-      anchor = new Point(x,y);
-      splitSize = GetSplitSize(anchor);
-      DrawSplitBar(1);
-    }
-
-    private void SplitEnd(bool accept)
-    {
-      DrawSplitBar(3);
-      Capture = false;
-      if (splitterMessageFilter != null)
-      {
-        Application.RemoveMessageFilter(splitterMessageFilter);
-        splitterMessageFilter = null;
-      }
-      if (accept)
-        ApplySplitPosition();
-      else if (splitSize != initTargetSize)
-        SplitPosition = initTargetSize;
-      anchor = Point.Empty;
-    }
-
-    private void SplitMove(Point point)
-    {
-      var x = point.X;
-      var y = point.Y;
-      int size =  GetSplitSize((x - base.Left) + anchor.X, (y - base.Top) + anchor.Y);
-      if (size == splitSize) return;
-      splitSize = size;
-      DrawSplitBar(2);
-    }
-    */
 
     #region Public Local Classes
 
@@ -235,16 +194,21 @@ namespace ZedGraph
       private const int SW_SHOWNOACTIVATE = 4;
       private const uint SWP_NOACTIVATE = 0x0010;
 
-      public HighLight()
+      public HighLight(Point location, Size sz)
       {
         FormBorderStyle = FormBorderStyle.None;
-        BackColor = Color.Black;
-        Opacity = 0;
-        ShowInTaskbar = false;
-        StartPosition = FormStartPosition.Manual;
+        BackColor       = Color.Black;
+        Opacity         = 0;
+        ShowIcon        = false;
+        ShowInTaskbar   = false;
+        StartPosition   = FormStartPosition.Manual;
+
+        ShowInactiveTopmost();
+        Location = location;
+        Size     = sz;
       }
 
-      public void ShowInactiveTopmost()
+      private void ShowInactiveTopmost()
       {
         ShowWindow(Handle, SW_SHOWNOACTIVATE);
         SetWindowPos(Handle.ToInt32(), HWND_TOPMOST,
@@ -267,9 +231,5 @@ namespace ZedGraph
     }
 
     #endregion
-
-
-    #endregion
-
   }
 }
