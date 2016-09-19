@@ -49,10 +49,14 @@ namespace ZedGraph.Demo
 
 			ColorSymbolRotator rotator = new ColorSymbolRotator();
 
-			for ( int j = 0; j < 6; j++ )
-				master.Add( AddGraph( j, rotator ) );
+		  for (int j = 0; j < 6; j++)
+		  {
+		    master.Add(AddGraph(j, rotator));
+        if (j == 0 || j == 1 || j == 2)
+          master.Add(new SplitterPane(j == 0));
+      }
 
-			using ( Graphics g = base.ZedGraphControl.CreateGraphics() )
+      using ( Graphics g = base.ZedGraphControl.CreateGraphics() )
 			{
 
         //master.PaneLayoutMgr.SetLayout( PaneLayout.ExplicitRow32 );
@@ -60,7 +64,8 @@ namespace ZedGraph.Demo
         var prop = new[]
         {
           new Tuple<float, float[]>(2f, new[] {1f}),
-          new Tuple<float, float[]>(1f, new[] {1f, 1f, 1f}),
+          new Tuple<float, float[]>(0f, null),
+          new Tuple<float, float[]>(1f, new[] {1f, 0f, 1f, 0f, 1f}),
           new Tuple<float, float[]>(3f, new[] {1f, 1f})
         };
 

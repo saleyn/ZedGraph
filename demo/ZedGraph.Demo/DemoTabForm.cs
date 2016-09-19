@@ -37,7 +37,10 @@ namespace ZedGraph.Demo
 	#region Methods
 		protected override void loadDemos()
 		{
-			loadDemo(new ComboDemo());
+      loadDemo(new OHLCBarRealTimeDemo());
+      loadDemo(new MasterPaneWithSplitterDemo());
+
+      loadDemo(new ComboDemo());
 			loadDemo(new FilteredPointDemo());
 			loadDemo(new PieChartDemo());
 			loadDemo(new LineStackingDemo());
@@ -83,9 +86,6 @@ namespace ZedGraph.Demo
 			loadDemo( new OHLCBarDemo() );
 			loadDemo( new ImageForSymbolDemo() );
 			loadDemo( new MasterPaneLayout() );
-
-      loadDemo(new OHLCBarRealTimeDemo());
-      loadDemo(new MasterPaneWithSplitterDemo());
 
       // TODO: add more demos here
       // ...

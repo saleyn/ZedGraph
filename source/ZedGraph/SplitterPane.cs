@@ -139,7 +139,9 @@ namespace ZedGraph
     #region Internal Methods
 
     private HighLight m_HighLight;
-    private Point     m_Start;
+    private Point     m_Start, m_Last;
+    private int       m_Min,   m_Max;
+
     internal void OnMouseDown(ZedGraphControl sender, MouseEventArgs e)
     {
       if (e.Button != MouseButtons.Left || e.Clicks != 1) return;
@@ -150,14 +152,18 @@ namespace ZedGraph
       loc.Offset(sender.PointToScreen(sender.ClientRectangle.Location));
 
       m_HighLight = new HighLight(loc, Size);
-      m_Start     = e.Location;
+      m_Start     = m_Last = e.Location;
 
       if (PaneIndex > 0 && sender.MasterPane != null && PaneIndex < sender.MasterPane.PaneList.Count-1)
       {
         var before = sender.MasterPane.PaneList[PaneIndex-1];
         var after  = sender.MasterPane.PaneList[PaneIndex+1];
 
+        var min = before.Location; 
+        var max = new Point((int)after.Rect.Right, (int)after.Rect.Bottom);
 
+        m_Min = Vertical ? min.X : min.Y;
+        m_Max = Vertical ? max.X : max.Y;
       }
     }
 
@@ -165,23 +171,37 @@ namespace ZedGraph
     {
       m_HighLight?.Close();
       m_HighLight = null;
+
+      var range = m_Max - m_Min;
+
+      if (e.Location == m_Start || Vertical ? (e.Location.X <= m_Min || e.Location.X >= m_Max)
+                                            : (e.Location.Y <= m_Min || e.Location.Y >= m_Max)
+                                || range == 0)
+        return;
+
+      var ratio = (float)((Vertical ? e.Location.X : e.Location.Y) - m_Min) / range;
+
+      sender.MasterPane.SetProportion(this, ratio);
+      sender.Invalidate();
+      sender.Refresh();
     }
 
     internal void OnMouseMove(ZedGraphControl sender, MouseEventArgs e)
     {
       if (m_HighLight == null)
         return;
-      if (e.Location == m_Start)
+      if (e.Location == m_Last || Vertical ? (e.Location.X <= m_Min || e.Location.X >= m_Max)
+                                            : (e.Location.Y <= m_Min || e.Location.Y >= m_Max))
         return;
 
       var offset = Vertical
-                 ? new Point(e.X - m_Start.X, 0)
-                 : new Point(0, e.Y - m_Start.Y);
+                 ? new Point(e.X - m_Last.X, 0)
+                 : new Point(0, e.Y - m_Last.Y);
       var loc = m_HighLight.Location;
       loc.Offset(offset);
       m_HighLight.Location = loc;
 
-      m_Start = e.Location;
+      m_Last = e.Location;
     }
 
     #endregion

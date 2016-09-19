@@ -196,7 +196,6 @@ namespace ZedGraph.Demo
       m_Line.DashOff = 3;
       m_Line.Width   = 1;
       ZedGraphControl.AxisChange();
-      ZedGraphControl.Invalidate();
 
       m_Timer.Elapsed += (o, args) =>
       {
