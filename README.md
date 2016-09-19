@@ -24,9 +24,7 @@ Example:
 
 ![image](https://cloud.githubusercontent.com/assets/272543/18227320/ce021676-71ee-11e6-9e54-78b8bfe64e8d.png)
 
-## TODO ##
-
-* Multi-pane crosshair
+![image](https://cloud.githubusercontent.com/assets/272543/18622921/60c71ef4-7e04-11e6-91b1-7373bd4e0291.png)
 
 ## Maintainer ##
 
