@@ -15,7 +15,7 @@ to make it more usable for financial charting.
 * Chart scrolling with MouseWheel
 * Chart zooming band with fill effect
 * Controlling panning/zooming actions using chart's MouseWheelActions property
-* Chart panning/zooming/by using modifier keys and mouse wheel on the YAxis
+* Chart panning/zooming/by using modifier keys and mouse wheel on the XAxis or YAxis
 * Mouse selectable LineItem
 * Annotation shapes (PointObj)
 * SplitterPane and ability to adjust pane sizes within MasterPane using SplitterPane
