@@ -113,7 +113,7 @@ namespace ZedGraph
     /// </remarks>
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      Description( "Determines which mouse button is used as the secondary for panning" )]
-    public MouseButtons PanButtons2 { get; set; } = MouseButtons.Middle;
+    public MouseButtons PanButtons2 { get; set; } = MouseButtons.Left;
 
     // NOTE: The default value of PanModifierKeys is Keys.Shift. Because of an apparent bug in
     // VS 2003, the initial value set in InitializeComponent by the code wizard is "Keys.Shift+None"

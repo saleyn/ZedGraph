@@ -173,12 +173,12 @@ namespace ZedGraph.Demo
       //      myCurve.Bar.IsAutoSize        = true;
       //      myCurve.Bar.Color             = Color.DodgerBlue;
       var myCurve                       = m_Pane.AddJapaneseCandleStick("trades", m_Data);
-      myCurve.Stick.FallingColor        = Color.White;
-      myCurve.Stick.Color               = Color.White;
-      myCurve.Stick.RisingFill.Color    = Color.DarkOliveGreen;
+      myCurve.Stick.FallingColor        = Color.FromArgb(255, 0, 255, 0);
+      myCurve.Stick.Color               = Color.FromArgb(255, 0, 255, 0);
+      myCurve.Stick.RisingFill.Color    = Color.White;
       myCurve.Stick.FallingFill.Color   = Color.Black;
-      myCurve.Stick.FallingBorder.Color = Color.AntiqueWhite;
-      myCurve.Stick.RisingBorder.Color  = Color.AntiqueWhite;
+      myCurve.Stick.FallingBorder.Color = Color.FromArgb(255, 0, 255, 0);
+      myCurve.Stick.RisingBorder.Color  = Color.FromArgb(255, 0, 255, 0);
       myCurve.IsY2Axis                  = true; // Associate this curve with the Y2 axis
       myCurve.YAxisIndex                = 0;    // Associate this curve with the first Y2 axis (this is actually default)
       myCurve.IsSelectable              = true;
