@@ -54,8 +54,7 @@ namespace ZedGraph.Demo
 				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
-				spl.Add( pt );
+        spl.Add(x, open, hi, low, close, 100000);
 
 				open = close;
 				// Advance one day

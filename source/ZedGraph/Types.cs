@@ -700,17 +700,17 @@ namespace ZedGraph
   /// </remarks>
   public enum ZOrder
   {
-     /// <summary>
-     /// Specifies that the <see cref="GraphObj"/> will be behind all other
-     /// objects (including the <see cref="PaneBase"/> <see cref="PaneBase.Title"/>).
-     /// </summary>
-     H_BehindAll,
-     /// <summary>
-     /// Specifies that the <see cref="GraphObj"/> will be behind the
-     /// <see cref="Chart.Rect"/> background <see cref="Fill"/>
-     /// (see <see cref="Chart.Fill"/>).
-     /// </summary>
-     G_BehindChartFill,
+    /// <summary>
+    /// Specifies that the <see cref="GraphObj"/> will be behind all other
+    /// objects (including the <see cref="PaneBase"/> <see cref="PaneBase.Title"/>).
+    /// </summary>
+    H_BehindAll,
+    /// <summary>
+    /// Specifies that the <see cref="GraphObj"/> will be behind the
+    /// <see cref="Chart.Rect"/> background <see cref="Fill"/>
+    /// (see <see cref="Chart.Fill"/>).
+    /// </summary>
+    G_BehindChartFill,
     /// <summary>
     /// Specifies that the <see cref="GraphObj"/> will be behind the grid lines.
     /// </summary>
@@ -721,27 +721,27 @@ namespace ZedGraph
     /// </summary>
     E_BehindCurves,
     /// <summary>
-     /// Specifies that the <see cref="GraphObj"/> will be behind the
-     /// <see cref="Axis"/> objects.
-     /// </summary>
-     D_BehindAxis,
-     /// <summary>
-     /// Specifies that the <see cref="GraphObj"/> will be behind the
-     /// <see cref="Chart"/> border.
-     /// </summary>
-     C_BehindChartBorder,
-     /// <summary>
-     /// Specifies that the <see cref="GraphObj"/> will be behind the
-     /// <see cref="Legend"/> object.
-     /// </summary>
-     B_BehindLegend,
-     /// <summary>
-     /// Specifies that the <see cref="GraphObj"/> will be in front of
-     /// all other objects, except for the other <see cref="GraphObj"/>
-     /// objects that have the same <see cref="ZOrder"/> and are before
-     /// this object in the <see cref="GraphObjList"/>.
-     /// </summary>
-     A_InFront
+    /// Specifies that the <see cref="GraphObj"/> will be behind the
+    /// <see cref="Axis"/> objects.
+    /// </summary>
+    D_BehindAxis,
+    /// <summary>
+    /// Specifies that the <see cref="GraphObj"/> will be behind the
+    /// <see cref="Chart"/> border.
+    /// </summary>
+    C_BehindChartBorder,
+    /// <summary>
+    /// Specifies that the <see cref="GraphObj"/> will be behind the
+    /// <see cref="Legend"/> object.
+    /// </summary>
+    B_BehindLegend,
+    /// <summary>
+    /// Specifies that the <see cref="GraphObj"/> will be in front of
+    /// all other objects, except for the other <see cref="GraphObj"/>
+    /// objects that have the same <see cref="ZOrder"/> and are before
+    /// this object in the <see cref="GraphObjList"/>.
+    /// </summary>
+    A_InFront
   }
 
   /// <summary>

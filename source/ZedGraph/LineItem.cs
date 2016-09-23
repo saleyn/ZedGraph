@@ -127,8 +127,9 @@ namespace ZedGraph
     /// <param name="lineWidth">The width (in points) to be used for the <see cref="Line"/>.  This
     /// width is scaled based on <see cref="PaneBase.CalcScaleFactor"/>.  Use a value of zero to
     /// hide the line (see <see cref="ZedGraph.LineBase.IsVisible"/>).</param>
-    public LineItem( string label, double[] x, double[] y, Color color, SymbolType symbolType, float lineWidth )
-      : this( label, new PointPairList( x, y ), color, symbolType, lineWidth )
+    public LineItem( string label, double[] x, double[] y, Color color, SymbolType symbolType,
+                     float lineWidth=-1, int zOrder=-1 )
+      : this(label, new PointPairList( x, y ), color, symbolType, lineWidth, zOrder)
     {
     }
 
@@ -166,33 +167,17 @@ namespace ZedGraph
     /// <param name="lineWidth">The width (in points) to be used for the <see cref="Line"/>.  This
     /// width is scaled based on <see cref="PaneBase.CalcScaleFactor"/>.  Use a value of zero to
     /// hide the line (see <see cref="ZedGraph.LineBase.IsVisible"/>).</param>
-    public LineItem( string label, IPointList points, Color color, SymbolType symbolType, float lineWidth )
-      : base( label, points )
+    public LineItem(string label, IPointList points, Color color, SymbolType symbolType,
+                    float lineWidth=-1, int zOrder=-1)
+      : base( label, points, zOrder )
     {
       _line = new Line( color );
-      if ( lineWidth == 0 )
+      if ( lineWidth == 0.0 )
         _line.IsVisible = false;
       else
-        _line.Width = lineWidth;
+        _line.Width = lineWidth < 0 ? LineBase.Default.Width : lineWidth;
 
       _symbol = new Symbol( symbolType, color );
-    }
-
-    /// <summary>
-    /// Create a new <see cref="LineItem"/> using the specified properties.
-    /// </summary>
-    /// <param name="label">The _label that will appear in the legend.</param>
-    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
-    /// the X and Y values for this curve</param>
-    /// <param name="color">A <see cref="Color"/> value that will be applied to
-    /// the <see cref="Line"/> and <see cref="Symbol"/> properties.
-    /// </param>
-    /// <param name="symbolType">A <see cref="SymbolType"/> enum specifying the
-    /// type of symbol to use for this <see cref="LineItem"/>.  Use <see cref="SymbolType.None"/>
-    /// to hide the symbols.</param>
-    public LineItem( string label, IPointList points, Color color, SymbolType symbolType )
-      : this( label, points, color, symbolType, LineBase.Default.Width )
-    {
     }
 
     /// <summary>
@@ -288,7 +273,7 @@ namespace ZedGraph
     /// </param>
     override public void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor  )
     {
-      if (!_isVisible) return;
+      if (!IsVisible) return;
 
       Line.Draw( g, pane, this, scaleFactor );
       Symbol.Draw( g, pane, this, scaleFactor, IsSelected );
@@ -360,10 +345,10 @@ namespace ZedGraph
     {
       coords = string.Empty;
 
-      if ( i < 0 || i >= _points.Count )
+      if ( i < 0 || i >= Points.Count )
         return false;
 
-      PointPair pt = _points[i];
+      PointPair pt = Points[i];
       if ( pt.IsInvalid )
         return false;
 
@@ -374,8 +359,8 @@ namespace ZedGraph
       Axis yAxis = GetYAxis( pane );
       Axis xAxis = GetXAxis( pane );
 
-      PointF pixPt = new PointF( xAxis.Scale.Transform( _isOverrideOrdinal, i, x ),
-              yAxis.Scale.Transform( _isOverrideOrdinal, i, y ) );
+      PointF pixPt = new PointF( xAxis.Scale.Transform( IsOverrideOrdinal, i, x ),
+              yAxis.Scale.Transform( IsOverrideOrdinal, i, y ) );
       
       if ( !pane.Chart.Rect.Contains( pixPt ) )
         return false;

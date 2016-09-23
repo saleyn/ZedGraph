@@ -84,7 +84,7 @@ namespace ZedGraph
       IsVisible = Default.IsVisible;
       MajorGrid._isZeroLine = Default.IsZeroLine;
       Scale._fontSpec.Angle = 180F;
-      Title._fontSpec.Angle = 180F;
+      Title.FontSpec.Angle = 180F;
     }
 
     /// <summary>

@@ -312,13 +312,13 @@ namespace ZedGraph
               var x = (int)Math.Round(xaxis.ReverseTransform(pane, _lastCrosshairPoint.X));
               var text = xaxis.Scale.MakeLabel(pane, 0, x);
 
-              CrossHairFontSpec.Draw(g, pane, xaxis, text, _lastCrosshairPoint.X, rect.Height,
+              CrossHairFontSpec.Draw(g, pane, xaxis, text, _lastCrosshairPoint.X, xaxis is XAxis ? rect.Bottom : rect.Top,
                 new SizeF(0, -1));
 
               var y = (int)Math.Round(yaxis.ReverseTransform(pane, _lastCrosshairPoint.Y));
               text = yaxis.Scale.MakeLabel(pane, 0, y);
 
-              CrossHairFontSpec.Draw(g, pane, yaxis, text, rect.Width, _lastCrosshairPoint.Y,
+              CrossHairFontSpec.Draw(g, pane, yaxis, text, yaxis is YAxis ? rect.Left : rect.Right, _lastCrosshairPoint.Y,
                 new SizeF(0, 0));
             }
           }

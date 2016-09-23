@@ -278,7 +278,7 @@ namespace ZedGraph
     /// <param name="title">A string containing the axis title</param>
     protected Axis(string title) : this()
     {
-      Title._text = title;
+      Title.Text = title;
     }
 
     /// <summary>
@@ -1080,7 +1080,7 @@ namespace ZedGraph
         // Only add space for the title if there is one
         // Axis Title gets actual height
         // if ( str.Length > 0 && _title._isVisible )
-        if (!string.IsNullOrEmpty(str) && Title._isVisible)
+        if (!string.IsNullOrEmpty(str) && Title.IsVisible)
         {
           //tmpSpace += this.TitleFontSpec.BoundingBox( g, str, scaleFactor ).Height;
           fixedSpace = Title.FontSpec.BoundingBox(g, str, scaleFactor).Height +
@@ -1297,7 +1297,7 @@ namespace ZedGraph
 
       // If the Axis is visible, draw the title
       //if ( _isVisible && _title._isVisible && str.Length > 0 )
-      if (!IsVisible || !Title._isVisible || string.IsNullOrEmpty(str)) return;
+      if (!IsVisible || !Title.IsVisible || string.IsNullOrEmpty(str)) return;
 
       var hasTic = (Scale.IsLabelsInside
                  ? (MajorTic.IsInside || MajorTic._isCrossInside ||
@@ -1339,8 +1339,8 @@ namespace ZedGraph
 
     private string MakeTitle()
     {
-      if (Title._text == null)
-        Title._text = "";
+      if (Title.Text == null)
+        Title.Text = "";
 
       // Revision: JCarpenter 10/06
       // Allow customization of the modified title when the scale is very large
@@ -1348,8 +1348,8 @@ namespace ZedGraph
       // null, then the title will be the default.
       if (ScaleTitleEvent == null)
         return Scale._mag != 0 && !Title._isOmitMag && !Scale.IsLog
-                 ? Title._text + $" (10^{Scale._mag})"
-                 : Title._text;
+                 ? Title.Text + $" (10^{Scale._mag})"
+                 : Title.Text;
 
       var label = ScaleTitleEvent(this);
       if (label != null)
@@ -1358,8 +1358,8 @@ namespace ZedGraph
       // If the Mag is non-zero and IsOmitMag == false, and IsLog == false,
       // then add the mag indicator to the title.
       return Scale._mag != 0 && !Title._isOmitMag && !Scale.IsLog
-               ? Title._text + $" (10^{Scale._mag})"
-               : Title._text;
+               ? Title.Text + $" (10^{Scale._mag})"
+               : Title.Text;
     }
 
     /// <summary>

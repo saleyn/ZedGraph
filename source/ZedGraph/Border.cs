@@ -81,8 +81,8 @@ namespace ZedGraph
         public Border( bool isVisible, Color color, float width ) :
         base( color )
     {
-      _width = width;
-      _isVisible = isVisible;
+      Width = width;
+      IsVisible = isVisible;
     }
 
     /// <summary>
@@ -225,7 +225,7 @@ namespace ZedGraph
     {
       // Need to use the RectangleF props since rounding it can cause the axisFrame to
       // not line up properly with the last tic mark
-      if ( _isVisible )
+      if ( IsVisible )
       {
         var smode = g.SmoothingMode;
         g.SmoothingMode = SmoothingMode.None;

@@ -54,7 +54,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.5 $ $Date: 2007-06-02 06:56:03 $ </version>
   [Serializable]
-  public class NoDupePointList : List<DataPoint>, IPointList, IPointListEdit
+  public class NoDupePointList : List<DataPoint>, IPointListEdit
   {
     /// <summary>
     /// Protected field that stores a value indicating whether or not the data have been filtered.
@@ -112,10 +112,7 @@ namespace ZedGraph
     /// have not been filtered, then <see cref="Count" /> will be equal to
     /// <see cref="TotalCount" />.
     /// </summary>
-    public bool IsFiltered
-    {
-      get { return _isFiltered; }
-    }
+    public bool IsFiltered => _isFiltered;
 
     /// <summary>
     /// Indexer: get the DataPoint instance at the specified ordinal position in the list
@@ -161,25 +158,13 @@ namespace ZedGraph
     /// samples that are non-duplicates.  See the <see cref="TotalCount" /> property
     /// to get the total number of samples in the list.
     /// </summary>
-    public new int Count
-    {
-      get
-      {
-        if ( !_isFiltered )
-          return base.Count;
-        else
-          return _filteredCount;
-      }
-    }
+    public new int Count => _isFiltered ? _filteredCount : base.Count;
 
     /// <summary>
     /// Gets the total number of samples in the collection.  See the <see cref="Count" />
     /// property to get the number of active (non-duplicate) samples in the list.
     /// </summary>
-    public int TotalCount
-    {
-      get { return base.Count; }
-    }
+    public int TotalCount => base.Count;
 
     /// <summary>
     /// Append a data point to the collection
@@ -187,9 +172,11 @@ namespace ZedGraph
     /// <param name="pt">The <see cref="PointPair" /> value to append</param>
     public void Add( PointPair pt )
     {
-      DataPoint dp = new DataPoint();
-      dp.X = pt.X;
-      dp.Y = pt.Y;
+      var dp = new DataPoint
+      {
+        X = pt.X,
+        Y = pt.Y
+      };
       Add( dp );
     }
 
@@ -201,7 +188,7 @@ namespace ZedGraph
     /// <param name="y">The y value of the point to append</param>
     public void Add( double x, double y )
     {
-      DataPoint dp = new DataPoint();
+      var dp = new DataPoint();
       dp.X = x;
       dp.Y = y;
       Add( dp );
@@ -243,18 +230,15 @@ namespace ZedGraph
     /// <param name="rhs">The NoDupePointList to be copied</param>
     public NoDupePointList( NoDupePointList rhs )
     {
-      int count = rhs.TotalCount;
-      for ( int i = 0; i < count; i++ )
+      var count = rhs.TotalCount;
+      for ( var i = 0; i < count; i++ )
         Add( rhs.GetDataPointAt( i ) );
 
       _filteredCount = rhs._filteredCount;
       _isFiltered = rhs._isFiltered;
       _filterMode = rhs._filterMode;
 
-      if ( rhs._visibleIndicies != null )
-        _visibleIndicies = (int[]) rhs._visibleIndicies.Clone();
-      else
-        _visibleIndicies = null;
+      _visibleIndicies = (int[])rhs._visibleIndicies?.Clone();
     }
 
     /// <summary>
@@ -319,7 +303,7 @@ namespace ZedGraph
       if ( width <= 0 || height <= 0 )
         throw new IndexOutOfRangeException( "Error in FilterData: Chart rect not valid" );
 
-      bool[,] usedArray = new bool[width, height];
+      var usedArray = new bool[width, height];
       for ( int i = 0; i < width; i++ )
         for ( int j = 0; j < height; j++ )
           usedArray[i, j] = false;

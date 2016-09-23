@@ -38,7 +38,7 @@ namespace ZedGraph
   /// <author> John Champion based on code by Jerry Vos</author>
   /// <version> $Revision: 3.4 $ $Date: 2007-02-18 05:51:54 $ </version>
   [Serializable]
-  public class StockPointList : List<StockPt>, IOrdinalPointListEdit
+  public class StockPointList : List<StockPt>, IPointListEdit, IOrdinalPointList
   {
     private readonly List<Tuple<double,int>> _dateIndex;
     private int                              _offset;
@@ -72,15 +72,12 @@ namespace ZedGraph
     /// Indexer for getting the index that corresponds to given date
     /// if the list contains ordinal dates.
     /// </summary>
-    int IOrdinalPointListEdit.this[double date]
+    int IOrdinalPointList.Ordinal(double date)
     {
-      get
-      {
-        var idx = indexOf(date);
-        if (idx < 0 || idx == _dateIndex.Count) return -1;
-        return _dateIndex[idx].Item2 - _offset;
-      }
-    } 
+      var idx = indexOf(date);
+      if (idx < 0 || idx == _dateIndex.Count) return -1;
+      return _dateIndex[idx].Item2 - _offset;
+    }
 
     #endregion
 
@@ -89,7 +86,12 @@ namespace ZedGraph
     /// <summary>
     /// Default constructor for the collection class
     /// </summary>
-    public StockPointList(bool ordinal = false)
+    public StockPointList() : this(false) {}
+
+    /// <summary>
+    /// Constructor for the collection class that can enable ordinal index
+    /// </summary>
+    public StockPointList(bool ordinal)
     {
       _offset = 0;
       if (ordinal)
@@ -176,7 +178,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add( double date, double high )
     {
-      Add(new StockPt( date, high, PointPair.Missing, PointPair.Missing,
+      Add(new StockPt( date, PointPair.Missing, high, PointPair.Missing,
         PointPair.Missing, PointPair.Missing));
     }
 
@@ -184,15 +186,15 @@ namespace ZedGraph
     /// Add a single point to the <see cref="PointPairList"/> from values of type double.
     /// </summary>
     /// <param name="date">An <see cref="XDate" /> value</param>
+    /// <param name="open">The opening value for the day</param>
     /// <param name="high">The high value for the day</param>
     /// <param name="low">The low value for the day</param>
-    /// <param name="open">The opening value for the day</param>
     /// <param name="close">The closing value for the day</param>
     /// <param name="vol">The trading volume for the day</param>
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
-    public void Add( double date, double high, double low, double open, double close, double vol )
+    public void Add(double date, double open, double high, double low, double close, double vol)
     {
-      Add(new StockPt(date, high, low, open, close, vol));
+      Add(new StockPt(date, open, high, low, close, vol));
     }
 
     /// <summary>

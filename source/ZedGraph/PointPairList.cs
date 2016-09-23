@@ -33,7 +33,7 @@ namespace ZedGraph
   /// modified by John Champion</author>
   /// <version> $Revision: 3.37 $ $Date: 2007/06/29 15:39:07 $ </version>
   [Serializable]
-  public class PointPairList : List<PointPair>, IPointListEdit
+  public class PointPairList : List<PointPair>, IPointListEdit, IOrdinalPointList
   {
     #region Fields
     /// <summary>Private field to maintain the sort status of this
@@ -130,6 +130,14 @@ namespace ZedGraph
       return this.Clone();
     }
 
+    public int Ordinal(double xValue)
+    {
+      for (var i = 0; i < Count; i++)
+        if (this[i].X >= xValue)
+          return i;
+      return this.Count;
+    }
+
     /// <summary>
     /// Typesafe, deep-copy clone method.
     /// </summary>
@@ -192,12 +200,12 @@ namespace ZedGraph
 
       for (var i = 0; i < len; i++)
       {
-        var xx = x == null    ? (double)i + 1.0 :
-                 i < x.Length ? x[i]            :
+        var xx = x == null    ? i + 1.0 :
+                 i < x.Length ? x[i]    :
                  PointPairBase.Missing;
 
-        var yy = y == null    ? (double)i + 1.0 :
-                 i < y.Length ? y[i]            :
+        var yy = y == null    ? i + 1.0 :
+                 i < y.Length ? y[i]    :
                  PointPairBase.Missing;
 
         base.Add(new PointPair(xx, yy, 0));
@@ -232,16 +240,16 @@ namespace ZedGraph
 
       for (int i = 0; i < len; i++)
       {
-        var xx = x == null    ? (double)i + 1.0 :
-                 i < x.Length ? x[i]            :
+        var xx = x == null    ? i + 1.0 :
+                 i < x.Length ? x[i]    :
                  PointPairBase.Missing;
 
-        var yy = y == null    ? (double)i + 1.0 :
-                 i < y.Length ? y[i]            :
+        var yy = y == null    ? i + 1.0 :
+                 i < y.Length ? y[i]    :
                  PointPairBase.Missing;
 
-        var zz = z == null    ? (double)i + 1.0 :
-                 i < z.Length ? z[i]            :
+        var zz = z == null    ? i + 1.0 :
+                 i < z.Length ? z[i]    :
                  PointPairBase.Missing;
 
         base.Add(new PointPair(xx, yy, zz));

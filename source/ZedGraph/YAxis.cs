@@ -88,7 +88,7 @@ namespace ZedGraph
       IsVisible = Default.IsVisible;
       MajorGrid._isZeroLine = Default.IsZeroLine;
       Scale._fontSpec.Angle = 90.0F;
-      Title._fontSpec.Angle = -180F;
+      Title.FontSpec.Angle = -180F;
       base.LineHObjs = new LineHObjList();
     }
 

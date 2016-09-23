@@ -97,8 +97,8 @@ namespace ZedGraph
     /// <param name="lineWidth">The width (in points) to be used for the <see cref="Line"/>.  This
     /// width is scaled based on <see cref="PaneBase.CalcScaleFactor"/>.  Use a value of zero to
     /// hide the line (see <see cref="ZedGraph.LineBase.IsVisible"/>).</param>
-    public StickItem( string label, double[] x, double[] y, Color color, float lineWidth )
-      : this( label, new PointPairList( x, y ), color, lineWidth )
+    public StickItem( string label, double[] x, double[] y, Color color, float lineWidth, int zOrder=-1 )
+      : this( label, new PointPairList( x, y ), color, lineWidth, zOrder: zOrder )
     {
     }
 
@@ -113,8 +113,8 @@ namespace ZedGraph
     /// <param name="color">A <see cref="Color"/> value that will be applied to
     /// the <see cref="Line"/> and <see cref="Symbol"/> properties.
     /// </param>
-    public StickItem( string label, double[] x, double[] y, Color color )
-      : this( label, new PointPairList( x, y ), color )
+    public StickItem( string label, double[] x, double[] y, Color color, int zOrder=-1 )
+      : this( label, new PointPairList( x, y ), color, zOrder: zOrder )
     {
     }
 
@@ -127,8 +127,8 @@ namespace ZedGraph
     /// <param name="color">A <see cref="Color"/> value that will be applied to
     /// the <see cref="Line"/> and <see cref="Symbol"/> properties.
     /// </param>
-    public StickItem( string label, IPointList points, Color color )
-      : this( label, points, color, LineBase.Default.Width )
+    public StickItem( string label, IPointList points, Color color, int zOrder=-1 )
+      : this( label, points, color, LineBase.Default.Width, zOrder: zOrder )
     {
     }
 
@@ -144,8 +144,8 @@ namespace ZedGraph
     /// <param name="lineWidth">The width (in points) to be used for the <see cref="Line"/>.  This
     /// width is scaled based on <see cref="PaneBase.CalcScaleFactor"/>.  Use a value of zero to
     /// hide the line (see <see cref="ZedGraph.LineBase.IsVisible"/>).</param>
-    public StickItem( string label, IPointList points, Color color, float lineWidth )
-      : base( label, points, color, Symbol.Default.Type, lineWidth )
+    public StickItem( string label, IPointList points, Color color, float lineWidth, int zOrder=-1 )
+      : base( label, points, color, Symbol.Default.Type, lineWidth, zOrder )
     {
       _symbol.IsVisible = false;
     }

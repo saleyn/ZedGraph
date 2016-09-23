@@ -352,7 +352,7 @@ namespace ZedGraph
       var halfSize = GetBarWidth(pane, baseAxis, scaleFactor);
 
       using (var pen = !curve.IsSelected
-                         ? new Pen(_color, _width)
+                         ? new Pen(Color, Width)
                          : new Pen(Selection.Border.Color, Selection.Border.Width))
         //        using ( Pen pen = new Pen( _color, _penWidth ) )
       {
@@ -389,7 +389,7 @@ namespace ZedGraph
                           ? float.MaxValue
                           : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, close);
 
-          if (!curve.IsSelected && this._gradientFill.IsGradientValueType)
+          if (!curve.IsSelected && this.GradientFill.IsGradientValueType)
           {
             using (var tPen = GetPen(pane, scaleFactor, pt))
               Draw(g, pane, baseAxis is IXAxis,

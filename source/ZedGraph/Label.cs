@@ -35,20 +35,7 @@ namespace ZedGraph
   [Serializable]
   public class Label : ICloneable, ISerializable
   {
-    /// <summary>
-    /// private field that stores the <see cref="string" /> text for this label
-    /// </summary>
-    internal string _text;
-    /// <summary>
-    /// private field that stores the <see cref="FontSpec" /> font properties for this label
-    /// </summary>
-    internal FontSpec _fontSpec;
-    /// <summary>
-    /// private field that determines if this label will be displayed.
-    /// </summary>
-    internal bool _isVisible;
-
-  #region Constructors
+    #region Constructors
 
     /// <summary>
     /// Constructor to build an <see cref="AxisLabel" /> from the text and the
@@ -64,45 +51,45 @@ namespace ZedGraph
     /// <param name="isBold">true for a bold font face</param>
     /// <param name="isItalic">true for an italic font face</param>
     /// <param name="isUnderline">true for an underline font face</param>
-    public Label( string text, string fontFamily, float fontSize, Color color, bool isBold,
-      bool isItalic, bool isUnderline )
+    public Label(string text, string fontFamily, float fontSize, Color color, bool isBold,
+      bool isItalic, bool isUnderline)
     {
-      _text = ( text == null ) ? string.Empty : text;
+      _text = text ?? string.Empty;
 
-      _fontSpec = new FontSpec( fontFamily, fontSize, color, isBold, isItalic, isUnderline );
-      _isVisible = true;
+      FontSpec = new FontSpec(fontFamily, fontSize, color, isBold, isItalic, isUnderline);
+      IsVisible = true;
     }
 
     /// <summary>
     /// Constructor that builds a <see cref="Label" /> from a text <see cref="string" />
-    /// and a <see cref="FontSpec" /> instance.
+    /// and a <see cref="ZedGraph.FontSpec" /> instance.
     /// </summary>
     /// <param name="text"></param>
     /// <param name="fontSpec"></param>
-    public Label( string text, FontSpec fontSpec )
+    public Label(string text, FontSpec fontSpec)
     {
-      _text = (text == null) ? string.Empty : text;
+      _text = text ?? string.Empty;
 
-      _fontSpec = fontSpec;
-      _isVisible = true;
+      FontSpec = fontSpec;
+      IsVisible = true;
     }
 
     /// <summary>
     /// Copy constructor
     /// </summary>
     /// <param name="rhs">the <see cref="Label" /> instance to be copied.</param>
-    public Label( Label rhs )
+    public Label(Label rhs)
     {
-      if (rhs._text != null)
-        _text = (string)rhs._text.Clone();
+      if (rhs.Text != null)
+        _text = (string)rhs.Text.Clone();
       else
         _text = string.Empty;
 
-      _isVisible = rhs._isVisible;
-      if ( rhs._fontSpec != null )
-        _fontSpec = rhs._fontSpec.Clone();
+      IsVisible = rhs.IsVisible;
+      if (rhs.FontSpec != null)
+        FontSpec = rhs.FontSpec.Clone();
       else
-        _fontSpec = null;
+        FontSpec = null;
     }
 
     /// <summary>
@@ -121,12 +108,26 @@ namespace ZedGraph
     /// <returns>A new, independent copy of this class</returns>
     public Label Clone()
     {
-      return new Label( this );
+      return new Label(this);
     }
 
-  #endregion
+    #endregion
 
-  #region Properties
+    #region Fields
+
+    /// <summary>
+    /// Current schema value that defines the version of the serialized file
+    /// </summary>
+    private const int _schema = 10;
+
+    /// <summary>
+    /// Storage field for Text property
+    /// </summary>
+    internal string _text;
+
+    #endregion
+
+    #region Properties
 
     /// <summary>
     /// The <see cref="String" /> text to be displayed
@@ -134,36 +135,23 @@ namespace ZedGraph
     public string Text
     {
       get { return _text; }
-      set { _text = value; }
+      set { _text = value ?? string.Empty; }
     }
 
     /// <summary>
     /// A <see cref="ZedGraph.FontSpec" /> instance representing the font properties
     /// for the displayed text.
     /// </summary>
-    public FontSpec FontSpec
-    {
-      get { return _fontSpec; }
-      set { _fontSpec = value; }
-    }
+    public FontSpec FontSpec { get; set; }
 
     /// <summary>
     /// Gets or sets a boolean value that determines whether or not this label will be displayed.
     /// </summary>
-    public bool IsVisible
-    {
-      get { return _isVisible; }
-      set { _isVisible = value; }
-    }
+    public bool IsVisible { get; set; }
 
-  #endregion
+    #endregion
 
-  #region Serialization
-
-    /// <summary>
-    /// Current schema value that defines the version of the serialized file
-    /// </summary>
-    public const int schema = 10;
+    #region Serialization
 
     /// <summary>
     /// Constructor for deserializing objects
@@ -172,30 +160,30 @@ namespace ZedGraph
     /// </param>
     /// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data
     /// </param>
-    protected Label( SerializationInfo info, StreamingContext context )
+    protected Label(SerializationInfo info, StreamingContext context)
     {
       // The schema value is just a file version parameter.  You can use it to make future versions
       // backwards compatible as new member variables are added to classes
-      int sch = info.GetInt32( "schema" );
+      int sch = info.GetInt32("schema");
 
-      _text = info.GetString( "text" );
-      _isVisible = info.GetBoolean( "isVisible" );
-      _fontSpec = (FontSpec) info.GetValue( "fontSpec", typeof( FontSpec ) );
+      _text = info.GetString("text");
+      IsVisible = info.GetBoolean("isVisible");
+      FontSpec = (FontSpec)info.GetValue("fontSpec", typeof(FontSpec));
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
     /// </summary>
     /// <param name="info">A <see cref="SerializationInfo"/> instance that defines the serialized data</param>
     /// <param name="context">A <see cref="StreamingContext"/> instance that contains the serialized data</param>
-    [SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
-    public virtual void GetObjectData( SerializationInfo info, StreamingContext context )
+    [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+    public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-      info.AddValue( "schema", schema );
-      info.AddValue( "text", _text );
-      info.AddValue( "isVisible", _isVisible );
-      info.AddValue( "fontSpec", _fontSpec );
+      info.AddValue("schema", _schema);
+      info.AddValue("text", Text);
+      info.AddValue("isVisible", IsVisible);
+      info.AddValue("fontSpec", FontSpec);
     }
-  #endregion
+    #endregion
 
 
   }

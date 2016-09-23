@@ -131,7 +131,7 @@ namespace ZedGraph
       int index = 0;
       foreach ( Y2Axis axis in this )
       {
-        if ( String.Compare( axis.Title._text, title, true ) == 0 )
+        if ( String.Compare( axis.Title.Text, title, true ) == 0 )
           return index;
         index++;
       }

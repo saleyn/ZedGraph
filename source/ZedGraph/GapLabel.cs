@@ -114,7 +114,7 @@ namespace ZedGraph
     /// <param name="scaleFactor">The scaling factor to be applied</param>
     public float GetScaledGap( float scaleFactor )
     {
-      return _fontSpec.GetHeight( scaleFactor ) * _gap;
+      return FontSpec.GetHeight( scaleFactor ) * _gap;
     }
 
   #endregion

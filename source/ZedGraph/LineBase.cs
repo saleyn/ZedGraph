@@ -37,63 +37,6 @@ namespace ZedGraph
   public class LineBase : ICloneable, ISerializable
   {
 
-  #region Fields
-
-    /// <summary>
-    /// Private field that stores the pen width for this line.
-    /// Use the public property <see cref="Width"/> to access this value.
-    /// </summary>
-    internal float _width;
-    /// <summary>
-    /// Private field that stores the <see cref="DashStyle"/> for this
-    /// line.  Use the public
-    /// property <see cref="Style"/> to access this value.
-    /// </summary>
-    internal DashStyle _style;
-    /// <summary>
-    /// private field that stores the "Dash On" length for drawing the line.  Use the
-    /// public property <see cref="DashOn" /> to access this value.
-    /// </summary>
-    internal float _dashOn;
-    /// <summary>
-    /// private field that stores the "Dash Off" length for drawing the line.  Use the
-    /// public property <see cref="DashOff" /> to access this value.
-    /// </summary>
-    internal float _dashOff;
-
-    /// <summary>
-    /// Private field that stores the visibility of this line.  Use the public
-    /// property <see cref="IsVisible"/> to access this value.
-    /// </summary>
-    internal bool _isVisible;
-
-    /// <summary>
-    /// private field that determines if the line is drawn using
-    /// Anti-Aliasing capabilities from the <see cref="Graphics" /> class.
-    /// Use the public property <see cref="IsAntiAlias" /> to access
-    /// this value.
-    /// </summary>
-    internal bool _isAntiAlias;
-    /// <summary>
-    /// Private field that stores the color of this line.  Use the public
-    /// property <see cref="Color"/> to access this value.  If this value is
-    /// false, the line will not be shown (but the <see cref="Symbol"/> may
-    /// still be shown).
-    /// </summary>
-    internal Color _color;
-
-    /// <summary>
-    /// Internal field that stores a custom <see cref="Fill" /> class.  This
-    /// fill is used strictly for <see cref="FillType.GradientByX" />,
-    /// <see cref="FillType.GradientByY" />, <see cref="FillType.GradientByZ" />,
-    /// and <see cref="FillType.GradientByColorValue" /> calculations to determine
-    /// the color of the line.
-    /// </summary>
-    internal Fill _gradientFill;
-
-
-  #endregion
-
   #region Defaults
 
     /// <summary>
@@ -153,11 +96,8 @@ namespace ZedGraph
     /// and <see cref="FillType.GradientByColorValue" /> types.
     /// </summary>
     /// <seealso cref="GradientFill"/>
-    public Color Color
-    {
-      get { return _color; }
-      set { _color = value; }
-    }
+    public Color Color { get; set; }
+
     /// <summary>
     /// The style of the <see cref="Line"/>, defined as a <see cref="DashStyle"/> enum.
     /// This allows the line to be solid, dashed, or dotted.
@@ -165,11 +105,7 @@ namespace ZedGraph
     /// <seealso cref="Default.Style"/>
     /// <seealso cref="DashOn" />
     /// <seealso cref="DashOff" />
-    public DashStyle Style
-    {
-      get { return _style; }
-      set { _style = value; }
-    }
+    public DashStyle Style { get; set; }
 
     /// <summary>
     /// The "Dash On" mode for drawing the line.
@@ -183,11 +119,8 @@ namespace ZedGraph
     /// <seealso cref="DashOff"/>
     /// <seealso cref="IsVisible"/>
     /// <seealso cref="Default.DashOn"/>.
-    public float DashOn
-    {
-      get { return _dashOn; }
-      set { _dashOn = value; }
-    }
+    public float DashOn { get; set; }
+
     /// <summary>
     /// The "Dash Off" mode for drawing the line.
     /// </summary>
@@ -200,31 +133,21 @@ namespace ZedGraph
     /// <seealso cref="DashOn"/>
     /// <seealso cref="IsVisible"/>
     /// <seealso cref="Default.DashOff"/>.
-    public float DashOff
-    {
-      get { return _dashOff; }
-      set { _dashOff = value; }
-    }
+    public float DashOff { get; set; }
 
     /// <summary>
     /// The pen width used to draw the <see cref="Line"/>, in points (1/72 inch)
     /// </summary>
     /// <seealso cref="Default.Width"/>
-    public float Width
-    {
-      get { return _width; }
-      set { _width = value; }
-    }
+    public float Width { get; set; }
+
     /// <summary>
     /// Gets or sets a property that shows or hides the <see cref="Line"/>.
     /// </summary>
     /// <value>true to show the line, false to hide it</value>
     /// <seealso cref="Default.IsVisible"/>
-    public bool IsVisible
-    {
-      get { return _isVisible; }
-      set { _isVisible = value; }
-    }
+    public bool IsVisible { get; set; }
+
     /// <summary>
     /// Gets or sets a value that determines if the lines are drawn using
     /// Anti-Aliasing capabilities from the <see cref="Graphics" /> class.
@@ -235,11 +158,7 @@ namespace ZedGraph
     /// this <see cref="Line" /> is drawn.  A value of false will leave the value of
     /// <see cref="Graphics.SmoothingMode" /> unchanged.
     /// </remarks>
-    public bool IsAntiAlias
-    {
-      get { return _isAntiAlias; }
-      set { _isAntiAlias = value; }
-    }
+    public bool IsAntiAlias { get; set; }
 
     /// <summary>
     /// Gets or sets a custom <see cref="Fill" /> class.
@@ -251,11 +170,7 @@ namespace ZedGraph
     /// one of the above <see cref="FillType" /> values are selected.
     /// </remarks>
     /// <seealso cref="Color"/>
-    public Fill GradientFill
-    {
-      get { return _gradientFill; }
-      set { _gradientFill = value; }
-    }
+    public Fill GradientFill { get; set; }
 
   #endregion
 
@@ -288,15 +203,14 @@ namespace ZedGraph
     /// <param name="color">The color to assign to this new Line object</param>
     public LineBase( Color color, Color color2 )
     {
-      _width = Default.Width;
-      _style = Default.Style;
-      _dashOn = Default.DashOn;
-      _dashOff = Default.DashOff;
-      _isVisible = Default.IsVisible;
-      _color = color.IsEmpty ? Default.Color : color;
-      _isAntiAlias = Default.IsAntiAlias;
-      _gradientFill = new Fill( _color, color2 );
-      _gradientFill.Type = FillType.None;
+      Width        = Default.Width;
+      Style        = Default.Style;
+      DashOn       = Default.DashOn;
+      DashOff      = Default.DashOff;
+      IsVisible    = Default.IsVisible;
+      Color        = color.IsEmpty ? Default.Color : color;
+      IsAntiAlias  = Default.IsAntiAlias;
+      GradientFill = new Fill(Color, color2) {Type = FillType.None};
     }
 
     /// <summary>
@@ -305,16 +219,14 @@ namespace ZedGraph
     /// <param name="rhs">The LineBase object from which to copy</param>
     public LineBase( LineBase rhs )
     {
-      _width = rhs._width;
-      _style = rhs._style;
-      _dashOn = rhs._dashOn;
-      _dashOff = rhs._dashOff;
-
-      _isVisible = rhs._isVisible;
-      _color = rhs._color;
-
-      _isAntiAlias = rhs._isAntiAlias;
-      _gradientFill = new Fill( rhs._gradientFill );
+      Width        = rhs.Width;
+      Style        = rhs.Style;
+      DashOn       = rhs.DashOn;
+      DashOff      = rhs.DashOff;
+      IsVisible    = rhs.IsVisible;
+      Color        = rhs.Color;
+      IsAntiAlias  = rhs.IsAntiAlias;
+      GradientFill = new Fill( rhs.GradientFill );
     }
 
     /// <summary>
@@ -372,14 +284,14 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32( "schema0" );
 
-      _width = info.GetSingle( "width" );
-      _style = (DashStyle)info.GetValue( "style", typeof( DashStyle ) );
-      _dashOn = info.GetSingle( "dashOn" );
-      _dashOff = info.GetSingle( "dashOff" );
-      _isVisible = info.GetBoolean( "isVisible" );
-      _isAntiAlias = info.GetBoolean( "isAntiAlias" );
-      _color = (Color)info.GetValue( "color", typeof( Color ) );
-      _gradientFill = (Fill)info.GetValue( "gradientFill", typeof( Fill ) );
+      Width = info.GetSingle( "width" );
+      Style = (DashStyle)info.GetValue( "style", typeof( DashStyle ) );
+      DashOn = info.GetSingle( "dashOn" );
+      DashOff = info.GetSingle( "dashOff" );
+      IsVisible = info.GetBoolean( "isVisible" );
+      IsAntiAlias = info.GetBoolean( "isAntiAlias" );
+      Color = (Color)info.GetValue( "color", typeof( Color ) );
+      GradientFill = (Fill)info.GetValue( "gradientFill", typeof( Fill ) );
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize
@@ -394,14 +306,14 @@ namespace ZedGraph
     {
       info.AddValue( "schema0", schema0 );
 
-      info.AddValue( "width", _width );
-      info.AddValue( "style", _style );
-      info.AddValue( "dashOn", _dashOn );
-      info.AddValue( "dashOff", _dashOff );
-      info.AddValue( "isVisible", _isVisible );
-      info.AddValue( "isAntiAlias", _isAntiAlias );
-      info.AddValue( "color", _color );
-      info.AddValue( "gradientFill", _gradientFill );
+      info.AddValue( "width", Width );
+      info.AddValue( "style", Style );
+      info.AddValue( "dashOn", DashOn );
+      info.AddValue( "dashOff", DashOff );
+      info.AddValue( "isVisible", IsVisible );
+      info.AddValue( "isAntiAlias", IsAntiAlias );
+      info.AddValue( "color", Color );
+      info.AddValue( "gradientFill", GradientFill );
     }
 
   #endregion
@@ -451,23 +363,23 @@ namespace ZedGraph
     /// </returns>
     public Pen GetPen( PaneBase pane, float scaleFactor, PointPair dataValue )
     {
-      var color = _color;
-      if ( _gradientFill.IsGradientValueType )
-        color = _gradientFill.GetGradientColor( dataValue );
+      var color = Color;
+      if ( GradientFill.IsGradientValueType )
+        color = GradientFill.GetGradientColor( dataValue );
 
-      var pen = new Pen(color, pane.ScaledPenWidth(_width, scaleFactor))
+      var pen = new Pen(color, pane.ScaledPenWidth(Width, scaleFactor))
       {
-        DashStyle = _style
+        DashStyle = Style
       };
 
-      if (_style != DashStyle.Custom) return pen;
+      if (Style != DashStyle.Custom) return pen;
 
-      if (_dashOff <= 1e-10 || _dashOn <= 1e-10)
+      if (DashOff <= 1e-10 || DashOn <= 1e-10)
         pen.DashStyle = DashStyle.Solid;
       else
       {
         pen.DashStyle = DashStyle.Custom;
-        pen.DashPattern = new[] {_dashOn, _dashOff};
+        pen.DashPattern = new[] {DashOn, DashOff};
       }
 
       return pen;

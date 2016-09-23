@@ -40,36 +40,19 @@ namespace ZedGraph
     // internal temporary value that keeps
     // the max number of points for any curve
     // associated with this curveList
-    private int  maxPts;
 
     /// <summary>
     /// Read only value for the maximum number of points in any of the curves
     /// in the list.
     /// </summary>
-    public int MaxPts
-    {
-      get { return maxPts; }
-    }
+    public int MaxPts { get; private set; }
 
     /// <summary>
     /// Read only property that returns the number of curves in the list that are of
     /// type <see cref="BarItem"/>. This does not include <see cref="HiLowBarItem" /> or
     /// <see cref="ErrorBarItem" /> types.
     /// </summary>
-    public int NumBars
-    {
-      get
-      {
-        int count = 0;
-        foreach ( CurveItem curve in this )
-        {
-          if ( curve.IsBar )
-            count++;
-        }
-
-        return count;
-      }
-    }
+    public int NumBars => this.Count(curve => curve.IsBar);
 
     /// <summary>
     /// Read only property that returns the number of curves in the list that are
@@ -79,61 +62,19 @@ namespace ZedGraph
     /// </summary>
     /// <remarks>Note that this property is only the number of bars that COULD BE clustered.  The
     /// actual cluster settings are not considered.</remarks>
-    public int NumClusterableBars
-    {
-      get
-      {
-        int count = 0;
-        foreach ( CurveItem curve in this )
-        {
-          if ( curve.IsBar || curve is HiLowBarItem )
-            count++;
-        }
-
-        return count;
-      }
-    }
-
-
+    public int NumClusterableBars => this.Count(curve => curve.IsBar || curve is HiLowBarItem);
 
     /// <summary>
     /// Read only property that returns the number of pie slices in the list (class type is
     /// <see cref="PieItem"/> ).
     /// </summary>
-    public int NumPies
-    {
-      get
-      {
-        int count = 0;
-        foreach ( CurveItem curve in this )
-        {
-          if ( curve.IsPie )
-            count++;
-        }
-
-        return count;
-      }
-    }
+    public int NumPies => this.Count(c => c.IsPie);
 
     /// <summary>
     /// Read only property that determines if all items in the <see cref="CurveList"/> are
     /// Pies.
     /// </summary>
-    public bool IsPieOnly
-    {
-       get
-       {
-        bool hasPie = false;
-         foreach ( CurveItem curve in this )
-         {
-           if ( !curve.IsPie )
-             return false;
-          else
-            hasPie = true;
-         }
-        return hasPie;
-       }
-    }
+    public bool IsPieOnly => this.Count > 0 && this.All(c => c.IsPie);
 
     /// <summary>
     /// Determine if there is any data in any of the <see cref="CurveItem"/>
@@ -143,12 +84,7 @@ namespace ZedGraph
     /// <returns>true if there is any data, false otherwise</returns>
     public bool HasData()
     {
-      foreach( CurveItem curve in this )
-      {
-        if ( curve.Points.Count > 0 )
-          return true;
-      }
-      return false;
+      return this.Any(curve => curve.Points.Count > 0);
     }
   #endregion
   
@@ -159,7 +95,7 @@ namespace ZedGraph
     /// </summary>
     public CurveList()
     {
-      maxPts = 1;
+      MaxPts = 1;
     }
 
     /// <summary>
@@ -168,12 +104,8 @@ namespace ZedGraph
     /// <param name="rhs">The XAxis object from which to copy</param>
     public CurveList( CurveList rhs )
     {
-      this.maxPts = rhs.maxPts;
-
-      foreach ( CurveItem item in rhs )
-      {
-        this.Add( (CurveItem) ((ICloneable)item).Clone() );
-      }
+      MaxPts = rhs.MaxPts;
+      rhs.ForEach(ci => Add((CurveItem)((ICloneable)ci).Clone()));
     }
 
     /// <summary>
@@ -181,19 +113,13 @@ namespace ZedGraph
     /// calling the typed version of <see cref="Clone" />
     /// </summary>
     /// <returns>A deep copy of this object</returns>
-    object ICloneable.Clone()
-    {
-      return this.Clone();
-    }
+    object ICloneable.Clone() { return this.Clone(); }
 
     /// <summary>
     /// Typesafe, deep-copy clone method.
     /// </summary>
     /// <returns>A new, independent copy of this class</returns>
-    public CurveList Clone()
-    {
-      return new CurveList( this );
-    }
+    public CurveList Clone() { return new CurveList( this ); }
 
     
   #endregion
@@ -252,38 +178,35 @@ namespace ZedGraph
     {
       get
       {
-        int index = IndexOf( label );
-        if ( index >= 0 )
-          return( this[index]  );
-        else
-          return null;
+        int    index =  IndexOf( label );
+        return index >= 0 ? ( this[index]  ) : null;
       }
     }
-/*
+
     /// <summary>
     /// Add a <see cref="CurveItem"/> object to the collection at the end of the list.
     /// </summary>
     /// <param name="curve">A reference to the <see cref="CurveItem"/> object to
     /// be added</param>
     /// <seealso cref="IList.Add"/>
-    public void Add( CurveItem curve )
+    public new void Add(CurveItem curve)
     {
-      List.Add( curve );
+      base.Add(curve);
+      Sort(new CurveItem.ZOrderComparer());
     }
-*/
-/*
+
     /// <summary>
     /// Remove a <see cref="CurveItem"/> object from the collection based on an object reference.
     /// </summary>
     /// <param name="curve">A reference to the <see cref="CurveItem"/> object that is to be
     /// removed.</param>
     /// <seealso cref="IList.Remove"/>
-    public void Remove( CurveItem curve )
+    public new void Remove( CurveItem curve )
     {
-      List.Remove( curve );
+      base.Remove( curve );
+      Sort(new CurveItem.ZOrderComparer());
     }
-*/
-/*
+
     /// <summary>
     /// Insert a <see cref="CurveItem"/> object into the collection at the specified
     /// zero-based index location.
@@ -292,11 +215,11 @@ namespace ZedGraph
     /// <param name="curve">A reference to the <see cref="CurveItem"/> object that is to be
     /// inserted.</param>
     /// <seealso cref="IList.Insert"/>
-    public void Insert( int index, CurveItem curve )
+    public new void Insert( int index, CurveItem curve )
     {
-      List.Insert( index, curve );
+      base.Insert( index, curve );
+      Sort(new CurveItem.ZOrderComparer());
     }
-*/
 
     /// <summary>
     /// Return the zero-based position index of the
@@ -313,7 +236,7 @@ namespace ZedGraph
       int index = 0;
       foreach ( CurveItem p in this )
       {
-        if ( String.Compare( p._label._text, label, true ) == 0 )
+        if ( String.Compare( p.Label.Text, label, true ) == 0 )
           return index;
         index++;
       }
@@ -392,9 +315,9 @@ namespace ZedGraph
 
 
 
-  #endregion
+    #endregion
 
-  #region Rendering Methods
+    #region Rendering Methods
 
     /// <summary>
     /// Go through each <see cref="CurveItem"/> object in the collection,
@@ -426,19 +349,21 @@ namespace ZedGraph
     /// owner of this object.
     /// </param>
     /// <seealso cref="GraphPane.IsBoundedRanges"/>
-    public void GetRange( bool bIgnoreInitial, bool isBoundedRanges, GraphPane pane )
+    public void GetRange(bool bIgnoreInitial, bool isBoundedRanges, GraphPane pane)
     {
-      InitScale( pane.XAxis.Scale, isBoundedRanges );
-      InitScale( pane.X2Axis.Scale, isBoundedRanges );
+      InitScale(pane.XAxis.Scale, isBoundedRanges);
+      InitScale(pane.X2Axis.Scale, isBoundedRanges);
 
-      foreach ( var axis in pane.YAxisList )
-        InitScale( axis.Scale, isBoundedRanges );
+      foreach (var axis in pane.YAxisList)
+        InitScale(axis.Scale, isBoundedRanges);
 
-      foreach ( var axis in pane.Y2AxisList )
-        InitScale( axis.Scale, isBoundedRanges );
+      foreach (var axis in pane.Y2AxisList)
+        InitScale(axis.Scale, isBoundedRanges);
 
-      maxPts = 1;
+      MaxPts = 1;
 
+      //FIXME:
+      //CurveItem xMinCurve = null, xMaxCurve = null;
 
       // Loop over each curve in the collection and examine the data ranges
       foreach (var curve in this.Where(curve => curve.IsVisible))
@@ -453,15 +378,14 @@ namespace ZedGraph
                                     pane._barSettings.Type == BarType.PercentStack)) ||
             ((curve is LineItem) && pane.LineType == LineType.Stack))
         {
-          GetStackRange( pane, curve, out tXMinVal, out tYMinVal,
-                         out tXMaxVal, out tYMaxVal );
+          GetStackRange(pane, curve, out tXMinVal, out tYMinVal, out tXMaxVal, out tYMaxVal);
         }
         else
         {
           // Call the GetRange() member function for the current
           // curve to get the min and max values
-          curve.GetRange( out tXMinVal, out tXMaxVal,
-                          out tYMinVal, out tYMaxVal, bIgnoreInitial, true, pane );
+          curve.GetRange(out tXMinVal, out tXMaxVal,
+                         out tYMinVal, out tYMaxVal, bIgnoreInitial, true, pane);
         }
 
         var yScale = curve.GetYAxis(pane).Scale;
@@ -522,8 +446,8 @@ namespace ZedGraph
         }
 
         // determine which curve has the maximum number of points
-        if (curve.NPts > maxPts)
-          maxPts = curve.NPts;
+        if (curve.NPts > MaxPts)
+          MaxPts = curve.NPts;
 
         // If the min and/or max values from the current curve
         // are the absolute min and/or max, then save the values
@@ -532,6 +456,47 @@ namespace ZedGraph
         if (tYMinVal < yScale._rangeMin) yScale._rangeMin = tYMinVal;
         if (tYMaxVal > yScale._rangeMax) yScale._rangeMax = tYMaxVal;
 
+        // FIXME:
+        /*
+        if (isXOrd)
+        {
+          if (xMinCurve == null)
+          {
+            xMinCurve = curve;
+            tXMinVal  = curve.Points[Math.Min(curve.Points.Count - 1, (int)tXMinVal)].X;
+          }
+          else if (xMinCurve.Points.Count > 0)
+          {
+            var min = curve.Points[Math.Min(curve.Points.Count - 1, (int)tXMinVal)].X;
+
+            if (min < xMinCurve[0].X)
+            {
+              xMinCurve = curve;
+              tXMinVal  = min;
+            }
+            else
+              tXMinVal  = xScale._rangeMin;
+          }
+
+          if (xMaxCurve == null)
+          {
+            xMaxCurve = curve;
+            tXMaxVal  = curve.Points[Math.Min(curve.Points.Count-1, (int)tXMaxVal)].X;
+          }
+          else if (xMaxCurve.Points.Count > 0)
+          {
+            var max = curve.Points[Math.Min(curve.Points.Count - 1, (int)tXMaxVal)].X;
+
+            if (max > xMaxCurve[xMaxCurve.Points.Count - 1].X)
+            {
+              xMaxCurve = curve;
+              tXMaxVal  = max;
+            }
+            else
+              tXMinVal = xScale._rangeMax;
+          }
+        }
+        */
 
         if (tXMinVal < xScale._rangeMin) xScale._rangeMin = tXMinVal;
         if (tXMaxVal > xScale._rangeMax) xScale._rangeMax = tXMaxVal;
@@ -540,9 +505,9 @@ namespace ZedGraph
       pane.XAxis.Scale.SetRange(pane);
       pane.X2Axis.Scale.SetRange(pane);
 
-      foreach ( YAxis axis in pane.YAxisList )
-        axis.Scale.SetRange(pane );
-      foreach ( Y2Axis axis in pane.Y2AxisList )
+      foreach (YAxis axis in pane.YAxisList)
+        axis.Scale.SetRange(pane);
+      foreach (Y2Axis axis in pane.Y2AxisList)
         axis.Scale.SetRange(pane);
     }
 
@@ -572,52 +537,43 @@ namespace ZedGraph
     /// <param name="tXMaxVal">The maximum X value so far</param>
     /// <param name="tYMaxVal">The maximum Y value so far</param>
     /// <seealso cref="GraphPane.IsBoundedRanges"/>
-    private void GetStackRange( GraphPane pane, CurveItem curve, out double tXMinVal,
-                  out double tYMinVal, out double tXMaxVal, out double tYMaxVal )
+    private void GetStackRange(GraphPane pane, CurveItem curve, out double tXMinVal,
+                  out double tYMinVal, out double tXMaxVal, out double tYMaxVal)
     {
       // initialize the values to outrageous ones to start
       tXMinVal = tYMinVal = Double.MaxValue;
       tXMaxVal = tYMaxVal = Double.MinValue;
 
-      var valueHandler = new ValueHandler( pane, false );
-      var baseAxis     = curve.BaseAxis( pane );
-      var isXBase      = baseAxis is IXAxis;
+      var valueHandler = new ValueHandler(pane, false);
+      var baseAxis = curve.BaseAxis(pane);
+      var isXBase = baseAxis is IXAxis;
 
-      for ( int i=0; i<curve.Points.Count; i++ )
+      for (int i = 0; i < curve.Points.Count; i++)
       {
         double lowVal;
         double hiVal;
         double baseVal;
-        valueHandler.GetValues( curve, i, out baseVal, out lowVal, out hiVal );
+        valueHandler.GetValues(curve, i, out baseVal, out lowVal, out hiVal);
         var x = isXBase ? baseVal : hiVal;
         var y = isXBase ? hiVal : baseVal;
 
-        if (x == PointPair.Missing || y == PointPair.Missing ||
-            lowVal == PointPair.Missing)
+        if (x == PointPair.Missing || y == PointPair.Missing || lowVal == PointPair.Missing)
           continue;
 
-        if ( x < tXMinVal )
-          tXMinVal = x;
-        if ( x > tXMaxVal )
-          tXMaxVal = x;
-        if ( y < tYMinVal )
-          tYMinVal = y;
-        if ( y > tYMaxVal )
-          tYMaxVal = y;
+        if (x < tXMinVal) tXMinVal = x;
+        if (x > tXMaxVal) tXMaxVal = x;
+        if (y < tYMinVal) tYMinVal = y;
+        if (y > tYMaxVal) tYMaxVal = y;
 
-        if ( !isXBase )
+        if (!isXBase)
         {
-          if ( lowVal < tXMinVal )
-            tXMinVal = lowVal;
-          if ( lowVal > tXMaxVal )
-            tXMaxVal = lowVal;
+          if (lowVal < tXMinVal) tXMinVal = lowVal;
+          if (lowVal > tXMaxVal) tXMaxVal = lowVal;
         }
         else
         {
-          if ( lowVal < tYMinVal )
-            tYMinVal = lowVal;
-          if ( lowVal > tYMaxVal )
-            tYMaxVal = lowVal;
+          if (lowVal < tYMinVal) tYMinVal = lowVal;
+          if (lowVal > tYMaxVal) tYMaxVal = lowVal;
         }
       }
     }
@@ -659,40 +615,34 @@ namespace ZedGraph
         tempList.AddRange(this.Where(curve => curve.IsBar));
 
         // Loop through the bars, graphing each ordinal position separately
-        for ( int i=0; i<this.maxPts; i++ )
+        for ( var i=0; i<MaxPts; i++ )
         {
           // At each ordinal position, sort the curves according to the value axis value
           tempList.Sort( pane._barSettings.Base == BarBase.X ? SortType.YValues : SortType.XValues, i );
           // plot the bars for the current ordinal position, in sorted order
-          foreach ( var curveItem in tempList )
-          {
-            var barItem = (BarItem)curveItem;
+          foreach (var barItem in tempList.Cast<BarItem>())
             barItem.Bar.DrawSingleBar( g, pane, barItem,
                                        barItem.BaseAxis( pane ),
                                        barItem.ValueAxis( pane ),
                                        0, i, barItem.GetBarWidth( pane ), scaleFactor );
-          }
         }
       }
 
       // Loop for each curve in reverse order to pick up the remaining curves
       // The reverse order is done so that curves that are later in the list are plotted behind
       // curves that are earlier in the list
-
-      for ( int i = this.Count - 1; i >= 0; i-- )
+      for (var i = Count - 1; i >= 0; i--)
       {
-        CurveItem curve = this[i];
-        
-        if ( curve.IsBar)
+        var curve = this[i];
+
+        if (curve.IsBar)
           pos--;
-          
+
         // Render the curve
 
         //  if it's a sorted overlay bar type, it's already been done above
-        if ( !( curve.IsBar && pane._barSettings.Type == BarType.SortedOverlay ) )
-        {
-          curve.Draw( g, pane, pos, scaleFactor );
-        }
+        if (!(curve.IsBar && pane._barSettings.Type == BarType.SortedOverlay))
+          curve.Draw(g, pane, pos, scaleFactor);
       }
     }
 

@@ -22,6 +22,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ZedGraph
@@ -609,7 +610,7 @@ namespace ZedGraph
 
       // Set the ClusterScaleWidth, if needed
       //_barSettings.CalcClusterScaleWidth();
-      if ( _barSettings._clusterScaleWidthAuto )
+      if ( _barSettings.ClusterScaleWidthAuto )
         _barSettings._clusterScaleWidth = 1.0;
 
       // if the ChartRect is not yet determined, then pick a scale based on a default ChartRect
@@ -690,7 +691,7 @@ namespace ZedGraph
     /// A graphic device object to be drawn into.  This is normally e.Graphics from the
     /// PaintEventArgs argument to the Paint() method.
     /// </param>
-    public override void Draw( Graphics g )
+    public override void Draw(Graphics g)
     {
       // Calculate the chart rect, deducting the area for the scales, titles, legend, etc.
       //int    hStack;
@@ -698,29 +699,29 @@ namespace ZedGraph
 
       // Draw the pane border & background fill, the title, and the GraphObj objects that lie at
       // ZOrder.G_BehindAll
-      base.Draw( g );
+      base.Draw(g);
 
-      if ( _rect.Width <= 1 || _rect.Height <= 1 )
+      if (_rect.Width <= 1 || _rect.Height <= 1)
         return;
 
       // Clip everything to the rect
-      g.SetClip( _rect );
+      g.SetClip(_rect);
 
       var scaleFactor = CalcScaleFactor();
 
       // if the size of the ChartRect is determined automatically, then do so
       // otherwise, calculate the legendrect, scalefactor, hstack, and legendwidth parameters
       // but leave the ChartRect alone
-      if ( _chart._isRectAuto )
+      if (_chart._isRectAuto)
       {
-        CurveClipRect = _chart._rect = CalcChartRect( g, scaleFactor );
+        CurveClipRect = _chart._rect = CalcChartRect(g, scaleFactor);
         //this.pieRect = PieItem.CalcPieRect( g, this, scaleFactor, this.chartRect );
       }
       else
-        CurveClipRect = CalcChartRect( g, scaleFactor );
+        CurveClipRect = CalcChartRect(g, scaleFactor);
 
       // do a sanity check on the ChartRect
-      if ( _chart._rect.Width < 1 || _chart._rect.Height < 1 )
+      if (_chart._rect.Width < 1 || _chart._rect.Height < 1)
         return;
 
       // Draw the graph features only if there is at least one curve with data
@@ -733,74 +734,74 @@ namespace ZedGraph
       // the GraphObj's are drawn so that the Transform functions are
       // ready.  Also, this should be done before CalcChartRect so that the
       // Axis.Cross - shift parameter can be calculated.
-      _xAxis.Scale.SetupScaleData( this );
-      _x2Axis.Scale.SetupScaleData( this );
-      foreach ( Axis axis in _yAxisList )
-        axis.Scale.SetupScaleData( this );
-      foreach ( Axis axis in _y2AxisList )
-        axis.Scale.SetupScaleData( this );
+      _xAxis.Scale.SetupScaleData(this);
+      _x2Axis.Scale.SetupScaleData(this);
+      foreach (var axis in _yAxisList)
+        axis.Scale.SetupScaleData(this);
+      foreach (var axis in _y2AxisList)
+        axis.Scale.SetupScaleData(this);
 
       // Draw the GraphItems that are behind the Axis objects
-      if ( showGraf )
-        GraphObjList.Draw( g, this, scaleFactor, ZOrder.G_BehindChartFill );
+      if (showGraf)
+        GraphObjList.Draw(g, this, scaleFactor, ZOrder.G_BehindChartFill);
 
       // Fill the axis background
-      _chart.Fill.Draw( g, _chart._rect );
+      _chart.Fill.Draw(g, _chart._rect);
 
-      if ( showGraf )
+      if (showGraf)
       {
         // Draw the GraphItems that are behind the CurveItems
-        GraphObjList.Draw( g, this, scaleFactor, ZOrder.F_BehindGrid );
+        GraphObjList.Draw(g, this, scaleFactor, ZOrder.F_BehindGrid);
 
-        DrawGrid( g, scaleFactor );
+        DrawGrid(g, scaleFactor);
 
         // Draw the GraphItems that are behind the CurveItems
-        GraphObjList.Draw( g, this, scaleFactor, ZOrder.E_BehindCurves );
+        GraphObjList.Draw(g, this, scaleFactor, ZOrder.E_BehindCurves);
 
         // Clip the points to the actual plot area
         g.SetClip(CurveClipRect, CombineMode.Intersect);
 
         if (!g.IsClipEmpty) // update region may not be in chart at all
-          _curveList.Draw( g, this, scaleFactor );
-        g.SetClip( _rect );
+          _curveList.Draw(g, this, scaleFactor);
+        g.SetClip(_rect);
 
         // Draw the GraphItems that are behind the Axis objects
-        GraphObjList.Draw( g, this, scaleFactor, ZOrder.D_BehindAxis );
+        GraphObjList.Draw(g, this, scaleFactor, ZOrder.D_BehindAxis);
 
         // Draw the Axes
-        _xAxis.Draw( g, this, scaleFactor, 0.0f );
-        _x2Axis.Draw( g, this, scaleFactor, 0.0f );
+        _xAxis.Draw(g, this, scaleFactor, 0.0f);
+        _x2Axis.Draw(g, this, scaleFactor, 0.0f);
 
         float shift = 0;
-        foreach ( Axis axis in _yAxisList )
+        foreach (var axis in _yAxisList)
         {
-          axis.Draw( g, this, scaleFactor, shift );
+          axis.Draw(g, this, scaleFactor, shift);
           shift += axis._tmpSpace;
         }
 
         shift = 0;
-        foreach ( Axis axis in _y2AxisList )
+        foreach (var axis in _y2AxisList)
         {
-          axis.Draw( g, this, scaleFactor, shift );
+          axis.Draw(g, this, scaleFactor, shift);
           shift += axis._tmpSpace;
         }
 
         // Draw the GraphItems that are behind the Axis border
-        GraphObjList.Draw( g, this, scaleFactor, ZOrder.C_BehindChartBorder );
+        GraphObjList.Draw(g, this, scaleFactor, ZOrder.C_BehindChartBorder);
       }
 
       // Border the axis itself
-      _chart.Border.Draw( g, this, scaleFactor, _chart._rect );
+      _chart.Border.Draw(g, this, scaleFactor, _chart._rect);
 
-      if ( showGraf )
+      if (showGraf)
       {
         // Draw the GraphItems that are behind the Legend object
-        GraphObjList.Draw( g, this, scaleFactor, ZOrder.B_BehindLegend );
+        GraphObjList.Draw(g, this, scaleFactor, ZOrder.B_BehindLegend);
 
-        _legend.Draw( g, this, scaleFactor );
+        _legend.Draw(g, this, scaleFactor);
 
         // Draw the GraphItems that are in front of all other items
-        GraphObjList.Draw( g, this, scaleFactor, ZOrder.A_InFront );
+        GraphObjList.Draw(g, this, scaleFactor, ZOrder.A_InFront);
       }
 
       // Reset the clipping
@@ -821,38 +822,38 @@ namespace ZedGraph
       DrawEvent?.Invoke(this);
     }
 
-    internal void DrawGrid( Graphics g, float scaleFactor )
+    internal void DrawGrid(Graphics g, float scaleFactor)
     {
-      _xAxis.DrawGrid( g, this, scaleFactor, 0.0f );
-      _x2Axis.DrawGrid( g, this, scaleFactor, 0.0f );
+      _xAxis.DrawGrid(g, this, scaleFactor, 0.0f);
+      _x2Axis.DrawGrid(g, this, scaleFactor, 0.0f);
 
       float shiftPos = 0.0f;
-      foreach ( YAxis yAxis in _yAxisList )
+      foreach (YAxis yAxis in _yAxisList)
       {
-        yAxis.DrawGrid( g, this, scaleFactor, shiftPos );
+        yAxis.DrawGrid(g, this, scaleFactor, shiftPos);
         shiftPos += yAxis._tmpSpace;
       }
 
       shiftPos = 0.0f;
-      foreach ( Y2Axis y2Axis in _y2AxisList )
+      foreach (Y2Axis y2Axis in _y2AxisList)
       {
-        y2Axis.DrawGrid( g, this, scaleFactor, shiftPos );
+        y2Axis.DrawGrid(g, this, scaleFactor, shiftPos);
         shiftPos += y2Axis._tmpSpace;
       }
     }
 
     private bool AxisRangesValid()
     {
-      bool showGraf = 
-          (double.IsNaN(_xAxis.Scale._min)  && double.IsNaN(_xAxis.Scale._max)  ||
+      bool showGraf =
+          (double.IsNaN(_xAxis.Scale._min) && double.IsNaN(_xAxis.Scale._max) ||
            _xAxis.Scale._min < _xAxis.Scale._max) &&
           (double.IsNaN(_x2Axis.Scale._min) && double.IsNaN(_x2Axis.Scale._max) ||
            _x2Axis.Scale._min < _x2Axis.Scale._max);
-      foreach ( Axis axis in _yAxisList )
-        if ( axis.Scale._min >= axis.Scale._max )
+      foreach (Axis axis in _yAxisList)
+        if (axis.Scale._min >= axis.Scale._max)
           showGraf = false;
-      foreach ( Axis axis in _y2AxisList )
-        if ( axis.Scale._min >= axis.Scale._max )
+      foreach (Axis axis in _y2AxisList)
+        if (axis.Scale._min >= axis.Scale._max)
           showGraf = false;
 
       return showGraf;
@@ -1064,9 +1065,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddCurve(string,double[],double[],Color)"/> method.</returns>
-    public LineItem AddCurve( string label, double[] x, double[] y, Color color )
+    public LineItem AddCurve( string label, double[] x, double[] y, Color color, int zOrder=-1 )
     {
-      LineItem curve = new LineItem( label, x, y, color, SymbolType.Default );
+      LineItem curve = new LineItem( label, x, y, color, SymbolType.Default, zOrder:zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1089,9 +1090,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddCurve(string,IPointList,Color)"/> method.</returns>
-    public LineItem AddCurve( string label, IPointList points, Color color )
+    public LineItem AddCurve( string label, IPointList points, Color color, int zOrder = -1)
     {
-      LineItem curve = new LineItem( label, points, color, SymbolType.Default );
+      LineItem curve = new LineItem( label, points, color, SymbolType.Default, zOrder: zOrder);
       _curveList.Add( curve );
 
       return curve;
@@ -1119,9 +1120,9 @@ namespace ZedGraph
     /// are not defined as arguments to the
     /// <see cref="AddCurve(string,double[],double[],Color,SymbolType)"/> method.</returns>
     public LineItem AddCurve( string label, double[] x, double[] y,
-      Color color, SymbolType symbolType )
+      Color color, SymbolType symbolType, int zOrder = -1)
     {
-      LineItem curve = new LineItem( label, x, y, color, symbolType );
+      LineItem curve = new LineItem( label, x, y, color, symbolType, zOrder: zOrder);
       _curveList.Add( curve );
 
       return curve;
@@ -1147,9 +1148,9 @@ namespace ZedGraph
     /// are not defined as arguments to the
     /// <see cref="AddCurve(string,IPointList,Color,SymbolType)"/> method.</returns>
     public LineItem AddCurve( string label, IPointList points,
-      Color color, SymbolType symbolType )
+      Color color, SymbolType symbolType, int zOrder = -1)
     {
-      LineItem curve = new LineItem( label, points, color, symbolType );
+      LineItem curve = new LineItem( label, points, color, symbolType, zOrder: zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1174,9 +1175,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddStick(string,double[],double[],Color)"/> method.</returns>
-    public StickItem AddStick( string label, double[] x, double[] y, Color color )
+    public StickItem AddStick( string label, double[] x, double[] y, Color color, int zOrder=-1 )
     {
-      StickItem curve = new StickItem( label, x, y, color );
+      StickItem curve = new StickItem( label, x, y, color, zOrder: zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1199,9 +1200,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddStick(string,IPointList,Color)"/> method.</returns>
-    public StickItem AddStick( string label, IPointList points, Color color )
+    public StickItem AddStick( string label, IPointList points, Color color, int zOrder = -1)
     {
-      StickItem curve = new StickItem( label, points, color );
+      StickItem curve = new StickItem( label, points, color, zOrder: zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1229,9 +1230,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddOHLCBar(string,IPointList,Color)"/> method.</returns>
-    public OHLCBarItem AddOHLCBar( string label, IPointList points, Color color )
+    public OHLCBarItem AddOHLCBar( string label, IPointList points, Color color, int zOrder = -1)
     {
-      OHLCBarItem curve = new OHLCBarItem( label, points, color );
+      OHLCBarItem curve = new OHLCBarItem( label, points, color, zOrder: zOrder);
       _curveList.Add( curve );
 
       return curve;
@@ -1257,9 +1258,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddJapaneseCandleStick(string,IPointList)"/> method.</returns>
-    public JapaneseCandleStickItem AddJapaneseCandleStick( string label, IPointList points )
+    public JapaneseCandleStickItem AddJapaneseCandleStick( string label, IPointList points, int zOrder=-1 )
     {
-      JapaneseCandleStickItem curve = new JapaneseCandleStickItem( label, points );
+      JapaneseCandleStickItem curve = new JapaneseCandleStickItem( label, points, zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1288,10 +1289,10 @@ namespace ZedGraph
     /// are not defined as arguments to the
     /// <see cref="AddErrorBar(string,IPointList,Color)"/> method.</returns>
     public ErrorBarItem AddErrorBar( string label, double[] x, double[] y,
-      double[] baseValue, Color color )
+      double[] baseValue, Color color, int zOrder = -1)
     {
       ErrorBarItem curve = new ErrorBarItem( label, new PointPairList( x, y, baseValue ),
-        color );
+        color, zOrder: zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1313,9 +1314,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddErrorBar(string,IPointList,Color)"/> method.</returns>
-    public ErrorBarItem AddErrorBar( string label, IPointList points, Color color )
+    public ErrorBarItem AddErrorBar( string label, IPointList points, Color color, int zOrder=-1 )
     {
-      ErrorBarItem curve = new ErrorBarItem( label, points, color );
+      ErrorBarItem curve = new ErrorBarItem( label, points, color, zOrder: zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1337,9 +1338,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddBar(string,IPointList,Color)"/> method.</returns>
-    public BarItem AddBar( string label, IPointList points, Color color )
+    public BarItem AddBar( string label, IPointList points, Color color, int zOrder=-1 )
     {
-      BarItem curve = new BarItem( label, points, color );
+      BarItem curve = new BarItem( label, points, color, zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1363,9 +1364,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddBar(string,double[],double[],Color)"/> method.</returns>
-    public BarItem AddBar( string label, double[] x, double[] y, Color color )
+    public BarItem AddBar( string label, double[] x, double[] y, Color color, int zOrder=-1 )
     {
-      BarItem curve = new BarItem( label, x, y, color );
+      BarItem curve = new BarItem( label, x, y, color, zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1393,9 +1394,9 @@ namespace ZedGraph
     /// are not defined as arguments to the
     /// <see cref="AddHiLowBar(string,double[],double[],double[],Color)"/> method.</returns>
     public HiLowBarItem AddHiLowBar( string label, double[] x, double[] y,
-      double[] baseVal, Color color )
+      double[] baseVal, Color color, int zOrder = -1)
     {
-      HiLowBarItem curve = new HiLowBarItem( label, x, y, baseVal, color );
+      HiLowBarItem curve = new HiLowBarItem( label, x, y, baseVal, color, zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1417,9 +1418,9 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddHiLowBar(string,IPointList,Color)"/> method.</returns>
-    public HiLowBarItem AddHiLowBar( string label, IPointList points, Color color )
+    public HiLowBarItem AddHiLowBar( string label, IPointList points, Color color, int zOrder = -1)
     {
-      HiLowBarItem curve = new HiLowBarItem( label, points, color );
+      HiLowBarItem curve = new HiLowBarItem( label, points, color, zOrder );
       _curveList.Add( curve );
 
       return curve;
@@ -1924,8 +1925,8 @@ namespace ZedGraph
         }
 
         // See if the point is in the Pane Title
-        SizeF paneTitleBox = _title._fontSpec.BoundingBox( g, _title._text, scaleFactor );
-        if ( saveZOrder <= ZOrder.H_BehindAll && _title._isVisible )
+        SizeF paneTitleBox = _title.FontSpec.BoundingBox( g, _title.Text, scaleFactor );
+        if ( saveZOrder <= ZOrder.H_BehindAll && _title.IsVisible )
         {
           tmpRect = new RectangleF( ( _rect.Left + _rect.Right - paneTitleBox.Width ) / 2,
             _rect.Top + Margin.Top * scaleFactor,
@@ -2372,7 +2373,7 @@ namespace ZedGraph
       // Second, look at the curve data points
       foreach ( CurveItem curve in _curveList )
       {
-        link = curve._link;
+        link = curve.Link;
 
         if (!link.IsActive) continue;
         CurveItem nearestCurve;

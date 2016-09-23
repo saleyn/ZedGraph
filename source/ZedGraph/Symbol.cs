@@ -662,7 +662,7 @@ namespace ZedGraph
 
             // If the fill type for this symbol is a Gradient by value type,
             // the make a brush corresponding to the appropriate current value
-            if (Fill.IsGradientValueType || Border._gradientFill.IsGradientValueType)
+            if (Fill.IsGradientValueType || Border.GradientFill.IsGradientValueType)
             {
               using (var tBrush = Fill.MakeBrush(rect, points[i]))
               using (var tPen   = Border.GetPen(pane, scaleFactor, points[i]))

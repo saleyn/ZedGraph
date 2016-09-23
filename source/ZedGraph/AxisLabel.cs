@@ -170,7 +170,7 @@ namespace ZedGraph
       base.GetObjectData( info, context );
 
       info.AddValue( "schema3", schema2 );
-      info.AddValue( "isOmitMag", _isVisible );
+      info.AddValue( "isOmitMag", IsVisible );
       info.AddValue( "isTitleAtCross", _isTitleAtCross );
     }
     #endregion

@@ -774,7 +774,7 @@ namespace ZedGraph.ControlTest
 				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
+				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
 
 				open = close;
@@ -839,7 +839,7 @@ namespace ZedGraph.ControlTest
 				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
+				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
 
 				open = close;
@@ -898,7 +898,7 @@ namespace ZedGraph.ControlTest
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
 				// Create a StockPt instead of a PointPair so we can carry 6 properties
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
+				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 
 				//if price is increasing color=black, else color=red
 				pt.ColorValue = close > prevClose ? 2 : 1;
@@ -986,7 +986,7 @@ namespace ZedGraph.ControlTest
 				double change = close - prevClose;
 
 				// Create a StockPt instead of a PointPair so we can carry 6 properties
-				StockPt pt = new StockPt( x, hi, low, open, close, vol );
+				StockPt pt = new StockPt( x, open, hi, low, close, vol );
 
 				//if price is increasing color=black, else color=red
 				pt.ColorValue = close > prevClose ? 2 : 1;
@@ -1186,7 +1186,7 @@ namespace ZedGraph.ControlTest
 				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
+				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
 
 				open = close;
@@ -1243,7 +1243,7 @@ namespace ZedGraph.ControlTest
 				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
+				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
 
 				open = close;
@@ -1298,7 +1298,7 @@ namespace ZedGraph.ControlTest
 				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
+				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
 
 				open = close;
@@ -1351,8 +1351,8 @@ namespace ZedGraph.ControlTest
 				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
-				spl.Add( pt );
+        StockPt pt = new StockPt(x, open, hi, low, close, 100000);
+        spl.Add( pt );
 
 				open = close;
 				// Advance one day
@@ -2702,8 +2702,8 @@ namespace ZedGraph.ControlTest
 				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 
-				StockPt pt = new StockPt( x, hi, low, open, close, 100000 );
-				spl.Add( pt );
+        StockPt pt = new StockPt(x, open, hi, low, close, 100000);
+        spl.Add( pt );
 
 				open = close;
 				if ( xDate.DateTime.Hour < 23 )

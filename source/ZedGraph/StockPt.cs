@@ -89,8 +89,8 @@ namespace ZedGraph
     /// <param name="high">The daily high stock price</param>
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
-    public StockPt(double date, double high, double low, double open, double close, double vol)
-      : this(date, high, low, open, close, vol, null)
+    public StockPt(double date, double open, double high, double low, double close, double vol)
+      : this(date, open, high, low, close, vol, null)
     {
     }
 
@@ -104,8 +104,7 @@ namespace ZedGraph
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
-    public StockPt(double date, double high, double low, double open, double close, double vol,
-          string tag)
+    public StockPt(double date, double open, double high, double low, double close, double vol, string tag)
       : base(date, close, low)
     {
       Open = open;
@@ -122,12 +121,11 @@ namespace ZedGraph
     public StockPt(StockPt rhs)
       : base(rhs)
     {
-      Open = rhs.Open;
-      High = rhs.High;
-      Vol = rhs.Vol;
+      Open       = rhs.Open;
+      High       = rhs.High;
+      Vol        = rhs.Vol;
       ColorValue = rhs.ColorValue;
-
-      Tag = rhs.Tag is ICloneable ? ((ICloneable)rhs.Tag).Clone() : rhs.Tag;
+      Tag        = rhs.Tag is ICloneable ? ((ICloneable)rhs.Tag).Clone() : rhs.Tag;
     }
 
     /// <summary>
@@ -139,17 +137,17 @@ namespace ZedGraph
     {
       if (rhs is StockPt)
       {
-        var pt = rhs as StockPt;
-        Open   = pt.Open;
-        Vol    = pt.Vol;
-        High   = pt.High;
+        var pt     = rhs as StockPt;
+        Open       = pt.Open;
+        Vol        = pt.Vol;
+        High       = pt.High;
         ColorValue = rhs.ColorValue;
       }
       else
       {
-        Open = PointPair.Missing;
-        High = PointPair.Missing;
-        Vol  = PointPair.Missing;
+        Open       = PointPair.Missing;
+        High       = PointPair.Missing;
+        Vol        = PointPair.Missing;
         ColorValue = PointPair.Missing;
       }
     }

@@ -102,7 +102,7 @@ namespace ZedGraph
     /// Create a new <see cref="ErrorBarItem"/>, specifying only the legend label.
     /// </summary>
     /// <param name="label">The label that will appear in the legend.</param>
-    public ErrorBarItem( string label ) : base( label )
+    public ErrorBarItem( string label, int zOrder=-1 ) : base( label, zOrder:zOrder )
     {
       _bar = new ErrorBar();
     }
@@ -121,8 +121,8 @@ namespace ZedGraph
     /// the <see cref="Line"/> properties.
     /// </param>
     public ErrorBarItem( string label, double[] x, double[] y, double[] lowValue,
-              System.Drawing.Color color )
-      : this( label, new PointPairList( x, y, lowValue ), color )
+              System.Drawing.Color color, int zOrder=-1 )
+      : this( label, new PointPairList( x, y, lowValue ), color, zOrder: zOrder )
     {
     }
 
@@ -135,8 +135,8 @@ namespace ZedGraph
     /// <param name="color">A <see cref="Color"/> value that will be applied to
     /// the <see cref="Line"/> properties.
     /// </param>
-    public ErrorBarItem( string label, IPointList points, Color color )
-      : base( label, points )
+    public ErrorBarItem( string label, IPointList points, Color color, int zOrder=-1 )
+      : base( label, points, zOrder )
     {
       _bar = new ErrorBar( color );
     }
@@ -237,7 +237,7 @@ namespace ZedGraph
     /// </param>
     override public void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor  )
     {
-      if ( _isVisible )
+      if ( IsVisible )
       {
         _bar.Draw( g, pane, this, this.BaseAxis( pane ),
                 this.ValueAxis( pane ), scaleFactor );
@@ -301,7 +301,7 @@ namespace ZedGraph
     {
       coords = string.Empty;
 
-      if ( i < 0 || i >= _points.Count )
+      if ( i < 0 || i >= Points.Count )
         return false;
 
       Axis valueAxis = ValueAxis( pane );
@@ -331,13 +331,13 @@ namespace ZedGraph
       //   by zero, etc.
       // Also, any value <= zero on a log scale is invalid
 
-      if ( !_points[i].IsInvalid3D )
+      if ( !Points[i].IsInvalid3D )
       {
         // calculate a pixel value for the top of the bar on value axis
-        pixLowVal = valueAxis.Scale.Transform( _isOverrideOrdinal, i, curLowVal );
-        pixHiVal = valueAxis.Scale.Transform( _isOverrideOrdinal, i, curHiVal );
+        pixLowVal = valueAxis.Scale.Transform( IsOverrideOrdinal, i, curLowVal );
+        pixHiVal = valueAxis.Scale.Transform( IsOverrideOrdinal, i, curHiVal );
         // calculate a pixel value for the center of the bar on the base axis
-        pixBase = baseAxis.Scale.Transform( _isOverrideOrdinal, i, curBase );
+        pixBase = baseAxis.Scale.Transform( IsOverrideOrdinal, i, curBase );
 
         // Calculate the pixel location for the side of the bar (on the base axis)
         float pixSide = pixBase - scaledSize / 2.0F;

@@ -841,7 +841,7 @@ namespace ZedGraph
     /// {
     ///   new Tuple<float, float[]>(2f, new[] {1f}),
     ///   new Tuple<float, float[]>(0f, null),                // Vertical splitter
-    ///   new Tuple<float, float[]>(1f, new[] {1f, 0f, 1f}),  // Column with 2 row being a vertical splitter
+    ///   new Tuple<float, float[]>(1f, new[] {1f, 0f, 1f}),  // Column with 2 row being a horizontal splitter
     ///   new Tuple<float, float[]>(3f, new[] {1f, 1f, 1f})
     /// };
     /// </code>
@@ -1102,7 +1102,6 @@ namespace ZedGraph
         var graphPaneRows  = rows - rowSplitters;
         var graphPaneVGaps = graphPaneRows - rowSplitters - 1;
 
-        var row = 0;
         foreach (var prow in _prop)
         {
           int cols, colSplitters, graphPaneCols, graphPaneHGaps;
@@ -1169,8 +1168,6 @@ namespace ZedGraph
 
           if (!thisHPaneSplitter && !isSplitter(PaneList, iPane))
             y += scaledInnerGap;
-
-          row++;
         }
       }
       else
@@ -1181,7 +1178,6 @@ namespace ZedGraph
         var graphPaneCols  = cols - colSplitters;
         var graphPaneHGaps = graphPaneCols - colSplitters - 1;
 
-        var col = 0;
         foreach (var pcol in _prop)
         {
           int rows, rowSplitters, graphPaneRows, graphPaneVGaps;

@@ -65,8 +65,8 @@ namespace ZedGraph
     /// <param name="color">A <see cref="Color"/> value that will be applied to
     /// the <see cref="ZedGraph.Bar.Fill"/> and <see cref="ZedGraph.Bar.Border"/> properties.
     /// </param>
-    public HiLowBarItem( string label, double[] x, double[] y, double[] baseVal, Color color ) :
-      this( label, new PointPairList( x, y, baseVal ), color )
+    public HiLowBarItem( string label, double[] x, double[] y, double[] baseVal, Color color, int zOrder = -1) :
+      this( label, new PointPairList( x, y, baseVal ), color, zOrder )
     {
     }
     
@@ -79,8 +79,8 @@ namespace ZedGraph
     /// <param name="color">A <see cref="Color"/> value that will be applied to
     /// the <see cref="ZedGraph.Bar.Fill"/> and <see cref="ZedGraph.Bar.Border"/> properties.
     /// </param>
-    public HiLowBarItem( string label, IPointList points, Color color )
-      : base( label, points, color )
+    public HiLowBarItem( string label, IPointList points, Color color, int zOrder = -1)
+      : base( label, points, color, zOrder )
     {
     }
 

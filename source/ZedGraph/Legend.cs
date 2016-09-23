@@ -595,7 +595,7 @@ namespace ZedGraph
           {
             CurveItem curve = tmpPane.CurveList[_isReverse ? count - i - 1 : i];
 
-            if ( curve._label._text != "" && curve._label._isVisible )
+            if ( curve.Label.Text != "" && curve.Label.IsVisible )
             {
               // Calculate the x,y (TopLeft) location of the current
               // curve legend label
@@ -609,8 +609,8 @@ namespace ZedGraph
               y = _rect.Top + (int)( iEntry / _hStack ) * _legendItemHeight;
 
               // Draw the legend label for the current curve
-              FontSpec tmpFont = ( curve._label._fontSpec != null ) ?
-                    curve._label._fontSpec : this.FontSpec;
+              FontSpec tmpFont = ( curve.Label.FontSpec != null ) ?
+                    curve.Label.FontSpec : this.FontSpec;
 
               // This is required because, for long labels, the centering can affect the
               // position in GDI+.
@@ -618,7 +618,7 @@ namespace ZedGraph
 
               if ( _isShowLegendSymbols )
               {
-                tmpFont.Draw( g, pane, curve._label._text,
+                tmpFont.Draw( g, pane, curve.Label.Text,
                     x + 2.5F * _tmpSize, y + _legendItemHeight / 2.0F,
                     AlignH.Left, AlignV.Center, scaleFactor );
 
@@ -628,10 +628,10 @@ namespace ZedGraph
               }
               else
               {
-                if ( curve._label._fontSpec == null )
+                if ( curve.Label.FontSpec == null )
                   tmpFont.FontColor = curve.Color;
 
-                tmpFont.Draw(g, pane, curve._label._text,
+                tmpFont.Draw(g, pane, curve.Label.Text,
                   x + 0.0F * _tmpSize, y + _legendItemHeight / 2.0F,
                   AlignH.Left, AlignV.Center, scaleFactor);
               }
@@ -661,14 +661,14 @@ namespace ZedGraph
       {
         foreach ( CurveItem curve in tmpPane.CurveList )
         {
-          if ( curve._label._text != string.Empty && curve._label._isVisible )
+          if ( curve.Label.Text != string.Empty && curve.Label.IsVisible )
           {
             float tmpHeight = defaultCharHeight;
-            if ( curve._label._fontSpec != null )
-              tmpHeight = curve._label._fontSpec.GetHeight( scaleFactor );
+            if ( curve.Label.FontSpec != null )
+              tmpHeight = curve.Label.FontSpec.GetHeight( scaleFactor );
 
             // Account for multiline legend entries
-            tmpHeight *= curve._label._text.Split( '\n' ).Length;
+            tmpHeight *= curve.Label.Text.Split( '\n' ).Length;
 
             if ( tmpHeight > maxCharHeight )
               maxCharHeight = tmpHeight;
@@ -723,7 +723,7 @@ namespace ZedGraph
       {
         foreach ( CurveItem curve in tmpPane.CurveList )
         {
-          if ( curve._label._isVisible && curve._label._text != string.Empty )
+          if ( curve.Label.IsVisible && curve.Label.Text != string.Empty )
           {
             if ( pos == 0 )
               return true;
@@ -815,13 +815,13 @@ namespace ZedGraph
         for ( int i = 0; i < count; i++ )
         {
           CurveItem curve = tmpPane.CurveList[_isReverse ? count - i - 1 : i];
-          if ( curve._label._text != string.Empty && curve._label._isVisible )
+          if ( curve.Label.Text != string.Empty && curve.Label.IsVisible )
           {
             // Calculate the width of the label save the max width
-            FontSpec tmpFont = ( curve._label._fontSpec != null ) ?
-                    curve._label._fontSpec : this.FontSpec;
+            FontSpec tmpFont = ( curve.Label.FontSpec != null ) ?
+                    curve.Label.FontSpec : this.FontSpec;
 
-            tmpWidth = tmpFont.GetWidth( g, curve._label._text, scaleFactor );
+            tmpWidth = tmpFont.GetWidth( g, curve.Label.Text, scaleFactor );
 
             if ( tmpWidth > maxWidth )
               maxWidth = tmpWidth;

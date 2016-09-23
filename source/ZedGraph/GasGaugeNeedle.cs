@@ -403,7 +403,7 @@ namespace ZedGraph
 
         _slicePath = new GraphicsPath();
 
-        if ( !_isVisible )
+        if ( !IsVisible )
           return;
 
         RectangleF tRect = _boundingRectangle;
@@ -464,7 +464,7 @@ namespace ZedGraph
     /// </param> 
     public override void DrawLegendKey( Graphics g, GraphPane pane, RectangleF rect, float scaleFactor )
     {
-      if ( !_isVisible )
+      if ( !IsVisible )
         return;
 
       float yMid = rect.Top + rect.Height / 2.0F;

@@ -92,7 +92,7 @@ namespace ZedGraph
     /// Create a new <see cref="BarItem"/>, specifying only the legend label for the bar.
     /// </summary>
     /// <param name="label">The label that will appear in the legend.</param>
-    public BarItem( string label ) : base( label )
+    public BarItem( string label, int zOrder=-1 ) : base( label, zOrder )
     {
       _bar = new Bar();
     }
@@ -107,8 +107,8 @@ namespace ZedGraph
     /// <param name="color">A <see cref="Color"/> value that will be applied to
     /// the <see cref="ZedGraph.Bar.Fill"/> and <see cref="ZedGraph.Bar.Border"/> properties.
     /// </param>
-    public BarItem( string label, double[] x, double[] y, Color color )
-      : this( label, new PointPairList( x, y ), color )
+    public BarItem( string label, double[] x, double[] y, Color color, int zOrder=-1 )
+      : this( label, new PointPairList( x, y ), color, zOrder )
     {
     }
 
@@ -121,8 +121,8 @@ namespace ZedGraph
     /// <param name="color">A <see cref="Color"/> value that will be applied to
     /// the <see cref="ZedGraph.Bar.Fill"/> and <see cref="ZedGraph.Bar.Border"/> properties.
     /// </param>
-    public BarItem( string label, IPointList points, Color color )
-      : base( label, points )
+    public BarItem( string label, IPointList points, Color color, int zOrder=-1 )
+      : base( label, points, zOrder )
     {
       _bar = new Bar( color );
     }
@@ -220,7 +220,7 @@ namespace ZedGraph
                   float scaleFactor  )
     {
       // Pass the drawing onto the bar class
-      if ( _isVisible )
+      if ( IsVisible )
         _bar.DrawBars( g, pane, this, BaseAxis( pane ), ValueAxis( pane ),
                 this.GetBarWidth( pane ), pos, scaleFactor );
     }
@@ -402,7 +402,7 @@ namespace ZedGraph
     {
       coords = string.Empty;
 
-      if ( i < 0 || i >= _points.Count )
+      if ( i < 0 || i >= Points.Count )
         return false;
 
       Axis valueAxis = ValueAxis( pane );
@@ -430,13 +430,13 @@ namespace ZedGraph
       //   by zero, etc.
       // Also, any value <= zero on a log scale is invalid
 
-      if ( !_points[i].IsInvalid3D )
+      if ( !Points[i].IsInvalid3D )
       {
         // calculate a pixel value for the top of the bar on value axis
-        pixLowVal = valueAxis.Scale.Transform( _isOverrideOrdinal, i, curLowVal );
-        pixHiVal = valueAxis.Scale.Transform( _isOverrideOrdinal, i, curHiVal );
+        pixLowVal = valueAxis.Scale.Transform( IsOverrideOrdinal, i, curLowVal );
+        pixHiVal = valueAxis.Scale.Transform( IsOverrideOrdinal, i, curHiVal );
         // calculate a pixel value for the center of the bar on the base axis
-        pixBase = baseAxis.Scale.Transform( _isOverrideOrdinal, i, curBase );
+        pixBase = baseAxis.Scale.Transform( IsOverrideOrdinal, i, curBase );
 
         // Calculate the pixel location for the side of the bar (on the base axis)
         float pixSide = pixBase - clusterWidth / 2.0F + clusterGap / 2.0F +

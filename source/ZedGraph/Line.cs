@@ -247,7 +247,7 @@ namespace ZedGraph
     /// <param name="color">The color to assign to this new Line object</param>
     public Line( Color color )
     {
-      _color = color.IsEmpty ? Default.Color : color;
+      Color = color.IsEmpty ? Default.Color : color;
       _stepType = Default.StepType;
       _isSmooth = Default.IsSmooth;
       _smoothTension = Default.SmoothTension;
@@ -261,7 +261,7 @@ namespace ZedGraph
     /// <param name="rhs">The Line object from which to copy</param>
     public Line( Line rhs ) : base( rhs )
     {
-      _color = rhs._color;
+      Color = rhs.Color;
       _stepType = rhs._stepType;
       _isSmooth = rhs._isSmooth;
       _smoothTension = rhs._smoothTension;
@@ -376,7 +376,7 @@ namespace ZedGraph
       //  GraphPane.Default.SelectedLine.
 
       SmoothingMode sModeSave = g.SmoothingMode;
-      if ( _isAntiAlias )
+      if ( IsAntiAlias )
         g.SmoothingMode = SmoothingMode.HighQuality;
 
       if ( curve is StickItem )
@@ -418,7 +418,7 @@ namespace ZedGraph
     public void DrawSegment( Graphics g, GraphPane pane, float x1, float y1,
                   float x2, float y2, float scaleFactor )
     {
-      if ( _isVisible && !this.Color.IsEmpty )
+      if ( IsVisible && !this.Color.IsEmpty )
       {
         using ( Pen pen = GetPen( pane, scaleFactor ) )
         {
@@ -482,7 +482,7 @@ namespace ZedGraph
               if ( pixY < pane.Chart._rect.Top )
                 pixY = pane.Chart._rect.Top;
 
-              if ( !curve.IsSelected && this._gradientFill.IsGradientValueType )
+              if ( !curve.IsSelected && this.GradientFill.IsGradientValueType )
               {
                 using ( Pen tPen = GetPen( pane, scaleFactor, pt ) )
                   g.DrawLine( tPen, pixX, pixY, pixX, basePix );
@@ -670,7 +670,7 @@ namespace ZedGraph
 
       using ( var pen = source.GetPen( pane, scaleFactor ) )
       {
-        if (points == null || _color.IsEmpty || !this.IsVisible) return;
+        if (points == null || Color.IsEmpty || !this.IsVisible) return;
         
         //bool lastOut = false;
         bool isOut;
@@ -754,7 +754,7 @@ namespace ZedGraph
                                     lastX, lastY, tmpX, tmpY );
                 else if ( !isOut )
                 {
-                  if ( !curve.IsSelected && this._gradientFill.IsGradientValueType )
+                  if ( !curve.IsSelected && this.GradientFill.IsGradientValueType )
                   {
                     using ( Pen tPen = GetPen( pane, scaleFactor, lastPt ) )
                     {
@@ -873,7 +873,7 @@ namespace ZedGraph
 
       using ( Pen pen = source.GetPen( pane, scaleFactor ) )
       {
-        if ( points != null && !_color.IsEmpty && this.IsVisible )
+        if ( points != null && !Color.IsEmpty && this.IsVisible )
         {
           //bool lastOut = false;
           bool isOut;
@@ -938,7 +938,7 @@ namespace ZedGraph
                             lastX, lastY, tmpX, tmpY );
                   else if ( !isOut )
                   {
-                    if ( !curve.IsSelected && this._gradientFill.IsGradientValueType )
+                    if ( !curve.IsSelected && this.GradientFill.IsGradientValueType )
                     {
                       using ( Pen tPen = GetPen( pane, scaleFactor, lastPt ) )
                       {
@@ -1087,7 +1087,7 @@ namespace ZedGraph
         else     // non-step
           g.DrawLine( pen, lastX, lastY, tmpX, tmpY );
         */
-        if ( !curve.IsSelected && this._gradientFill.IsGradientValueType )
+        if ( !curve.IsSelected && this.GradientFill.IsGradientValueType )
         {
           using ( Pen tPen = GetPen( pane, scaleFactor, lastPt ) )
           {

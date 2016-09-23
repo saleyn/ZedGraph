@@ -103,8 +103,8 @@ namespace ZedGraph
           xVal = _x[fIndex];
           yVal = _y[fIndex];
         }
-        xVal = _x[_filtdInds[index]];
-        yVal = _y[_filtdInds[index]];
+        //xVal = _x[_filtdInds[index]];
+        //yVal = _y[_filtdInds[index]];
 
         return new PointPair(xVal, yVal, PointPair.Missing, null);
       }
@@ -120,6 +120,15 @@ namespace ZedGraph
         _x.Insert(ind, value.X);
         _y.Insert(ind, value.Y);
       }
+    }
+
+    public int Ordinal(double value)
+    {
+      int ind = _x.BinarySearch(value);
+      if (ind < 0)
+        ind = ~ind;
+
+      return ind;
     }
 
     /// <summary>

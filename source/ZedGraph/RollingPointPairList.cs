@@ -43,7 +43,7 @@ namespace ZedGraph
   /// <version> $Date: 2007-11-05 04:33:26 $ </version>
   /// </summary>
   [Serializable]
-  public class RollingPointPairList : IPointList, ISerializable, IPointListEdit
+  public class RollingPointPairList : ISerializable, IPointListEdit
   {
 
   #region Fields
@@ -130,10 +130,7 @@ namespace ZedGraph
     /// <summary>
     /// Gets the capacity of the rolling buffer.
     /// </summary>
-    public int Capacity
-    {
-      get { return _mBuffer.Length; }
-    }
+    public int Capacity => _mBuffer.Length;
 
     /// <summary>
     /// Gets the count of items within the rolling buffer. Note that this may be less than

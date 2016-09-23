@@ -583,7 +583,7 @@ namespace ZedGraph
 
         _slicePath = new GraphicsPath();
 
-        if ( !_isVisible )
+        if ( !IsVisible )
           return;
 
         RectangleF tRect = _boundingRectangle;
@@ -957,17 +957,17 @@ namespace ZedGraph
           curve._labelStr = ( curve._sweepAngle / 360 ).ToString( "P", labelFormat );
           break;
         case PieLabelType.Name_Value:
-          curve._labelStr = curve._label._text + ": " + curve._pieValue.ToString( "F", labelFormat );
+          curve._labelStr = curve.Label.Text + ": " + curve._pieValue.ToString( "F", labelFormat );
           break;
         case PieLabelType.Name_Percent:
-          curve._labelStr = curve._label._text + ": " + ( curve._sweepAngle / 360 ).ToString( "P", labelFormat );
+          curve._labelStr = curve.Label.Text + ": " + ( curve._sweepAngle / 360 ).ToString( "P", labelFormat );
           break;
         case PieLabelType.Name_Value_Percent:
-          curve._labelStr = curve._label._text + ": " + curve._pieValue.ToString( "F", labelFormat ) +
+          curve._labelStr = curve.Label.Text + ": " + curve._pieValue.ToString( "F", labelFormat ) +
             " (" + ( curve._sweepAngle / 360 ).ToString( "P", labelFormat ) + ")";
           break;
         case PieLabelType.Name:
-          curve._labelStr = curve._label._text;
+          curve._labelStr = curve.Label.Text;
           break;
         case PieLabelType.None:
         default:
@@ -1016,7 +1016,7 @@ namespace ZedGraph
     /// </param>
     override public void DrawLegendKey( Graphics g, GraphPane pane, RectangleF rect, float scaleFactor )
     {
-      if ( !_isVisible )
+      if ( !IsVisible )
         return;
 
       // Fill the slice

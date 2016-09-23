@@ -40,7 +40,7 @@ namespace ZedGraph
       base.IsFontsScaled    = false;
       base.IsPenWidthScaled = false;
       base.MouseWheelAction = MouseWheelActions.None;
-      base.Title._isVisible = false;
+      base.Title.IsVisible  = false;
       base.Legend.IsVisible = false;
       base.TitleGap         = 0f;
       Border.IsVisible      = false;

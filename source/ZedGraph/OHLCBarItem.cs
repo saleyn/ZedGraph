@@ -107,8 +107,8 @@ namespace ZedGraph
     /// Create a new <see cref="OHLCBarItem"/>, specifying only the legend label.
     /// </summary>
     /// <param name="label">The label that will appear in the legend.</param>
-    public OHLCBarItem( string label )
-      : base( label )
+    public OHLCBarItem( string label, int zOrder=-1)
+      : base( label, zOrder )
     {
       _bar = new OHLCBar();
     }
@@ -124,8 +124,8 @@ namespace ZedGraph
     /// </param>
     /// <param name="color">
     /// The <see cref="System.Drawing.Color" /> to use for drawing the candlesticks.</param>
-    public OHLCBarItem( string label, IPointList points, Color color )
-      : base( label, points )
+    public OHLCBarItem( string label, IPointList points, Color color, int zOrder=-1 )
+      : base( label, points, zOrder )
     {
       _bar = new OHLCBar( color );
     }
@@ -226,7 +226,7 @@ namespace ZedGraph
     /// </param>
     override public void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor )
     {
-      if ( _isVisible )
+      if ( IsVisible )
       {
         _bar.Draw(g, pane, this, this.BaseAxis( pane ),
                   this.ValueAxis( pane ), scaleFactor );
@@ -276,7 +276,7 @@ namespace ZedGraph
 
       var halfSize = 2.0f * scaleFactor;
 
-      using ( var pen = new Pen( _bar.Color, _bar._width ) )
+      using ( var pen = new Pen( _bar.Color, _bar.Width ) )
       {
         _bar.Draw( g, pane, pane._barSettings.Base == BarBase.X, pixBase, pixHigh,
                    pixLow, pixOpen, pixClose, halfSize, pen );
@@ -296,7 +296,7 @@ namespace ZedGraph
     {
       coords = string.Empty;
 
-      if ( i < 0 || i >= _points.Count )
+      if ( i < 0 || i >= Points.Count )
         return false;
 
       var valueAxis = ValueAxis( pane );
@@ -304,7 +304,7 @@ namespace ZedGraph
 
       var halfSize = _bar.Size * pane.CalcScaleFactor();
 
-      var pt = _points[i];
+      var pt = Points[i];
       double date = pt.X;
       double high;
       double low;
@@ -324,9 +324,9 @@ namespace ZedGraph
           ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
         return false;
 
-      var pixBase = baseAxis.Scale.Transform( _isOverrideOrdinal, i, date );
-      var pixHigh = valueAxis.Scale.Transform( _isOverrideOrdinal, i, high );
-      var pixLow  = valueAxis.Scale.Transform( _isOverrideOrdinal, i, low );
+      var pixBase = baseAxis.Scale.Transform( IsOverrideOrdinal, i, date );
+      var pixHigh = valueAxis.Scale.Transform( IsOverrideOrdinal, i, high );
+      var pixLow  = valueAxis.Scale.Transform( IsOverrideOrdinal, i, low );
 
       // Calculate the pixel location for the side of the bar (on the base axis)
       var pixSide = pixBase - halfSize;

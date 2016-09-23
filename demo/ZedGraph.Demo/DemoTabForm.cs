@@ -16,81 +16,75 @@
 //License along with this library; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================
-using System;
 
 namespace ZedGraph.Demo
 {
-	/// <summary>
-	/// An implementation of ChartTabForm that loads up ZedGraph demos.
-	/// </summary>
-	/// 
-	/// <author> Jerry Vos </author>
-	/// <version> $Revision: 1.12 $ $Date: 2007-01-26 09:01:49 $ </version>
-	public class DemoTabForm : ChartTabForm
-	{
-	#region Constructor
-		public DemoTabForm()
-		{
-		}
-	#endregion
+  /// <summary>
+  /// An implementation of ChartTabForm that loads up ZedGraph demos.
+  /// </summary>
+  ///
+  /// <author> Jerry Vos </author>
+  /// <version> $Revision: 1.12 $ $Date: 2007-01-26 09:01:49 $ </version>
+  public class DemoTabForm : ChartTabForm
+  {
+    #region Methods
 
-	#region Methods
-		protected override void loadDemos()
-		{
+    protected override void loadDemos()
+    {
       loadDemo(new OHLCBarRealTimeDemo());
       loadDemo(new MasterPaneWithSplitterDemo());
 
       loadDemo(new ComboDemo());
-			loadDemo(new FilteredPointDemo());
-			loadDemo(new PieChartDemo());
-			loadDemo(new LineStackingDemo());
-			loadDemo(new TransparentDemo1());
-			loadDemo(new LineGraphBandDemo());
-			loadDemo(new FilledBarGraphDemo());
-			loadDemo(new SineBarGraphDemo());
-			loadDemo(new MasterPaneDemo());
-			loadDemo(new MultiPieChartDemo());
-			loadDemo(new GradientByValueDemo());
-			loadDemo(new HiLowCloseDemo());
-			loadDemo(new HiLowBarDemo());
-			loadDemo(new StickItemDemo());
-			loadDemo(new HorizontalBarDemo());
-			loadDemo(new MultiYDemo());
-			loadDemo(new DualYDemo());
-			loadDemo(new FilledCurveDemo());
-			loadDemo(new SampleMultiPointListDemo());
-			loadDemo(new ErrorBarDemo());
-			loadDemo(new OverlayBarDemo());
-			loadDemo(new SortedOverlayBarDemo());
-			loadDemo(new CrossLineDemo());
-			loadDemo(new StepChartDemo());
-			loadDemo(new SmoothChartDemo());
-			loadDemo(new BaseTicDemo());
-			loadDemo(new HorizontalStackedBarDemo());
-			loadDemo(new VerticalBarsWithLabelsDemo());
-			loadDemo(new HorizontalBarsWithLabelsDemo());
-			loadDemo(new StackedBarsWithLabelsDemo());
-			
-			loadDemo(new InitialSampleDemo());
-			loadDemo(new ModInitialSampleDemo());
-			loadDemo(new DateAxisSampleDemo());
-			loadDemo(new TextAxisSampleDemo());
-			loadDemo(new BarChartSampleDemo());
-			loadDemo(new HorizontalBarSampleDemo());
-			loadDemo(new StackedBarSampleDemo());
-			loadDemo(new PercentStkBarDemo());
-			loadDemo(new PieSampleDemo());
-			loadDemo( new MasterSampleDemo() );
-			loadDemo( new SynchronizedPanes() );
-			loadDemo( new JapaneseCandleStickDemo() );
-			loadDemo( new OHLCBarDemo() );
-			loadDemo( new ImageForSymbolDemo() );
-			loadDemo( new MasterPaneLayout() );
+      loadDemo(new FilteredPointDemo());
+      loadDemo(new PieChartDemo());
+      loadDemo(new LineStackingDemo());
+      loadDemo(new TransparentDemo1());
+      loadDemo(new LineGraphBandDemo());
+      loadDemo(new FilledBarGraphDemo());
+      loadDemo(new SineBarGraphDemo());
+      loadDemo(new MasterPaneDemo());
+      loadDemo(new MultiPieChartDemo());
+      loadDemo(new GradientByValueDemo());
+      loadDemo(new HiLowCloseDemo());
+      loadDemo(new HiLowBarDemo());
+      loadDemo(new StickItemDemo());
+      loadDemo(new HorizontalBarDemo());
+      loadDemo(new MultiYDemo());
+      loadDemo(new DualYDemo());
+      loadDemo(new FilledCurveDemo());
+      loadDemo(new SampleMultiPointListDemo());
+      loadDemo(new ErrorBarDemo());
+      loadDemo(new OverlayBarDemo());
+      loadDemo(new SortedOverlayBarDemo());
+      loadDemo(new CrossLineDemo());
+      loadDemo(new StepChartDemo());
+      loadDemo(new SmoothChartDemo());
+      loadDemo(new BaseTicDemo());
+      loadDemo(new HorizontalStackedBarDemo());
+      loadDemo(new VerticalBarsWithLabelsDemo());
+      loadDemo(new HorizontalBarsWithLabelsDemo());
+      loadDemo(new StackedBarsWithLabelsDemo());
+
+      loadDemo(new InitialSampleDemo());
+      loadDemo(new ModInitialSampleDemo());
+      loadDemo(new DateAxisSampleDemo());
+      loadDemo(new TextAxisSampleDemo());
+      loadDemo(new BarChartSampleDemo());
+      loadDemo(new HorizontalBarSampleDemo());
+      loadDemo(new StackedBarSampleDemo());
+      loadDemo(new PercentStkBarDemo());
+      loadDemo(new PieSampleDemo());
+      loadDemo(new MasterSampleDemo());
+      loadDemo(new SynchronizedPanes());
+      loadDemo(new JapaneseCandleStickDemo());
+      loadDemo(new OHLCBarDemo());
+      loadDemo(new ImageForSymbolDemo());
+      loadDemo(new MasterPaneLayout());
 
       // TODO: add more demos here
       // ...
     }
-    #endregion
 
+    #endregion Methods
   }
 }
