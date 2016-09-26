@@ -149,7 +149,7 @@ namespace ZedGraph
     /// </param>
     /// <seealso cref="PickScale"/>
     /// <seealso cref="AxisType.Ordinal"/>
-    override public void PickScale( GraphPane pane, Graphics g, float scaleFactor )
+    public override void PickScale( GraphPane pane, Graphics g, float scaleFactor )
     {
       // call the base class first
       base.PickScale( pane, g, scaleFactor );

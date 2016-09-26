@@ -952,8 +952,8 @@ namespace ZedGraph
             shiftPos += _tmpSpace;
 
             // shift the axis to leave room for the outside tics
-            if (MajorTic.IsOutside || MajorTic._isCrossOutside ||
-                MinorTic.IsOutside || MinorTic._isCrossOutside)
+            if (MajorTic.IsOutside || MajorTic.IsCrossOutside ||
+                MinorTic.IsOutside || MinorTic.IsCrossOutside)
               shiftPos -= ticSize;
           }
           else
@@ -962,8 +962,8 @@ namespace ZedGraph
             shiftPos += AxisGap*scaleFactor;
 
             // if it has inside tics, leave another tic space
-            if (MajorTic.IsInside || MajorTic._isCrossInside ||
-                MinorTic.IsInside || MinorTic._isCrossInside)
+            if (MajorTic.IsInside || MajorTic.IsCrossInside ||
+                MinorTic.IsInside || MinorTic.IsCrossInside)
               shiftPos += ticSize;
           }
         }
@@ -1048,8 +1048,8 @@ namespace ZedGraph
       // Account for the Axis
       if (IsVisible)
       {
-        var hasTic = MajorTic.IsOutside || MajorTic._isCrossOutside ||
-                     MinorTic.IsOutside || MinorTic._isCrossOutside;
+        var hasTic = MajorTic.IsOutside || MajorTic.IsCrossOutside ||
+                     MinorTic.IsOutside || MinorTic.IsCrossOutside;
 
         // account for the tic space.  Leave the tic space for any type of outside tic (Outside Tic Space)
         if (hasTic)
@@ -1062,8 +1062,8 @@ namespace ZedGraph
           _tmpSpace += axisGap;
 
           // if it has inside tics, leave another tic space (Inside Tic Space)
-          if (MajorTic._isInside || MajorTic._isCrossInside ||
-              MinorTic._isInside || MinorTic._isCrossInside)
+          if (MajorTic.IsInside || MajorTic.IsCrossInside ||
+              MinorTic.IsInside || MinorTic.IsCrossInside)
             _tmpSpace += ticSize;
         }
 
@@ -1212,7 +1212,7 @@ namespace ZedGraph
                               float scaleFactor, float topPix)
     {
       if ((!MinorTic.IsOutside && !MinorTic.IsOpposite && !MinorTic.IsInside &&
-           !MinorTic._isCrossOutside && !MinorTic._isCrossInside && !MinorGrid._isVisible) ||
+           !MinorTic.IsCrossOutside && !MinorTic.IsCrossInside && !MinorGrid._isVisible) ||
           !IsVisible)
         return;
 
@@ -1236,8 +1236,8 @@ namespace ZedGraph
       var MajorTic = 0;
       var majorVal = Scale.CalcMajorTicValue(baseVal, MajorTic);
 
-      using (var pen = new Pen(MinorTic._color,
-                               pane.ScaledPenWidth(MinorTic._penWidth, scaleFactor)))
+      using (var pen = new Pen(MinorTic.Color,
+                               pane.ScaledPenWidth(MinorTic.PenWidth, scaleFactor)))
       using (var minorGridPen = MinorGrid.GetPen(pane, scaleFactor))
       {
         // Draw the minor tic marks
@@ -1300,10 +1300,10 @@ namespace ZedGraph
       if (!IsVisible || !Title.IsVisible || string.IsNullOrEmpty(str)) return;
 
       var hasTic = (Scale.IsLabelsInside
-                 ? (MajorTic.IsInside || MajorTic._isCrossInside ||
-                    MinorTic.IsInside || MinorTic._isCrossInside)
-                 : (MajorTic.IsOutside || MajorTic._isCrossOutside ||
-                    MinorTic.IsOutside || MinorTic._isCrossOutside));
+                 ? (MajorTic.IsInside || MajorTic.IsCrossInside ||
+                    MinorTic.IsInside || MinorTic.IsCrossInside)
+                 : (MajorTic.IsOutside || MajorTic.IsCrossOutside ||
+                    MinorTic.IsOutside || MinorTic.IsCrossOutside));
 
       // Calculate the title position in screen coordinates
       var x = (Scale._maxPix - Scale._minPix)/2;

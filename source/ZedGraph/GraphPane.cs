@@ -22,8 +22,6 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Windows.Forms;
 
 namespace ZedGraph
 {
@@ -61,16 +59,15 @@ namespace ZedGraph
     public delegate void AxisChangeEventHandler( GraphPane pane );
 
     /// <summary>
-    /// Subscribe to this event to be notified when <see cref="AxisChange()" /> is called.
-    /// </summary>
-    public event AxisChangeEventHandler AxisChangeEvent;
-
-    /// <summary>
     /// A delegate that allows notification after a 'Draw' operation has been completed by a pane.
     /// </summary>
     /// <param name="pane">The <see cref="GraphPane"/> object that performed the 'Draw'.</param>
     public delegate void DrawEventHandler(GraphPane pane);
 
+    /// <summary>
+    /// Subscribe to this event to be notified when <see cref="AxisChange()" /> is called.
+    /// </summary>
+    public event AxisChangeEventHandler AxisChangeEvent;
     /// <summary>
     /// Subscribe to this event to be notified when 'Draw' operation has been completed by a pane.
     /// </summary>
@@ -84,67 +81,11 @@ namespace ZedGraph
 
     // Item subclasses ////////////////////////////////////////////////////////////////////
 
-    /// <summary>Private field instance of the <see cref="ZedGraph.XAxis"/> class.  Use the
-    /// public property <see cref="GraphPane.XAxis"/> to access this class.</summary>
-    private XAxis _xAxis;
-    /// <summary>Private field instance of the <see cref="ZedGraph.XAxis"/> class.  Use the
-    /// public property <see cref="GraphPane.X2Axis"/> to access this class.</summary>
-    private X2Axis _x2Axis;
-    /// <summary>Private field instance of the <see cref="ZedGraph.YAxisList"/> class.  Use the
-    /// public property <see cref="GraphPane.YAxisList"/> to access this class.</summary>
-    private YAxisList _yAxisList;
-    /// <summary>Private field instance of the <see cref="ZedGraph.Y2AxisList"/> class.  Use the
-    /// public property <see cref="GraphPane.Y2AxisList"/> to access this class.</summary>
-    private Y2AxisList _y2AxisList;
-    /// <summary>Private field instance of the <see cref="ZedGraph.CurveList"/> class.  Use the
-    /// public property <see cref="GraphPane.CurveList"/> to access this class.</summary>
-    private CurveList _curveList;
-
-    // Chart Properties //////////////////////////////////////////////////////////////
+    internal BarSettings _barSettings;
 
     internal Chart _chart;
 
-    internal BarSettings _barSettings;
-
-    /// <summary>Private field that determines whether or not initial zero values will
-    /// be included or excluded when determining the Y or Y2 axis scale range.
-    /// Use the public property <see cref="IsIgnoreInitial"/> to access
-    /// this value. </summary>
-    private bool _isIgnoreInitial;
-    /// <summary>Private field that determines whether or not initial
-    /// <see cref="PointPairBase.Missing"/> values will cause the line segments of
-    /// a curve to be discontinuous.  If this field is true, then the curves
-    /// will be plotted as continuous lines as if the Missing values did not
-    /// exist.
-    /// Use the public property <see cref="IsIgnoreMissing"/> to access
-    /// this value. </summary>
-    private bool _isIgnoreMissing;
-    /// <summary> private field that determines if the auto-scaled axis ranges will subset the
-    /// data points based on any manually set scale range values.  Use the public property
-    /// <see cref="IsBoundedRanges"/> to access this value.</summary>
-    /// <remarks>The bounds provide a means to subset the data.  For example, if all the axes are set to
-    /// autoscale, then the full range of data are used.  But, if the XAxis.Min and XAxis.Max values
-    /// are manually set, then the Y data range will reflect the Y values within the bounds of
-    /// XAxis.Min and XAxis.Max.</remarks>
-    private bool _isBoundedRanges;
-
-    /// <summary>
-    /// private field that determines if ZedGraph should modify the scale ranges for the Y and Y2
-    /// axes such that the number of steps, and therefore the grid lines, line up.  Use the
-    /// public property <see cref="IsAlignGrids" /> to acccess this value.
-    /// </summary>
-    private bool _isAlignGrids;
-
-
-    /// <summary>Private field that determines how the <see cref="LineItem"/>
-    /// graphs will be displayed. See the <see cref="ZedGraph.LineType"/> enum
-    /// for the individual types available.
-    /// To access this value, use the public property <see cref="LineType"/>.
-    /// </summary>
-    /// <seealso cref="Default.LineType"/>
-    private LineType _lineType;
-
-  #endregion
+    #endregion
 
   #region Defaults
 
@@ -154,27 +95,6 @@ namespace ZedGraph
     /// </summary>
     public new struct Default
     {
-      /// <summary>
-      /// The default settings for the <see cref="Axis"/> scale ignore initial
-      /// zero values option (<see cref="GraphPane.IsIgnoreInitial"/> property).
-      /// true to have the auto-scale-range code ignore the initial data points
-      /// until the first non-zero Y value, false otherwise.
-      /// </summary>
-      public static bool IsIgnoreInitial = false;
-      /// <summary>
-      /// The default settings for the <see cref="Axis"/> scale bounded ranges option
-      /// (<see cref="GraphPane.IsBoundedRanges"/> property).
-      /// true to have the auto-scale-range code subset the data according to any
-      /// manually set scale values, false otherwise.
-      /// </summary>
-      public static bool IsBoundedRanges = false;
-
-      /// <summary>The default value for the <see cref="GraphPane.LineType"/> property, which
-      /// determines if the lines are drawn in normal or "stacked" mode.  See the
-      /// <see cref="ZedGraph.LineType"/> for more information.
-      /// </summary>
-      /// <seealso cref="GraphPane.LineType"/>
-      public static LineType LineType = LineType.Normal;
       /// <summary>
       /// The default width of a bar cluster 
       /// on a <see cref="Bar"/> graph.  This value only applies to
@@ -186,6 +106,28 @@ namespace ZedGraph
       /// <seealso cref="ZedGraph.BarSettings.Default.MinClusterGap"/>
       /// <seealso cref="ZedGraph.BarSettings.MinBarGap"/>
       public static double ClusterScaleWidth = 1.0;
+
+      /// <summary>
+      /// The default settings for the <see cref="Axis"/> scale bounded ranges option
+      /// (<see cref="GraphPane.IsBoundedRanges"/> property).
+      /// true to have the auto-scale-range code subset the data according to any
+      /// manually set scale values, false otherwise.
+      /// </summary>
+      public static bool IsBoundedRanges = false;
+
+      /// <summary>
+      /// The default settings for the <see cref="Axis"/> scale ignore initial
+      /// zero values option (<see cref="GraphPane.IsIgnoreInitial"/> property).
+      /// true to have the auto-scale-range code ignore the initial data points
+      /// until the first non-zero Y value, false otherwise.
+      /// </summary>
+      public static bool IsIgnoreInitial = false;
+      /// <summary>The default value for the <see cref="GraphPane.LineType"/> property, which
+      /// determines if the lines are drawn in normal or "stacked" mode.  See the
+      /// <see cref="ZedGraph.LineType"/> for more information.
+      /// </summary>
+      /// <seealso cref="GraphPane.LineType"/>
+      public static LineType LineType = LineType.Normal;
       /// <summary>
       /// The tolerance that is applied to the
       /// <see cref="GraphPane.FindNearestPoint(PointF,out CurveItem,out int)"/> routine.
@@ -196,61 +138,14 @@ namespace ZedGraph
       public static double NearestTol = 7.0;
 
     }
-  #endregion
+    #endregion
 
-  #region Class Instance Properties
+    #region Class Instance Properties
     /// <summary>
-    /// Gets or sets the list of <see cref="CurveItem"/> items for this <see cref="GraphPane"/>
+    /// Gets the <see cref="BarSettings" /> instance for this <see cref="GraphPane" />,
+    /// which stores the global properties for bar type charts.
     /// </summary>
-    /// <value>A reference to a <see cref="CurveList"/> collection object</value>
-    public CurveList CurveList
-    {
-      get { return _curveList; }
-      set { _curveList = value; }
-    }
-    /// <summary>
-    /// Gets or sets the clipping region for curves for this <see cref="GraphPane"/>
-    /// </summary>
-    /// <value>A reference to a RectangleF object</value>
-    public RectangleF CurveClipRect { get; set; }
-
-    /// <summary>
-    /// Accesses the <see cref="XAxis"/> for this graph
-    /// </summary>
-    /// <value>A reference to a <see cref="XAxis"/> object</value>
-    public XAxis XAxis => _xAxis;
-
-    /// <summary>
-    /// Accesses the <see cref="X2Axis"/> for this graph
-    /// </summary>
-    /// <value>A reference to a <see cref="X2Axis"/> object</value>
-    public X2Axis X2Axis => _x2Axis;
-
-    /// <summary>
-    /// Accesses the primary <see cref="YAxis"/> for this graph
-    /// </summary>
-    /// <value>A reference to a <see cref="YAxis"/> object</value>
-    /// <seealso cref="YAxisList" />
-    /// <seealso cref="Y2AxisList" />
-    public YAxis YAxis => _yAxisList[0];
-
-    /// <summary>
-    /// Accesses the primary <see cref="Y2Axis"/> for this graph
-    /// </summary>
-    /// <value>A reference to a <see cref="Y2Axis"/> object</value>
-    /// <seealso cref="YAxisList" />
-    /// <seealso cref="Y2AxisList" />
-    public Y2Axis Y2Axis => _y2AxisList[0];
-
-    /// <summary>
-    /// Gets the collection of Y axes that belong to this <see cref="GraphPane" />.
-    /// </summary>
-    public YAxisList YAxisList => _yAxisList;
-
-    /// <summary>
-    /// Gets the collection of Y2 axes that belong to this <see cref="GraphPane" />.
-    /// </summary>
-    public Y2AxisList Y2AxisList => _y2AxisList;
+    public BarSettings BarSettings => _barSettings;
 
     /// <summary>
     /// Gets the <see cref="Chart" /> instance for this <see cref="GraphPane" />.
@@ -258,14 +153,78 @@ namespace ZedGraph
     public Chart Chart => _chart;
 
     /// <summary>
-    /// Gets the <see cref="BarSettings" /> instance for this <see cref="GraphPane" />,
-    /// which stores the global properties for bar type charts.
+    /// Gets or sets the clipping region for curves for this <see cref="GraphPane"/>
     /// </summary>
-    public BarSettings BarSettings => _barSettings;
+    /// <value>A reference to a RectangleF object</value>
+    public RectangleF CurveClipRect { get; set; }
 
-  #endregion
+    /// <summary>
+    /// Gets or sets the list of <see cref="CurveItem"/> items for this <see cref="GraphPane"/>
+    /// </summary>
+    /// <value>A reference to a <see cref="CurveList"/> collection object</value>
+    public CurveList CurveList { get; set; }
 
-  #region General Properties
+    /// <summary>
+    /// Accesses the <see cref="X2Axis"/> for this graph
+    /// </summary>
+    /// <value>A reference to a <see cref="X2Axis"/> object</value>
+    public X2Axis X2Axis { get; }
+
+    /// <summary>
+    /// Accesses the <see cref="XAxis"/> for this graph
+    /// </summary>
+    /// <value>A reference to a <see cref="XAxis"/> object</value>
+    public XAxis XAxis { get; }
+
+    /// <summary>
+    /// Accesses the primary <see cref="Y2Axis"/> for this graph
+    /// </summary>
+    /// <value>A reference to a <see cref="Y2Axis"/> object</value>
+    /// <seealso cref="YAxisList" />
+    /// <seealso cref="Y2AxisList" />
+    public Y2Axis Y2Axis => Y2AxisList[0];
+
+    /// <summary>
+    /// Gets the collection of Y2 axes that belong to this <see cref="GraphPane" />.
+    /// </summary>
+    public Y2AxisList Y2AxisList { get; }
+
+    /// <summary>
+    /// Accesses the primary <see cref="YAxis"/> for this graph
+    /// </summary>
+    /// <value>A reference to a <see cref="YAxis"/> object</value>
+    /// <seealso cref="YAxisList" />
+    /// <seealso cref="Y2AxisList" />
+    public YAxis YAxis => YAxisList[0];
+    /// <summary>
+    /// Gets the collection of Y axes that belong to this <see cref="GraphPane" />.
+    /// </summary>
+    public YAxisList YAxisList { get; }
+
+    #endregion
+
+    #region General Properties
+
+    /// <summary>
+    /// Gets or sets a value that determines if ZedGraph should modify the scale ranges
+    /// for the Y and Y2 axes such that the number of major steps, and therefore the
+    /// major grid lines, line up.
+    /// </summary>
+    /// <remarks>
+    /// This property affects the way that <see cref="AxisChange()" /> selects the scale
+    /// ranges for the Y and Y2 axes.  It applies to the scale ranges of all Y and Y2 axes,
+    /// but only if the <see cref="Scale.MaxAuto" /> is set to true.<br />
+    /// </remarks>
+    public bool IsAlignGrids { get; set; }
+
+    /// <summary> Gets or sets a boolean value that determines if the auto-scaled axis ranges will
+    /// subset the data points based on any manually set scale range values.</summary>
+    /// <remarks>The bounds provide a means to subset the data.  For example, if all the axes are set to
+    /// autoscale, then the full range of data are used.  But, if the XAxis.Min and XAxis.Max values
+    /// are manually set, then the Y data range will reflect the Y values within the bounds of
+    /// XAxis.Min and XAxis.Max.  Set to true to subset the data, or false to always include
+    /// all data points when calculating scale ranges.</remarks>
+    public bool IsBoundedRanges { get; set; }
 
     /// <summary>
     /// Gets or sets a boolean value that affects the data range that is considered
@@ -280,23 +239,8 @@ namespace ZedGraph
     [Bindable( true ), Browsable( true ), Category( "Display" ), NotifyParentProperty( true )]
     [Description("Determines whether the auto-ranged scale will include all data points" +
       " or just the visible data points")]
-    public bool IsIgnoreInitial
-    {
-      get { return _isIgnoreInitial; }
-      set { _isIgnoreInitial = value; }
-    }
-    /// <summary> Gets or sets a boolean value that determines if the auto-scaled axis ranges will
-    /// subset the data points based on any manually set scale range values.</summary>
-    /// <remarks>The bounds provide a means to subset the data.  For example, if all the axes are set to
-    /// autoscale, then the full range of data are used.  But, if the XAxis.Min and XAxis.Max values
-    /// are manually set, then the Y data range will reflect the Y values within the bounds of
-    /// XAxis.Min and XAxis.Max.  Set to true to subset the data, or false to always include
-    /// all data points when calculating scale ranges.</remarks>
-    public bool IsBoundedRanges
-    {
-      get { return _isBoundedRanges; }
-      set { _isBoundedRanges = value; }
-    }
+    public bool IsIgnoreInitial { get; set; }
+
     /// <summary>Gets or sets a value that determines whether or not initial
     /// <see cref="PointPairBase.Missing"/> values will cause the line segments of
     /// a curve to be discontinuous.
@@ -305,38 +249,7 @@ namespace ZedGraph
     /// will be plotted as continuous lines as if the Missing values did not exist.
     /// Use the public property <see cref="IsIgnoreMissing"/> to access
     /// this value. </remarks>
-    public bool IsIgnoreMissing
-    {
-      get { return _isIgnoreMissing; }
-      set { _isIgnoreMissing = value; }
-    }
-    
-    /// <summary>
-    /// Gets or sets a value that determines if ZedGraph should modify the scale ranges
-    /// for the Y and Y2 axes such that the number of major steps, and therefore the
-    /// major grid lines, line up.
-    /// </summary>
-    /// <remarks>
-    /// This property affects the way that <see cref="AxisChange()" /> selects the scale
-    /// ranges for the Y and Y2 axes.  It applies to the scale ranges of all Y and Y2 axes,
-    /// but only if the <see cref="Scale.MaxAuto" /> is set to true.<br />
-    /// </remarks>
-    public bool IsAlignGrids
-    {
-      get { return _isAlignGrids; }
-      set { _isAlignGrids = value; }
-    }
-
-    /// <summary>Determines how the <see cref="LineItem"/>
-    /// graphs will be displayed. See the <see cref="ZedGraph.LineType"/> enum
-    /// for the individual types available.
-    /// </summary>
-    /// <seealso cref="Default.LineType"/>
-    public LineType LineType
-    {
-      get { return _lineType; }
-      set { _lineType = value; }
-    }
+    public bool IsIgnoreMissing { get; set; }
 
     /// <summary>
     /// Gets a value that indicates whether or not the <see cref="ZoomStateStack" /> for
@@ -344,6 +257,13 @@ namespace ZedGraph
     /// the <see cref="ZedGraphControl" />.
     /// </summary>
     public bool IsZoomed => !ZoomStack.IsEmpty;
+
+    /// <summary>Determines how the <see cref="LineItem"/>
+    /// graphs will be displayed. See the <see cref="ZedGraph.LineType"/> enum
+    /// for the individual types available.
+    /// </summary>
+    /// <seealso cref="Default.LineType"/>
+    public LineType LineType { get; set; }
 
     /// <summary>
     /// Gets a reference to the <see cref="ZoomStateStack" /> for this <see cref="GraphPane" />.
@@ -364,8 +284,7 @@ namespace ZedGraph
     /// </summary>
     public GraphPane()
       : this( new RectangleF( 0, 0, 500, 375 ), "", "", "" )
-    {
-    }
+    {}
 
     /// <summary>
     /// Constructor for the <see cref="GraphPane"/> object.  This routine will
@@ -379,31 +298,30 @@ namespace ZedGraph
     /// <param name="title">The <see cref="PaneBase.Title"/> for this <see cref="GraphPane"/></param>
     /// <param name="xTitle">The <see cref="Axis.Title"/> for the <see cref="XAxis"/></param>
     /// <param name="yTitle">The <see cref="Axis.Title"/> for the <see cref="YAxis"/></param>
-    public GraphPane( RectangleF rect, string title,
-      string xTitle, string yTitle )
+    public GraphPane( RectangleF rect, string title, string xTitle, string yTitle )
       : base( title, rect )
     {
-      _xAxis = new XAxis( xTitle );
-      _x2Axis = new X2Axis( "" );
+      XAxis           = new XAxis(xTitle);
+      X2Axis          = new X2Axis("");
 
-      _yAxisList = new YAxisList();
-      _y2AxisList = new Y2AxisList();
+      YAxisList       = new YAxisList();
+      Y2AxisList      = new Y2AxisList();
 
-      _yAxisList.Add( new YAxis( yTitle ) );
-      _y2AxisList.Add( new Y2Axis( string.Empty ) );
+      YAxisList.Add(new YAxis(yTitle));
+      Y2AxisList.Add(new Y2Axis(string.Empty));
 
-      _curveList = new CurveList();
-      ZoomStack = new ZoomStateStack();
+      CurveList       = new CurveList();
+      ZoomStack       = new ZoomStateStack();
 
-      _isIgnoreInitial = Default.IsIgnoreInitial;
-      _isBoundedRanges = Default.IsBoundedRanges;
-      _isAlignGrids = false;
+      IsIgnoreInitial = Default.IsIgnoreInitial;
+      IsBoundedRanges = Default.IsBoundedRanges;
+      IsAlignGrids    = false;
 
-      _chart = new Chart();
+      _chart          = new Chart();
 
-      _barSettings = new BarSettings( this );
+      _barSettings    = new BarSettings(this);
 
-      _lineType = Default.LineType;
+      LineType        = Default.LineType;
     }
 
     /// <summary>
@@ -414,27 +332,36 @@ namespace ZedGraph
       : base( rhs )
     {
       // copy values for all the value types
-      _isIgnoreInitial = rhs.IsIgnoreInitial;
-      _isBoundedRanges = rhs._isBoundedRanges;
-      _isAlignGrids = rhs._isAlignGrids;
+      IsIgnoreInitial = rhs.IsIgnoreInitial;
+      IsBoundedRanges = rhs.IsBoundedRanges;
+      IsAlignGrids = rhs.IsAlignGrids;
 
       _chart = rhs._chart.Clone();
 
       _barSettings = new BarSettings( rhs._barSettings, this );
 
-      _lineType = rhs.LineType;
+      LineType = rhs.LineType;
 
 
       // copy all the reference types with deep copies
-      _xAxis = new XAxis( rhs.XAxis );
-      _x2Axis = new X2Axis( rhs.X2Axis );
+      XAxis = new XAxis( rhs.XAxis );
+      X2Axis = new X2Axis( rhs.X2Axis );
 
-      _yAxisList = new YAxisList( rhs._yAxisList );
-      _y2AxisList = new Y2AxisList( rhs._y2AxisList );
+      YAxisList = new YAxisList( rhs.YAxisList );
+      Y2AxisList = new Y2AxisList( rhs.Y2AxisList );
 
-      _curveList = new CurveList( rhs.CurveList );
+      CurveList = new CurveList( rhs.CurveList );
       ZoomStack = new ZoomStateStack( rhs.ZoomStack );
 
+    }
+
+    /// <summary>
+    /// Typesafe, deep-copy clone method.
+    /// </summary>
+    /// <returns>A new, independent copy of this class</returns>
+    public GraphPane Clone()
+    {
+      return new GraphPane(this);
     }
 
     /// <summary>
@@ -446,16 +373,6 @@ namespace ZedGraph
     {
       return this.Clone();
     }
-
-    /// <summary>
-    /// Typesafe, deep-copy clone method.
-    /// </summary>
-    /// <returns>A new, independent copy of this class</returns>
-    public GraphPane Clone()
-    {
-      return new GraphPane( this );
-    }
-
   #endregion
 
   #region Serialization
@@ -483,28 +400,28 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32( "schema2" );
 
-      _xAxis = (XAxis)info.GetValue( "xAxis", typeof( XAxis ) );
+      XAxis = (XAxis)info.GetValue( "xAxis", typeof( XAxis ) );
       if ( sch >= 11 )
-        _x2Axis = (X2Axis)info.GetValue( "x2Axis", typeof( X2Axis ) );
+        X2Axis = (X2Axis)info.GetValue( "x2Axis", typeof( X2Axis ) );
       else
-        _x2Axis = new X2Axis( "" );
+        X2Axis = new X2Axis( "" );
 
-      _yAxisList = (YAxisList)info.GetValue( "yAxisList", typeof( YAxisList ) );
-      _y2AxisList = (Y2AxisList)info.GetValue( "y2AxisList", typeof( Y2AxisList ) );
+      YAxisList = (YAxisList)info.GetValue( "yAxisList", typeof( YAxisList ) );
+      Y2AxisList = (Y2AxisList)info.GetValue( "y2AxisList", typeof( Y2AxisList ) );
 
-      _curveList = (CurveList)info.GetValue( "curveList", typeof( CurveList ) );
+      CurveList = (CurveList)info.GetValue( "curveList", typeof( CurveList ) );
 
       _chart = (Chart) info.GetValue( "chart", typeof( Chart ) );
 
       _barSettings = (BarSettings)info.GetValue( "barSettings", typeof( BarSettings ) );
       _barSettings._ownerPane = this;
 
-      _isIgnoreInitial = info.GetBoolean( "isIgnoreInitial" );
-      _isBoundedRanges = info.GetBoolean( "isBoundedRanges" );
-      _isIgnoreMissing = info.GetBoolean( "isIgnoreMissing" );
-      _isAlignGrids = info.GetBoolean( "isAlignGrids" );
+      IsIgnoreInitial = info.GetBoolean( "isIgnoreInitial" );
+      IsBoundedRanges = info.GetBoolean( "isBoundedRanges" );
+      IsIgnoreMissing = info.GetBoolean( "isIgnoreMissing" );
+      IsAlignGrids = info.GetBoolean( "isAlignGrids" );
 
-      _lineType = (LineType)info.GetValue( "lineType", typeof( LineType ) );
+      LineType = (LineType)info.GetValue( "lineType", typeof( LineType ) );
 
       ZoomStack = new ZoomStateStack();
     }
@@ -520,22 +437,22 @@ namespace ZedGraph
 
       info.AddValue( "schema2", schema2 );
 
-      info.AddValue( "xAxis", _xAxis );
-      info.AddValue( "x2Axis", _x2Axis );
-      info.AddValue( "yAxisList", _yAxisList );
-      info.AddValue( "y2AxisList", _y2AxisList );
-      info.AddValue( "curveList", _curveList );
+      info.AddValue( "xAxis", XAxis );
+      info.AddValue( "x2Axis", X2Axis );
+      info.AddValue( "yAxisList", YAxisList );
+      info.AddValue( "y2AxisList", Y2AxisList );
+      info.AddValue( "curveList", CurveList );
 
       info.AddValue( "chart", _chart );
 
       info.AddValue( "barSettings", _barSettings );
 
-      info.AddValue( "isIgnoreInitial", _isIgnoreInitial );
-      info.AddValue( "isBoundedRanges", _isBoundedRanges );
-      info.AddValue( "isIgnoreMissing", _isIgnoreMissing );
-      info.AddValue( "isAlignGrids", _isAlignGrids );
+      info.AddValue( "isIgnoreInitial", IsIgnoreInitial );
+      info.AddValue( "isBoundedRanges", IsBoundedRanges );
+      info.AddValue( "isIgnoreMissing", IsIgnoreMissing );
+      info.AddValue( "isAlignGrids", IsAlignGrids );
 
-      info.AddValue( "lineType", _lineType );
+      info.AddValue( "lineType", LineType );
     }
 
   #endregion
@@ -584,33 +501,33 @@ namespace ZedGraph
     /// A graphic device object to be drawn into.  This is normally e.Graphics from the
     /// PaintEventArgs argument to the Paint() method.
     /// </param>
-    public void AxisChange( Graphics g )
+    public void AxisChange(Graphics g)
     {
       //double  xMin, xMax, yMin, yMax, y2Min, y2Max;
 
       // Get the scale range of the data (all curves)
-      _curveList.GetRange( /* out xMin, out xMax, out yMin,
+      CurveList.GetRange( /* out xMin, out xMax, out yMin,
         out yMax, out y2Min, out y2Max, */
-        _isIgnoreInitial, _isBoundedRanges, this );
+        IsIgnoreInitial, IsBoundedRanges, this);
 
       // Determine the scale factor
-      this.CalcScaleFactor();
+      CalcScaleFactor();
 
       // For pie charts, go ahead and turn off the axis displays if it's only pies
-      if ( this.CurveList.IsPieOnly )
+      if (CurveList.IsPieOnly)
       {
         //don't want to display axis or border if there's only pies
-        this.XAxis.IsVisible = false;
-        this.X2Axis.IsVisible = false;
-        this.YAxis.IsVisible = false;
-        this.Y2Axis.IsVisible = false;
+        XAxis.IsVisible = false;
+        X2Axis.IsVisible = false;
+        YAxis.IsVisible = false;
+        Y2Axis.IsVisible = false;
         _chart.Border.IsVisible = false;
         //this.Legend.Position = LegendPos.TopCenter;
       }
 
       // Set the ClusterScaleWidth, if needed
       //_barSettings.CalcClusterScaleWidth();
-      if ( _barSettings.ClusterScaleWidthAuto )
+      if (_barSettings.ClusterScaleWidthAuto)
         _barSettings._clusterScaleWidth = 1.0;
 
       // if the ChartRect is not yet determined, then pick a scale based on a default ChartRect
@@ -619,14 +536,11 @@ namespace ZedGraph
       // then let the scales re-calculate to make sure that the assumption was ok
 
       // Pick new scales based on the range
-      PickScale( g, CalcScaleFactor() );
+      PickScale(g, CalcScaleFactor());
       var rect = CalcChartRect(g);
 
-      if ( _chart._isRectAuto )
-      {
+      if (_chart._isRectAuto)
         _chart._rect = rect;
-        //this.pieRect = PieItem.CalcPieRect( g, this, scaleFactor, this.chartRect );
-      }
 
       // Pick new scales based on the range
       //PickScale( g, CalcScaleFactor() );
@@ -635,48 +549,120 @@ namespace ZedGraph
       _barSettings.CalcClusterScaleWidth();
 
       // Trigger the AxisChangeEvent
-      this.AxisChangeEvent?.Invoke( this );
+      AxisChangeEvent?.Invoke(this);
     }
 
-    private void PickScale( Graphics g, float scaleFactor )
+    /// <summary>
+    /// Calculate the <see cref="ZedGraph.Chart.Rect"/> based on the <see cref="PaneBase.Rect"/>.
+    /// </summary>
+    /// <remarks>The ChartRect
+    /// is the plot area bounded by the axes, and the rect is the total area as
+    /// specified by the client application.
+    /// </remarks>
+    /// <param name="g">
+    /// A graphic device object to be drawn into.  This is normally e.Graphics from the
+    /// PaintEventArgs argument to the Paint() method.
+    /// </param>
+    /// <returns>The calculated chart rect, in pixel coordinates.</returns>
+    public RectangleF CalcChartRect(Graphics g)
     {
-      int maxTics = 0;
+      // Calculate the chart rect, deducting the area for the scales, titles, legend, etc.
+      //int    hStack;
+      //float  legendWidth, legendHeight;
 
-      _xAxis.Scale.PickScale( this, g, scaleFactor );
-      _x2Axis.Scale.PickScale( this, g, scaleFactor );
-
-      foreach ( var axis in _yAxisList )
-      {
-        axis.Scale.PickScale( this, g, scaleFactor );
-        if (!axis.Scale.MaxAuto) continue;
-
-        int nTics = axis.Scale.CalcNumTics();
-        maxTics = nTics > maxTics ? nTics : maxTics;
-      }
-      foreach ( var axis in _y2AxisList )
-      {
-        axis.Scale.PickScale( this, g, scaleFactor );
-        if (!axis.Scale.MaxAuto) continue;
-
-        int nTics = axis.Scale.CalcNumTics();
-        maxTics = nTics > maxTics ? nTics : maxTics;
-      }
-
-      if (!_isAlignGrids) return;
-
-      foreach ( var axis in _yAxisList )
-        ForceNumTics( axis, maxTics );
-
-      foreach ( var axis in _y2AxisList )
-        ForceNumTics( axis, maxTics );
+      return CalcChartRect(g, CalcScaleFactor());
     }
 
-    private void ForceNumTics( Axis axis, int numTics )
+    public RectangleF CalcChartRect(Graphics g, float scaleFactor)
     {
-      if (!axis.Scale.MaxAuto) return;
-      int nTics = axis.Scale.CalcNumTics();
-      if ( nTics < numTics )
-        axis.Scale._maxLinearized += axis.Scale._majorStep * ( numTics - nTics );
+      // chart rect starts out at the full pane rect less the margins
+      //   and less space for the Pane title
+      var clientRect = this.CalcClientRect(g, scaleFactor);
+
+      //float minSpaceX = 0;
+      //float minSpaceY = 0;
+      //float minSpaceY2 = 0;
+      float totSpaceY = 0;
+      //float spaceY2 = 0;
+
+      // actual minimum axis space for the left side of the chart rect
+      float minSpaceL = 0;
+      // actual minimum axis space for the right side of the chart rect
+      float minSpaceR = 0;
+      // actual minimum axis space for the bottom side of the chart rect
+      float minSpaceB = 0;
+      // actual minimum axis space for the top side of the chart rect
+      float minSpaceT = 0;
+
+      XAxis.CalcSpace(g, this, scaleFactor, out minSpaceB);
+      X2Axis.CalcSpace(g, this, scaleFactor, out minSpaceT);
+
+      //minSpaceB = _xAxis.tmpMinSpace;
+
+      foreach (var axis in YAxisList)
+      {
+        float fixedSpace;
+        float tmp = axis.CalcSpace(g, this, scaleFactor, out fixedSpace);
+        //if ( !axis.CrossAuto || axis.Cross < _xAxis.Min )
+        if (axis.IsCrossShifted(this))
+          totSpaceY += tmp;
+
+        minSpaceL += fixedSpace;
+      }
+      foreach (var axis in Y2AxisList)
+      {
+        float fixedSpace;
+        float tmp = axis.CalcSpace(g, this, scaleFactor, out fixedSpace);
+        //if ( !axis.CrossAuto || axis.Cross < _xAxis.Min )
+        if (axis.IsCrossShifted(this))
+          totSpaceY += tmp;
+
+        minSpaceR += fixedSpace;
+      }
+
+      float spaceB = 0, spaceT = 0, spaceL = 0, spaceR = 0;
+
+      SetSpace(XAxis, clientRect.Height - XAxis._tmpSpace, ref spaceB, ref spaceT);
+      //      minSpaceT = Math.Max( minSpaceT, spaceT );
+      SetSpace(X2Axis, clientRect.Height - X2Axis._tmpSpace, ref spaceT, ref spaceB);
+      XAxis._tmpSpace = spaceB;
+      X2Axis._tmpSpace = spaceT;
+
+      // TODO: Set axis.Rect for each X and Y axises
+
+      float totSpaceL = 0;
+      float totSpaceR = 0;
+
+      foreach (var axis in YAxisList)
+      {
+        SetSpace(axis, clientRect.Width - totSpaceY, ref spaceL, ref spaceR);
+        minSpaceR = Math.Max(minSpaceR, spaceR);
+        totSpaceL += spaceL;
+        axis._tmpSpace = spaceL;
+      }
+      foreach (var axis in Y2AxisList)
+      {
+        SetSpace(axis, clientRect.Width - totSpaceY, ref spaceR, ref spaceL);
+        minSpaceL = Math.Max(minSpaceL, spaceL);
+        totSpaceR += spaceR;
+        axis._tmpSpace = spaceR;
+      }
+
+      RectangleF tmpRect = clientRect;
+
+      totSpaceL = Math.Max(totSpaceL, minSpaceL);
+      totSpaceR = Math.Max(totSpaceR, minSpaceR);
+      spaceB = Math.Max(spaceB, minSpaceB);
+      spaceT = Math.Max(spaceT, minSpaceT);
+
+      tmpRect.X += totSpaceL;
+      tmpRect.Width -= totSpaceL + totSpaceR;
+      tmpRect.Height -= spaceT + spaceB;
+      tmpRect.Y += spaceT;
+
+      _legend.CalcRect(g, this, scaleFactor, ref tmpRect);
+
+      return tmpRect;
     }
 
     /// <summary>
@@ -734,11 +720,11 @@ namespace ZedGraph
       // the GraphObj's are drawn so that the Transform functions are
       // ready.  Also, this should be done before CalcChartRect so that the
       // Axis.Cross - shift parameter can be calculated.
-      _xAxis.Scale.SetupScaleData(this);
-      _x2Axis.Scale.SetupScaleData(this);
-      foreach (var axis in _yAxisList)
+      XAxis.Scale.SetupScaleData(this);
+      X2Axis.Scale.SetupScaleData(this);
+      foreach (var axis in YAxisList)
         axis.Scale.SetupScaleData(this);
-      foreach (var axis in _y2AxisList)
+      foreach (var axis in Y2AxisList)
         axis.Scale.SetupScaleData(this);
 
       // Draw the GraphItems that are behind the Axis objects
@@ -762,25 +748,25 @@ namespace ZedGraph
         g.SetClip(CurveClipRect, CombineMode.Intersect);
 
         if (!g.IsClipEmpty) // update region may not be in chart at all
-          _curveList.Draw(g, this, scaleFactor);
+          CurveList.Draw(g, this, scaleFactor);
         g.SetClip(_rect);
 
         // Draw the GraphItems that are behind the Axis objects
         GraphObjList.Draw(g, this, scaleFactor, ZOrder.D_BehindAxis);
 
         // Draw the Axes
-        _xAxis.Draw(g, this, scaleFactor, 0.0f);
-        _x2Axis.Draw(g, this, scaleFactor, 0.0f);
+        XAxis.Draw(g, this, scaleFactor, 0.0f);
+        X2Axis.Draw(g, this, scaleFactor, 0.0f);
 
         float shift = 0;
-        foreach (var axis in _yAxisList)
+        foreach (var axis in YAxisList)
         {
           axis.Draw(g, this, scaleFactor, shift);
           shift += axis._tmpSpace;
         }
 
         shift = 0;
-        foreach (var axis in _y2AxisList)
+        foreach (var axis in Y2AxisList)
         {
           axis.Draw(g, this, scaleFactor, shift);
           shift += axis._tmpSpace;
@@ -822,20 +808,50 @@ namespace ZedGraph
       DrawEvent?.Invoke(this);
     }
 
+    /// <summary>
+    /// This method will set the <see cref="Axis.MinSpace"/> property for all three axes;
+    /// <see cref="XAxis"/>, <see cref="YAxis"/>, and <see cref="Y2Axis"/>.
+    /// </summary>
+    /// <remarks>The <see cref="Axis.MinSpace"/>
+    /// is calculated using the currently required space multiplied by a fraction
+    /// (<paramref>bufferFraction</paramref>).
+    /// The currently required space is calculated using <see cref="Axis.CalcSpace"/>, and is
+    /// based on current data ranges, font sizes, etc.  The "space" is actually the amount of space
+    /// required to fit the tic marks, scale labels, and axis title.
+    /// The calculation is done by calling the <see cref="Axis.SetMinSpaceBuffer"/> method for
+    /// each <see cref="Axis"/>.
+    /// </remarks>
+    /// <param name="g">A graphic device object to be drawn into.  This is normally e.Graphics from the
+    /// PaintEventArgs argument to the Paint() method.</param>
+    /// <param name="bufferFraction">The amount of space to allocate for the axis, expressed
+    /// as a fraction of the currently required space.  For example, a value of 1.2 would
+    /// allow for 20% extra above the currently required space.</param>
+    /// <param name="isGrowOnly">If true, then this method will only modify the <see cref="Axis.MinSpace"/>
+    /// property if the calculated result is more than the current value.</param>
+    public void SetMinSpaceBuffer(Graphics g, float bufferFraction, bool isGrowOnly)
+    {
+      XAxis.SetMinSpaceBuffer(g, this, bufferFraction, isGrowOnly);
+      X2Axis.SetMinSpaceBuffer(g, this, bufferFraction, isGrowOnly);
+      foreach (var axis in YAxisList)
+        axis.SetMinSpaceBuffer(g, this, bufferFraction, isGrowOnly);
+      foreach (var axis in Y2AxisList)
+        axis.SetMinSpaceBuffer(g, this, bufferFraction, isGrowOnly);
+    }
+
     internal void DrawGrid(Graphics g, float scaleFactor)
     {
-      _xAxis.DrawGrid(g, this, scaleFactor, 0.0f);
-      _x2Axis.DrawGrid(g, this, scaleFactor, 0.0f);
+      XAxis.DrawGrid(g, this, scaleFactor, 0.0f);
+      X2Axis.DrawGrid(g, this, scaleFactor, 0.0f);
 
       float shiftPos = 0.0f;
-      foreach (YAxis yAxis in _yAxisList)
+      foreach (YAxis yAxis in YAxisList)
       {
         yAxis.DrawGrid(g, this, scaleFactor, shiftPos);
         shiftPos += yAxis._tmpSpace;
       }
 
       shiftPos = 0.0f;
-      foreach (Y2Axis y2Axis in _y2AxisList)
+      foreach (Y2Axis y2Axis in Y2AxisList)
       {
         y2Axis.DrawGrid(g, this, scaleFactor, shiftPos);
         shiftPos += y2Axis._tmpSpace;
@@ -845,41 +861,60 @@ namespace ZedGraph
     private bool AxisRangesValid()
     {
       bool showGraf =
-          (double.IsNaN(_xAxis.Scale._min) && double.IsNaN(_xAxis.Scale._max) ||
-           _xAxis.Scale._min < _xAxis.Scale._max) &&
-          (double.IsNaN(_x2Axis.Scale._min) && double.IsNaN(_x2Axis.Scale._max) ||
-           _x2Axis.Scale._min < _x2Axis.Scale._max);
-      foreach (Axis axis in _yAxisList)
+          (double.IsNaN(XAxis.Scale._min) && double.IsNaN(XAxis.Scale._max) ||
+           XAxis.Scale._min < XAxis.Scale._max) &&
+          (double.IsNaN(X2Axis.Scale._min) && double.IsNaN(X2Axis.Scale._max) ||
+           X2Axis.Scale._min < X2Axis.Scale._max);
+      foreach (var axis in YAxisList)
         if (axis.Scale._min >= axis.Scale._max)
           showGraf = false;
-      foreach (Axis axis in _y2AxisList)
+      foreach (var axis in Y2AxisList)
         if (axis.Scale._min >= axis.Scale._max)
           showGraf = false;
 
       return showGraf;
     }
 
-    /// <summary>
-    /// Calculate the <see cref="ZedGraph.Chart.Rect"/> based on the <see cref="PaneBase.Rect"/>.
-    /// </summary>
-    /// <remarks>The ChartRect
-    /// is the plot area bounded by the axes, and the rect is the total area as
-    /// specified by the client application.
-    /// </remarks>
-    /// <param name="g">
-    /// A graphic device object to be drawn into.  This is normally e.Graphics from the
-    /// PaintEventArgs argument to the Paint() method.
-    /// </param>
-    /// <returns>The calculated chart rect, in pixel coordinates.</returns>
-    public RectangleF CalcChartRect( Graphics g )
+    private void ForceNumTics(Axis axis, int numTics)
     {
-      // Calculate the chart rect, deducting the area for the scales, titles, legend, etc.
-      //int    hStack;
-      //float  legendWidth, legendHeight;
-
-      return CalcChartRect( g, CalcScaleFactor() );
+      if (!axis.Scale.MaxAuto) return;
+      int nTics = axis.Scale.CalcNumTics();
+      if (nTics < numTics)
+        axis.Scale.MaxLinearized += axis.Scale._majorStep * (numTics - nTics);
     }
 
+    private void PickScale(Graphics g, float scaleFactor)
+    {
+      int maxTics = 0;
+
+      XAxis.Scale.PickScale( this, g, scaleFactor );
+      X2Axis.Scale.PickScale( this, g, scaleFactor );
+
+      foreach ( var axis in YAxisList )
+      {
+        axis.Scale.PickScale( this, g, scaleFactor );
+        if (!axis.Scale.MaxAuto) continue;
+
+        int nTics = axis.Scale.CalcNumTics();
+        maxTics = nTics > maxTics ? nTics : maxTics;
+      }
+      foreach ( var axis in Y2AxisList )
+      {
+        axis.Scale.PickScale( this, g, scaleFactor );
+        if (!axis.Scale.MaxAuto) continue;
+
+        int nTics = axis.Scale.CalcNumTics();
+        maxTics = nTics > maxTics ? nTics : maxTics;
+      }
+
+      if (!IsAlignGrids) return;
+
+      foreach ( var axis in YAxisList )
+        ForceNumTics( axis, maxTics );
+
+      foreach ( var axis in Y2AxisList )
+        ForceNumTics( axis, maxTics );
+    }
     /// <summary>
     /// Calculate the <see cref="ZedGraph.Chart.Rect"/> based on the <see cref="PaneBase.Rect"/>.
     /// </summary>
@@ -897,99 +932,6 @@ namespace ZedGraph
     /// represents a linear multiple to be applied to font sizes, symbol sizes, etc.
     /// </param>
     /// <returns>The calculated chart rect, in pixel coordinates.</returns>
-
-    public RectangleF CalcChartRect( Graphics g, float scaleFactor )
-    {
-      // chart rect starts out at the full pane rect less the margins
-      //   and less space for the Pane title
-      var clientRect = this.CalcClientRect( g, scaleFactor );
-
-      //float minSpaceX = 0;
-      //float minSpaceY = 0;
-      //float minSpaceY2 = 0;
-      float totSpaceY = 0;
-      //float spaceY2 = 0;
-
-      // actual minimum axis space for the left side of the chart rect
-      float minSpaceL = 0;
-      // actual minimum axis space for the right side of the chart rect
-      float minSpaceR = 0;
-      // actual minimum axis space for the bottom side of the chart rect
-      float minSpaceB = 0;
-      // actual minimum axis space for the top side of the chart rect
-      float minSpaceT = 0;
-
-      _xAxis.CalcSpace( g, this, scaleFactor, out minSpaceB );
-      _x2Axis.CalcSpace( g, this, scaleFactor, out minSpaceT );
-
-      //minSpaceB = _xAxis.tmpMinSpace;
-
-      foreach ( var axis in _yAxisList )
-      {
-        float fixedSpace;
-        float tmp = axis.CalcSpace( g, this, scaleFactor, out fixedSpace );
-        //if ( !axis.CrossAuto || axis.Cross < _xAxis.Min )
-        if ( axis.IsCrossShifted( this ) )
-          totSpaceY += tmp;
-
-        minSpaceL += fixedSpace;
-      }
-      foreach ( var axis in _y2AxisList )
-      {
-        float fixedSpace;
-        float tmp = axis.CalcSpace( g, this, scaleFactor, out fixedSpace );
-        //if ( !axis.CrossAuto || axis.Cross < _xAxis.Min )
-        if ( axis.IsCrossShifted( this ) )
-          totSpaceY += tmp;
-
-        minSpaceR += fixedSpace;
-      }
-
-      float spaceB = 0, spaceT = 0, spaceL = 0, spaceR = 0;
-
-      SetSpace( _xAxis, clientRect.Height - _xAxis._tmpSpace, ref spaceB, ref spaceT );
-//      minSpaceT = Math.Max( minSpaceT, spaceT );
-      SetSpace( _x2Axis, clientRect.Height - _x2Axis._tmpSpace, ref spaceT, ref spaceB );
-      _xAxis._tmpSpace = spaceB;
-      _x2Axis._tmpSpace = spaceT;
-
-      // TODO: Set axis.Rect for each X and Y axises
-
-      float totSpaceL = 0;
-      float totSpaceR = 0;
-
-      foreach ( var axis in _yAxisList )
-      {
-        SetSpace( axis, clientRect.Width - totSpaceY, ref spaceL, ref spaceR );
-        minSpaceR = Math.Max( minSpaceR, spaceR );
-        totSpaceL += spaceL;
-        axis._tmpSpace = spaceL;
-      }
-      foreach ( var axis in _y2AxisList )
-      {
-        SetSpace( axis, clientRect.Width - totSpaceY, ref spaceR, ref spaceL );
-        minSpaceL = Math.Max( minSpaceL, spaceL );
-        totSpaceR += spaceR;
-        axis._tmpSpace = spaceR;
-      }
-
-      RectangleF tmpRect = clientRect;
-
-      totSpaceL = Math.Max( totSpaceL, minSpaceL );
-      totSpaceR = Math.Max( totSpaceR, minSpaceR );
-      spaceB = Math.Max( spaceB, minSpaceB );
-      spaceT = Math.Max( spaceT, minSpaceT );
-
-      tmpRect.X      += totSpaceL;
-      tmpRect.Width  -= totSpaceL + totSpaceR;
-      tmpRect.Height -= spaceT + spaceB;
-      tmpRect.Y      += spaceT;
-
-      _legend.CalcRect( g, this, scaleFactor, ref tmpRect );
-
-      return tmpRect;
-    }
-
     private void SetSpace( Axis axis, float clientSize, ref float spaceNorm, ref float spaceAlt )
     {
       //spaceNorm = 0;
@@ -1011,40 +953,59 @@ namespace ZedGraph
       else
         spaceNorm = axis._tmpSpace;
     }
+    #endregion
+
+    #region AddCurve Methods
 
     /// <summary>
-    /// This method will set the <see cref="Axis.MinSpace"/> property for all three axes;
-    /// <see cref="XAxis"/>, <see cref="YAxis"/>, and <see cref="Y2Axis"/>.
+    /// Add a bar type curve (<see cref="CurveItem"/> object) to the plot with
+    /// the given data points (<see cref="IPointList"/>) and properties.
+    /// This is simplified way to add curves without knowledge of the
+    /// <see cref="CurveList"/> class.  An alternative is to use
+    /// the <see cref="ZedGraph.CurveList" /> Add() method.
     /// </summary>
-    /// <remarks>The <see cref="Axis.MinSpace"/>
-    /// is calculated using the currently required space multiplied by a fraction
-    /// (<paramref>bufferFraction</paramref>).
-    /// The currently required space is calculated using <see cref="Axis.CalcSpace"/>, and is
-    /// based on current data ranges, font sizes, etc.  The "space" is actually the amount of space
-    /// required to fit the tic marks, scale labels, and axis title.
-    /// The calculation is done by calling the <see cref="Axis.SetMinSpaceBuffer"/> method for
-    /// each <see cref="Axis"/>.
-    /// </remarks>
-    /// <param name="g">A graphic device object to be drawn into.  This is normally e.Graphics from the
-    /// PaintEventArgs argument to the Paint() method.</param>
-    /// <param name="bufferFraction">The amount of space to allocate for the axis, expressed
-    /// as a fraction of the currently required space.  For example, a value of 1.2 would
-    /// allow for 20% extra above the currently required space.</param>
-    /// <param name="isGrowOnly">If true, then this method will only modify the <see cref="Axis.MinSpace"/>
-    /// property if the calculated result is more than the current value.</param>
-    public void SetMinSpaceBuffer( Graphics g, float bufferFraction, bool isGrowOnly )
+    /// <param name="label">The text label (string) for the curve that will be
+    /// used as a <see cref="Legend"/> entry.</param>
+    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
+    /// the X and Y values for this curve</param>
+    /// <param name="color">The color to used to fill the bars</param>
+    /// <returns>A <see cref="CurveItem"/> class for the newly created bar curve.
+    /// This can then be used to access all of the curve properties that
+    /// are not defined as arguments to the
+    /// <see cref="AddBar(string,IPointList,Color)"/> method.</returns>
+    public BarItem AddBar(string label, IPointList points, Color color, int zOrder = -1)
     {
-      _xAxis.SetMinSpaceBuffer( g, this, bufferFraction, isGrowOnly );
-      _x2Axis.SetMinSpaceBuffer( g, this, bufferFraction, isGrowOnly );
-      foreach ( Axis axis in _yAxisList )
-        axis.SetMinSpaceBuffer( g, this, bufferFraction, isGrowOnly );
-      foreach ( Axis axis in _y2AxisList )
-        axis.SetMinSpaceBuffer( g, this, bufferFraction, isGrowOnly );
+      BarItem curve = new BarItem(label, points, color, zOrder);
+      CurveList.Add(curve);
+
+      return curve;
     }
 
-  #endregion
+    /// <summary>
+    /// Add a bar type curve (<see cref="CurveItem"/> object) to the plot with
+    /// the given data points (double arrays) and properties.
+    /// This is simplified way to add curves without knowledge of the
+    /// <see cref="CurveList"/> class.  An alternative is to use
+    /// the <see cref="ZedGraph.CurveList" /> Add() method.
+    /// </summary>
+    /// <param name="label">The text label (string) for the curve that will be
+    /// used as a <see cref="Legend"/> entry.</param>
+    /// <param name="x">An array of double precision X values (the
+    /// independent values) that define the curve.</param>
+    /// <param name="y">An array of double precision Y values (the
+    /// dependent values) that define the curve.</param>
+    /// <param name="color">The color to used for the bars</param>
+    /// <returns>A <see cref="CurveItem"/> class for the newly created bar curve.
+    /// This can then be used to access all of the curve properties that
+    /// are not defined as arguments to the
+    /// <see cref="AddBar(string,double[],double[],Color)"/> method.</returns>
+    public BarItem AddBar(string label, double[] x, double[] y, Color color, int zOrder = -1)
+    {
+      BarItem curve = new BarItem(label, x, y, color, zOrder);
+      CurveList.Add(curve);
 
-  #region AddCurve Methods
+      return curve;
+    }
 
     /// <summary>
     /// Add a curve (<see cref="CurveItem"/> object) to the plot with
@@ -1068,7 +1029,7 @@ namespace ZedGraph
     public LineItem AddCurve( string label, double[] x, double[] y, Color color, int zOrder=-1 )
     {
       LineItem curve = new LineItem( label, x, y, color, SymbolType.Default, zOrder:zOrder );
-      _curveList.Add( curve );
+      CurveList.Add( curve );
 
       return curve;
     }
@@ -1092,8 +1053,8 @@ namespace ZedGraph
     /// <see cref="AddCurve(string,IPointList,Color)"/> method.</returns>
     public LineItem AddCurve( string label, IPointList points, Color color, int zOrder = -1)
     {
-      LineItem curve = new LineItem( label, points, color, SymbolType.Default, zOrder: zOrder);
-      _curveList.Add( curve );
+      var curve = new LineItem( label, points, color, SymbolType.Default, zOrder: zOrder);
+      CurveList.Add( curve );
 
       return curve;
     }
@@ -1122,8 +1083,8 @@ namespace ZedGraph
     public LineItem AddCurve( string label, double[] x, double[] y,
       Color color, SymbolType symbolType, int zOrder = -1)
     {
-      LineItem curve = new LineItem( label, x, y, color, symbolType, zOrder: zOrder);
-      _curveList.Add( curve );
+      var curve = new LineItem( label, x, y, color, symbolType, zOrder: zOrder);
+      CurveList.Add( curve );
 
       return curve;
     }
@@ -1151,117 +1112,7 @@ namespace ZedGraph
       Color color, SymbolType symbolType, int zOrder = -1)
     {
       LineItem curve = new LineItem( label, points, color, symbolType, zOrder: zOrder );
-      _curveList.Add( curve );
-
-      return curve;
-    }
-
-    /// <summary>
-    /// Add a stick graph (<see cref="StickItem"/> object) to the plot with
-    /// the given data points (double arrays) and properties.
-    /// This is simplified way to add curves without knowledge of the
-    /// <see cref="CurveList"/> class.  An alternative is to use
-    /// the <see cref="ZedGraph.CurveList" /> Add() method.
-    /// </summary>
-    /// <param name="label">The text label (string) for the curve that will be
-    /// used as a <see cref="Legend"/> entry.</param>
-    /// <param name="x">An array of double precision X values (the
-    /// independent values) that define the curve.</param>
-    /// <param name="y">An array of double precision Y values (the
-    /// dependent values) that define the curve.</param>
-    /// <param name="color">The color to used for the curve line,
-    /// symbols, etc.</param>
-    /// <returns>A <see cref="StickItem"/> class for the newly created curve.
-    /// This can then be used to access all of the curve properties that
-    /// are not defined as arguments to the
-    /// <see cref="AddStick(string,double[],double[],Color)"/> method.</returns>
-    public StickItem AddStick( string label, double[] x, double[] y, Color color, int zOrder=-1 )
-    {
-      StickItem curve = new StickItem( label, x, y, color, zOrder: zOrder );
-      _curveList.Add( curve );
-
-      return curve;
-    }
-
-    /// <summary>
-    /// Add a stick graph (<see cref="StickItem"/> object) to the plot with
-    /// the given data points (<see cref="IPointList"/>) and properties.
-    /// This is simplified way to add curves without knowledge of the
-    /// <see cref="CurveList"/> class.  An alternative is to use
-    /// the <see cref="ZedGraph.CurveList" /> Add() method.
-    /// </summary>
-    /// <param name="label">The text label (string) for the curve that will be
-    /// used as a <see cref="Legend"/> entry.</param>
-    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
-    /// the X and Y values for this curve</param>
-    /// <param name="color">The color to used for the curve line,
-    /// symbols, etc.</param>
-    /// <returns>A <see cref="CurveItem"/> class for the newly created curve.
-    /// This can then be used to access all of the curve properties that
-    /// are not defined as arguments to the
-    /// <see cref="AddStick(string,IPointList,Color)"/> method.</returns>
-    public StickItem AddStick( string label, IPointList points, Color color, int zOrder = -1)
-    {
-      StickItem curve = new StickItem( label, points, color, zOrder: zOrder );
-      _curveList.Add( curve );
-
-      return curve;
-    }
-
-    /// <summary>
-    /// Add a candlestick graph (<see cref="OHLCBarItem"/> object) to the plot with
-    /// the given data points (<see cref="IPointList"/>) and properties.
-    /// </summary>
-    /// <remarks>
-    /// This is simplified way to add curves without knowledge of the
-    /// <see cref="CurveList"/> class.  An alternative is to use
-    /// the <see cref="ZedGraph.CurveList" /> Add() method.
-    /// Note that the <see cref="IPointList" />
-    /// should contain <see cref="StockPt" /> objects instead of <see cref="PointPair" />
-    /// objects in order to contain all the data values required for this curve type.
-    /// </remarks>
-    /// <param name="label">The text label (string) for the curve that will be
-    /// used as a <see cref="Legend"/> entry.</param>
-    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
-    /// the X and Y values for this curve</param>
-    /// <param name="color">The color to used for the curve line,
-    /// symbols, etc.</param>
-    /// <returns>A <see cref="CurveItem"/> class for the newly created curve.
-    /// This can then be used to access all of the curve properties that
-    /// are not defined as arguments to the
-    /// <see cref="AddOHLCBar(string,IPointList,Color)"/> method.</returns>
-    public OHLCBarItem AddOHLCBar( string label, IPointList points, Color color, int zOrder = -1)
-    {
-      OHLCBarItem curve = new OHLCBarItem( label, points, color, zOrder: zOrder);
-      _curveList.Add( curve );
-
-      return curve;
-    }
-
-    /// <summary>
-    /// Add a japanesecandlestick graph (<see cref="JapaneseCandleStickItem"/> object) to the plot with
-    /// the given data points (<see cref="IPointList"/>) and properties.
-    /// </summary>
-    /// <remarks>
-    /// This is simplified way to add curves without knowledge of the
-    /// <see cref="CurveList"/> class.  An alternative is to use
-    /// the <see cref="ZedGraph.CurveList" /> Add() method.
-    /// Note that the <see cref="IPointList" />
-    /// should contain <see cref="StockPt" /> objects instead of <see cref="PointPair" />
-    /// objects in order to contain all the data values required for this curve type.
-    /// </remarks>
-    /// <param name="label">The text label (string) for the curve that will be
-    /// used as a <see cref="Legend"/> entry.</param>
-    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
-    /// the X and Y values for this curve</param>
-    /// <returns>A <see cref="CurveItem"/> class for the newly created curve.
-    /// This can then be used to access all of the curve properties that
-    /// are not defined as arguments to the
-    /// <see cref="AddJapaneseCandleStick(string,IPointList)"/> method.</returns>
-    public JapaneseCandleStickItem AddJapaneseCandleStick( string label, IPointList points, int zOrder=-1 )
-    {
-      JapaneseCandleStickItem curve = new JapaneseCandleStickItem( label, points, zOrder );
-      _curveList.Add( curve );
+      CurveList.Add( curve );
 
       return curve;
     }
@@ -1288,15 +1139,16 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddErrorBar(string,IPointList,Color)"/> method.</returns>
-    public ErrorBarItem AddErrorBar( string label, double[] x, double[] y,
+    public ErrorBarItem AddErrorBar(string label, double[] x, double[] y,
       double[] baseValue, Color color, int zOrder = -1)
     {
-      ErrorBarItem curve = new ErrorBarItem( label, new PointPairList( x, y, baseValue ),
-        color, zOrder: zOrder );
-      _curveList.Add( curve );
+      ErrorBarItem curve = new ErrorBarItem(label, new PointPairList(x, y, baseValue),
+        color, zOrder: zOrder);
+      CurveList.Add(curve);
 
       return curve;
     }
+
     /// <summary>
     /// Add an error bar set (<see cref="ErrorBarItem"/> object) to the plot with
     /// the given data points (<see cref="IPointList"/>) and properties.
@@ -1314,60 +1166,10 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddErrorBar(string,IPointList,Color)"/> method.</returns>
-    public ErrorBarItem AddErrorBar( string label, IPointList points, Color color, int zOrder=-1 )
+    public ErrorBarItem AddErrorBar(string label, IPointList points, Color color, int zOrder = -1)
     {
-      ErrorBarItem curve = new ErrorBarItem( label, points, color, zOrder: zOrder );
-      _curveList.Add( curve );
-
-      return curve;
-    }
-
-    /// <summary>
-    /// Add a bar type curve (<see cref="CurveItem"/> object) to the plot with
-    /// the given data points (<see cref="IPointList"/>) and properties.
-    /// This is simplified way to add curves without knowledge of the
-    /// <see cref="CurveList"/> class.  An alternative is to use
-    /// the <see cref="ZedGraph.CurveList" /> Add() method.
-    /// </summary>
-    /// <param name="label">The text label (string) for the curve that will be
-    /// used as a <see cref="Legend"/> entry.</param>
-    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
-    /// the X and Y values for this curve</param>
-    /// <param name="color">The color to used to fill the bars</param>
-    /// <returns>A <see cref="CurveItem"/> class for the newly created bar curve.
-    /// This can then be used to access all of the curve properties that
-    /// are not defined as arguments to the
-    /// <see cref="AddBar(string,IPointList,Color)"/> method.</returns>
-    public BarItem AddBar( string label, IPointList points, Color color, int zOrder=-1 )
-    {
-      BarItem curve = new BarItem( label, points, color, zOrder );
-      _curveList.Add( curve );
-
-      return curve;
-    }
-
-    /// <summary>
-    /// Add a bar type curve (<see cref="CurveItem"/> object) to the plot with
-    /// the given data points (double arrays) and properties.
-    /// This is simplified way to add curves without knowledge of the
-    /// <see cref="CurveList"/> class.  An alternative is to use
-    /// the <see cref="ZedGraph.CurveList" /> Add() method.
-    /// </summary>
-    /// <param name="label">The text label (string) for the curve that will be
-    /// used as a <see cref="Legend"/> entry.</param>
-    /// <param name="x">An array of double precision X values (the
-    /// independent values) that define the curve.</param>
-    /// <param name="y">An array of double precision Y values (the
-    /// dependent values) that define the curve.</param>
-    /// <param name="color">The color to used for the bars</param>
-    /// <returns>A <see cref="CurveItem"/> class for the newly created bar curve.
-    /// This can then be used to access all of the curve properties that
-    /// are not defined as arguments to the
-    /// <see cref="AddBar(string,double[],double[],Color)"/> method.</returns>
-    public BarItem AddBar( string label, double[] x, double[] y, Color color, int zOrder=-1 )
-    {
-      BarItem curve = new BarItem( label, x, y, color, zOrder );
-      _curveList.Add( curve );
+      ErrorBarItem curve = new ErrorBarItem(label, points, color, zOrder: zOrder);
+      CurveList.Add(curve);
 
       return curve;
     }
@@ -1393,11 +1195,11 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddHiLowBar(string,double[],double[],double[],Color)"/> method.</returns>
-    public HiLowBarItem AddHiLowBar( string label, double[] x, double[] y,
+    public HiLowBarItem AddHiLowBar(string label, double[] x, double[] y,
       double[] baseVal, Color color, int zOrder = -1)
     {
-      HiLowBarItem curve = new HiLowBarItem( label, x, y, baseVal, color, zOrder );
-      _curveList.Add( curve );
+      HiLowBarItem curve = new HiLowBarItem(label, x, y, baseVal, color, zOrder);
+      CurveList.Add(curve);
 
       return curve;
     }
@@ -1418,10 +1220,68 @@ namespace ZedGraph
     /// This can then be used to access all of the curve properties that
     /// are not defined as arguments to the
     /// <see cref="AddHiLowBar(string,IPointList,Color)"/> method.</returns>
-    public HiLowBarItem AddHiLowBar( string label, IPointList points, Color color, int zOrder = -1)
+    public HiLowBarItem AddHiLowBar(string label, IPointList points, Color color, int zOrder = -1)
     {
-      HiLowBarItem curve = new HiLowBarItem( label, points, color, zOrder );
-      _curveList.Add( curve );
+      HiLowBarItem curve = new HiLowBarItem(label, points, color, zOrder);
+      CurveList.Add(curve);
+
+      return curve;
+    }
+
+    /// <summary>
+    /// Add a japanesecandlestick graph (<see cref="JapaneseCandleStickItem"/> object) to the plot with
+    /// the given data points (<see cref="IPointList"/>) and properties.
+    /// </summary>
+    /// <remarks>
+    /// This is simplified way to add curves without knowledge of the
+    /// <see cref="CurveList"/> class.  An alternative is to use
+    /// the <see cref="ZedGraph.CurveList" /> Add() method.
+    /// Note that the <see cref="IPointList" />
+    /// should contain <see cref="StockPt" /> objects instead of <see cref="PointPair" />
+    /// objects in order to contain all the data values required for this curve type.
+    /// </remarks>
+    /// <param name="label">The text label (string) for the curve that will be
+    /// used as a <see cref="Legend"/> entry.</param>
+    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
+    /// the X and Y values for this curve</param>
+    /// <returns>A <see cref="CurveItem"/> class for the newly created curve.
+    /// This can then be used to access all of the curve properties that
+    /// are not defined as arguments to the
+    /// <see cref="AddJapaneseCandleStick(string,IPointList)"/> method.</returns>
+    public JapaneseCandleStickItem AddJapaneseCandleStick(string label, IPointList points, int zOrder = -1)
+    {
+      JapaneseCandleStickItem curve = new JapaneseCandleStickItem(label, points, zOrder);
+      CurveList.Add(curve);
+
+      return curve;
+    }
+
+    /// <summary>
+    /// Add a candlestick graph (<see cref="OHLCBarItem"/> object) to the plot with
+    /// the given data points (<see cref="IPointList"/>) and properties.
+    /// </summary>
+    /// <remarks>
+    /// This is simplified way to add curves without knowledge of the
+    /// <see cref="CurveList"/> class.  An alternative is to use
+    /// the <see cref="ZedGraph.CurveList" /> Add() method.
+    /// Note that the <see cref="IPointList" />
+    /// should contain <see cref="StockPt" /> objects instead of <see cref="PointPair" />
+    /// objects in order to contain all the data values required for this curve type.
+    /// </remarks>
+    /// <param name="label">The text label (string) for the curve that will be
+    /// used as a <see cref="Legend"/> entry.</param>
+    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
+    /// the X and Y values for this curve</param>
+    /// <param name="color">The color to used for the curve line,
+    /// symbols, etc.</param>
+    /// <returns>A <see cref="CurveItem"/> class for the newly created curve.
+    /// This can then be used to access all of the curve properties that
+    /// are not defined as arguments to the
+    /// <see cref="AddOHLCBar(string,IPointList,Color)"/> method.</returns>
+    public OHLCBarItem AddOHLCBar(string label, IPointList points, Color color, int zOrder = -1)
+    {
+      OHLCBarItem curve = new OHLCBarItem(label, points, color, zOrder: zOrder);
+      CurveList.Add(curve);
 
       return curve;
     }
@@ -1435,10 +1295,10 @@ namespace ZedGraph
     /// displaced from the center of the <see cref="PieItem"/>.</param>
     /// <param name="label">Text label for this <see cref="PieItem"/></param>
     /// <returns>a reference to the <see cref="PieItem"/> constructed</returns>
-    public PieItem AddPieSlice( double value, Color color, double displacement, string label )
+    public PieItem AddPieSlice(double value, Color color, double displacement, string label)
     {
-      PieItem slice = new PieItem( value, color, displacement, label );
-      this.CurveList.Add( slice );
+      PieItem slice = new PieItem(value, color, displacement, label);
+      this.CurveList.Add(slice);
       return slice;
     }
 
@@ -1454,11 +1314,11 @@ namespace ZedGraph
     /// <param name="displacement">The amount this <see cref="PieItem"/>  instance will be 
     /// displaced from the center point.</param>
     /// <param name="label">Text label for this <see cref="PieItem"/> instance.</param>
-    public PieItem AddPieSlice( double value, Color color1, Color color2, float fillAngle,
-            double displacement, string label )
+    public PieItem AddPieSlice(double value, Color color1, Color color2, float fillAngle,
+            double displacement, string label)
     {
-      PieItem slice = new PieItem( value, color1, color2, fillAngle, displacement, label );
-      this.CurveList.Add( slice );
+      PieItem slice = new PieItem(value, color1, color2, fillAngle, displacement, label);
+      this.CurveList.Add(slice);
       return slice;
     }
 
@@ -1473,119 +1333,616 @@ namespace ZedGraph
     /// </param>
     /// <returns>an array containing references to all <see cref="PieItem"/>s comprising
     /// the Pie Chart.</returns>
-    public PieItem[] AddPieSlices( double[] values, string[] labels )
+    public PieItem[] AddPieSlices(double[] values, string[] labels)
     {
       PieItem[] slices = new PieItem[values.Length];
-      for ( int x = 0; x < values.Length; x++ )
+      for (int x = 0; x < values.Length; x++)
       {
-        slices[x] = new PieItem( values[x], labels[x] );
-        this.CurveList.Add( slices[x] );
+        slices[x] = new PieItem(values[x], labels[x]);
+        this.CurveList.Add(slices[x]);
       }
       return slices;
     }
 
-  #endregion
-
-  #region General Utility Methods
     /// <summary>
-    /// Transform a data point from the specified coordinate type
-    /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+    /// Add a stick graph (<see cref="StickItem"/> object) to the plot with
+    /// the given data points (double arrays) and properties.
+    /// This is simplified way to add curves without knowledge of the
+    /// <see cref="CurveList"/> class.  An alternative is to use
+    /// the <see cref="ZedGraph.CurveList" /> Add() method.
     /// </summary>
-    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
-    /// has already been calculated via <see cref="AxisChange()"/> or
-    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
-    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
-    /// <param name="ptF">The X,Y pair that defines the point in user
-    /// coordinates.</param>
-    /// <param name="coord">A <see cref="CoordType"/> type that defines the
-    /// coordinate system in which the X,Y pair is defined.</param>
-    /// <returns>A point in screen coordinates that corresponds to the
-    /// specified user point.</returns>
-    public PointF GeneralTransform( PointF ptF, CoordType coord, int yAxisIndex = 0 )
+    /// <param name="label">The text label (string) for the curve that will be
+    /// used as a <see cref="Legend"/> entry.</param>
+    /// <param name="x">An array of double precision X values (the
+    /// independent values) that define the curve.</param>
+    /// <param name="y">An array of double precision Y values (the
+    /// dependent values) that define the curve.</param>
+    /// <param name="color">The color to used for the curve line,
+    /// symbols, etc.</param>
+    /// <returns>A <see cref="StickItem"/> class for the newly created curve.
+    /// This can then be used to access all of the curve properties that
+    /// are not defined as arguments to the
+    /// <see cref="AddStick(string,double[],double[],Color)"/> method.</returns>
+    public StickItem AddStick( string label, double[] x, double[] y, Color color, int zOrder=-1 )
     {
-      // Setup the scaling data based on the chart rect
-      _xAxis.Scale.SetupScaleData( this );
-      if (yAxisIndex < _yAxisList.Count)
-        _yAxisList[yAxisIndex].Scale.SetupScaleData(this);
-      if (yAxisIndex < _y2AxisList.Count)
-        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
-      /*
-      foreach ( Axis axis in _yAxisList )
-        axis.Scale.SetupScaleData( this, axis );
-      foreach ( Axis axis in _y2AxisList )
-        axis.Scale.SetupScaleData( this, axis );
-      */
-      return TransformCoord( ptF.X, ptF.Y, coord, yAxisIndex );
+      StickItem curve = new StickItem( label, x, y, color, zOrder: zOrder );
+      CurveList.Add( curve );
+
+      return curve;
     }
 
     /// <summary>
-    /// Transform a data point from the specified coordinate type
-    /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+    /// Add a stick graph (<see cref="StickItem"/> object) to the plot with
+    /// the given data points (<see cref="IPointList"/>) and properties.
+    /// This is simplified way to add curves without knowledge of the
+    /// <see cref="CurveList"/> class.  An alternative is to use
+    /// the <see cref="ZedGraph.CurveList" /> Add() method.
     /// </summary>
-    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
-    /// has already been calculated via <see cref="AxisChange()"/> or
-    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
-    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
-    /// <param name="pt">The X,Y pair that defines the point in user
-    /// coordinates.</param>
-    /// <param name="coord">A <see cref="CoordType"/> type that defines the
-    /// coordinate system in which the X,Y pair is defined.</param>
-    /// <returns>A point in screen coordinates that corresponds to the
-    /// specified user point.</returns>
-    public PointF GeneralTransform(PointD pt, CoordType coord, int yAxisIndex = 0)
+    /// <param name="label">The text label (string) for the curve that will be
+    /// used as a <see cref="Legend"/> entry.</param>
+    /// <param name="points">A <see cref="IPointList"/> of double precision value pairs that define
+    /// the X and Y values for this curve</param>
+    /// <param name="color">The color to used for the curve line,
+    /// symbols, etc.</param>
+    /// <returns>A <see cref="CurveItem"/> class for the newly created curve.
+    /// This can then be used to access all of the curve properties that
+    /// are not defined as arguments to the
+    /// <see cref="AddStick(string,IPointList,Color)"/> method.</returns>
+    public StickItem AddStick( string label, IPointList points, Color color, int zOrder = -1)
     {
-      // Setup the scaling data based on the chart rect
-      _xAxis.Scale.SetupScaleData(this);
-      if (yAxisIndex < _yAxisList.Count)
-        _yAxisList[yAxisIndex].Scale.SetupScaleData(this);
-      if (yAxisIndex < _y2AxisList.Count)
-        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
-      /*
-      foreach (Axis axis in _yAxisList)
-        axis.Scale.SetupScaleData(this, axis);
-      foreach (Axis axis in _y2AxisList)
-        axis.Scale.SetupScaleData(this, axis);
-      */
-      return TransformCoord(pt.X, pt.Y, coord, yAxisIndex);
-    }
+      StickItem curve = new StickItem( label, points, color, zOrder: zOrder );
+      CurveList.Add( curve );
 
+      return curve;
+    }
+    #endregion
+
+    #region General Utility Methods
     /// <summary>
-    /// Transform a data point from the specified coordinate type
-    /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+    /// Add a secondary <see cref="Y2Axis" /> (right side) to the list of axes
+    /// in the Graph.
     /// </summary>
-    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
-    /// has already been calculated via <see cref="AxisChange()"/> or
-    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
-    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).
-    /// Note that this method is more accurate than the <see cref="GeneralTransform(PointF,CoordType)" />
-    /// overload, since it uses double types.  This would typically only be significant for
-    /// <see cref="AxisType.Date" /> coordinates.
+    /// <remarks>
+    /// Note that the primary <see cref="Y2Axis" /> is always included by default.
+    /// This method turns off the <see cref="MajorTic" /> and <see cref="MinorTic" />
+    /// <see cref="MinorTic.IsOpposite" /> and <see cref="MinorTic.IsInside" />
+    /// properties by default.
     /// </remarks>
-    /// <param name="x">The x coordinate that defines the location in user space</param>
-    /// <param name="y">The y coordinate that defines the location in user space</param>
-    /// <param name="coord">A <see cref="CoordType"/> type that defines the
-    /// coordinate system in which the X,Y pair is defined.</param>
-    /// <returns>A point in screen coordinates that corresponds to the
-    /// specified user point.</returns>
-    public PointF GeneralTransform(double x, double y, CoordType coord, int yAxisIndex = 0)
+    /// <param name="title">The title for the <see cref="Y2Axis" />.</param>
+    /// <returns>the ordinal position (index) in the <see cref="Y2AxisList" />.</returns>
+    public int AddY2Axis(string title)
     {
-      // Setup the scaling data based on the chart rect
-      _xAxis.Scale.SetupScaleData( this );
-      if (yAxisIndex < _yAxisList.Count)
-        _yAxisList[yAxisIndex].Scale.SetupScaleData(this);
-      if (yAxisIndex < _y2AxisList.Count)
-        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
-      /*
-      foreach ( Axis axis in _yAxisList )
-        axis.Scale.SetupScaleData( this, axis );
-      foreach ( Axis axis in _y2AxisList )
-        axis.Scale.SetupScaleData( this, axis );
-      */
-
-      return TransformCoord( x, y, coord, yAxisIndex );
+      Y2Axis axis = new Y2Axis(title);
+      axis.MajorTic.IsOpposite = false;
+      axis.MinorTic.IsOpposite = false;
+      axis.MajorTic.IsInside = false;
+      axis.MinorTic.IsInside = false;
+      Y2AxisList.Add(axis);
+      return Y2AxisList.Count - 1;
     }
 
-        /// <summary>
+    /// <summary>
+    /// Add a secondary <see cref="YAxis" /> (left side) to the list of axes
+    /// in the Graph.
+    /// </summary>
+    /// <remarks>
+    /// Note that the primary <see cref="YAxis" /> is always included by default.
+    /// This method turns off the <see cref="MajorTic" /> and <see cref="MinorTic" />
+    /// <see cref="MinorTic.IsOpposite" /> and <see cref="MinorTic.IsInside" />
+    /// properties by default.
+    /// </remarks>
+    /// <param name="title">The title for the <see cref="YAxis" />.</param>
+    /// <returns>the ordinal position (index) in the <see cref="YAxisList" />.</returns>
+    public int AddYAxis(string title)
+    {
+      YAxis axis = new YAxis(title);
+      axis.MajorTic.IsOpposite = false;
+      axis.MinorTic.IsOpposite = false;
+      axis.MajorTic.IsInside = false;
+      axis.MinorTic.IsInside = false;
+      YAxisList.Add(axis);
+      return YAxisList.Count - 1;
+    }
+
+    /// <summary>
+    /// Find the axis that lies at the specified mouse (screen) point.
+    /// </summary>
+    /// <seealso cref="FindNearestObject"/>
+    public bool FindAxis(PointF mousePt, Graphics g, out Axis nearestObj, out int index, out RectangleF rect)
+    {
+      nearestObj = null;
+      index = -1;
+
+      // Make sure that the axes & data are being drawn
+      if (!AxisRangesValid())
+      {
+        rect = new RectangleF();
+        return false;
+      }
+
+      object obj;
+      var res = findAxis(mousePt, g, out obj, out index, out rect, CalcScaleFactor(), ZOrder.H_BehindAll);
+
+      if (res)
+        nearestObj = (Axis)obj;
+
+      return res;
+    }
+
+    // Revision: JCarpenter 10/06
+    /// <summary>
+    /// Find any objects that exist within the specified (screen) rectangle.
+    /// This method will search through all of the graph objects, such as
+    /// <see cref="Axis"/>, <see cref="Legend"/>, <see cref="PaneBase.Title"/>,
+    /// <see cref="GraphObj"/>, and <see cref="CurveItem"/>.
+    /// and see if the objects' bounding boxes are within the specified (screen) rectangle
+    /// This method returns true if any are found.
+    /// </summary>
+    public bool FindContainedObjects(RectangleF rectF, Graphics g,
+       out CurveList containedObjs)
+    {
+      containedObjs = new CurveList();
+
+      foreach (CurveItem ci in this.CurveList)
+        for (int i = 0; i < ci.Points.Count; i++)
+        {
+          if (ci.Points[i].X > rectF.Left &&
+               ci.Points[i].X < rectF.Right &&
+               ci.Points[i].Y > rectF.Bottom &&
+               ci.Points[i].Y < rectF.Top)
+          {
+            containedObjs.Add(ci);
+          }
+        }
+      return (containedObjs.Count > 0);
+    }
+
+    /// <summary>
+    /// Search through the <see cref="GraphObjList" /> and <see cref="CurveList" /> for
+    /// items that contain active <see cref="Link" /> objects.
+    /// </summary>
+    /// <param name="mousePt">The mouse location where the click occurred</param>
+    /// <param name="g">An appropriate <see cref="Graphics" /> instance</param>
+    /// <param name="scaleFactor">The current scaling factor for drawing operations.</param>
+    /// <param name="source">The clickable object that was found.  Typically a type of
+    /// <see cref="GraphObj" /> or a type of <see cref="CurveItem" />.</param>
+    /// <param name="link">The <see cref="Link" /> instance that is contained within
+    /// the <see paramref="source" /> object.</param>
+    /// <param name="index">An index value, indicating which point was clicked for
+    /// <see cref="CurveItem" /> type objects.</param>
+    /// <returns>returns true if a clickable link was found under the
+    /// <see paramref="mousePt" />, or false otherwise.
+    /// </returns>
+    public bool FindLinkableObject(PointF mousePt, Graphics g, float scaleFactor,
+        out object source, out Link link, out int index)
+    {
+      index = -1;
+
+      // First look for graph objects that lie in front of the data points
+      foreach (GraphObj graphObj in GraphObjList)
+      {
+        link = graphObj._link;
+
+        if (!link.IsActive) continue;
+        if (!graphObj.PointInBox(mousePt, this, g, scaleFactor)) continue;
+
+        source = graphObj;
+        return true;
+      }
+
+      // Second, look at the curve data points
+      foreach (CurveItem curve in CurveList)
+      {
+        link = curve.Link;
+
+        if (!link.IsActive) continue;
+        CurveItem nearestCurve;
+
+        if (!FindNearestPoint(mousePt, curve, out nearestCurve, out index)) continue;
+
+        source = curve;
+        return true;
+      }
+
+      // Third, look for graph objects that lie behind the data points
+      foreach (GraphObj graphObj in GraphObjList)
+      {
+        link = graphObj._link;
+
+        if (!link.IsActive) continue;
+        if (!graphObj.PointInBox(mousePt, this, g, scaleFactor)) continue;
+
+        source = graphObj;
+        return true;
+      }
+
+      source = null;
+      link = null;
+      index = -1;
+      return false;
+
+    }
+
+    /// <summary>
+    /// Find the object that lies closest to the specified mouse (screen) point.
+    /// </summary>
+    /// <remarks>
+    /// This method will search through all of the graph objects, such as
+    /// <see cref="Axis"/>, <see cref="Legend"/>, <see cref="PaneBase.Title"/>,
+    /// <see cref="GraphObj"/>, and <see cref="CurveItem"/>.
+    /// If the mouse point is within the bounding box of the items (or in the case
+    /// of <see cref="ArrowObj"/> and <see cref="CurveItem"/>, within
+    /// <see cref="Default.NearestTol"/> pixels), then the object will be returned.
+    /// You must check the type of the object to determine what object was
+    /// selected (for example, "if ( object is Legend ) ...").  The
+    /// <see paramref="index"/> parameter returns the index number of the item
+    /// within the selected object (such as the point number within a
+    /// <see cref="CurveItem"/> object.
+    /// </remarks>
+    /// <param name="mousePt">The screen point, in pixel coordinates.</param>
+    /// <param name="g">
+    /// A graphic device object to be drawn into.  This is normally e.Graphics from the
+    /// PaintEventArgs argument to the Paint() method.
+    /// </param>
+    /// <param name="nearestObj">A reference to the nearest object to the
+    /// specified screen point.  This can be any of <see cref="Axis"/>,
+    /// <see cref="Legend"/>, <see cref="PaneBase.Title"/>,
+    /// <see cref="TextObj"/>, <see cref="ArrowObj"/>, or <see cref="CurveItem"/>.
+    /// Note: If the pane title is selected, then the <see cref="GraphPane"/> object
+    /// will be returned.
+    /// </param>
+    /// <param name="index">The index number of the item within the selected object
+    /// (where applicable).  For example, for a <see cref="CurveItem"/> object,
+    /// <see paramref="index"/> will be the index number of the nearest data point,
+    /// accessible via <see cref="CurveItem.Points">CurveItem.Points[index]</see>.
+    /// index will be -1 if no data points are available.</param>
+    /// <returns>true if an object was found, false otherwise.</returns>
+    /// <seealso cref="FindNearestObject"/>
+    public override bool FindNearestObject(PointF mousePt, Graphics g,
+      out object nearestObj, out int index)
+    {
+      nearestObj = null;
+      index = -1;
+
+      // Make sure that the axes & data are being drawn
+      if (AxisRangesValid())
+      {
+        float scaleFactor = CalcScaleFactor();
+        //int      hStack;
+        //float    legendWidth, legendHeight;
+        RectangleF tmpRect;
+        GraphObj saveGraphItem = null;
+        int saveIndex = -1;
+        ZOrder saveZOrder = ZOrder.H_BehindAll;
+
+        // Calculate the chart rect, deducting the area for the scales, titles, legend, etc.
+        RectangleF tmpChartRect = CalcChartRect(g, scaleFactor);
+
+        // See if the point is in a GraphObj
+        // If so, just save the object and index so we can see if other overlying objects were
+        // intersected as well.
+        if (this.GraphObjList.FindPoint(mousePt, this, g, scaleFactor, out index))
+        {
+          saveGraphItem = this.GraphObjList[index];
+          saveIndex = index;
+          saveZOrder = saveGraphItem.ZOrder;
+        }
+
+        // See if the point is in the legend
+        if (saveZOrder <= ZOrder.B_BehindLegend &&
+          this.Legend.FindPoint(mousePt, this, scaleFactor, out index))
+        {
+          nearestObj = this.Legend;
+          return true;
+        }
+
+        // See if the point is in the Pane Title
+        SizeF paneTitleBox = _title.FontSpec.BoundingBox(g, _title.Text, scaleFactor);
+        if (saveZOrder <= ZOrder.H_BehindAll && _title.IsVisible)
+        {
+          tmpRect = new RectangleF((_rect.Left + _rect.Right - paneTitleBox.Width) / 2,
+            _rect.Top + Margin.Top * scaleFactor,
+            paneTitleBox.Width, paneTitleBox.Height);
+          if (tmpRect.Contains(mousePt))
+          {
+            nearestObj = this;
+            return true;
+          }
+        }
+
+        RectangleF dummy;
+
+        // See if mouse point lies on one of the axises
+        if (findAxis(mousePt, g, out nearestObj, out index, out dummy, scaleFactor, saveZOrder))
+          return true;
+
+        CurveItem curve;
+        // See if it's a data point
+        if (saveZOrder <= ZOrder.E_BehindCurves &&
+             FindNearestPoint(mousePt, out curve, out index))
+        {
+          nearestObj = curve;
+          return true;
+        }
+
+        if (saveGraphItem == null) return false;
+
+        index = saveIndex;
+        nearestObj = saveGraphItem;
+        return true;
+      }
+
+      return false;
+    }
+
+    /// <summary>
+    /// Find the data point that lies closest to the specified mouse (screen)
+    /// point for the specified curve.
+    /// </summary>
+    /// <remarks>
+    /// This method will search only through the points for the specified
+    /// curve to determine which point is
+    /// nearest the mouse point.  It will only consider points that are within
+    /// <see cref="Default.NearestTol"/> pixels of the screen point.
+    /// </remarks>
+    /// <param name="mousePt">The screen point, in pixel coordinates.</param>
+    /// <param name="nearestCurve">A reference to the <see cref="CurveItem"/>
+    /// instance that contains the closest point.  nearestCurve will be null if
+    /// no data points are available.</param>
+    /// <param name="targetCurve">A <see cref="CurveItem"/> object containing
+    /// the data points to be searched.</param>
+    /// <param name="iNearest">The index number of the closest point.  The
+    /// actual data vpoint will then be <see cref="CurveItem.Points">CurveItem.Points[iNearest]</see>
+    /// .  iNearest will
+    /// be -1 if no data points are available.</param>
+    /// <returns>true if a point was found and that point lies within
+    /// <see cref="Default.NearestTol"/> pixels
+    /// of the screen point, false otherwise.</returns>
+    public bool FindNearestPoint(PointF mousePt, CurveItem targetCurve,
+        out CurveItem nearestCurve, out int iNearest)
+    {
+      CurveList targetCurveList = new CurveList();
+      targetCurveList.Add(targetCurve);
+      return FindNearestPoint(mousePt, targetCurveList,
+        out nearestCurve, out iNearest);
+    }
+
+    /// <summary>
+    /// Find the data point that lies closest to the specified mouse (screen)
+    /// point.
+    /// </summary>
+    /// <remarks>
+    /// This method will search through all curves in
+    /// <see cref="GraphPane.CurveList"/> to find which point is
+    /// nearest.  It will only consider points that are within
+    /// <see cref="Default.NearestTol"/> pixels of the screen point.
+    /// </remarks>
+    /// <param name="mousePt">The screen point, in pixel coordinates.</param>
+    /// <param name="nearestCurve">A reference to the <see cref="CurveItem"/>
+    /// instance that contains the closest point.  nearestCurve will be null if
+    /// no data points are available.</param>
+    /// <param name="iNearest">The index number of the closest point.  The
+    /// actual data vpoint will then be <see cref="CurveItem.Points">CurveItem.Points[iNearest]</see>
+    /// .  iNearest will
+    /// be -1 if no data points are available.</param>
+    /// <returns>true if a point was found and that point lies within
+    /// <see cref="Default.NearestTol"/> pixels
+    /// of the screen point, false otherwise.</returns>
+    public bool FindNearestPoint(PointF mousePt,
+      out CurveItem nearestCurve, out int iNearest)
+    {
+      return FindNearestPoint(mousePt, CurveList,
+        out nearestCurve, out iNearest);
+    }
+
+    /// <summary>
+    /// Find the data point that lies closest to the specified mouse (screen)
+    /// point.
+    /// </summary>
+    /// <remarks>
+    /// This method will search through the specified list of curves to find which point is
+    /// nearest.  It will only consider points that are within
+    /// <see cref="Default.NearestTol"/> pixels of the screen point, and it will
+    /// only consider <see cref="CurveItem"/>'s that are in 
+    /// <paramref name="targetCurveList"/>.
+    /// </remarks>
+    /// <param name="mousePt">The screen point, in pixel coordinates.</param>
+    /// <param name="targetCurveList">A <see cref="CurveList"/> object containing
+    /// a subset of <see cref="CurveItem"/>'s to be searched.</param>
+    /// <param name="nearestCurve">A reference to the <see cref="CurveItem"/>
+    /// instance that contains the closest point.  nearestCurve will be null if
+    /// no data points are available.</param>
+    /// <param name="iNearest">The index number of the closest point.  The
+    /// actual data vpoint will then be <see cref="CurveItem.Points">CurveItem.Points[iNearest]</see>
+    /// .  iNearest will
+    /// be -1 if no data points are available.</param>
+    /// <returns>true if a point was found and that point lies within
+    /// <see cref="Default.NearestTol"/> pixels
+    /// of the screen point, false otherwise.</returns>
+    public bool FindNearestPoint(PointF mousePt, CurveList targetCurveList,
+      out CurveItem nearestCurve, out int iNearest)
+    {
+      CurveItem nearestBar = null;
+      int iNearestBar = -1;
+      nearestCurve = null;
+      iNearest = -1;
+
+      // If the point is outside the ChartRect, always return false
+      if (!_chart._rect.Contains(mousePt))
+        return false;
+
+      double x, x2;
+      double[] y;
+      double[] y2;
+
+      //ReverseTransform( mousePt, out x, out y, out y2 );
+      ReverseTransform(mousePt, out x, out x2, out y, out y2);
+
+      if (!AxisRangesValid())
+        return false;
+
+      var valueHandler = new ValueHandler(this, false);
+
+      //double  yPixPerUnit = chartRect.Height / ( yAxis.Max - yAxis.Min );
+      //double  y2PixPerUnit; // = chartRect.Height / ( y2Axis.Max - y2Axis.Min );
+
+      double yPixPerUnitAct, yAct, yMinAct, yMaxAct, xAct;
+      double minDist = 1e20;
+      double xVal, yVal, dist = 99999, distX, distY;
+      double tolSquared = Default.NearestTol * Default.NearestTol;
+
+      int iBar = 0;
+
+      foreach (CurveItem curve in targetCurveList)
+      {
+        //test for pie first...if it's a pie rest of method superfluous
+        if (curve is PieItem && curve.IsVisible)
+        {
+          if (((PieItem)curve).SlicePath != null &&
+               ((PieItem)curve).SlicePath.IsVisible(mousePt))
+          {
+            nearestBar = curve;
+            iNearestBar = 0;
+          }
+
+          continue;
+        }
+        if (!curve.IsVisible) continue;
+
+        int yIndex = curve.GetYAxisIndex(this);
+        Axis yAxis = curve.GetYAxis(this);
+        Axis xAxis = curve.GetXAxis(this);
+
+        if (curve.IsY2Axis)
+        {
+          yAct = y2[yIndex];
+          yMinAct = Y2AxisList[yIndex].Scale._min;
+          yMaxAct = Y2AxisList[yIndex].Scale._max;
+        }
+        else
+        {
+          yAct = y[yIndex];
+          yMinAct = YAxisList[yIndex].Scale._min;
+          yMaxAct = YAxisList[yIndex].Scale._max;
+        }
+
+        yPixPerUnitAct = _chart._rect.Height / (yMaxAct - yMinAct);
+        var xPixPerUnit = _chart._rect.Width / (xAxis.Scale._max - xAxis.Scale._min);
+        xAct = xAxis is XAxis ? x : x2;
+
+        var points = curve.Points;
+        var barWidth = curve.GetBarWidth(this);
+        Axis baseAxis = curve.BaseAxis(this);
+        var isXBaseAxis = (baseAxis is XAxis || baseAxis is X2Axis);
+        var barWidthUserHalf = isXBaseAxis
+          ? barWidth / xPixPerUnit / 2.0
+          : barWidth / yPixPerUnitAct / 2.0;
+
+        if (points == null) continue;
+        for (var iPt = 0; iPt < curve.NPts; iPt++)
+        {
+          // xVal is the user scale X value of the current point
+          xVal = xAxis.Scale.IsAnyOrdinal && !curve.IsOverrideOrdinal
+            ? iPt + 1.0
+            : points[iPt].X;
+
+          // yVal is the user scale Y value of the current point
+          yVal = yAxis.Scale.IsAnyOrdinal && !curve.IsOverrideOrdinal
+            ? iPt + 1.0
+            : points[iPt].Y;
+
+          if (xVal == PointPair.Missing || yVal == PointPair.Missing) continue;
+
+          if (curve.IsBar || curve is IBarItem)
+          {
+            double baseVal, lowVal, hiVal;
+            valueHandler.GetValues(curve, iPt, out baseVal,
+                                    out lowVal, out hiVal);
+
+            if (lowVal > hiVal)
+            {
+              var tmpVal = lowVal;
+              lowVal = hiVal;
+              hiVal = tmpVal;
+            }
+
+            if (isXBaseAxis)
+            {
+
+              var centerVal = valueHandler.BarCenterValue(curve, barWidth, iPt, xVal, iBar);
+
+              if (xAct < centerVal - barWidthUserHalf ||
+                   xAct > centerVal + barWidthUserHalf ||
+                   yAct < lowVal || yAct > hiVal)
+                continue;
+            }
+            else
+            {
+              var centerVal = valueHandler.BarCenterValue(curve, barWidth, iPt, yVal, iBar);
+
+              if (yAct < centerVal - barWidthUserHalf ||
+                   yAct > centerVal + barWidthUserHalf ||
+                   xAct < lowVal || xAct > hiVal)
+                continue;
+            }
+
+            if (nearestBar == null)
+            {
+              iNearestBar = iPt;
+              nearestBar = curve;
+            }
+          }
+          else if (xVal >= xAxis.Scale._min && xVal <= xAxis.Scale._max &&
+                    yVal >= yMinAct && yVal <= yMaxAct)
+          {
+            if (curve is LineItem && LineType == LineType.Stack)
+            {
+              double zVal;
+              valueHandler.GetValues(curve, iPt, out xVal, out zVal, out yVal);
+            }
+
+            distX = (xVal - xAct) * xPixPerUnit;
+            distY = (yVal - yAct) * yPixPerUnitAct;
+            dist = distX * distX + distY * distY;
+
+            if (dist >= minDist)
+              continue;
+
+            minDist = dist;
+            iNearest = iPt;
+            nearestCurve = curve;
+          }
+        }
+
+        if (curve.IsBar)
+          iBar++;
+      }
+
+      if (nearestCurve is LineItem)
+      {
+        var halfSymbol = (((LineItem)nearestCurve).Symbol.Size * CalcScaleFactor() / 2);
+        minDist -= halfSymbol * halfSymbol;
+        if (minDist < 0)
+          minDist = 0;
+      }
+
+      if (minDist >= tolSquared && nearestBar != null)
+      {
+        // if no point met the tolerance, but a bar was found, use it
+        nearestCurve = nearestBar;
+        iNearest = iNearestBar;
+        return true;
+      }
+      if (minDist < tolSquared)
+      {
+        // Did we find a close point, and is it within the tolerance?
+        // (minDist is the square of the distance in pixel units)
+        return true;
+      }
+      return false;
+    }
+
+    /// <summary>
     /// Transform a data point from screen coordinates (pixels) to
     /// the specified coordinate type  (<see cref="CoordType"/>).
     /// </summary>
@@ -1602,11 +1959,11 @@ namespace ZedGraph
     public PointD GeneralReverseTransform(PointF ptF, CoordType coord, int yAxisIndex = 0)
     {
       // Setup the scaling data based on the chart rect
-      _xAxis.Scale.SetupScaleData(this);
-      if (yAxisIndex < _yAxisList.Count)
-        _yAxisList[yAxisIndex].Scale.SetupScaleData(this);
-      if (yAxisIndex < _y2AxisList.Count)
-        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
+      XAxis.Scale.SetupScaleData(this);
+      if (yAxisIndex < YAxisList.Count)
+        YAxisList[yAxisIndex].Scale.SetupScaleData(this);
+      if (yAxisIndex < Y2AxisList.Count)
+        Y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
       /*
       foreach ( Axis axis in _yAxisList )
         axis.Scale.SetupScaleData( this, axis );
@@ -1638,11 +1995,11 @@ namespace ZedGraph
     public PointD GeneralReverseTransform(float x, float y, CoordType coord, int yAxisIndex = 0)
     {
       // Setup the scaling data based on the chart rect
-      _xAxis.Scale.SetupScaleData(this);
-      if (yAxisIndex < _yAxisList.Count)
-        _yAxisList[yAxisIndex].Scale.SetupScaleData(this);
-      if (yAxisIndex < _y2AxisList.Count)
-        _y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
+      XAxis.Scale.SetupScaleData(this);
+      if (yAxisIndex < YAxisList.Count)
+        YAxisList[yAxisIndex].Scale.SetupScaleData(this);
+      if (yAxisIndex < Y2AxisList.Count)
+        Y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
       /*
       foreach ( Axis axis in _yAxisList )
         axis.Scale.SetupScaleData( this, axis );
@@ -1653,6 +2010,103 @@ namespace ZedGraph
       return this.ReverseTransformCoord(x, y, coord);
     }
 
+    /// <summary>
+    /// Transform a data point from the specified coordinate type
+    /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+    /// </summary>
+    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+    /// has already been calculated via <see cref="AxisChange()"/> or
+    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
+    /// <param name="ptF">The X,Y pair that defines the point in user
+    /// coordinates.</param>
+    /// <param name="coord">A <see cref="CoordType"/> type that defines the
+    /// coordinate system in which the X,Y pair is defined.</param>
+    /// <returns>A point in screen coordinates that corresponds to the
+    /// specified user point.</returns>
+    public PointF GeneralTransform( PointF ptF, CoordType coord, int yAxisIndex = 0 )
+    {
+      // Setup the scaling data based on the chart rect
+      XAxis.Scale.SetupScaleData( this );
+      if (yAxisIndex < YAxisList.Count)
+        YAxisList[yAxisIndex].Scale.SetupScaleData(this);
+      if (yAxisIndex < Y2AxisList.Count)
+        Y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
+      /*
+      foreach ( Axis axis in _yAxisList )
+        axis.Scale.SetupScaleData( this, axis );
+      foreach ( Axis axis in _y2AxisList )
+        axis.Scale.SetupScaleData( this, axis );
+      */
+      return TransformCoord( ptF.X, ptF.Y, coord, yAxisIndex );
+    }
+
+    /// <summary>
+    /// Transform a data point from the specified coordinate type
+    /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+    /// </summary>
+    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+    /// has already been calculated via <see cref="AxisChange()"/> or
+    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).</remarks>
+    /// <param name="pt">The X,Y pair that defines the point in user
+    /// coordinates.</param>
+    /// <param name="coord">A <see cref="CoordType"/> type that defines the
+    /// coordinate system in which the X,Y pair is defined.</param>
+    /// <returns>A point in screen coordinates that corresponds to the
+    /// specified user point.</returns>
+    public PointF GeneralTransform(PointD pt, CoordType coord, int yAxisIndex = 0)
+    {
+      // Setup the scaling data based on the chart rect
+      XAxis.Scale.SetupScaleData(this);
+      if (yAxisIndex < YAxisList.Count)
+        YAxisList[yAxisIndex].Scale.SetupScaleData(this);
+      if (yAxisIndex < Y2AxisList.Count)
+        Y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
+      /*
+      foreach (Axis axis in _yAxisList)
+        axis.Scale.SetupScaleData(this, axis);
+      foreach (Axis axis in _y2AxisList)
+        axis.Scale.SetupScaleData(this, axis);
+      */
+      return TransformCoord(pt.X, pt.Y, coord, yAxisIndex);
+    }
+
+    /// <summary>
+    /// Transform a data point from the specified coordinate type
+    /// (<see cref="CoordType"/>) to screen coordinates (pixels).
+    /// </summary>
+    /// <remarks>This method implicitly assumes that <see cref="ZedGraph.Chart.Rect"/>
+    /// has already been calculated via <see cref="AxisChange()"/> or
+    /// <see cref="Draw"/> methods, or the <see cref="ZedGraph.Chart.Rect"/> is
+    /// set manually (see <see cref="ZedGraph.Chart.IsRectAuto"/>).
+    /// Note that this method is more accurate than the <see cref="GeneralTransform(PointF,CoordType)" />
+    /// overload, since it uses double types.  This would typically only be significant for
+    /// <see cref="AxisType.Date" /> coordinates.
+    /// </remarks>
+    /// <param name="x">The x coordinate that defines the location in user space</param>
+    /// <param name="y">The y coordinate that defines the location in user space</param>
+    /// <param name="coord">A <see cref="CoordType"/> type that defines the
+    /// coordinate system in which the X,Y pair is defined.</param>
+    /// <returns>A point in screen coordinates that corresponds to the
+    /// specified user point.</returns>
+    public PointF GeneralTransform(double x, double y, CoordType coord, int yAxisIndex = 0)
+    {
+      // Setup the scaling data based on the chart rect
+      XAxis.Scale.SetupScaleData( this );
+      if (yAxisIndex < YAxisList.Count)
+        YAxisList[yAxisIndex].Scale.SetupScaleData(this);
+      if (yAxisIndex < Y2AxisList.Count)
+        Y2AxisList[yAxisIndex].Scale.SetupScaleData(this);
+      /*
+      foreach ( Axis axis in _yAxisList )
+        axis.Scale.SetupScaleData( this, axis );
+      foreach ( Axis axis in _y2AxisList )
+        axis.Scale.SetupScaleData( this, axis );
+      */
+
+      return TransformCoord( x, y, coord, yAxisIndex );
+    }
     /// <summary>
     /// Return the user scale values that correspond to the specified screen
     /// coordinate position (pixels).  This overload assumes the default
@@ -1671,7 +2125,7 @@ namespace ZedGraph
     public void ReverseTransform(PointF ptF, out double x, out double y)
     {
       // Setup the scaling data based on the chart rect
-      _xAxis.Scale.SetupScaleData( this );
+      XAxis.Scale.SetupScaleData( this );
       this.YAxis.Scale.SetupScaleData( this );
 
       x = this.XAxis.Scale.ReverseTransform( ptF.X );
@@ -1700,8 +2154,8 @@ namespace ZedGraph
       out double y2 )
     {
       // Setup the scaling data based on the chart rect
-      _xAxis.Scale.SetupScaleData( this );
-      _x2Axis.Scale.SetupScaleData( this );
+      XAxis.Scale.SetupScaleData( this );
+      X2Axis.Scale.SetupScaleData( this );
       this.YAxis.Scale.SetupScaleData( this );
       this.Y2Axis.Scale.SetupScaleData( this );
 
@@ -1736,7 +2190,7 @@ namespace ZedGraph
           out double x, out double y )
     {
       // Setup the scaling data based on the chart rect
-      var xAxis = isX2Axis ? (Axis)_x2Axis : _xAxis;
+      var xAxis = isX2Axis ? (Axis)X2Axis : XAxis;
 
       xAxis.Scale.SetupScaleData( this );
       x = xAxis.Scale.ReverseTransform( ptF.X );
@@ -1782,212 +2236,28 @@ namespace ZedGraph
       out double[] y2 )
     {
       // Setup the scaling data based on the chart rect
-      _xAxis.Scale.SetupScaleData( this );
+      XAxis.Scale.SetupScaleData( this );
       x = this.XAxis.Scale.ReverseTransform( ptF.X );
-      _x2Axis.Scale.SetupScaleData( this );
+      X2Axis.Scale.SetupScaleData( this );
       x2 = this.X2Axis.Scale.ReverseTransform( ptF.X );
 
-      y  = new double[_yAxisList.Count];
-      y2 = new double[_y2AxisList.Count];
+      y  = new double[YAxisList.Count];
+      y2 = new double[Y2AxisList.Count];
 
-      for ( int i = 0; i < _yAxisList.Count; i++ )
+      for ( int i = 0; i < YAxisList.Count; i++ )
       {
-        Axis axis = _yAxisList[i];
+        Axis axis = YAxisList[i];
         axis.Scale.SetupScaleData( this );
         y[i] = axis.Scale.ReverseTransform( ptF.Y );
       }
 
-      for ( int i = 0; i < _y2AxisList.Count; i++ )
+      for ( int i = 0; i < Y2AxisList.Count; i++ )
       {
-        Axis axis = _y2AxisList[i];
+        Axis axis = Y2AxisList[i];
         axis.Scale.SetupScaleData( this );
         y2[i] = axis.Scale.ReverseTransform( ptF.Y );
       }
     }
-
-    /// <summary>
-    /// Add a secondary <see cref="YAxis" /> (left side) to the list of axes
-    /// in the Graph.
-    /// </summary>
-    /// <remarks>
-    /// Note that the primary <see cref="YAxis" /> is always included by default.
-    /// This method turns off the <see cref="MajorTic" /> and <see cref="MinorTic" />
-    /// <see cref="MinorTic.IsOpposite" /> and <see cref="MinorTic.IsInside" />
-    /// properties by default.
-    /// </remarks>
-    /// <param name="title">The title for the <see cref="YAxis" />.</param>
-    /// <returns>the ordinal position (index) in the <see cref="YAxisList" />.</returns>
-    public int AddYAxis( string title )
-    {
-      YAxis axis = new YAxis( title );
-      axis.MajorTic.IsOpposite = false;
-      axis.MinorTic.IsOpposite = false;
-      axis.MajorTic.IsInside   = false;
-      axis.MinorTic.IsInside   = false;
-      _yAxisList.Add( axis );
-      return _yAxisList.Count - 1;
-    }
-
-    /// <summary>
-    /// Add a secondary <see cref="Y2Axis" /> (right side) to the list of axes
-    /// in the Graph.
-    /// </summary>
-    /// <remarks>
-    /// Note that the primary <see cref="Y2Axis" /> is always included by default.
-    /// This method turns off the <see cref="MajorTic" /> and <see cref="MinorTic" />
-    /// <see cref="MinorTic.IsOpposite" /> and <see cref="MinorTic.IsInside" />
-    /// properties by default.
-    /// </remarks>
-    /// <param name="title">The title for the <see cref="Y2Axis" />.</param>
-    /// <returns>the ordinal position (index) in the <see cref="Y2AxisList" />.</returns>
-    public int AddY2Axis( string title )
-    {
-      Y2Axis axis = new Y2Axis( title );
-      axis.MajorTic.IsOpposite = false;
-      axis.MinorTic.IsOpposite = false;
-      axis.MajorTic.IsInside   = false;
-      axis.MinorTic.IsInside   = false;
-      _y2AxisList.Add( axis );
-      return _y2AxisList.Count - 1;
-    }
-
-    /// <summary>
-    /// Find the object that lies closest to the specified mouse (screen) point.
-    /// </summary>
-    /// <remarks>
-    /// This method will search through all of the graph objects, such as
-    /// <see cref="Axis"/>, <see cref="Legend"/>, <see cref="PaneBase.Title"/>,
-    /// <see cref="GraphObj"/>, and <see cref="CurveItem"/>.
-    /// If the mouse point is within the bounding box of the items (or in the case
-    /// of <see cref="ArrowObj"/> and <see cref="CurveItem"/>, within
-    /// <see cref="Default.NearestTol"/> pixels), then the object will be returned.
-    /// You must check the type of the object to determine what object was
-    /// selected (for example, "if ( object is Legend ) ...").  The
-    /// <see paramref="index"/> parameter returns the index number of the item
-    /// within the selected object (such as the point number within a
-    /// <see cref="CurveItem"/> object.
-    /// </remarks>
-    /// <param name="mousePt">The screen point, in pixel coordinates.</param>
-    /// <param name="g">
-    /// A graphic device object to be drawn into.  This is normally e.Graphics from the
-    /// PaintEventArgs argument to the Paint() method.
-    /// </param>
-    /// <param name="nearestObj">A reference to the nearest object to the
-    /// specified screen point.  This can be any of <see cref="Axis"/>,
-    /// <see cref="Legend"/>, <see cref="PaneBase.Title"/>,
-    /// <see cref="TextObj"/>, <see cref="ArrowObj"/>, or <see cref="CurveItem"/>.
-    /// Note: If the pane title is selected, then the <see cref="GraphPane"/> object
-    /// will be returned.
-    /// </param>
-    /// <param name="index">The index number of the item within the selected object
-    /// (where applicable).  For example, for a <see cref="CurveItem"/> object,
-    /// <see paramref="index"/> will be the index number of the nearest data point,
-    /// accessible via <see cref="CurveItem.Points">CurveItem.Points[index]</see>.
-    /// index will be -1 if no data points are available.</param>
-    /// <returns>true if an object was found, false otherwise.</returns>
-    /// <seealso cref="FindNearestObject"/>
-    public override bool FindNearestObject( PointF mousePt, Graphics g, 
-      out object nearestObj, out int index )
-    {
-      nearestObj = null;
-      index = -1;
-
-      // Make sure that the axes & data are being drawn
-      if ( AxisRangesValid() )
-      {
-        float scaleFactor = CalcScaleFactor();
-        //int      hStack;
-        //float    legendWidth, legendHeight;
-        RectangleF tmpRect;
-        GraphObj saveGraphItem = null;
-        int saveIndex = -1;
-        ZOrder saveZOrder = ZOrder.H_BehindAll;
-
-        // Calculate the chart rect, deducting the area for the scales, titles, legend, etc.
-        RectangleF tmpChartRect = CalcChartRect( g, scaleFactor );
-
-        // See if the point is in a GraphObj
-        // If so, just save the object and index so we can see if other overlying objects were
-        // intersected as well.
-        if ( this.GraphObjList.FindPoint( mousePt, this, g, scaleFactor, out index ) )
-        {
-          saveGraphItem = this.GraphObjList[index];
-          saveIndex = index;
-          saveZOrder = saveGraphItem.ZOrder;
-        }
-
-        // See if the point is in the legend
-        if ( saveZOrder <= ZOrder.B_BehindLegend &&
-          this.Legend.FindPoint( mousePt, this, scaleFactor, out index ) )
-        {
-          nearestObj = this.Legend;
-          return true;
-        }
-
-        // See if the point is in the Pane Title
-        SizeF paneTitleBox = _title.FontSpec.BoundingBox( g, _title.Text, scaleFactor );
-        if ( saveZOrder <= ZOrder.H_BehindAll && _title.IsVisible )
-        {
-          tmpRect = new RectangleF( ( _rect.Left + _rect.Right - paneTitleBox.Width ) / 2,
-            _rect.Top + Margin.Top * scaleFactor,
-            paneTitleBox.Width, paneTitleBox.Height );
-          if ( tmpRect.Contains( mousePt ) )
-          {
-            nearestObj = this;
-            return true;
-          }
-        }
-
-        RectangleF dummy;
-
-        // See if mouse point lies on one of the axises
-        if (findAxis(mousePt, g, out nearestObj, out index, out dummy, scaleFactor, saveZOrder))
-          return true;
-
-        CurveItem curve;
-        // See if it's a data point
-        if ( saveZOrder <= ZOrder.E_BehindCurves &&
-             FindNearestPoint( mousePt, out curve, out index ) )
-        {
-          nearestObj = curve;
-          return true;
-        }
-
-        if (saveGraphItem == null) return false;
-
-        index = saveIndex;
-        nearestObj = saveGraphItem;
-        return true;
-      }
-
-      return false;
-    }
-
-    /// <summary>
-    /// Find the axis that lies at the specified mouse (screen) point.
-    /// </summary>
-    /// <seealso cref="FindNearestObject"/>
-    public bool FindAxis(PointF mousePt, Graphics g, out Axis nearestObj, out int index, out RectangleF rect)
-    {
-      nearestObj = null;
-      index = -1;
-
-      // Make sure that the axes & data are being drawn
-      if (!AxisRangesValid())
-      {
-        rect = new RectangleF();
-        return false;
-      }
-
-      object obj;
-      var res = findAxis(mousePt, g, out obj, out index, out rect, CalcScaleFactor(), ZOrder.H_BehindAll);
-
-      if (res)
-        nearestObj = (Axis)obj;
-
-      return res;
-    }
-
     private bool findAxis(PointF mousePt, Graphics g, out object nearestObj, out int index, out RectangleF rect,
       float scaleFactor, ZOrder saveZOrder)
     {
@@ -1997,9 +2267,9 @@ namespace ZedGraph
       var left = tmpChartRect.Left;
 
       // See if the point is in one of the Y Axes
-      for ( int yIndex = 0; yIndex < _yAxisList.Count; yIndex++ )
+      for ( int yIndex = 0; yIndex < YAxisList.Count; yIndex++ )
       {
-        Axis yAxis = _yAxisList[yIndex];
+        Axis yAxis = YAxisList[yIndex];
         var width = yAxis._tmpSpace;
         if (width <= 0) continue;
 
@@ -2019,9 +2289,9 @@ namespace ZedGraph
       left = tmpChartRect.Right;
 
       // See if the point is in one of the Y2 Axes
-      for ( int yIndex = 0; yIndex < _y2AxisList.Count; yIndex++ )
+      for ( int yIndex = 0; yIndex < Y2AxisList.Count; yIndex++ )
       {
-        var y2Axis = _y2AxisList[yIndex];
+        var y2Axis = Y2AxisList[yIndex];
         var width  = y2Axis._tmpSpace;
         if (!(width > 0)) continue;
 
@@ -2039,7 +2309,7 @@ namespace ZedGraph
       }
 
       // See if the point is in the X Axis
-      var height = _xAxis._tmpSpace;
+      var height = XAxis._tmpSpace;
 
       rect = new RectangleF( tmpChartRect.Left, tmpChartRect.Bottom,
                                 tmpChartRect.Width, height ); //_rect.Bottom - tmpChartRect.Bottom );
@@ -2052,7 +2322,7 @@ namespace ZedGraph
       }
 
       // See if the point is in the X2 Axis
-      height = _x2Axis._tmpSpace;
+      height = X2Axis._tmpSpace;
 
       rect = new RectangleF( tmpChartRect.Left,
                                 tmpChartRect.Top - height,
@@ -2069,368 +2339,6 @@ namespace ZedGraph
       index      = -1;
       return false;
     }
-
-    /// <summary>
-    /// Find the data point that lies closest to the specified mouse (screen)
-    /// point for the specified curve.
-    /// </summary>
-    /// <remarks>
-    /// This method will search only through the points for the specified
-    /// curve to determine which point is
-    /// nearest the mouse point.  It will only consider points that are within
-    /// <see cref="Default.NearestTol"/> pixels of the screen point.
-    /// </remarks>
-    /// <param name="mousePt">The screen point, in pixel coordinates.</param>
-    /// <param name="nearestCurve">A reference to the <see cref="CurveItem"/>
-    /// instance that contains the closest point.  nearestCurve will be null if
-    /// no data points are available.</param>
-    /// <param name="targetCurve">A <see cref="CurveItem"/> object containing
-    /// the data points to be searched.</param>
-    /// <param name="iNearest">The index number of the closest point.  The
-    /// actual data vpoint will then be <see cref="CurveItem.Points">CurveItem.Points[iNearest]</see>
-    /// .  iNearest will
-    /// be -1 if no data points are available.</param>
-    /// <returns>true if a point was found and that point lies within
-    /// <see cref="Default.NearestTol"/> pixels
-    /// of the screen point, false otherwise.</returns>
-    public bool FindNearestPoint( PointF mousePt, CurveItem targetCurve,
-        out CurveItem nearestCurve, out int iNearest )
-    {
-      CurveList targetCurveList = new CurveList();
-      targetCurveList.Add( targetCurve );
-      return FindNearestPoint( mousePt, targetCurveList,
-        out nearestCurve, out iNearest );
-    }
-
-    /// <summary>
-    /// Find the data point that lies closest to the specified mouse (screen)
-    /// point.
-    /// </summary>
-    /// <remarks>
-    /// This method will search through all curves in
-    /// <see cref="GraphPane.CurveList"/> to find which point is
-    /// nearest.  It will only consider points that are within
-    /// <see cref="Default.NearestTol"/> pixels of the screen point.
-    /// </remarks>
-    /// <param name="mousePt">The screen point, in pixel coordinates.</param>
-    /// <param name="nearestCurve">A reference to the <see cref="CurveItem"/>
-    /// instance that contains the closest point.  nearestCurve will be null if
-    /// no data points are available.</param>
-    /// <param name="iNearest">The index number of the closest point.  The
-    /// actual data vpoint will then be <see cref="CurveItem.Points">CurveItem.Points[iNearest]</see>
-    /// .  iNearest will
-    /// be -1 if no data points are available.</param>
-    /// <returns>true if a point was found and that point lies within
-    /// <see cref="Default.NearestTol"/> pixels
-    /// of the screen point, false otherwise.</returns>
-    public bool FindNearestPoint( PointF mousePt,
-      out CurveItem nearestCurve, out int iNearest )
-    {
-      return FindNearestPoint( mousePt, _curveList,
-        out nearestCurve, out iNearest );
-    }
-
-    /// <summary>
-    /// Find the data point that lies closest to the specified mouse (screen)
-    /// point.
-    /// </summary>
-    /// <remarks>
-    /// This method will search through the specified list of curves to find which point is
-    /// nearest.  It will only consider points that are within
-    /// <see cref="Default.NearestTol"/> pixels of the screen point, and it will
-    /// only consider <see cref="CurveItem"/>'s that are in 
-    /// <paramref name="targetCurveList"/>.
-    /// </remarks>
-    /// <param name="mousePt">The screen point, in pixel coordinates.</param>
-    /// <param name="targetCurveList">A <see cref="CurveList"/> object containing
-    /// a subset of <see cref="CurveItem"/>'s to be searched.</param>
-    /// <param name="nearestCurve">A reference to the <see cref="CurveItem"/>
-    /// instance that contains the closest point.  nearestCurve will be null if
-    /// no data points are available.</param>
-    /// <param name="iNearest">The index number of the closest point.  The
-    /// actual data vpoint will then be <see cref="CurveItem.Points">CurveItem.Points[iNearest]</see>
-    /// .  iNearest will
-    /// be -1 if no data points are available.</param>
-    /// <returns>true if a point was found and that point lies within
-    /// <see cref="Default.NearestTol"/> pixels
-    /// of the screen point, false otherwise.</returns>
-    public bool FindNearestPoint( PointF mousePt, CurveList targetCurveList,
-      out CurveItem nearestCurve, out int iNearest )
-    {
-      CurveItem nearestBar = null;
-      int iNearestBar = -1;
-      nearestCurve = null;
-      iNearest = -1;
-
-      // If the point is outside the ChartRect, always return false
-      if ( !_chart._rect.Contains( mousePt ) )
-        return false;
-
-      double x, x2;
-      double[] y;
-      double[] y2;
-
-      //ReverseTransform( mousePt, out x, out y, out y2 );
-      ReverseTransform( mousePt, out x, out x2, out y, out y2 );
-
-      if ( !AxisRangesValid() )
-        return false;
-
-      var valueHandler = new ValueHandler( this, false );
-
-      //double  yPixPerUnit = chartRect.Height / ( yAxis.Max - yAxis.Min );
-      //double  y2PixPerUnit; // = chartRect.Height / ( y2Axis.Max - y2Axis.Min );
-
-      double yPixPerUnitAct, yAct, yMinAct, yMaxAct, xAct;
-      double minDist = 1e20;
-      double xVal, yVal, dist = 99999, distX, distY;
-      double tolSquared = Default.NearestTol * Default.NearestTol;
-
-      int iBar = 0;
-
-      foreach ( CurveItem curve in targetCurveList )
-      {
-        //test for pie first...if it's a pie rest of method superfluous
-        if ( curve is PieItem && curve.IsVisible )
-        {
-          if ( ( (PieItem)curve ).SlicePath != null &&
-               ( (PieItem)curve ).SlicePath.IsVisible( mousePt ) )
-          {
-            nearestBar = curve;
-            iNearestBar = 0;
-          }
-
-          continue;
-        }
-        if (!curve.IsVisible) continue;
-
-        int yIndex = curve.GetYAxisIndex( this );
-        Axis yAxis = curve.GetYAxis( this );
-        Axis xAxis = curve.GetXAxis( this );
-
-        if ( curve.IsY2Axis )
-        {
-          yAct     = y2[yIndex];
-          yMinAct  = _y2AxisList[yIndex].Scale._min;
-          yMaxAct  = _y2AxisList[yIndex].Scale._max;
-        }
-        else
-        {
-          yAct     = y[yIndex];
-          yMinAct  = _yAxisList[yIndex].Scale._min;
-          yMaxAct  = _yAxisList[yIndex].Scale._max;
-        }
-
-        yPixPerUnitAct  = _chart._rect.Height / ( yMaxAct - yMinAct );
-        var xPixPerUnit = _chart._rect.Width / ( xAxis.Scale._max - xAxis.Scale._min );
-        xAct            = xAxis is XAxis ? x : x2;
-
-        var    points        = curve.Points;
-        var    barWidth      = curve.GetBarWidth( this );
-        Axis   baseAxis      = curve.BaseAxis( this );
-        var    isXBaseAxis   = ( baseAxis is XAxis || baseAxis is X2Axis );
-        var barWidthUserHalf = isXBaseAxis
-          ? barWidth/xPixPerUnit/2.0
-          : barWidth/yPixPerUnitAct/2.0;
-
-        if (points == null) continue;
-        for ( var iPt = 0; iPt < curve.NPts; iPt++ )
-        {
-          // xVal is the user scale X value of the current point
-          xVal = xAxis.Scale.IsAnyOrdinal && !curve.IsOverrideOrdinal
-            ? iPt + 1.0
-            : points[iPt].X;
-
-          // yVal is the user scale Y value of the current point
-          yVal = yAxis.Scale.IsAnyOrdinal && !curve.IsOverrideOrdinal
-            ? iPt + 1.0
-            : points[iPt].Y;
-
-          if (xVal == PointPair.Missing || yVal == PointPair.Missing) continue;
-
-          if ( curve.IsBar || curve is IBarItem )
-          {
-            double baseVal, lowVal, hiVal;
-            valueHandler.GetValues( curve, iPt, out baseVal,
-                                    out lowVal, out hiVal );
-
-            if ( lowVal > hiVal )
-            {
-              var tmpVal = lowVal;
-              lowVal = hiVal;
-              hiVal = tmpVal;
-            }
-
-            if ( isXBaseAxis )
-            {
-
-              var centerVal = valueHandler.BarCenterValue( curve, barWidth, iPt, xVal, iBar );
-
-              if ( xAct < centerVal - barWidthUserHalf ||
-                   xAct > centerVal + barWidthUserHalf ||
-                   yAct < lowVal || yAct > hiVal )
-                continue;
-            }
-            else
-            {
-              var centerVal = valueHandler.BarCenterValue( curve, barWidth, iPt, yVal, iBar );
-
-              if ( yAct < centerVal - barWidthUserHalf ||
-                   yAct > centerVal + barWidthUserHalf ||
-                   xAct < lowVal || xAct > hiVal )
-                continue;
-            }
-
-            if ( nearestBar == null )
-            {
-              iNearestBar = iPt;
-              nearestBar = curve;
-            }
-          }
-          else if ( xVal >= xAxis.Scale._min && xVal <= xAxis.Scale._max &&
-                    yVal >= yMinAct && yVal <= yMaxAct )
-          {
-            if ( curve is LineItem && _lineType == LineType.Stack )
-            {
-              double zVal;
-              valueHandler.GetValues( curve, iPt, out xVal, out zVal, out yVal );
-            }
-
-            distX = ( xVal - xAct ) * xPixPerUnit;
-            distY = ( yVal - yAct ) * yPixPerUnitAct;
-            dist = distX * distX + distY * distY;
-
-            if ( dist >= minDist )
-              continue;
-
-            minDist = dist;
-            iNearest = iPt;
-            nearestCurve = curve;
-          }
-        }
-
-        if ( curve.IsBar )
-          iBar++;
-      }
-
-      if ( nearestCurve is LineItem )
-      {
-        var halfSymbol = ( ( (LineItem)nearestCurve ).Symbol.Size * CalcScaleFactor() / 2 );
-        minDist -= halfSymbol * halfSymbol;
-        if ( minDist < 0 )
-          minDist = 0;
-      }
-
-      if ( minDist >= tolSquared && nearestBar != null )
-      {
-        // if no point met the tolerance, but a bar was found, use it
-        nearestCurve = nearestBar;
-        iNearest = iNearestBar;
-        return true;
-      }
-      if ( minDist < tolSquared )
-      {
-        // Did we find a close point, and is it within the tolerance?
-        // (minDist is the square of the distance in pixel units)
-        return true;
-      }
-      return false;
-    }
-
-    /// <summary>
-    /// Search through the <see cref="GraphObjList" /> and <see cref="CurveList" /> for
-    /// items that contain active <see cref="Link" /> objects.
-    /// </summary>
-    /// <param name="mousePt">The mouse location where the click occurred</param>
-    /// <param name="g">An appropriate <see cref="Graphics" /> instance</param>
-    /// <param name="scaleFactor">The current scaling factor for drawing operations.</param>
-    /// <param name="source">The clickable object that was found.  Typically a type of
-    /// <see cref="GraphObj" /> or a type of <see cref="CurveItem" />.</param>
-    /// <param name="link">The <see cref="Link" /> instance that is contained within
-    /// the <see paramref="source" /> object.</param>
-    /// <param name="index">An index value, indicating which point was clicked for
-    /// <see cref="CurveItem" /> type objects.</param>
-    /// <returns>returns true if a clickable link was found under the
-    /// <see paramref="mousePt" />, or false otherwise.
-    /// </returns>
-    public bool FindLinkableObject( PointF mousePt, Graphics g, float scaleFactor,
-        out object source, out Link link, out int index )
-    {
-      index = -1;
-
-      // First look for graph objects that lie in front of the data points
-      foreach ( GraphObj graphObj in GraphObjList )
-      {
-        link = graphObj._link;
-
-        if (!link.IsActive) continue;
-        if (!graphObj.PointInBox(mousePt, this, g, scaleFactor)) continue;
-
-        source = graphObj;
-        return true;
-      }
-
-      // Second, look at the curve data points
-      foreach ( CurveItem curve in _curveList )
-      {
-        link = curve.Link;
-
-        if (!link.IsActive) continue;
-        CurveItem nearestCurve;
-
-        if (!FindNearestPoint(mousePt, curve, out nearestCurve, out index)) continue;
-
-        source = curve;
-        return true;
-      }
-
-      // Third, look for graph objects that lie behind the data points
-      foreach ( GraphObj graphObj in GraphObjList )
-      {
-        link = graphObj._link;
-
-        if (!link.IsActive) continue;
-        if (!graphObj.PointInBox(mousePt, this, g, scaleFactor)) continue;
-
-        source = graphObj;
-        return true;
-      }
-
-      source = null;
-      link = null;
-      index = -1;
-      return false;
-
-    }
-
-    // Revision: JCarpenter 10/06
-    /// <summary>
-    /// Find any objects that exist within the specified (screen) rectangle.
-    /// This method will search through all of the graph objects, such as
-    /// <see cref="Axis"/>, <see cref="Legend"/>, <see cref="PaneBase.Title"/>,
-    /// <see cref="GraphObj"/>, and <see cref="CurveItem"/>.
-    /// and see if the objects' bounding boxes are within the specified (screen) rectangle
-    /// This method returns true if any are found.
-    /// </summary>
-    public bool FindContainedObjects( RectangleF rectF, Graphics g,
-       out CurveList containedObjs )
-    {
-      containedObjs = new CurveList();
-
-      foreach ( CurveItem ci in this.CurveList )
-        for ( int i = 0; i < ci.Points.Count; i++ )
-        {
-          if ( ci.Points[i].X > rectF.Left &&
-               ci.Points[i].X < rectF.Right &&
-               ci.Points[i].Y > rectF.Bottom &&
-               ci.Points[i].Y < rectF.Top )
-          {
-            containedObjs.Add( ci );
-          }
-        }
-      return ( containedObjs.Count > 0 );
-    }
-
   #endregion
 
   }

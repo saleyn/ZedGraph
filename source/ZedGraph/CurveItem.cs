@@ -39,7 +39,7 @@ namespace ZedGraph
   /// modified by Jerry Vos </author>
   /// <version> $Revision: 3.43 $ $Date: 2007-11-03 04:41:28 $ </version>
   [Serializable]
-  abstract public class CurveItem : ISerializable, ICloneable
+  public abstract class CurveItem : ISerializable, ICloneable
   {
   
   #region Fields
@@ -216,23 +216,23 @@ namespace ZedGraph
     [SecurityPermissionAttribute(SecurityAction.Demand,SerializationFormatter=true)]
     public virtual void GetObjectData( SerializationInfo info, StreamingContext context )
     {
-      info.AddValue("schema", _schema);
-      info.AddValue("label", Label);
-      info.AddValue("isX2Axis", IsX2Axis);
-      info.AddValue("isY2Axis", IsY2Axis);
-      info.AddValue("isVisible", IsVisible);
+      info.AddValue("schema",            _schema);
+      info.AddValue("label",             Label);
+      info.AddValue("isX2Axis",          IsX2Axis);
+      info.AddValue("isY2Axis",          IsY2Axis);
+      info.AddValue("isVisible",         IsVisible);
       info.AddValue("isOverrideOrdinal", IsOverrideOrdinal);
 
       // if points is already a PointPairList, use it
       // otherwise, create a new PointPairList so it can be serialized
-      var list = Points is PointPairList ? Points as PointPairList : new PointPairList(Points);
+      var list = Points is PointPairList ? (PointPairList)Points : new PointPairList(Points);
 
-      info.AddValue("points", list);
-      info.AddValue("Tag", Tag);
-      info.AddValue("yAxisIndex", YAxisIndex);
-      info.AddValue("link", Link);
-      info.AddValue("zOrder", ZOrder);
-      info.AddValue("created", _created);
+      info.AddValue("points",           list);
+      info.AddValue("Tag",              Tag);
+      info.AddValue("yAxisIndex",       YAxisIndex);
+      info.AddValue("link",             Link);
+      info.AddValue("zOrder",           ZOrder);
+      info.AddValue("created",          _created);
     }
     #endregion
 
@@ -241,29 +241,29 @@ namespace ZedGraph
     /// A <see cref="ZedGraph.Label" /> instance that represents the <see cref="ZedGraph.Legend"/>
     /// entry for the this <see cref="CurveItem"/> object
     /// </summary>
-    public Label Label { get; private set; }
+    public Label Label { get; }
 
     /// <summary>
     /// The <see cref="Line"/>/<see cref="Symbol"/>/<see cref="Bar"/> 
     /// color (FillColor for the Bar).  This is a common access to
-    /// <see cref="ZedGraph.LineBase.Color">Line.Color</see>,
-    /// <see cref="ZedGraph.LineBase.Color">Border.Color</see>, and
-    /// <see cref="ZedGraph.Fill.Color">Fill.Color</see> properties for this curve.
+    /// <see cref="LineBase.Color">Line.Color</see>,
+    /// <see cref="LineBase.Color">Border.Color</see>, and
+    /// <see cref="Fill.Color">Fill.Color</see> properties for this curve.
     /// </summary>
     public Color Color
     {
       get
       {
-        if ( this is BarItem )
-          return ((BarItem) this).Bar.Fill.Color;
-        if ( this is LineItem && ((LineItem) this).Line.IsVisible )
-          return ((LineItem) this).Line.Color;
-        if ( this is LineItem )
-          return ((LineItem) this).Symbol.Border.Color;
-        if ( this is ErrorBarItem )
-          return ((ErrorBarItem) this).Bar.Color;
-        if ( this is HiLowBarItem )
-          return ((HiLowBarItem) this).Bar.Fill.Color;
+        if (this is BarItem)
+          return ((BarItem)this).Bar.Fill.Color;
+        if (this is LineItem && ((LineItem)this).Line.IsVisible)
+          return ((LineItem)this).Line.Color;
+        if (this is LineItem)
+          return ((LineItem)this).Symbol.Border.Color;
+        if (this is ErrorBarItem)
+          return ((ErrorBarItem)this).Bar.Color;
+        if (this is HiLowBarItem)
+          return ((HiLowBarItem)this).Bar.Fill.Color;
         return Color.Empty;
       }
       set 
@@ -399,7 +399,7 @@ namespace ZedGraph
     /// <param name="pane">The parent <see cref="GraphPane" /> of this <see cref="CurveItem" />.
     /// </param>
     /// <value>true if the Z data are included, false otherwise</value>
-    abstract internal bool IsZIncluded( GraphPane pane );
+    internal abstract bool IsZIncluded( GraphPane pane );
     
     /// <summary>
     /// Gets a flag indicating if the X axis is the independent axis for this <see cref="CurveItem" />
@@ -407,7 +407,7 @@ namespace ZedGraph
     /// <param name="pane">The parent <see cref="GraphPane" /> of this <see cref="CurveItem" />.
     /// </param>
     /// <value>true if the X axis is independent, false otherwise</value>
-    abstract internal bool IsXIndependent( GraphPane pane );
+    internal abstract bool IsXIndependent( GraphPane pane );
     
     /// <summary>
     /// Readonly property that gives the number of points that define this
@@ -471,7 +471,7 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    abstract public void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor  );
+    public abstract void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor  );
     
     /// <summary>
     /// Draw a legend key entry for this <see cref="CurveItem"/> at the specified location.
@@ -494,7 +494,7 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    abstract public void DrawLegendKey( Graphics g, GraphPane pane, RectangleF rect, float scaleFactor );
+    public abstract void DrawLegendKey( Graphics g, GraphPane pane, RectangleF rect, float scaleFactor );
     
   #endregion
 
@@ -525,10 +525,9 @@ namespace ZedGraph
       if ( Points == null )
         Points = new PointPairList();
 
-      if ( Points is IPointListEdit )
-        ( Points as IPointListEdit ).Add( point );
-      else
+      if (!(Points is IPointListEdit))
         throw new NotImplementedException();
+      ((IPointListEdit)Points).Add(point);
     }
 
     /// <summary>
@@ -542,10 +541,9 @@ namespace ZedGraph
     /// </remarks>
     public void Clear()
     {
-      if ( Points is IPointListEdit )
-        (Points as IPointListEdit).Clear();
-      else
+      if (!(Points is IPointListEdit))
         throw new NotImplementedException();
+      ((IPointListEdit)Points).Clear();
     }
 
     /// <summary>
@@ -559,10 +557,9 @@ namespace ZedGraph
     /// <param name="index">The ordinal position of the point to be removed.</param>
     public void RemovePoint( int index )
     {
-      if ( Points is IPointListEdit )
-        (Points as IPointListEdit).RemoveAt( index );
-      else
+      if (!(Points is IPointListEdit))
         throw new NotImplementedException();
+      ((IPointListEdit)Points).RemoveAt(index);
     }
 
     /// <summary>
@@ -627,7 +624,7 @@ namespace ZedGraph
     /// </summary>
     public void MakeUnique()
     {
-      this.MakeUnique( ColorSymbolRotator.StaticInstance );
+      MakeUnique( ColorSymbolRotator.StaticInstance );
     }
 
     /// <summary>
@@ -640,9 +637,9 @@ namespace ZedGraph
     /// The <see cref="ColorSymbolRotator"/> that is used to pick the color
     ///  and symbol for this method call.
     /// </param>
-    virtual public void MakeUnique( ColorSymbolRotator rotator )
+    public virtual void MakeUnique( ColorSymbolRotator rotator )
     {
-      this.Color = rotator.NextColor;
+      Color = rotator.NextColor;
     }
   
     /// <summary>
@@ -670,7 +667,7 @@ namespace ZedGraph
     /// owner of this object.
     /// </param>
     /// <seealso cref="GraphPane.IsBoundedRanges"/>
-    virtual public void GetRange(out double xMin, out double xMax,
+    public virtual void GetRange(out double xMin, out double xMax,
                     out double yMin, out double yMax,
                     bool ignoreInitial,
                     bool isBoundedRanges,
@@ -680,20 +677,20 @@ namespace ZedGraph
       // values allow you to subset the data values.  If the X range is bounded, then
       // the resulting range for Y will reflect the Y values for the points within the X
       // bounds.
-      double xLBound = double.MinValue;
-      double xUBound = double.MaxValue;
-      double yLBound = double.MinValue;
-      double yUBound = double.MaxValue;
+      var xLBound = double.MinValue;
+      var xUBound = double.MaxValue;
+      var yLBound = double.MinValue;
+      var yUBound = double.MaxValue;
 
       // initialize the values to outrageous ones to start
       var xMinOrd = int.MaxValue;
       var xMaxOrd = int.MinValue;
 
-      xMin = yMin = Double.MaxValue;
-      xMax = yMax = Double.MinValue;
+      xMin = yMin = double.MaxValue;
+      xMax = yMax = double.MinValue;
 
-      Axis yAxis = this.GetYAxis( pane );
-      Axis xAxis = this.GetXAxis( pane );
+      var yAxis  =  GetYAxis( pane );
+      var xAxis  =  GetXAxis( pane );
       if ( yAxis == null || xAxis == null )
         return;
 
@@ -706,13 +703,13 @@ namespace ZedGraph
       }
 
 
-      bool isZIncluded = this.IsZIncluded( pane );
-      bool isXIndependent = this.IsXIndependent( pane );
-      bool isXLog = xAxis.Scale.IsLog;
-      bool isYLog = yAxis.Scale.IsLog;
-      bool isXOrdinal = xAxis.Scale.IsAnyOrdinal;
-      bool isYOrdinal = yAxis.Scale.IsAnyOrdinal;
-      bool isZOrdinal = ( isXIndependent ? yAxis : xAxis ).Scale.IsAnyOrdinal;
+      var isZIncluded    = IsZIncluded( pane );
+      var isXIndependent = IsXIndependent( pane );
+      var isXLog         = xAxis.Scale.IsLog;
+      var isYLog         = yAxis.Scale.IsLog;
+      var isXOrdinal     = xAxis.Scale.IsAnyOrdinal;
+      var isYOrdinal     = yAxis.Scale.IsAnyOrdinal;
+      var isZOrdinal     = (isXIndependent ? yAxis : xAxis).Scale.IsAnyOrdinal;
 
       int from, to;
 
@@ -737,35 +734,34 @@ namespace ZedGraph
       {
         var point = Points[i];
 
-        double curX = isXOrdinal ? i + 1 : point.X;
+        //double curX = isXOrdinal ? i + 1 : point.X;
         // FIXME:
-        //int curOrd = i + 1;
-        //double curX = isXOrdinal && !IsOverrideOrdinal ? curOrd : point.X;
-        double curY = isYOrdinal ? i + 1 : point.Y;
-        double loZ  = isZOrdinal ? i + 1 : Math.Min(point.LowValue, point.HighValue); //point.Z;
-        double hiZ  = isZOrdinal ? i + 1 : Math.Max(point.LowValue, point.HighValue);//point.Z;
+        var curOrd = i + 1;
+        var curX   = isXOrdinal && !IsOverrideOrdinal ? curOrd : point.X;
+        var curY   = isYOrdinal ? i + 1 : point.Y;
+        var loZ    = isZOrdinal ? i + 1 : Math.Min(point.LowValue, point.HighValue); //point.Z;
+        var hiZ    = isZOrdinal ? i + 1 : Math.Max(point.LowValue, point.HighValue);//point.Z;
 
-        bool outOfBounds = curX < xLBound || curX > xUBound ||
-                           curY < yLBound || curY > yUBound ||
-                          ( isZIncluded && ((isXIndependent  && (loZ < yLBound || hiZ > yUBound))   ||
-                                            (!isXIndependent && (loZ < xLBound || hiZ > xUBound)))) ||
-                          ( curX <= 0 && isXLog ) || ( curY <= 0 && isYLog );
-      
+        var outOfBounds = curX < xLBound || curX > xUBound ||
+                          curY < yLBound || curY > yUBound ||
+                          (isZIncluded && ((isXIndependent  && (loZ < yLBound || hiZ > yUBound)) ||
+                                           (!isXIndependent && (loZ < xLBound || hiZ > xUBound)))) ||
+                          (curX <= 0 && isXLog) || (curY <= 0 && isYLog);
+
         // ignoreInitial becomes false at the first non-zero
         // Y value
         if (  ignoreInitial && curY != 0 &&
             curY != PointPair.Missing )
           ignoreInitial = false;
 
-        if (ignoreInitial || outOfBounds || curX == PointPair.Missing ||
-            curY == PointPair.Missing)
+        if (ignoreInitial || outOfBounds || curX == PointPair.Missing || curY == PointPair.Missing)
           continue;
 
-        if (curX < xMin) xMin = curX;
-        if (curX > xMax) xMax = curX;
+        //if (curX < xMin) xMin = curX;
+        //if (curX > xMax) xMax = curX;
         //FIXME:
-        //if (curX < xMin) { xMin = curX; xMinOrd = curOrd; }
-        //if (curX > xMax) { xMax = curX; xMaxOrd = curOrd; }
+        if (curX < xMin) { xMin = curX; xMinOrd = curOrd; }
+        if (curX > xMax) { xMax = curX; xMaxOrd = curOrd; }
         if (curY < yMin) yMin = curY;
         if (curY > yMax) yMax = curY;
 
@@ -787,7 +783,7 @@ namespace ZedGraph
         }
       }
 
-      if (isXOrdinal && IsOverrideOrdinal)
+      if (isXOrdinal && !IsOverrideOrdinal)
       {
         xMin = xMinOrd;
         xMax = xMaxOrd;
@@ -870,8 +866,7 @@ namespace ZedGraph
       float barWidth;
 
       if ( this is ErrorBarItem )
-        barWidth = (float) ( ((ErrorBarItem)this).Bar.Symbol.Size *
-            pane.CalcScaleFactor() );
+        barWidth = ((ErrorBarItem)this).Bar.Symbol.Size * pane.CalcScaleFactor();
 //      else if ( this is HiLowBarItem && pane._barSettings.Type != BarType.ClusterHiLow )
 //        barWidth = (float) ( ((HiLowBarItem)this).Bar.GetBarWidth( pane,
 //            ((HiLowBarItem)this).BaseAxis(pane), pane.CalcScaleFactor() ) );
@@ -880,21 +875,18 @@ namespace ZedGraph
       else // BarItem or LineItem
       {
         // For stacked bar types, the bar width will be based on a single bar
-        float numBars = 1.0F;
+        var numBars = 1.0F;
         if ( pane._barSettings.Type == BarType.Cluster )
           numBars = pane.CurveList.NumClusterableBars;
 
-        float denom = numBars * ( 1.0F + pane._barSettings.MinBarGap ) -
+        var denom = numBars * ( 1.0F + pane._barSettings.MinBarGap ) -
               pane._barSettings.MinBarGap + pane._barSettings.MinClusterGap;
         if ( denom <= 0 )
           denom = 1;
         barWidth = pane.BarSettings.GetClusterWidth() / denom;
       }
 
-      if ( barWidth <= 0 )
-        return 1;
-
-      return barWidth;
+      return barWidth <= 0 ? 1 : barWidth;
     }
 
     /// <summary>
@@ -908,99 +900,26 @@ namespace ZedGraph
     /// <returns>true if it's a valid point, false otherwise</returns>
     public abstract bool GetCoords( GraphPane pane, int i, out string coords );
 
-    private static int compareZOrder(CurveItem lhs, CurveItem rhs)
-    {
-      var l = lhs.ZOrder >= 0 ? lhs.ZOrder : lhs._created;
-      var r = rhs.ZOrder >= 0 ? rhs.ZOrder : rhs._created;
-      return l == r ? 0 : l < r ? -1 : 1;
-    }
-
+    /// <summary>
+    /// Comparer used for sorting curves by their ZOrder for drawing.
+    /// </summary>
+    /// <remarks>
+    /// Curves that have ZOrder set have a precedence over those that don't.
+    /// The rest of the curves are ordered in the order of time of their addition to a CurveList.
+    /// </remarks>
     internal struct ZOrderComparer : IComparer<CurveItem>
     {
-      public int Compare(CurveItem x, CurveItem y) { return compareZOrder(x, y); }
+      public int Compare(CurveItem lhs, CurveItem rhs)
+      {
+        var l = lhs.ZOrder >= 0 ? lhs.ZOrder : lhs._created;
+        var r = rhs.ZOrder >= 0 ? rhs.ZOrder : rhs._created;
+        return l.CompareTo(r);
+      }
     }
 
     #endregion
 
     #region Inner classes
-
-#if (DOTNET1) // Is this a .Net 1.1 compilation?
-  
-    /// <summary>
-    /// Compares <see cref="CurveItem"/>'s based on the point value at the specified
-    /// index and for the specified axis.
-    /// <seealso cref="System.Collections.ArrayList.Sort()"/>
-    /// </summary>
-    public class Comparer : IComparer
-    {
-      private int index;
-      private SortType sortType;
-      
-      /// <summary>
-      /// Constructor for Comparer.
-      /// </summary>
-      /// <param name="type">The axis type on which to sort.</param>
-      /// <param name="index">The index number of the point on which to sort</param>
-      public Comparer( SortType type, int index )
-      {
-        this.sortType = type;
-        this.index = index;
-      }
-      
-      /// <summary>
-      /// Compares two <see cref="CurveItem"/>s using the previously specified index value
-      /// and axis.  Sorts in descending order.
-      /// </summary>
-      /// <param name="l">Curve to the left.</param>
-      /// <param name="r">Curve to the right.</param>
-      /// <returns>-1, 0, or 1 depending on l.X's relation to r.X</returns>
-      public int Compare( object l, object r ) 
-      {
-        CurveItem cl = (CurveItem) l;
-        CurveItem cr = (CurveItem) r;
-
-        if (cl == null && cr == null )
-          return 0;
-        else if (cl == null && cr != null ) 
-          return -1;
-        else if (cl != null && cr == null) 
-          return 1;
-
-        if ( cr != null && cr.NPts <= index )
-          cr = null;
-        if ( cl != null && cl.NPts <= index )
-          cl = null;
-            
-        double lVal, rVal;
-
-        if ( sortType == SortType.XValues )
-        {
-          lVal = ( l != null ) ? System.Math.Abs( cl[index].X ) : PointPair.Missing;
-          rVal = ( r != null ) ? System.Math.Abs( cr[index].X ) : PointPair.Missing;
-        }
-        else
-        {
-          lVal = ( l != null ) ? System.Math.Abs( cl[index].Y ) : PointPair.Missing;
-          rVal = ( r != null ) ? System.Math.Abs( cr[index].Y ) : PointPair.Missing;
-        }
-        
-        if ( lVal == PointPair.Missing || Double.IsInfinity( lVal ) || Double.IsNaN( lVal ) )
-          cl = null;
-        if ( rVal == PointPair.Missing || Double.IsInfinity( rVal ) || Double.IsNaN( rVal ) )
-          cr = null;
-          
-        if ( ( cl == null && cr == null) || ( System.Math.Abs( lVal - rVal ) < 1e-10 ) )
-          return 0;
-        else if ( cl == null && cr != null ) 
-          return -1;
-        else if ( cl != null && r == null ) 
-          return 1;
-        else
-          return rVal < lVal ? -1 : 1;
-      }
-    }
-  
-#else    // Otherwise, it's .Net 2.0 so use generics
 
     /// <summary>
     /// Compares <see cref="CurveItem"/>'s based on the point value at the specified
@@ -1009,72 +928,71 @@ namespace ZedGraph
     /// </summary>
     public class Comparer : IComparer<CurveItem>
     {
-      private int index;
-      private SortType sortType;
-      
+      private readonly int index;
+      private readonly SortType sortType;
+
       /// <summary>
-      /// Constructor for Comparer.
+      ///   Constructor for Comparer.
       /// </summary>
       /// <param name="type">The axis type on which to sort.</param>
       /// <param name="index">The index number of the point on which to sort</param>
-      public Comparer( SortType type, int index )
+      public Comparer(SortType type, int index)
       {
-        this.sortType = type;
+        sortType = type;
         this.index = index;
       }
-      
+
       /// <summary>
-      /// Compares two <see cref="CurveItem"/>s using the previously specified index value
-      /// and axis.  Sorts in descending order.
+      ///   Compares two <see cref="CurveItem" />s using the previously specified index value
+      ///   and axis.  Sorts in descending order.
       /// </summary>
       /// <param name="l">Curve to the left.</param>
       /// <param name="r">Curve to the right.</param>
       /// <returns>-1, 0, or 1 depending on l.X's relation to r.X</returns>
-      public int Compare( CurveItem l, CurveItem r ) 
+      public int Compare(CurveItem l, CurveItem r)
       {
-        if (l == null && r == null )
+        if (l == null && r == null)
           return 0;
-        if (l == null && r != null ) 
+        if (l == null)
           return -1;
-        if (l != null && r == null) 
+        if (r == null)
           return 1;
 
-        if ( r != null && r.NPts <= index )
+        if (r.NPts <= index)
           r = null;
-        if ( l != null && l.NPts <= index )
+        if (l.NPts <= index)
           l = null;
-            
+
         double lVal, rVal;
 
-        if ( sortType == SortType.XValues )
+        if (sortType == SortType.XValues)
         {
-          lVal = ( l != null ) ? System.Math.Abs( l[index].X ) : PointPair.Missing;
-          rVal = ( r != null ) ? System.Math.Abs( r[index].X ) : PointPair.Missing;
+          lVal = l != null ? Math.Abs(l[index].X) : PointPairBase.Missing;
+          rVal = r != null ? Math.Abs(r[index].X) : PointPairBase.Missing;
         }
         else
         {
-          lVal = ( l != null ) ? System.Math.Abs( l[index].Y ) : PointPair.Missing;
-          rVal = ( r != null ) ? System.Math.Abs( r[index].Y ) : PointPair.Missing;
+          lVal = l != null ? Math.Abs(l[index].Y) : PointPairBase.Missing;
+          rVal = r != null ? Math.Abs(r[index].Y) : PointPairBase.Missing;
         }
-        
-        if ( lVal == PointPair.Missing || Double.IsInfinity( lVal ) || Double.IsNaN( lVal ) )
+
+        if ((lVal == PointPairBase.Missing) || double.IsInfinity(lVal) ||
+            double.IsNaN(lVal))
           l = null;
-        if ( rVal == PointPair.Missing || Double.IsInfinity( rVal ) || Double.IsNaN( rVal ) )
+        if ((rVal == PointPairBase.Missing) || double.IsInfinity(rVal) ||
+            double.IsNaN(rVal))
           r = null;
-          
-        if ( (l == null && r == null) || ( System.Math.Abs( lVal - rVal ) < 1e-10 ) )
+
+        if ((l == null && r == null) || (Math.Abs(lVal - rVal) < 1e-10))
           return 0;
-        else if (l == null && r != null ) 
+        if (l == null)
           return -1;
-        else if (l != null && r == null) 
+        if (r == null)
           return 1;
-        else
-          return rVal < lVal ? -1 : 1;
+        return rVal < lVal ? -1 : 1;
       }
     }
 
-  #endif
-  
   #endregion
 
   }

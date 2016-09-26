@@ -329,6 +329,7 @@ namespace ZedGraph.Demo
       ZedGraphControl.IsAutoScrollRange = true;
       ZedGraphControl.ZoomResolution = 0.001;
       m_DistanceMeasurer.Coord = CoordType.AxisXY2Scale;
+      GraphPane.AxisChange();
     }
 
     public override void Deactivate()
@@ -346,7 +347,7 @@ namespace ZedGraph.Demo
     private readonly PointPairList m_EMAData;
     private readonly PointPairList m_ZigZagData;
     private readonly DynFilteredPointList m_FilteredData;
-    private float    m_ZigZagPercent = 0.05f;
+    private float    m_ZigZagPercent = 0.20f;
 
     private XDate m_Now;
     private double m_Open;
@@ -690,6 +691,7 @@ namespace ZedGraph.Demo
           /* Trend Reversal */
           if (low >= emax)
           {
+            //output.Add(input[refpos].X, refpos == start ? input[refpos].HighValue : refval);
             output[refpos].X = input[refpos].X;
             output[refpos].Y = refpos == start ? input[refpos].HighValue : refval;
             refval = curval;
@@ -721,6 +723,7 @@ namespace ZedGraph.Demo
           /* Trend Reversal */
           if (high <= emin)
           {
+            //output.Add(input[refpos].X, refpos == start ? input[refpos].HighValue : refval);
             output[refpos].X = input[refpos].X;
             output[refpos].Y = refpos == start ? input[refpos].LowValue : refval;
             refval = curval;
@@ -733,7 +736,7 @@ namespace ZedGraph.Demo
         }
       }
 
-      /* Set final values */
+      // Set final values
       output[refpos] = new PointPair(input[refpos].X, refval, PointPairBase.Missing);
       output[curpos] = new PointPair(input[curpos].X, curval, PointPairBase.Missing);
     }

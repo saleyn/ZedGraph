@@ -1142,8 +1142,8 @@ namespace ZedGraph
         else
         {
         */
-      var minLin = scale._minLinearized;
-      var maxLin = scale._maxLinearized;
+      var minLin = scale.MinLinearized;
+      var maxLin = scale.MaxLinearized;
       //var range  = ( maxLin - minLin ) * zoomFraction / 2.0;
       var fact   = zoomFraction == 1.0 ? 0.0 : 1 / zoomFraction - 1;
 
@@ -1163,8 +1163,8 @@ namespace ZedGraph
       //if (minSet < _xScrollRange.Min) minSet = _xScrollRange.Min;
       //if (maxSet > _xScrollRange.Max) maxSet = _xScrollRange.Max;
 
-      scale._minLinearized = minSet;
-      scale._maxLinearized = maxSet;
+      scale.MinLinearized = minSet;
+      scale.MaxLinearized = maxSet;
 
       //  }
 
@@ -1295,8 +1295,8 @@ namespace ZedGraph
       if (_xScrollRange.Max != 0.0 && ddmaxx < delta)
         delta = ddmaxx;
       */
-      scale._minLinearized += delta;
-      scale._maxLinearized += delta;
+      scale.MinLinearized += delta;
+      scale.MaxLinearized += delta;
 
       scale.MinAuto = false;
       scale.MaxAuto = false;
