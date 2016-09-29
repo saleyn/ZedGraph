@@ -60,7 +60,7 @@ namespace ZedGraph
     /// calculated automatically based on the minimum axis scale step size between
     /// bars.  Use the public property <see cref="IsAutoSize" /> to access this value.
     /// </summary>
-    [CLSCompliant(false)] protected Boolean _isAutoSize;
+    [CLSCompliant(false)] protected bool _isAutoSize;
 
     /// <summary>
     /// The result of the autosize calculation, which is the size of the bars in
@@ -423,7 +423,7 @@ namespace ZedGraph
       var width = _isAutoSize
                     ? baseAxis.Scale.GetClusterWidth(_userScaleSize)/
                       (1.0F + pane._barSettings.MinClusterGap) / WidthDivisor
-                    : _size*scaleFactor / WidthDivisor;
+                    : Size*scaleFactor / WidthDivisor;
 
       // use integral size
       return (int)(width + 0.5f);

@@ -628,21 +628,31 @@ namespace ZedGraph
         }
       }
 
-      // Loop for each curve in reverse order to pick up the remaining curves
-      // The reverse order is done so that curves that are later in the list are plotted behind
-      // curves that are earlier in the list
-      for (var i = Count - 1; i >= 0; i--)
-      {
-        var curve = this[i];
+      var list = this.Where(c => !(c.IsBar && pane._barSettings.Type == BarType.SortedOverlay));
 
+      // Loop over the remaining curves first drawing the ones that have ZOrder set.
+      // The list is already sorted respecting curves' ZOrder.
+      foreach (var curve in list.Where(c => c.ZOrder >= 0))
+      {
+        if (curve.IsBar)
+          pos--;
+
+        //  if it's a sorted overlay bar type, it's already been done above
+        curve.Draw(g, pane, pos, scaleFactor);
+      }
+
+      // Loop for each curve in reverse order to pick up the remaining curves.
+      // The reverse order is done so that curves that are later in the list are plotted behind
+      // curves that are earlier in the list.
+      foreach (var curve in list.Where(c => c.ZOrder < 0).Reverse())
+      {
         if (curve.IsBar)
           pos--;
 
         // Render the curve
 
         //  if it's a sorted overlay bar type, it's already been done above
-        if (!(curve.IsBar && pane._barSettings.Type == BarType.SortedOverlay))
-          curve.Draw(g, pane, pos, scaleFactor);
+        curve.Draw(g, pane, pos, scaleFactor);
       }
     }
 

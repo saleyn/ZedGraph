@@ -343,7 +343,7 @@ namespace ZedGraph
       var baseAxis = BarBaseAxis();
 
       // First, calculate the clusterScaleWidth for BarItem objects
-      if (ClusterScaleWidthAuto && !baseAxis.Scale.IsOrdinal)
+      if (ClusterScaleWidthAuto && !baseAxis.Scale.IsAnyOrdinal)
       {
         var minStep = _ownerPane.CurveList
                                 .Where(curve => curve is BarItem)
@@ -410,7 +410,7 @@ namespace ZedGraph
     {
       var minStep = double.MaxValue;
 
-      if ((list.Count == 0) || baseAxis.Scale.IsOrdinal)
+      if ((list.Count == 0) || baseAxis.Scale.IsAnyOrdinal)
         return 1.0;
 
       var lastPt = list[0];

@@ -1065,6 +1065,9 @@ namespace ZedGraph
     /// </summary>
     public Pen CrossHairPen { get; set; } = new Pen(Color.Silver) { DashStyle = DashStyle.Dash };
 
+    /// <summary>
+    /// Font specification used for drawing crosshair lines and labels
+    /// </summary>
     public FontSpec CrossHairFontSpec { get; }
 
     public void ResetSelectedGraph()

@@ -138,7 +138,7 @@ namespace ZedGraph
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
     /// <seealso cref="AxisType.Ordinal"/>
-    override public void PickScale( GraphPane pane, Graphics g, float scaleFactor )
+    public override void PickScale( GraphPane pane, Graphics g, float scaleFactor )
     {
       // call the base class first
       base.PickScale( pane, g, scaleFactor );
@@ -162,17 +162,16 @@ namespace ZedGraph
         if ( scale.MajorStepAuto )
         {
           // Calculate the step size based on targetSteps
-          scale._majorStep = Scale.CalcStepSize( scale._max - scale._min,
-            ( scale._ownerAxis is XAxis || scale._ownerAxis is X2Axis ) ?
-                Default.TargetXSteps : Default.TargetYSteps );
+          scale._majorStep = CalcStepSize( scale._max - scale._min,
+            scale._ownerAxis is IXAxis ? Default.TargetXSteps : Default.TargetYSteps );
 
           if ( scale.IsPreventLabelOverlap )
           {
             // Calculate the maximum number of labels
-            double maxLabels = (double) scale.CalcMaxLabels( g, pane, scaleFactor );
+            var maxLabels = (double)scale.CalcMaxLabels( g, pane, scaleFactor );
 
             // Calculate a step size based on the width of the labels
-            double tmpStep = Math.Ceiling( ( scale._max - scale._min ) / maxLabels );
+            var tmpStep = Math.Ceiling( ( scale._max - scale._min ) / maxLabels );
 
             // Use the greater of the two step sizes
             if ( tmpStep > scale._majorStep )

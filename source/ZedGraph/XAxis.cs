@@ -169,7 +169,7 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    override public void SetTransformMatrix( Graphics g, GraphPane pane, float scaleFactor )
+    public override void SetTransformMatrix( Graphics g, GraphPane pane, float scaleFactor )
     {
       // Move the origin to the BottomLeft of the ChartRect, which is the left
       // side of the X axis (facing from the label side)
@@ -194,7 +194,7 @@ namespace ZedGraph
     /// </param>
     /// <returns>true for a primary <see cref="Axis" /> (for the <see cref="XAxis" />,
     /// this is always true), false otherwise</returns>
-    override internal bool IsPrimary( GraphPane pane )
+    internal override bool IsPrimary( GraphPane pane )
     {
       return this == pane.XAxis;
     }
@@ -235,7 +235,7 @@ namespace ZedGraph
     /// A reference to the <see cref="GraphPane"/> object that is the parent or
     /// owner of this object.
     /// </param>
-    override public Axis GetCrossAxis( GraphPane pane )
+    public override Axis GetCrossAxis( GraphPane pane )
     {
       return pane.YAxis;
     }

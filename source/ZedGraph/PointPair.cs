@@ -170,6 +170,14 @@ namespace ZedGraph
       return new PointPair(this);
     }
 
+    /// <summary>
+    /// Set all X,Y,Z values to <see cref="PointPairBase.Missing"/>.
+    /// </summary>
+    public void Clear()
+    {
+      X = Y = Z = Missing;
+    }
+
     #endregion
 
     #region Serialization

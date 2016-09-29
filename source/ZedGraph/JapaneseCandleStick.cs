@@ -37,7 +37,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.10 $ $Date: 2007-04-16 00:03:02 $ </version>
   [Serializable]
-  public class JapaneseCandleStick : OHLCBar, ICloneable, ISerializable
+  public class JapaneseCandleStick : OHLCBar, ICloneable
   {
     #region Defaults
 
@@ -161,13 +161,13 @@ namespace ZedGraph
     /// <param name="rhs">The <see cref="JapaneseCandleStick"/> object from which to copy</param>
     public JapaneseCandleStick(JapaneseCandleStick rhs) : base(rhs)
     {
-      RisingFill = rhs.RisingFill.Clone();
-      FallingFill = rhs.FallingFill.Clone();
-      RisingBorder = rhs.RisingBorder.Clone();
+      RisingFill    = rhs.RisingFill.Clone();
+      FallingFill   = rhs.FallingFill.Clone();
+      RisingBorder  = rhs.RisingBorder.Clone();
       FallingBorder = rhs.FallingBorder.Clone();
-      FallingColor = rhs.FallingColor;
-      HighDotColor = rhs.HighDotColor;
-      LowDotColor = rhs.LowDotColor;
+      FallingColor  = rhs.FallingColor;
+      HighDotColor  = rhs.HighDotColor;
+      LowDotColor   = rhs.LowDotColor;
     }
 
     /// <summary>
@@ -212,14 +212,13 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32("schema2");
 
-      RisingFill = (Fill)info.GetValue("risingFill", typeof(Fill));
-      FallingFill = (Fill)info.GetValue("fallingFill", typeof(Fill));
-      RisingBorder = (Border)info.GetValue("risingBorder", typeof(Border));
+      RisingFill    = (Fill)info.GetValue("risingFill", typeof(Fill));
+      FallingFill   = (Fill)info.GetValue("fallingFill", typeof(Fill));
+      RisingBorder  = (Border)info.GetValue("risingBorder", typeof(Border));
       FallingBorder = (Border)info.GetValue("fallingBorder", typeof(Border));
-      FallingColor = (Color)info.GetValue("fallingColor", typeof(Color));
-      HighDotColor = (Color)info.GetValue("highDotColor", typeof(Color));
-      LowDotColor = (Color)info.GetValue("lowDotColor", typeof(Color));
-
+      FallingColor  = (Color)info.GetValue("fallingColor", typeof(Color));
+      HighDotColor  = (Color)info.GetValue("highDotColor", typeof(Color));
+      LowDotColor   = (Color)info.GetValue("lowDotColor", typeof(Color));
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -391,8 +390,8 @@ namespace ZedGraph
         tFallingBorder = Selection.Border;
       }
 
-      using (Pen risingPen = new Pen(tColor, tPenWidth))
-      using (Pen fallingPen = new Pen(tFallingColor, tPenWidth))
+      using (var risingPen  = new Pen(tColor, tPenWidth))
+      using (var fallingPen = new Pen(tFallingColor, tPenWidth))
       {
         // Loop over each defined point              
         for (int i = 0; i < curve.Points.Count; i++)

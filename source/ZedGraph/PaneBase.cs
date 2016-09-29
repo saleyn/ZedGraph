@@ -34,14 +34,18 @@ using System.IO;
 namespace ZedGraph
 {
   /// <summary>
-  /// An abstract base class that defines basic functionality for handling a pane.  This class is the
-  /// parent class for <see cref="MasterPane"/> and <see cref="GraphPane"/>.
+  /// An abstract base class that defines basic functionality for handling a pane.
+  /// This class is the parent class for <see cref="MasterPane"/> and <see cref="GraphPane"/>.
   /// </summary>
   /// 
   /// <author>John Champion</author>
   /// <version> $Revision: 3.32 $ $Date: 2007-11-05 18:28:56 $ </version>
-  abstract public class PaneBase : ICloneable
+  public abstract class PaneBase : ICloneable
   {
+    /// <summary>
+    /// Subscribe to this event to be notified when pane is resized.
+    /// </summary>
+    public event Action<PaneBase, EventArgs> ResizePaneEvent;
 
   #region Fields
 
@@ -70,7 +74,7 @@ namespace ZedGraph
     internal RectangleF ClientRect { get; private set; }
   #endregion
 
-  #region Defaults
+    #region Defaults
     /// <summary>
     /// A simple struct that defines the default property values for the <see cref="PaneBase"/> class.
     /// </summary>
@@ -175,10 +179,22 @@ namespace ZedGraph
       /// a fraction of the scaled <see cref="Title" /> character height.
       /// </summary>
       public static float TitleGap = 0.5f;
-    }
-  #endregion
 
-  #region Properties
+      /// <summary>
+      /// The default font spec used to draw crosshair
+      /// </summary>
+      public static FontSpec CrossHairFontSpec = new FontSpec
+      {
+        FontColor = Color.Black,
+        Size = 9,
+        Border = { IsVisible = true },
+        Fill = { Color = Color.Beige, Brush = new SolidBrush(Color.Beige) },
+        TextBrush = new SolidBrush(Color.Black)
+      };
+    }
+    #endregion
+
+    #region Properties
 
     /// <summary>
     /// The rectangle that defines the full area into which all graphics
@@ -338,9 +354,14 @@ namespace ZedGraph
     /// </summary>
     internal float ScaleFactor { get; private set; }
 
+    /// <summary>
+    /// Font spec used to draw crosshair
+    /// </summary>
+    public static FontSpec CrossHairFontSpec { get; set; } = Default.CrossHairFontSpec.Clone();
+
   #endregion
 
-  #region Constructors
+    #region Constructors
 
     /// <summary>
     /// Default constructor for the <see cref="PaneBase"/> class.  Leaves the <see cref="Rect"/> empty.
@@ -529,7 +550,7 @@ namespace ZedGraph
     {
       if ( _rect.Width <= 1 || _rect.Height <= 1 )
         return;
-
+      
       // Use scaleFactor on "normal" pane size (BaseDimension)
       // Fill the pane background and draw a border around it      
       DrawPaneFrame( g, ScaleFactor );
@@ -663,6 +684,7 @@ namespace ZedGraph
     public virtual void ReSize( Graphics g, RectangleF rect )
     {
       _rect = rect;
+      OnResizePaneEvent();
     }
 
     /// <summary>
@@ -741,10 +763,7 @@ namespace ZedGraph
     /// <returns>The scaled pen width, in world pixels</returns>
     public float ScaledPenWidth( float penWidth, float scaleFactor )
     {
-      if ( IsPenWidthScaled )
-        return (float)( penWidth * scaleFactor );
-      else
-        return penWidth;
+      return IsPenWidthScaled ? penWidth*scaleFactor : penWidth;
     }
 
     /// <summary>
@@ -1260,7 +1279,17 @@ namespace ZedGraph
         return pt;
     }
 
-#endregion
+    /// <summary>
+    /// Call to trigger pane resize <see cref="ResizePaneEvent"/> notification callback
+    /// </summary>
+    internal virtual void OnResizePaneEvent()
+    {
+      if (IsFontsScaled)
+        CrossHairFontSpec.Remake(CalcScaleFactor());
 
+      ResizePaneEvent?.Invoke(this, EventArgs.Empty);
     }
+
+    #endregion
+  }
 }

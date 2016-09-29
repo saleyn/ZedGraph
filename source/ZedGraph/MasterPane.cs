@@ -435,20 +435,11 @@ namespace ZedGraph
       if (!IsCommonScaleFactor) return;
 
       // Find the maximum scaleFactor of all the GraphPanes
-      float maxFactor = 0;
-      foreach (var pane in PaneList)
-      {
-        pane.BaseDimension = PaneBase.Default.BaseDimension;
-        var scaleFactor = pane.CalcScaleFactor();
-        maxFactor = scaleFactor > maxFactor ? scaleFactor : maxFactor;
-      }
+      var maxFactor = PaneList.Select(pane => pane.CalcScaleFactor()).Max();
 
       // Now, calculate the base dimension
-      foreach (var pane in PaneList)
-      {
-        var scaleFactor = pane.CalcScaleFactor();
-        pane.BaseDimension *= scaleFactor / maxFactor;
-      }
+      PaneList.ForEach
+        (pane => { pane.BaseDimension *= pane.ScaleFactor / maxFactor; pane.OnResizePaneEvent(); });
     }
 
     /// <summary>
@@ -503,7 +494,7 @@ namespace ZedGraph
       // Reset the clipping
       g.ResetClip();
 
-      foreach (PaneBase pane in PaneList)
+      foreach (var pane in PaneList)
       {
         if (pane is GraphPane)
           ((GraphPane)pane).CurveClipRect = _clipRectF;

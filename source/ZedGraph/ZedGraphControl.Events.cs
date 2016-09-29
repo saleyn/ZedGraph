@@ -37,6 +37,8 @@ namespace ZedGraph
     private int              _mouseHoveredYAxisIndex;
     private RectangleF       _mouseHoveredAxisRect;
     internal Point           _lastCrosshairPoint;
+    private Rectangle        _lastCrosshairXlabelRect;
+    private Rectangle        _lastCrosshairYlabelRect;
   #endregion
 
   #region Events
@@ -430,7 +432,7 @@ namespace ZedGraph
       base.OnMouseLeave(e);
       _mouseInBounds = false;
 
-      InvalidateCrossHair();
+      InvalidateCrossHair(new Point());
     }
 
     /// <summary>
@@ -833,57 +835,39 @@ namespace ZedGraph
           }
       }
 
-      HandleCrossHair(pane, mousePt);
+      InvalidateCrossHair(mousePt);
 
       _currentPane = pane;
     }
 
-    private void HandleCrossHair(PaneBase pane, Point mousePt)
+    private void InvalidateCrossHair(Point mousePt)
     {
       // Display crosshair
-      if (!IsShowCrossHair) return;
+      if (!IsShowCrossHair)
+        return;
 
-      // Invalidate old crosshair location
-      InvalidateCrossHair();
-
-      if (CrossHairType == CrossHairType.MasterPane)
+      if (!_lastCrosshairPoint.IsEmpty)
       {
-        // Invalidate new cross-hair location
-        Invalidate(new Rectangle(mousePt.X - 1, 0, 2, ClientSize.Height));
-        Invalidate(new Rectangle(0, mousePt.Y - 1, ClientSize.Width, 2));
-      }
-      else if (pane is GraphPane)
-      {
-        // Invalidate new cross-hair location
-        var rect = ((GraphPane)pane).Chart.Rect;
-        Invalidate(new Rectangle(mousePt.X - 1, (int)rect.Top, 2, (int)rect.Height));
-        Invalidate(new Rectangle((int)rect.Left, mousePt.Y - 1, (int)rect.Width, 2));
+        if (CrossHairType == CrossHairType.MasterPane)
+        {
+          // Invalidate old cross-hair location
+          Invalidate(new Rectangle(_lastCrosshairPoint.X - 5, 0, 10, ClientSize.Height));
+          Invalidate(new Rectangle(0, _lastCrosshairPoint.Y - 5, ClientSize.Width, 10));
+        }
+        else if (_currentPane is GraphPane)
+        {
+          // Invalidate old cross-hair location
+          var rect = ((GraphPane)_currentPane).Chart.Rect;
+          Invalidate(new Rectangle(_lastCrosshairPoint.X - 5, (int)rect.Top, 10, (int)rect.Height));
+          Invalidate(new Rectangle((int)rect.Left, _lastCrosshairPoint.Y - 5, (int)rect.Width, 10));
+          Invalidate(_lastCrosshairXlabelRect);
+          Invalidate(_lastCrosshairYlabelRect);
+        }
       }
 
       _lastCrosshairPoint = mousePt;
     }
 
-    private void InvalidateCrossHair()
-    {
-      // Display crosshair
-      if (!IsShowCrossHair || _lastCrosshairPoint.IsEmpty) return;
-
-      if (CrossHairType == CrossHairType.MasterPane)
-      {
-        // Invalidate old cross-hair location
-        Invalidate(new Rectangle(_lastCrosshairPoint.X - 1, 0, _lastCrosshairPoint.X, ClientSize.Height));
-        Invalidate(new Rectangle(0, _lastCrosshairPoint.Y - 1, ClientSize.Width, _lastCrosshairPoint.Y));
-      }
-      else if (_currentPane != null && _currentPane is GraphPane)
-      {
-        // Invalidate old cross-hair location
-        var rect = ((GraphPane)_currentPane).Chart.Rect;
-        Invalidate(new Rectangle(_lastCrosshairPoint.X - 1, (int)rect.Top, _lastCrosshairPoint.X, (int)rect.Height));
-        Invalidate(new Rectangle((int)rect.Left, _lastCrosshairPoint.Y - 1, (int)rect.Width, _lastCrosshairPoint.Y));
-      }
-
-      _lastCrosshairPoint = new Point(0,0);
-    }
     #endregion
 
     #region Mouse Wheel Zoom Events

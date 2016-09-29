@@ -223,9 +223,9 @@ namespace ZedGraph
         FontColor = Color.Black,
         Size      = 9,
         Border    = { IsVisible = true    },
-        Fill      = { Color = Color.Beige }
+        Fill      = { Color = Color.Beige, Brush = new SolidBrush(Color.Beige) },
+        TextBrush = new SolidBrush(Color.Black)
       };
-
     }
 
     /// <summary>
@@ -296,7 +296,7 @@ namespace ZedGraph
           if (pane != null && !pane.CurveList.Any(c => c.IsPie)
                            && pane.Chart.Rect.Contains(_lastCrosshairPoint))
           {
-            // Invalidate new cross-hair location
+            // Draw cross-hair lines
             var rect = pane.Chart.Rect;
             g.SetClip(rect);
             g.DrawLine(CrossHairPen, (int)rect.Left, _lastCrosshairPoint.Y, (int)rect.Right, _lastCrosshairPoint.Y);
@@ -306,21 +306,11 @@ namespace ZedGraph
             var xaxis = pane.XAxis.Scale.Valid ? (Axis)pane.XAxis : pane.X2Axis;
             var yaxis = pane.YAxis.Scale.Valid ? (Axis)pane.YAxis : pane.Y2Axis;
 
-            // FIXME: This is experimental support of drawing crosshair values
-            using (var brush = xaxis.Scale.FontSpec.Fill.MakeBrush(rect, null))
-            {
-              var x = (int)Math.Round(xaxis.ReverseTransform(pane, _lastCrosshairPoint.X));
-              var text = xaxis.Scale.MakeLabel(pane, 0, x);
+            CrossHairFontSpec.ScaleFactor = _masterPane.ScaleFactor;
 
-              CrossHairFontSpec.Draw(g, pane, xaxis, text, _lastCrosshairPoint.X, xaxis is XAxis ? rect.Bottom : rect.Top,
-                new SizeF(0, -1));
-
-              var y = (int)Math.Round(yaxis.ReverseTransform(pane, _lastCrosshairPoint.Y));
-              text = yaxis.Scale.MakeLabel(pane, 0, y);
-
-              CrossHairFontSpec.Draw(g, pane, yaxis, text, yaxis is YAxis ? rect.Left : rect.Right, _lastCrosshairPoint.Y,
-                new SizeF(0, 0));
-            }
+            // Draw crosshair values at each axis
+            _lastCrosshairXlabelRect = xaxis.DrawXValueLabel(g, pane, _lastCrosshairPoint.X, CrossHairFontSpec);
+            _lastCrosshairYlabelRect = yaxis.DrawYValueLabel(g, pane, _lastCrosshairPoint.Y, CrossHairFontSpec);
           }
         }
       }
@@ -364,11 +354,9 @@ namespace ZedGraph
         else
           vScrollBar1.Visible = false;
 
-        using ( Graphics g = this.CreateGraphics() )
-        {
+        using ( Graphics g = CreateGraphics() )
           _masterPane.ReSize( g, new RectangleF( 0, 0, newSize.Width, newSize.Height ) );
-          //g.Dispose();
-        }
+
         this.Invalidate();
       }
     }

@@ -287,19 +287,19 @@ namespace ZedGraph
     /// <param name="rhs">The Axis object from which to copy</param>
     protected Axis(Axis rhs)
     {
-      Scale                = rhs.Scale.Clone(this);
-      Cross                = rhs.Cross;
-      CrossAuto            = rhs.CrossAuto;
-      MajorTic             = rhs.MajorTic.Clone();
-      MinorTic             = rhs.MinorTic.Clone();
-      MajorGrid            = rhs.MajorGrid.Clone();
-      MinorGrid            = rhs.MinorGrid.Clone();
-      IsVisible            = rhs.IsVisible;
+      Scale = rhs.Scale.Clone(this);
+      Cross = rhs.Cross;
+      CrossAuto = rhs.CrossAuto;
+      MajorTic = rhs.MajorTic.Clone();
+      MinorTic = rhs.MinorTic.Clone();
+      MajorGrid = rhs.MajorGrid.Clone();
+      MinorGrid = rhs.MinorGrid.Clone();
+      IsVisible = rhs.IsVisible;
       IsAxisSegmentVisible = rhs.IsAxisSegmentVisible;
-      Title                = rhs.Title.Clone();
-      AxisGap              = rhs.AxisGap;
-      MinSpace             = rhs.MinSpace;
-      Color                = rhs.Color;
+      Title = rhs.Title.Clone();
+      AxisGap = rhs.AxisGap;
+      MinSpace = rhs.MinSpace;
+      Color = rhs.Color;
 
       if (rhs.LineHObjs != null)
         LineHObjs = rhs.LineHObjs.Clone();
@@ -324,7 +324,7 @@ namespace ZedGraph
     object ICloneable.Clone()
     {
       throw new NotImplementedException(
-        "Can't clone an abstract base type -- child types must implement ICloneable");
+                                        "Can't clone an abstract base type -- child types must implement ICloneable");
       //return new PaneBase( this );
     }
 
@@ -350,22 +350,22 @@ namespace ZedGraph
     {
       // The schema value is just a file version parameter.  You can use it to make future versions
       // backwards compatible as new member variables are added to classes
-      var sch              = info.GetInt32("schema");
-      Cross                = info.GetDouble("cross");
-      CrossAuto            = info.GetBoolean("crossAuto");
-      MajorTic             = (MajorTic)info.GetValue("MajorTic", typeof(MajorTic));
-      MinorTic             = (MinorTic)info.GetValue("MinorTic", typeof(MinorTic));
-      MajorGrid            = (MajorGrid)info.GetValue("majorGrid", typeof(MajorGrid));
-      MinorGrid            = (MinorGrid)info.GetValue("minorGrid", typeof(MinorGrid));
-      IsVisible            = info.GetBoolean("isVisible");
-      Title                = (AxisLabel)info.GetValue("title", typeof(AxisLabel));
-      MinSpace             = info.GetSingle("minSpace");
-      Color                = (Color)info.GetValue("color", typeof(Color));
+      var sch = info.GetInt32("schema");
+      Cross = info.GetDouble("cross");
+      CrossAuto = info.GetBoolean("crossAuto");
+      MajorTic = (MajorTic)info.GetValue("MajorTic", typeof(MajorTic));
+      MinorTic = (MinorTic)info.GetValue("MinorTic", typeof(MinorTic));
+      MajorGrid = (MajorGrid)info.GetValue("majorGrid", typeof(MajorGrid));
+      MinorGrid = (MinorGrid)info.GetValue("minorGrid", typeof(MinorGrid));
+      IsVisible = info.GetBoolean("isVisible");
+      Title = (AxisLabel)info.GetValue("title", typeof(AxisLabel));
+      MinSpace = info.GetSingle("minSpace");
+      Color = (Color)info.GetValue("color", typeof(Color));
       IsAxisSegmentVisible = info.GetBoolean("isAxisSegmentVisible");
-      AxisGap              = info.GetSingle("axisGap");
-      Scale                = (Scale)info.GetValue("scale", typeof(Scale));
-      Scale._ownerAxis     = this;
-      LineHObjs            = (LineHObjList)info.GetValue("LineHObjs", typeof(LineHObjList));
+      AxisGap = info.GetSingle("axisGap");
+      Scale = (Scale)info.GetValue("scale", typeof(Scale));
+      Scale._ownerAxis = this;
+      LineHObjs = (LineHObjList)info.GetValue("LineHObjs", typeof(LineHObjList));
     }
 
     /// <summary>
@@ -465,11 +465,6 @@ namespace ZedGraph
     /// </summary>
     /// <value>A reference to a <see cref="LineHObjList" /> collection object</value>
     protected LineHObjList LineHObjs { get; set; }
-
-    /// <summary>
-    ///   Rectangle of the axis updated after the axis is drawn
-    /// </summary>
-    internal RectangleF Rect { get; set; }
 
     #endregion
 
@@ -854,9 +849,9 @@ namespace ZedGraph
     internal void MinScaleLimit(double v1, ref double v2)
     {
       var limit = Scale.MajorStep*Scale.MajorUnitMultiplier;
-      if (v1 > float.MaxValue || v2 > float.MaxValue) return;
+      if ((v1 > float.MaxValue) || (v2 > float.MaxValue)) return;
       var diff = Math.Abs(v1 - v2);
-      if (Scale.MajorStep < float.MaxValue && diff < limit)
+      if ((Scale.MajorStep < float.MaxValue) && (diff < limit))
         v2 = v1 < v2 ? v1 + limit : v1 - limit;
     }
 
@@ -900,7 +895,7 @@ namespace ZedGraph
         // don't need to save any room for the axis labels (they will be inside the chart rect)
         if (IsPrimary(pane) && Scale.IsLabelsInside)
           return 1.0f;
-          // otherwise, it's a secondary (outboard) axis and we always save room for the axis and labels.
+        // otherwise, it's a secondary (outboard) axis and we always save room for the axis and labels.
         return 0.0f;
       }
 
@@ -916,9 +911,9 @@ namespace ZedGraph
       float frac;
 
       if (((this is XAxis || this is YAxis) &&
-           Scale.IsLabelsInside == crossAxis.Scale.IsReverse) ||
+           (Scale.IsLabelsInside == crossAxis.Scale.IsReverse)) ||
           ((this is X2Axis || this is Y2Axis) &&
-           Scale.IsLabelsInside != crossAxis.Scale.IsReverse))
+           (Scale.IsLabelsInside != crossAxis.Scale.IsReverse)))
         frac = (float)((effCross - min)/(max - min));
       else
         frac = (float)((max - effCross)/(max - min));
@@ -934,8 +929,6 @@ namespace ZedGraph
     private float CalcTotalShift(GraphPane pane, float scaleFactor, float shiftPos)
     {
       if (!IsPrimary(pane))
-      {
-        // if ( CalcCrossFraction( pane ) != 0.0 )
         if (IsCrossShifted(pane))
         {
           shiftPos = 0;
@@ -967,7 +960,6 @@ namespace ZedGraph
               shiftPos += ticSize;
           }
         }
-      }
 
       // shift is the position of the actual axis line itself
       // everything else is based on that position.
@@ -1028,11 +1020,11 @@ namespace ZedGraph
       //fixedSpace = 0;
 
       //Typical character height for the scale font
-      var charHeight     = Scale._fontSpec.GetHeight(scaleFactor);
+      var charHeight = Scale._fontSpec.GetHeight(scaleFactor);
       // Scaled size (pixels) of a tic
-      var ticSize        = MajorTic.ScaledTic(scaleFactor);
+      var ticSize = MajorTic.ScaledTic(scaleFactor);
       // Scaled size (pixels) of the axis gap
-      var axisGap        = AxisGap*scaleFactor;
+      var axisGap = AxisGap*scaleFactor;
       var scaledLabelGap = Scale.LabelGap*charHeight;
       var scaledTitleGap = Title.GetScaledGap(scaleFactor);
 
@@ -1040,10 +1032,10 @@ namespace ZedGraph
       // be the left side of the chart rect for the Y axis, the right side for the Y2 axis, etc.
       // This amount of space is based on the need to reserve space for tics, etc., even if the
       // Axis.Cross property causes the axis to be in a different location.
-      fixedSpace = 0;
-
-      // The actual space needed for this axis (ignoring the setting of Axis.Cross)
-      _tmpSpace = 0;
+      fixedSpace  = 0;
+      _tmpSpace   = 0; // The actual space needed for this axis (ignoring the setting of Axis.Cross)
+      float labelSpace = 0; // The actual space need for drawing label and label gap.
+      float fromOffset = 0; // The offset of the axis' scale at the end of the tick lines + tick gap.
 
       // Account for the Axis
       if (IsVisible)
@@ -1053,13 +1045,18 @@ namespace ZedGraph
 
         // account for the tic space.  Leave the tic space for any type of outside tic (Outside Tic Space)
         if (hasTic)
-          _tmpSpace += ticSize;
+        {
+          fromOffset = ticSize;
+          _tmpSpace  = ticSize;
+          fixedSpace = ticSize;
+        }
 
         // if this is not the primary axis
         if (!IsPrimary(pane))
         {
           // always leave an extra tic space for the space between the multi-axes (Axis Gap)
-          _tmpSpace += axisGap;
+          fromOffset += axisGap;
+          _tmpSpace  += axisGap;
 
           // if it has inside tics, leave another tic space (Inside Tic Space)
           if (MajorTic.IsInside || MajorTic.IsCrossInside ||
@@ -1073,9 +1070,12 @@ namespace ZedGraph
         // space between scale label and axis label is 0.5 tic
 
         // account for the tic labels + 'LabelGap' tic gap between the tic and the label
-        _tmpSpace += Scale.GetScaleMaxSpace(g, pane, scaleFactor, true).Height + scaledLabelGap;
+        labelSpace = Scale.GetScaleMaxSpace(g, pane, scaleFactor, true).Height;
 
-        var str = MakeTitle();
+        _tmpSpace  += labelSpace + scaledLabelGap;
+        fromOffset += scaledLabelGap;
+
+        var str  = MakeTitle();
 
         // Only add space for the title if there is one
         // Axis Title gets actual height
@@ -1083,29 +1083,25 @@ namespace ZedGraph
         if (!string.IsNullOrEmpty(str) && Title.IsVisible)
         {
           //tmpSpace += this.TitleFontSpec.BoundingBox( g, str, scaleFactor ).Height;
-          fixedSpace = Title.FontSpec.BoundingBox(g, str, scaleFactor).Height +
-                       scaledTitleGap;
-          _tmpSpace += fixedSpace;
+          fixedSpace  = Title.FontSpec.BoundingBox(g, str, scaleFactor).Height +
+                        scaledTitleGap;
+          _tmpSpace  += fixedSpace;
 
           fixedSpace += scaledTitleGap;
         }
-
-        if (hasTic)
-          fixedSpace += ticSize;
       }
 
       // for the Y axes, make sure that enough space is left to fit the first
       // and last X axis scale label
-      if (IsPrimary(pane) &&
-         (((this is YAxis && ((!pane.XAxis.Scale.IsSkipFirstLabel &&
-                               !pane.XAxis.Scale.IsReverse) ||
-                              (!pane.XAxis.Scale.IsSkipLastLabel &&
-                                pane.XAxis.Scale.IsReverse))) ||
-          (this is Y2Axis && ((!pane.XAxis.Scale.IsSkipFirstLabel &&
-                                pane.XAxis.Scale.IsReverse) ||
-                              (!pane.XAxis.Scale.IsSkipLastLabel &&
-                               !pane.XAxis.Scale.IsReverse)))) &&
-        pane.XAxis.IsVisible && pane.XAxis.Scale.IsVisible))
+      if (IsPrimary(pane) && ((this is YAxis && ((!pane.XAxis.Scale.IsSkipFirstLabel &&
+                                                  !pane.XAxis.Scale.IsReverse) ||
+                                                 (!pane.XAxis.Scale.IsSkipLastLabel &&
+                                                  pane.XAxis.Scale.IsReverse))) ||
+                              (this is Y2Axis && ((!pane.XAxis.Scale.IsSkipFirstLabel &&
+                                                   pane.XAxis.Scale.IsReverse) ||
+                                                  (!pane.XAxis.Scale.IsSkipLastLabel &&
+                                                   !pane.XAxis.Scale.IsReverse)))) &&
+          pane.XAxis.IsVisible && pane.XAxis.Scale.IsVisible)
       {
         // half the width of the widest item, plus a gap of 1/2 the charheight
         var tmp = pane.XAxis.Scale.GetScaleMaxSpace(g, pane, scaleFactor, true).Width/2.0F;
@@ -1120,23 +1116,21 @@ namespace ZedGraph
       _tmpSpace  = Math.Max(_tmpSpace,  MinSpace*scaleFactor);
       fixedSpace = Math.Max(fixedSpace, MinSpace*scaleFactor);
 
-      /*
-      float top, right;
-      Scale.GetTopRightPix(pane, out top, out right);
-      
-      var shiftPos = CalcTotalShift(pane, scaleFactor, 0);
-
+      // Update rectangle occupied by the axis' scale excluding the axis title
       if (this is IXAxis)
       {
-        top  = this is XAxis ? top + shiftPos : top;
-        Rect = new RectangleF(top, pane.ClientRect.Left, pane.ClientRect.Width, fixedSpace);
+        var top = this is XAxis
+                ? pane.Chart.Rect.Bottom + fromOffset
+                : pane.Chart.Rect.Top    - fromOffset - labelSpace;
+        Scale.Rect = new RectangleF(pane.Chart.Rect.Left, top, pane.Chart.Rect.Width, labelSpace);
       }
       else
       {
-        var left = this is YAxis ? pane.ClientRect.Left + shiftPos : right - shiftPos;
-        Rect = new RectangleF(top, left, fixedSpace, pane.ClientRect.Height);
+        var left = this is YAxis
+                 ? pane.Chart.Rect.Left  - fromOffset - labelSpace
+                 : pane.Chart.Rect.Right + fromOffset;
+        Scale.Rect = new RectangleF(left, pane.Chart.Rect.Top, labelSpace, pane.Chart.Rect.Height);
       }
-      */
 
       return _tmpSpace;
     }
@@ -1173,8 +1167,12 @@ namespace ZedGraph
 
       var zeroPix = Scale.Transform(0.0);
 
-      using (var zeroPen = new Pen(Color, pane.ScaledPenWidth(MajorGrid._penWidth, scaleFactor)))
+      using (
+        var zeroPen = new Pen(Color, pane.ScaledPenWidth(MajorGrid._penWidth, scaleFactor))
+      )
+      {
         g.DrawLine(zeroPen, left, zeroPix, right, zeroPix);
+      }
     }
 
     /// <summary>
@@ -1219,29 +1217,26 @@ namespace ZedGraph
       double tMajor = Scale._majorStep*Scale.MajorUnitMultiplier,
              tMinor = Scale._minorStep*Scale.MinorUnitMultiplier;
 
-      if (!Scale.IsLog && tMinor >= tMajor) return;
+      if (!Scale.IsLog && (tMinor >= tMajor)) return;
       var minorScaledTic = MinorTic.ScaledTic(scaleFactor);
 
       // Minor tics start at the minimum value and step all the way thru
       // the full scale.  This means that if the minor step size is not
       // an even division of the major step size, the minor tics won't
       // line up with all of the scale labels and major tics.
-      double first = Scale._minLinTemp,
-             last  = Scale._maxLinTemp;
+      var first    = Scale._minLinTemp;
+      var last     = Scale._maxLinTemp;
+      var dVal     = first;
 
-      var dVal = first;
-      float pixVal;
-
-      var iTic = Scale.CalcMinorStart(baseVal);
+      var iTic     = Scale.CalcMinorStart(baseVal);
       var MajorTic = 0;
       var majorVal = Scale.CalcMajorTicValue(baseVal, MajorTic);
 
-      using (var pen = new Pen(MinorTic.Color,
-                               pane.ScaledPenWidth(MinorTic.PenWidth, scaleFactor)))
+      using (var pen          = new Pen(MinorTic.Color, pane.ScaledPenWidth(MinorTic.PenWidth, scaleFactor)))
       using (var minorGridPen = MinorGrid.GetPen(pane, scaleFactor))
       {
         // Draw the minor tic marks
-        while (dVal < last && iTic < 5000)
+        while ((dVal < last) && (iTic < 5000))
         {
           // Calculate the scale value for the current tic
           dVal = Scale.CalcMinorTicValue(baseVal, iTic);
@@ -1250,11 +1245,11 @@ namespace ZedGraph
             majorVal = Scale.CalcMajorTicValue(baseVal, ++MajorTic);
 
           // Make sure that the current value does not match up with a major tic
-          if (((Math.Abs(dVal) < 1e-20 && Math.Abs(dVal - majorVal) > 1e-20) ||
-               (Math.Abs(dVal) > 1e-20 && Math.Abs((dVal - majorVal)/dVal) > 1e-10)) &&
-              (dVal >= first && dVal <= last))
+          if ((((Math.Abs(dVal) < 1e-20) && (Math.Abs(dVal - majorVal) > 1e-20)) ||
+               ((Math.Abs(dVal) > 1e-20) && (Math.Abs((dVal - majorVal)/dVal) > 1e-10))) &&
+              (dVal >= first) && (dVal <= last))
           {
-            pixVal = Scale.LocalTransform(dVal);
+            var pixVal = Scale.LocalTransform(dVal);
             MinorGrid.Draw(g, minorGridPen, pixVal, topPix);
             MinorTic.Draw(g, pane, pen, pixVal, topPix, shift, minorScaledTic);
           }
@@ -1299,16 +1294,16 @@ namespace ZedGraph
       //if ( _isVisible && _title._isVisible && str.Length > 0 )
       if (!IsVisible || !Title.IsVisible || string.IsNullOrEmpty(str)) return;
 
-      var hasTic = (Scale.IsLabelsInside
-                 ? (MajorTic.IsInside || MajorTic.IsCrossInside ||
-                    MinorTic.IsInside || MinorTic.IsCrossInside)
-                 : (MajorTic.IsOutside || MajorTic.IsCrossOutside ||
-                    MinorTic.IsOutside || MinorTic.IsCrossOutside));
+      var hasTic = Scale.IsLabelsInside
+                     ? MajorTic.IsInside || MajorTic.IsCrossInside ||
+                       MinorTic.IsInside || MinorTic.IsCrossInside
+                     : MajorTic.IsOutside || MajorTic.IsCrossOutside ||
+                       MinorTic.IsOutside || MinorTic.IsCrossOutside;
 
       // Calculate the title position in screen coordinates
       var x = (Scale._maxPix - Scale._minPix)/2;
 
-      var scaledTic      = MajorTic.ScaledTic(scaleFactor);
+      var scaledTic = MajorTic.ScaledTic(scaleFactor);
       var scaledLabelGap = Scale._fontSpec.GetHeight(scaleFactor)*Scale.LabelGap;
       var scaledTitleGap = Title.GetScaledGap(scaleFactor);
 
@@ -1322,8 +1317,9 @@ namespace ZedGraph
       var gap = scaledTic*(hasTic ? 1.0f : 0.0f) +
                 Title.FontSpec.BoundingBox(g, str, scaleFactor).Height/2.0F;
       var y = Scale.IsVisible
-            ? Scale.GetScaleMaxSpace(g, pane, scaleFactor, true).Height + scaledLabelGap
-            : 0;
+                ? Scale.GetScaleMaxSpace(g, pane, scaleFactor, true).Height +
+                  scaledLabelGap
+                : 0;
 
       y = Scale.IsLabelsInside ? shiftPos - y - gap : shiftPos + y + gap;
 
@@ -1347,7 +1343,7 @@ namespace ZedGraph
       // The event handler can edit the full label.  If the handler returns
       // null, then the title will be the default.
       if (ScaleTitleEvent == null)
-        return Scale._mag != 0 && !Title._isOmitMag && !Scale.IsLog
+        return (Scale._mag != 0) && !Title._isOmitMag && !Scale.IsLog
                  ? Title.Text + $" (10^{Scale._mag})"
                  : Title.Text;
 
@@ -1357,7 +1353,7 @@ namespace ZedGraph
 
       // If the Mag is non-zero and IsOmitMag == false, and IsLog == false,
       // then add the mag indicator to the title.
-      return Scale._mag != 0 && !Title._isOmitMag && !Scale.IsLog
+      return (Scale._mag != 0) && !Title._isOmitMag && !Scale.IsLog
                ? Title.Text + $" (10^{Scale._mag})"
                : Title.Text;
     }
@@ -1399,6 +1395,70 @@ namespace ZedGraph
       // second try.  If there's no custom ScaleFormatEvent, then just call
       // _scale.MakeLabel according to the type of scale
       return Scale != null ? Scale.MakeLabel(pane, index, dVal) : "?";
+    }
+
+    /// <summary>
+    /// Draw label corresponding to <see cref="pixX"/> X coordinate.
+    /// </summary>
+    /// <returns>Label's rectangle to be used for invalidation</returns>
+    internal Rectangle DrawXValueLabel(Graphics g, GraphPane pane, int pixX, FontSpec fontSpec)
+    {
+      var x     = ReverseTransform(pane, pixX);
+      var text  = Scale.MakeLabel(pane, 0, x);
+      var sizeF = g.MeasureString(text, fontSpec.Font) + new SizeF(2,2);
+      return drawValueLabel(g, pane, text,
+        new RectangleF(pixX - sizeF.Width / 2, Scale.Rect.Top - 1, sizeF.Width, Scale.Rect.Height+1),
+                       fontSpec, CenterHTextFormat);
+    }
+
+    /// <summary>
+    /// Draw label corresponding to <see cref="pixY"/> Y coordinate.
+    /// </summary>
+    /// <returns>Label's rectangle to be used for invalidation</returns>
+    internal Rectangle DrawYValueLabel(Graphics g, GraphPane pane, int pixY, FontSpec fontSpec)
+    {
+      var y     = ReverseTransform(pane, pixY);
+      var text  = Scale.MakeLabel(pane, 0, y);
+      var sizeF = g.MeasureString(text, fontSpec.Font) + new SizeF(2, 2);
+
+      return drawValueLabel(g, pane, text,
+        new RectangleF(Scale.Rect.Left, pixY - 2 - sizeF.Height / 2, Scale.Rect.Width, sizeF.Height+2),
+                       fontSpec, CenterVTextFormat);
+    }
+
+    static readonly StringFormat CenterVTextFormat = new StringFormat
+    {
+      Alignment     = StringAlignment.Far,
+      LineAlignment = StringAlignment.Center
+    };
+
+    static readonly StringFormat CenterHTextFormat = new StringFormat
+    {
+      Alignment     = StringAlignment.Center,
+      LineAlignment = StringAlignment.Center
+    };
+
+    private Rectangle drawValueLabel(
+      Graphics g, GraphPane pane, string text, RectangleF rectF, FontSpec fontSpec, StringFormat fmt)
+    {
+      var rect = Rectangle.Round(rectF);
+
+      g.FillRectangle(fontSpec.Fill.Brush, rectF);
+
+      if (fontSpec.Border.IsVisible)
+        using (var pen = new Pen(fontSpec.Border.Color, fontSpec.Border.Width))
+          g.DrawRectangle(pen, rect);
+
+      if (this is IXAxis)
+        rectF.Offset(0, 2);
+      else
+        rectF.Offset(-1, 1);
+
+      g.DrawString(text, fontSpec.Font, fontSpec.TextBrush, rectF, fmt);
+
+      rect.Inflate(7, 7);
+
+      return rect;
     }
 
     #endregion

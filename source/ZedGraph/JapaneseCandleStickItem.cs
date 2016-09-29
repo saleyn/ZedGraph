@@ -271,15 +271,15 @@ namespace ZedGraph
       }
 
       var baseAxis = BaseAxis(pane);
-      //float halfSize = _stick.GetBarWidth( pane, baseAxis, scaleFactor );
-      var halfSize = 2*scaleFactor;
+      var halfSize = Stick.GetBarWidth( pane, baseAxis, scaleFactor );
+      //var halfSize = Stick.Size * scaleFactor;
 
       using (var pen = new Pen(Stick.Color, Stick.Width))
       {
         Stick.Draw(g, pane, pane._barSettings.Base == BarBase.X, pixBase, pixHigh,
                     pixLow, pixOpen, pixClose, halfSize, scaleFactor, pen,
                     Stick.RisingFill,
-                    Stick.RisingBorder, null, _dotHalfSize);
+                    Stick.RisingBorder, null, _dotHalfSize * scaleFactor);
       }
     }
 

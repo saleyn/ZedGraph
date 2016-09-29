@@ -234,7 +234,7 @@ namespace ZedGraph
     /// The ColorValue property.  This is used with the
     /// <see cref="FillType.GradientByColorValue" /> option.
     /// </summary>
-    override public double ColorValue
+    public override double ColorValue
     {
       get { return _colorValue; }
       set { _colorValue = value; }
@@ -273,7 +273,7 @@ namespace ZedGraph
     /// </summary>
     /// <param name="isShowAll">true to show all the value coordinates</param>
     /// <returns>A string representation of the <see cref="StockPt" />.</returns>
-    override public string ToString(bool isShowAll)
+    public override string ToString(bool isShowAll)
     {
       return ToString(PointPair.DefaultFormat, isShowAll);
     }
@@ -288,7 +288,7 @@ namespace ZedGraph
     /// the two double type values (see <see cref="System.double.ToString()"/>).</param>
     /// <returns>A string representation of the PointPair</returns>
     /// <param name="isShowAll">true to show all the value coordinates</param>
-    override public string ToString(string format, bool isShowAll)
+    public override string ToString(string format, bool isShowAll)
     {
       var date = new XDate(Date).DateTime;
       return isShowAll

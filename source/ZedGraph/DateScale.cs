@@ -422,7 +422,7 @@ namespace ZedGraph
     /// <seealso cref="AxisType.Date"/>
     /// <seealso cref="Scale.MajorUnit"/>
     /// <seealso cref="Scale.MinorUnit"/>
-    override public void PickScale( GraphPane pane, Graphics g, float scaleFactor )
+    public override void PickScale( GraphPane pane, Graphics g, float scaleFactor )
     {
       // call the base class first
       base.PickScale( pane, g, scaleFactor );

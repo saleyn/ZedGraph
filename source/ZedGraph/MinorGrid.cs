@@ -273,17 +273,12 @@ namespace ZedGraph
 
     internal Pen GetPen( GraphPane pane, float scaleFactor )
     {
-      Pen pen = new Pen( _color,
-            pane.ScaledPenWidth( _penWidth, scaleFactor ) );
+      var pen = new Pen( _color, pane.ScaledPenWidth( _penWidth, scaleFactor ) );
 
-      if ( _dashOff > 1e-10 && _dashOn > 1e-10 )
-      {
-        pen.DashStyle = DashStyle.Custom;
-        float[] pattern = new float[2];
-        pattern[0] = _dashOn;
-        pattern[1] = _dashOff;
-        pen.DashPattern = pattern;
-      }
+      if (_dashOff <= 1e-10 || _dashOn <= 1e-10) return pen;
+
+      pen.DashStyle   = DashStyle.Custom;
+      pen.DashPattern = new [] { _dashOn, _dashOff };
 
       return pen;
     }

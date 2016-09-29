@@ -168,6 +168,9 @@ namespace ZedGraph.Demo
       m_Pane.Chart.Fill = new Fill(Color.Black);
       m_Pane.Fill = new Fill(Color.SlateGray, Color.FromArgb(220, 220, 255), 45.0f);
 
+      m_Pane.IsAlignGrids = true;
+      m_Pane.IsFontsScaled = false;
+
       //------------------------------------------------------------------------
       // Add a line to track last close
       //------------------------------------------------------------------------
@@ -196,9 +199,6 @@ namespace ZedGraph.Demo
       zigzag.YAxisIndex = 0;    // Associate this curve with the first Y2 axis
       zigzag.IsSelectable = true;
       zigzag.IsSelected = false;
-
-      m_Pane.IsAlignGrids = true;
-      m_Pane.IsFontsScaled = false;
 
       //------------------------------------------------------------------------
       // Cardinal spline smoothing function
