@@ -231,6 +231,11 @@ namespace ZedGraph.Demo
       // Associate this curve with the first Y2 axis (this is actually default)
       myCurve.IsSelectable = true;
       myCurve.IsSelected = false;
+      myCurve.BeforeDrawEvent += (c, item, index) => 
+      {
+        ((JapaneseCandleStick)item).HighDotColor = index % 3 == 0 ? ((JapaneseCandleStickItem)c).HighDotColor : Color.Empty;
+        ((JapaneseCandleStick)item).LowDotColor  = index % 5 == 0 ? ((JapaneseCandleStickItem)c).LowDotColor  : Color.Empty;
+      };
 
       /*
       m_XHair = new LineObj(Color.SlateGray, 0, 0, m_Pane.Rect.Width, 0)

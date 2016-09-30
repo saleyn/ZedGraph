@@ -1146,7 +1146,7 @@ namespace ZedGraph
     /// <returns>The corresponding XL Date, expressed in double
     /// floating point format</returns>
     /// <returns>The corresponding date in the form of a .Net DateTime struct</returns>
-    public static DateTime XLDateToDateTime( double xlDate )
+    public static DateTime XLDateToDateTime( double xlDate, DateTimeKind kind = DateTimeKind.Utc)
     {
       const double OADateMinAsDouble = -657435.0;
       const double OADateMaxAsDouble = 2958466.0;
@@ -1167,7 +1167,7 @@ namespace ZedGraph
       usecs += DoubleDateOffset / 10;
 
       if (usecs < 0) throw new ArgumentException($"Date scale error: {xlDate}");
-      return new DateTime(usecs * 10);
+      return new DateTime(usecs * 10, kind);
 
       /*
       int year, month, day, hour, minute, second, millisecond;
@@ -1189,8 +1189,12 @@ namespace ZedGraph
     {
       const long OADateMinAsTicks = 31241376000000000L;
 
+      if (dt.Kind == DateTimeKind.Local)
+        dt = dt.ToUniversalTime();
+
       // Note: we can't return dt.ToOADate(), because it does milliseconds rounding,
       // but we want nanoseconds precision:
+
       var value = dt.Ticks;
       if (value == 0)
         return 0.0;
@@ -1608,9 +1612,9 @@ namespace ZedGraph
     /// <see cref="System.Globalization.DateTimeFormatInfo" />
     /// class for a list of the format types available.</param>
     /// <returns>A string representation of the date</returns>
-    public string ToString( string fmtStr )
+    public string ToString( string fmtStr, DateTimeKind kind = DateTimeKind.Utc )
     {
-      return ToString( this.XLDate, fmtStr );
+      return ToString( this.XLDate, fmtStr, kind );
     }
 
     /// <summary>
@@ -1638,14 +1642,14 @@ namespace ZedGraph
     /// <see cref="System.Globalization.DateTimeFormatInfo" />
     /// for a list of the format types available.</param>
     /// <returns>A string representation of the date</returns>
-    public static string ToString( double xlDate, string fmtStr )
+    public static string ToString( double xlDate, string fmtStr, DateTimeKind kind = DateTimeKind.Utc )
     {
       //int    year, month, day, hour, minute, second, millisecond;
 
       if ( !CheckValidDate( xlDate ) )
         return "Date Error";
 
-      var dt = XLDateToDateTime(xlDate);
+      var dt = XLDateToDateTime(xlDate, kind);
       return dt.ToString(fmtStr);
 
       /*

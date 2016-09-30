@@ -272,7 +272,7 @@ namespace ZedGraph
     /// and text (<see cref="Scale.IsText"/>) type axes.
     /// </param>
     /// <returns>The resulting value label as a <see cref="string" /></returns>
-    override internal string MakeLabel( GraphPane pane, int index, double dVal )
+    internal override string MakeLabel( GraphPane pane, int index, double dVal )
     {
       if ( _format == null )
         _format = Scale.Default.Format;
@@ -287,7 +287,7 @@ namespace ZedGraph
       return XDate.ToString( val, _format );
     }
 
-    override internal double Value(GraphPane pane, int index, double dVal)
+    internal override double Value(GraphPane pane, int index, double dVal)
     {
       var data = pane.CurveList[0].Points;
       var pp   = data[MinMax(0, index, data.Count-1)];

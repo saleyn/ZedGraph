@@ -41,7 +41,11 @@ namespace ZedGraph
   [Serializable]
   public abstract class CurveItem : ISerializable, ICloneable
   {
-  
+    /// <summary>
+    /// Event called before drawing a point's object
+    /// </summary>
+    public event Action<CurveItem, LineBase, int> BeforeDrawEvent;
+
   #region Fields
 
     [CLSCompliant(false)]
@@ -993,8 +997,12 @@ namespace ZedGraph
       }
     }
 
-  #endregion
+    internal virtual void OnBeforeDrawEvent(LineBase obj, int i)
+    {
+      BeforeDrawEvent?.Invoke(this, obj, i);
+    }
 
+    #endregion
   }
 }
 

@@ -71,6 +71,28 @@ namespace ZedGraph
 
     #endregion
 
+    #region Defaults
+
+    /// <summary>
+    /// A simple struct that defines the
+    /// default property values for the <see cref="ZedGraph.JapaneseCandleStick"/> class.
+    /// </summary>
+    public struct Default
+    {
+      /// <summary>
+      /// The default color of the dot drawn at High price of a CandleStick
+      /// </summary>
+      public static Color HighDotColor = Color.LightPink;
+
+      /// <summary>
+      /// The default color of the dot drawn at Low price of a CandleStick
+      /// </summary>
+      public static Color LowDotColor = Color.LightSkyBlue;
+    }
+
+    #endregion
+
+
     #region Properties
 
     /// <summary>
@@ -92,6 +114,16 @@ namespace ZedGraph
     /// Half size of a dot drawn at the High/Low end of a candlestick
     /// </summary>
     internal float DotHalfSize => _dotHalfSize;
+
+    /// <summary>
+    /// Color of a dot drawn at the High end of the bar (None means no dot)
+    /// </summary>
+    public Color HighDotColor { get; set; } = Default.HighDotColor;
+
+    /// <summary>
+    /// Color of a dot drawn at the High end of the bar (None means no dot)
+    /// </summary>
+    public Color LowDotColor { get; set; } = Default.LowDotColor;
 
     #endregion
 
@@ -173,10 +205,11 @@ namespace ZedGraph
     {
       // The schema value is just a file version parameter.  You can use it to make future versions
       // backwards compatible as new member variables are added to classes
-      var sch = info.GetInt32("schema2");
-
-      Stick = (JapaneseCandleStick)info.GetValue("stick", typeof(JapaneseCandleStick));
-      DotSize = info.GetSingle("dotSize");
+      var sch      = info.GetInt32("schema2");
+      Stick        = (JapaneseCandleStick)info.GetValue("stick", typeof(JapaneseCandleStick));
+      DotSize      = info.GetSingle("dotSize");
+      HighDotColor = (Color)info.GetValue("highDotColor", typeof(Color));
+      LowDotColor  = (Color)info.GetValue("lowDotColor", typeof(Color));
     }
 
     /// <summary>
@@ -189,9 +222,11 @@ namespace ZedGraph
     {
       base.GetObjectData(info, context);
 
-      info.AddValue("schema2", schema2);
-      info.AddValue("stick", Stick);
-      info.AddValue("dotSize", DotSize);
+      info.AddValue("schema2",      schema2);
+      info.AddValue("stick",        Stick);
+      info.AddValue("dotSize",      DotSize);
+      info.AddValue("highDotColor", HighDotColor);
+      info.AddValue("lowDotColor",  LowDotColor);
     }
 
     #endregion

@@ -2342,8 +2342,7 @@ namespace ZedGraph
     /// <returns>The equivalent pixel size of the bar cluster</returns>
     public float GetClusterWidth(double clusterScaleWidth)
     {
-      var basisVal = _min;
-      return Math.Abs(Transform(basisVal + clusterScaleWidth) - Transform(basisVal));
+      return Math.Abs(Transform(_min + clusterScaleWidth) - Transform(_min));
     }
 
     #endregion Methods

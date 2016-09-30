@@ -325,15 +325,16 @@ namespace ZedGraph
       fill.Draw(g, rect, pt);
       border.Draw(g, pane, scaleFactor, rect);
 
-      var dotSize = dotHalfSize * 2;
+      var halfDotSz = dotHalfSize * scaleFactor;
+      var dotSize   = halfDotSz   * 2;
 
       if (HighDotColor != Color.Empty)
         using (var brush = new SolidBrush(HighDotColor))
-          g.FillEllipse(brush, pixBase - dotHalfSize, pixHigh - dotHalfSize, dotSize, dotSize);
+          g.FillEllipse(brush, pixBase - halfDotSz, pixHigh - halfDotSz, dotSize, dotSize);
 
       if (LowDotColor != Color.Empty)
         using (var brush = new SolidBrush(LowDotColor))
-          g.FillEllipse(brush, pixBase - dotHalfSize, pixLow - dotHalfSize, dotSize, dotSize);
+          g.FillEllipse(brush, pixBase - halfDotSz, pixLow - halfDotSz, dotSize, dotSize);
     }
 
 
@@ -370,6 +371,7 @@ namespace ZedGraph
 
       //float halfSize = _size * scaleFactor;
       var halfSize       = GetBarWidth(pane, baseAxis, scaleFactor);
+      var dotHalfSize    = Math.Max(curve.DotHalfSize, _isAutoSize ? Math.Max(2, halfSize/4) : curve.DotHalfSize);
 
       var tColor         = Color;
       var tFallingColor  = FallingColor;
@@ -404,6 +406,8 @@ namespace ZedGraph
           double close;
           GetOHLC(pt, out date, out open, out high, out low, out close);
 
+          curve.OnBeforeDrawEvent(this, i);
+
           // Any value set to double max is invalid and should be skipped
           // This is used for calculated values that are out of range, divide
           //   by zero, etc.
@@ -435,14 +439,14 @@ namespace ZedGraph
                    pixClose, halfSize, scaleFactor,
                    (tPen),
                    (rising ? tRisingFill   : tFallingFill),
-                   (rising ? tRisingBorder : tFallingBorder), pt, curve.DotHalfSize);
+                   (rising ? tRisingBorder : tFallingBorder), pt, dotHalfSize);
           }
           else
             Draw(g, pane, baseAxis is IXAxis, pixBase, pixHigh, pixLow, pixOpen,
                   pixClose, halfSize, scaleFactor,
                   (rising ? risingPen     : fallingPen),
                   (rising ? tRisingFill   : tFallingFill),
-                  (rising ? tRisingBorder : tFallingBorder), pt, curve.DotHalfSize);
+                  (rising ? tRisingBorder : tFallingBorder), pt, dotHalfSize);
         }
       }
     }
