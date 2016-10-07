@@ -53,11 +53,12 @@ namespace ZedGraph
     /// <summary>
     /// DateTime that corresponds to UNIX epoch
     /// </summary>
-    private readonly static DateTime UnixEpoch      = new DateTime(1970,1,1,0,0,0,0, System.DateTimeKind.Utc);
+    public static readonly DateTime UnixEpoch      = new DateTime(1970,1,1,0,0,0,0, System.DateTimeKind.Utc);
+
     /// <summary>
     /// XDate that corresponds to UNIX epoch
     /// </summary>
-    private readonly static double   UnixEpochXDate = new XDate(UnixEpoch);
+    public static readonly double   UnixEpochXDate = new XDate(UnixEpoch);
 
     /// <summary>
     /// The Astronomical Julian Day number that corresponds to XL Date 0.0
