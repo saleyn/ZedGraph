@@ -229,7 +229,7 @@ namespace ZedGraph
     /// Deep-copy clone routine
     /// </summary>
     /// <returns>A new, independent copy of the FilteredPointList</returns>
-    virtual public object Clone()
+    public virtual object Clone()
     {
       return new DynFilteredPointList(this);
     }

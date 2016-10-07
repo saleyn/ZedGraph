@@ -982,7 +982,7 @@ namespace ZedGraph.ControlTest
 				//double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
 				double hi = Math.Max( open, close ) * ( 1.0 + rand.NextDouble() * 0.05 );
 				double low = Math.Min( open, close ) * ( 0.95 + rand.NextDouble() * 0.05 );
-				double vol = 25.0 + rand.NextDouble() * 100.0;
+				int    vol = 25 + (int)(rand.NextDouble() * 100.0);
 				double change = close - prevClose;
 
 				// Create a StockPt instead of a PointPair so we can carry 6 properties
@@ -1255,8 +1255,8 @@ namespace ZedGraph.ControlTest
 			}
 
 			JapaneseCandleStickItem myCurve = myPane.AddJapaneseCandleStick( "trades", spl );
-			myCurve.Stick.IsAutoSize = true;
-			myCurve.Stick.Color = Color.Blue;
+			myCurve.Bar.IsAutoSize = true;
+			myCurve.Bar.Color = Color.Blue;
 
 			// Use DateAsOrdinal to skip weekend gaps
 			//myPane.XAxis.Type = AxisType.DateAsOrdinal;
@@ -1311,8 +1311,8 @@ namespace ZedGraph.ControlTest
 			}
 
 			JapaneseCandleStickItem myCurve = myPane.AddJapaneseCandleStick( "trades", spl );
-			myCurve.Stick.IsAutoSize = true;
-			myCurve.Stick.Color = Color.Blue;
+			myCurve.Bar.IsAutoSize = true;
+			myCurve.Bar.Color = Color.Blue;
 
 			// Use DateAsOrdinal to skip weekend gaps
 			myPane.XAxis.Type = AxisType.DateAsOrdinal;
@@ -1363,8 +1363,8 @@ namespace ZedGraph.ControlTest
 			}
 
 			JapaneseCandleStickItem myCurve = myPane.AddJapaneseCandleStick( "trades", spl );
-			myCurve.Stick.IsAutoSize = true;
-			myCurve.Stick.Color = Color.Blue;
+			myCurve.Bar.IsAutoSize = true;
+			myCurve.Bar.Color = Color.Blue;
 
 			// Use DateAsOrdinal to skip weekend gaps
 			myPane.XAxis.Type = AxisType.DateAsOrdinal;
@@ -2719,8 +2719,8 @@ namespace ZedGraph.ControlTest
 			}
 
 			JapaneseCandleStickItem myCurve = myPane.AddJapaneseCandleStick( "trades", spl );
-			myCurve.Stick.IsAutoSize = true;
-			myCurve.Stick.Color = Color.Blue;
+			myCurve.Bar.IsAutoSize = true;
+			myCurve.Bar.Color = Color.Blue;
 
 			// Use DateAsOrdinal to skip weekend gaps 
 			myPane.XAxis.Type = AxisType.DateAsOrdinal;

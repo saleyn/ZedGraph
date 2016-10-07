@@ -21,12 +21,10 @@
 //=============================================================================
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using Timer = System.Timers.Timer;
 
 namespace ZedGraph.Demo
@@ -34,11 +32,11 @@ namespace ZedGraph.Demo
   /// <summary>
   /// Summary description for SimpleDemo.
   /// </summary>
-  public class OHLCBarRealTimeDemo : DemoBase
+  public class OHLCBarClusterDemo : DemoBase
   {
-    public OHLCBarRealTimeDemo()
-      : base("Demonstration of the OHLCBar Chart Type",
-             "OHLCBar Real-Time Demo", DemoType.Financial)
+    public OHLCBarClusterDemo()
+      : base("Demonstration of the OHLCBarCluster Chart Type",
+             "OHLCBarCluster Demo", DemoType.Financial)
     {
       m_Timer = new Timer
       {
@@ -46,7 +44,7 @@ namespace ZedGraph.Demo
         Enabled = false,
         SynchronizingObject = ZedGraphControl
       };
-      m_Data = new StockPointList(true);
+      m_Data = new CandleClusterPtList(true);
       m_ZigZagData = new PointPairList();
       m_FilteredData = new DynFilteredPointList(new[] {0.0}, new[] {0.0});
       m_EMAData = new PointPairList();
@@ -63,113 +61,111 @@ namespace ZedGraph.Demo
       //------------------------------------------------------------------------
       // Setup the pane and X/Y axis
       //------------------------------------------------------------------------
-      m_Pane.Title.Text = "OHLC Real-Time Bar Chart Demo";
-      //m_Pane.XAxis.Title.Text     = "Trading Date";
-      //m_Pane.Y2Axis.Title.Text    = "Share Price, $US";
-      m_Pane.Title.IsVisible = false;
-      m_Pane.Legend.IsVisible = false;
-      m_Pane.Margin.Top = 1;
-      m_Pane.Margin.Left = 1;
-      m_Pane.Margin.Right = 0;
-      m_Pane.Margin.Bottom = 1;
-      m_Pane.Legend.Gap = 0;
-      m_Pane.MouseWheelAction = MouseWheelActions.Zoom | MouseWheelActions.PanH;
-      m_Pane.IsPenWidthScaled = true;
-      m_Pane.IsBoundedRanges = true;
-      m_Pane.IsIgnoreMissing = true;
-      m_Pane.IsAlignGrids = true;
+      m_Pane.Title.Text                     = "OHLCBarCluster Chart Demo";
+      //m_Pane.XAxis.Title.Text             = "Trading Date";
+      //m_Pane.Y2Axis.Title.Text            = "Share Price, $US";
+      m_Pane.Title.IsVisible                = false;
+      m_Pane.Legend.IsVisible               = false;
+      m_Pane.Margin.Top                     = 1;
+      m_Pane.Margin.Left                    = 1;
+      m_Pane.Margin.Right                   = 0;
+      m_Pane.Margin.Bottom                  = 1;
+      m_Pane.Legend.Gap                     = 0;
+      m_Pane.MouseWheelAction               = MouseWheelActions.Zoom | MouseWheelActions.PanH;
+      m_Pane.IsPenWidthScaled               = true;
+      m_Pane.IsBoundedRanges                = true;
+      m_Pane.IsIgnoreMissing                = true;
+      m_Pane.IsAlignGrids                   = true;
 
       // Customize X axis
-      m_Pane.XAxis.Title.IsVisible = false;
-      m_Pane.XAxis.AxisGap = 5;
-      m_Pane.XAxis.Scale.LabelGap = 0.2f;
-      m_Pane.XAxis.MajorGrid.IsVisible = true;
-      m_Pane.XAxis.MajorGrid.Color = Color.DarkGray;
-      m_Pane.XAxis.MajorGrid.DashOff = 7;
-      m_Pane.XAxis.MajorGrid.DashOn = 1;
-      m_Pane.XAxis.MajorTic.Size = 3;
-      m_Pane.XAxis.MinorTic.Size = 1;
-      m_Pane.XAxis.Type = AxisType.DateAsOrdinal;
-      //m_Pane.XAxis.Scale.MajorUnit             = DateUnit.Minute;
-      //m_Pane.XAxis.Scale.MinorUnit             = DateUnit.Second;
-      m_Pane.XAxis.Scale.Format = "yyyy-MM-dd\nHH:mm:ss";
-      m_Pane.XAxis.Scale.FontSpec.Size = 9;
-      //m_Pane.XAxis.Scale.MajorStep             = 2;
-      //m_Pane.XAxis.Scale.MinorStep             = 30;
-      m_Pane.XAxis.Scale.MaxAuto = true;
-      m_Pane.XAxis.Scale.MinAuto = true;
-      //      m_Pane.XAxis.Scale.MajorStep             = new XDate(0, 0, 0, 0, 2, 0).XLDate;
-      //      m_Pane.XAxis.Scale.MinorStep             = new XDate(0, 0, 0, 0, 0,15).XLDate;
+      m_Pane.XAxis.Title.IsVisible          = false;
+      m_Pane.XAxis.AxisGap                  = 5;
+      m_Pane.XAxis.Scale.LabelGap           = 0.2f;
+      m_Pane.XAxis.MajorGrid.IsVisible      = true;
+      m_Pane.XAxis.MajorGrid.Color          = Color.DarkGray;
+      m_Pane.XAxis.MajorGrid.DashOff        = 7;
+      m_Pane.XAxis.MajorGrid.DashOn         = 1;
+      m_Pane.XAxis.MajorTic.Size            = 3;
+      m_Pane.XAxis.MinorTic.Size            = 1;
+      m_Pane.XAxis.Type                     = AxisType.DateAsOrdinal;
+      //m_Pane.XAxis.Scale.MajorUnit        = DateUnit.Minute;
+      //m_Pane.XAxis.Scale.MinorUnit        = DateUnit.Second;
+      m_Pane.XAxis.Scale.Format             = "yyyy-MM-dd\nHH:mm:ss";
+      m_Pane.XAxis.Scale.FontSpec.Size      = 9;
+      //m_Pane.XAxis.Scale.MajorStep        = 2;
+      //m_Pane.XAxis.Scale.MinorStep        = 30;
+      m_Pane.XAxis.Scale.MaxAuto            = true;
+      m_Pane.XAxis.Scale.MinAuto            = true;
+      //m_Pane.XAxis.Scale.MajorStep        = new XDate(0, 0, 0, 0, 2, 0).XLDate;
+      //m_Pane.XAxis.Scale.MinorStep        = new XDate(0, 0, 0, 0, 0,15).XLDate;
       //
-      //      m_Pane.XAxis.Scale.MajorStep             = 120.0f / XDate.SecondsPerDay; // 120s
-      //      m_Pane.XAxis.Scale.MinorStep             = 15.0f  / XDate.SecondsPerDay; // 15s
+      //m_Pane.XAxis.Scale.MajorStep        = 120.0f / XDate.SecondsPerDay; // 120s
+      //m_Pane.XAxis.Scale.MinorStep        = 15.0f  / XDate.SecondsPerDay; // 15s
 
-      //      m_Pane.XAxis.Scale.BaseTic               = new XDate(0, 0, 0, 0, 0, 5);
-      //      m_Pane.XAxis.Scale.FontSpec.ScaleFactor  = 1.0f;
-      //      m_Pane.XAxis.Scale.MinAuto               = true;
-      //m_Pane.XAxis.Scale.MaxAuto               = true;
-      //      m_Pane.XAxis.Scale.MinGrace              = 50;
-      //m_Pane.XAxis.Scale.MaxGrace              = 50;
-      m_Pane.XAxis.Scale.IsSkipFirstLabel = true;
-      m_Pane.XAxis.Scale.IsSkipLastLabel = false;
-      //m_Pane.XAxis.Scale.Max                   = new XDate(now);
-      //m_Pane.XAxis.Scale.Min                   = new XDate(now) - 2*60;
-      //      m_Pane.XAxis.Scale.AlignH                = AlignH.Center;
-      //      m_Pane.XAxis.Scale.Align                 = AlignP.Inside;
+      //m_Pane.XAxis.Scale.BaseTic          = new XDate(0, 0, 0, 0, 0, 5);
+      //m_Pane.XAxis.Scale.MinAuto          = true;
+      //m_Pane.XAxis.Scale.MaxAuto          = true;
+      //m_Pane.XAxis.Scale.MinGrace         = 50;
+      //m_Pane.XAxis.Scale.MaxGrace         = 50;
+      m_Pane.XAxis.Scale.IsSkipFirstLabel   = true;
+      m_Pane.XAxis.Scale.IsSkipLastLabel    = false;
+      //m_Pane.XAxis.Scale.Max              = new XDate(now);
+      //m_Pane.XAxis.Scale.Min              = new XDate(now) - 2*60;
+      //m_Pane.XAxis.Scale.AlignH           = AlignH.Center;
+      //m_Pane.XAxis.Scale.Align            = AlignP.Inside;
       m_Pane.XAxis.MajorTic.IsBetweenLabels = true;
-      m_Pane.XAxis.MinorTic.Size = 2.5f;
-      m_Pane.XAxis.MinorTic.IsInside = false;
-      m_Pane.XAxis.MajorTic.IsInside = false;
-      m_Pane.XAxis.MinorTic.IsOutside = true;
+      m_Pane.XAxis.MinorTic.Size            = 2.5f;
+      m_Pane.XAxis.MinorTic.IsInside        = false;
+      m_Pane.XAxis.MajorTic.IsInside        = false;
+      m_Pane.XAxis.MinorTic.IsOutside       = true;
 
-      m_Pane.XAxis.MajorGrid.IsVisible = true;
-      m_Pane.XAxis.MajorGrid.DashOff = 10;
-      m_Pane.XAxis.MajorGrid.DashOn = 1;
-      m_Pane.XAxis.MajorGrid.Color = Color.SlateGray;
-      m_Pane.XAxis.MinorGrid.IsVisible = false;
-      //      m_Pane.XAxis.Scale.MajorStep             = new XDate(now - TimeSpan.FromSeconds(15));
+      m_Pane.XAxis.MajorGrid.IsVisible      = true;
+      m_Pane.XAxis.MajorGrid.DashOff        = 10;
+      m_Pane.XAxis.MajorGrid.DashOn         = 1;
+      m_Pane.XAxis.MajorGrid.Color          = Color.SlateGray;
+      m_Pane.XAxis.MinorGrid.IsVisible      = false;
+      //m_Pane.XAxis.Scale.MajorStep        = new XDate(now - TimeSpan.FromSeconds(15));
 
-      // Disable left-side Y axis
-      m_Pane.YAxis.IsVisible = false;
-      m_Pane.YAxis.Title.IsVisible = false;
-      m_Pane.YAxis.MinSpace = 0;
+      // Disable left                       -side Y axis
+      m_Pane.YAxis.IsVisible                = false;
+      m_Pane.YAxis.Title.IsVisible          = false;
+      m_Pane.YAxis.MinSpace                 = 0;
 
       // Enable the Y2 axis display
-      m_Pane.Y2Axis.IsVisible = true;
-      m_Pane.Y2Axis.Title.IsVisible = false;
-      m_Pane.Y2Axis.MinSpace = 50;
-      m_Pane.Y2Axis.AxisGap = 5;
-      m_Pane.Y2Axis.Scale.LabelGap = 0;
-      m_Pane.Y2Axis.MajorGrid.IsVisible = true;
-      m_Pane.Y2Axis.MajorGrid.DashOff = 10;
-      m_Pane.Y2Axis.MajorGrid.DashOn = 1;
-      m_Pane.Y2Axis.MajorGrid.Color = Color.SlateGray;
-      m_Pane.Y2Axis.MinorGrid.PenWidth = 1;
+      m_Pane.Y2Axis.IsVisible               = true;
+      m_Pane.Y2Axis.Title.IsVisible         = false;
+      m_Pane.Y2Axis.MinSpace                = 50;
+      m_Pane.Y2Axis.AxisGap                 = 5;
+      m_Pane.Y2Axis.Scale.LabelGap          = 0;
+      m_Pane.Y2Axis.MajorGrid.IsVisible     = true;
+      m_Pane.Y2Axis.MajorGrid.DashOff       = 10;
+      m_Pane.Y2Axis.MajorGrid.DashOn        = 1;
+      m_Pane.Y2Axis.MajorGrid.Color         = Color.SlateGray;
+      m_Pane.Y2Axis.MinorGrid.PenWidth      = 1;
 
-      m_Pane.Y2Axis.MinorGrid.IsVisible = false;
+      m_Pane.Y2Axis.MinorGrid.IsVisible     = false;
       /*
-      m_Pane.Y2Axis.MinorGrid.DashOff          = 15;
-      m_Pane.Y2Axis.MinorGrid.DashOn           = 1;
-      m_Pane.Y2Axis.MinorGrid.Color            = Color.DarkGray;
-      m_Pane.Y2Axis.MinorGrid.PenWidth         = 1;
+      m_Pane.Y2Axis.MinorGrid.DashOff       = 15;
+      m_Pane.Y2Axis.MinorGrid.DashOn        = 1;
+      m_Pane.Y2Axis.MinorGrid.Color         = Color.DarkGray;
+      m_Pane.Y2Axis.MinorGrid.PenWidth      = 1;
       */
 
-      m_Pane.Y2Axis.MajorTic.Size = 3;
-      m_Pane.Y2Axis.MinorTic.Size = 1;
-      //m_Pane.Y2Axis.Scale.AlignH               = AlignH.Right;
-      m_Pane.Y2Axis.Scale.Align = AlignP.Outside;
-      m_Pane.Y2Axis.Scale.MinAuto = true;
-      m_Pane.Y2Axis.Scale.MaxAuto = true;
-      m_Pane.Y2Axis.Scale.Format = "0.00000";
-      m_Pane.Y2Axis.MinorTic.IsInside = false;
-      m_Pane.Y2Axis.MajorTic.IsInside = false;
-      m_Pane.Y2Axis.MinorTic.IsOutside = true;
-      m_Pane.Y2Axis.MajorTic.IsOutside = true;
-      m_Pane.Y2Axis.Scale.FontSpec.Size = 9;
-      //      m_Pane.Y2Axis.Scale.FontSpec.ScaleFactor = 1.0f;
+      m_Pane.Y2Axis.MajorTic.Size           = 3;
+      m_Pane.Y2Axis.MinorTic.Size           = 1;
+      //m_Pane.Y2Axis.Scale.AlignH          = AlignH.Right;
+      m_Pane.Y2Axis.Scale.Align             = AlignP.Outside;
+      m_Pane.Y2Axis.Scale.MinAuto           = true;
+      m_Pane.Y2Axis.Scale.MaxAuto           = true;
+      m_Pane.Y2Axis.Scale.Format            = "0.00000";
+      m_Pane.Y2Axis.MinorTic.IsInside       = false;
+      m_Pane.Y2Axis.MajorTic.IsInside       = false;
+      m_Pane.Y2Axis.MinorTic.IsOutside      = true;
+      m_Pane.Y2Axis.MajorTic.IsOutside      = true;
+      m_Pane.Y2Axis.Scale.FontSpec.Size     = 9;
 
-      m_Pane.Chart.Fill = new Fill(Color.Black);
-      m_Pane.Fill = new Fill(Color.SlateGray, Color.FromArgb(220, 220, 255), 45.0f);
+      m_Pane.Chart.Fill                     = new Fill(Color.Black);
+      m_Pane.Fill                           = new Fill(Color.SlateGray, Color.FromArgb(220, 220, 255), 45.0f);
 
       m_Pane.IsAlignGrids = true;
       m_Pane.IsFontsScaled = false;
@@ -204,32 +200,17 @@ namespace ZedGraph.Demo
       zigzag.IsSelected = false;
 
       //------------------------------------------------------------------------
-      // Cardinal spline smoothing function
-      //------------------------------------------------------------------------
-      LineItem curve = m_Pane.AddCurve($"EMA({EMA_ALPHA:0.0})", m_EMAData,
-                                       Color.LightCoral, SymbolType.None);
-      curve.Line.IsSmooth = true;
-      curve.Line.SmoothTension = 0.5F;
-      curve.IsY2Axis = true; // Associate this curve with the Y2 axis
-      curve.YAxisIndex = 0; // Associate this curve with the first Y2 axis
-      curve.IsSelectable = true;
-      curve.IsSelected = false;
-
-      //------------------------------------------------------------------------
       // Add OHCL time series
       //------------------------------------------------------------------------
       //OHLCBarItem myCurve           = m_Pane.AddOHLCBar("trades", m_Data, Color.Black);
       //      myCurve.Bar.Width             = 2;
       //      myCurve.Bar.IsAutoSize        = true;
       //      myCurve.Bar.Color             = Color.DodgerBlue;
-      var myCurve = m_Pane.AddJapaneseCandleStick("EUR/USD", m_Data, zOrder:0);
-      myCurve.Bar.FallingColor        = Color.FromArgb(255, 0, 255, 0);
-      myCurve.Bar.Color               = Color.FromArgb(255, 0, 255, 0);
-      myCurve.Bar.RisingFill.Color    = Color.Black;
-      myCurve.Bar.FallingFill.Color   = Color.White;
-      myCurve.Bar.FallingBorder.Color = Color.FromArgb(255, 0, 255, 0);
-      myCurve.Bar.RisingBorder.Color  = Color.FromArgb(255, 0, 255, 0);
-      myCurve.IsY2Axis                = true; // Associate this curve with the Y2 axis
+      var myCurve = m_Pane.AddOHLCBarCluster("EUR/USD", m_Data, zOrder:0);
+      myCurve.Bar.Color = Color.FromArgb(255, 0, 255, 0);
+      myCurve.Bar.VolumeHeatMap.Add(500, Color.DarkViolet);
+      myCurve.Bar.VolumeHeatMap.Add(750, Color.Violet);
+      myCurve.IsY2Axis  = true; // Associate this curve with the Y2 axis
       myCurve.YAxisIndex = 0;
       // Associate this curve with the first Y2 axis (this is actually default)
       myCurve.IsSelectable = true;
@@ -288,9 +269,28 @@ namespace ZedGraph.Demo
         {
           m_EMAData.Clear();
           m_ZigZagData.Clear();
-          m_Data = csvFileExists ? Serializer.ReadFromCSV<StockPointList>(CSVFilename)
-                                 : Serializer.ReadFromBinaryFile<StockPointList>(Filename);
-          var close = ((StockPt)m_Data[0]).Close;
+          m_Data = csvFileExists ? Serializer.ReadFromCSV<CandleClusterPtList>(CSVFilename)
+                                 : Serializer.ReadFromBinaryFile<CandleClusterPtList>(Filename);
+
+          foreach (var pt in m_Data)
+          {
+            var lo = pt.Low;
+            var hi = pt.High;
+
+            var inc  = 0.0005;
+            var next = (lo - lo % inc) + inc;
+            var list = new List<Tuple<double,int>>();
+            while (next < hi)
+            {
+              list.Add(Tuple.Create(lo, m_Rand.Next(1000)));
+              lo    = next;
+              next += inc;
+            }
+            var px = lo + m_Rand.NextDouble() * (hi - lo);
+            pt.Volumes = list.ToArray();
+          }
+
+          var close = ((CandleClusterPt)m_Data[0]).Close;
           m_EMA = close;
 
           foreach (var p in m_Data)
@@ -351,7 +351,7 @@ namespace ZedGraph.Demo
     }
 
     private readonly Timer m_Timer;
-    private          StockPointList m_Data;
+    private          CandleClusterPtList m_Data;
     private readonly PointPairList m_EMAData;
     private readonly PointPairList m_ZigZagData;
     private readonly DynFilteredPointList m_FilteredData;
@@ -543,207 +543,4 @@ namespace ZedGraph.Demo
     }
   }
   */
-
-  public static class Serializer
-  {
-    /// <summary>
-    /// Writes the given object instance to a binary file.
-    /// <para>Object type (and all child types) must be decorated with the [Serializable] attribute.</para>
-    /// <para>To prevent a variable from being serialized, decorate it with the [NonSerialized] attribute; cannot be applied to properties.</para>
-    /// </summary>
-    /// <typeparam name="T">The type of object being written to the XML file.</typeparam>
-    /// <param name="filePath">The file path to write the object instance to.</param>
-    /// <param name="objectToWrite">The object instance to write to the XML file.</param>
-    /// <param name="append">If false the file will be overwritten if it already exists. If true the contents will be appended to the file.</param>
-    public static void WriteToBinaryFile<T>(string filePath, T objectToWrite, bool append = false)
-    {
-      using (Stream stream = File.Open(filePath, append ? FileMode.Append : FileMode.Create))
-      {
-        var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-        binaryFormatter.Serialize(stream, objectToWrite);
-      }
-    }
-
-    /// <summary>
-    /// Reads an object instance from a binary file.
-    /// </summary>
-    /// <typeparam name="T">The type of object to read from the XML.</typeparam>
-    /// <param name="filePath">The file path to read the object instance from.</param>
-    /// <returns>Returns a new instance of the object read from the binary file.</returns>
-    public static T ReadFromBinaryFile<T>(string filePath)
-    {
-      using (Stream stream = File.Open(filePath, FileMode.Open))
-      {
-        var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-        return (T)binaryFormatter.Deserialize(stream);
-      }
-    }
-
-    public static T ReadFromCSV<T>(string filePath) where T: IPointListEdit, new()
-    {
-      var output = new T();
-
-      using (var stream = File.Open(filePath, FileMode.Open))
-      using (var reader = new StreamReader(stream))
-      {
-        string line;
-        while ((line = reader.ReadLine()) != null)
-        {
-          var dt  = line.Substring(0, 16);
-          var row = line.Substring(17).Split(',');
-          var d = DateTime.ParseExact(dt, "yyyy.MM.dd,hh:mm", CultureInfo.InvariantCulture);
-          var o = double.Parse(row[0]);
-          var h = double.Parse(row[1]);
-          var l = double.Parse(row[2]);
-          var c = double.Parse(row[3]);
-          var v = int.Parse(row[4]);
-
-          output.Add(new StockPt(new XDate(d), o, h, l, c, v));
-        }
-      }
-
-      return output;
-    }
-  }
-
-  public static partial class Indicator
-  {
-    private enum Trend { None, Down, Up };
-
-    public static void ZigZag
-    (
-      IPointList      input,
-      IPointListEdit  output,
-      int start = 0, int end = -1,
-      double change = 0.05,     // Min change to cause zig-zag
-      bool isPcnt = true,       // true = %, false = change
-      bool retrace = true,      // true = retrace, false = absolute change
-      bool lastExtreme = false  // true = last, false = first extreme value
-    )
-    {
-      if (input.Count < 3 || end - start < 3)
-        return;
-
-      while (output.Count < input.Count)
-        output.Add(new PointPair(PointPairBase.Missing, PointPairBase.Missing, PointPairBase.Missing));
-
-      if (end == -1 || end > input.Count)
-        end = input.Count;
-
-      var sig    = Trend.None;
-      int refpos = start, curpos = start+1;
-      var refval = (input[refpos].HighValue + input[refpos].LowValue) / 2;
-      var curval = (input[curpos].HighValue + input[curpos].LowValue) / 2;
-
-      for (var i = curpos; i < end; ++i)
-      {
-        double emin;
-        double emax;
-        if (isPcnt)
-        {
-          /* If % change given (absolute move) */
-          emin = curval * (1.0 - change);
-          emax = curval * (change + 1.0);
-        }
-        else
-        {
-          /* If $ change given (only absolute moves make sense) */
-          emin = curval - change;
-          emax = curval + change;
-        }
-
-        /* Find local maximum and minimum */
-
-        var lmax = Math.Max(curval, input[i].HighValue);
-        var lmin = Math.Min(curval, input[i].LowValue);
-
-        /* Find first trend */
-
-        if (sig == Trend.None)
-        {
-          if (retrace) // Retrace prior move 
-            sig = curval >= refval ? Trend.Up : Trend.Down;
-          else
-          {
-            /* Absolute move */
-            if (lmin <= emin) // Confirmed Downtrend
-              sig = Trend.Down;
-            if (lmax >= emax) // Confirmed Uptrend
-              sig =  Trend.Up;
-          }
-        }
-
-        var low  = input[i].LowValue;
-        var high = input[i].HighValue;
-
-        if (sig == Trend.Down) // Downtrend
-        {
-          /* New Minimum */
-          if (Math.Abs(low - lmin) < float.Epsilon)
-          {
-            // Last Extreme or First Extreme
-            if (lastExtreme || Math.Abs(low - input[i - 1].LowValue) > float.Epsilon)
-            {
-              curval = low;
-              curpos = i;
-            }
-          }
-
-          /* Retrace prior move */
-          if (retrace)
-            emax = curval + (refval - curval) * change;
-
-          /* Trend Reversal */
-          if (low >= emax)
-          {
-            //output.Add(input[refpos].X, refpos == start ? input[refpos].HighValue : refval);
-            output[refpos].X = input[refpos].X;
-            output[refpos].Y = refpos == start ? input[refpos].HighValue : refval;
-            refval = curval;
-            refpos = curpos;
-            curval = high;
-            curpos = i;
-            sig    = Trend.Up;
-            continue;
-          }
-        }
-          
-        if (sig == Trend.Up)  // Uptrend
-        {
-          /* New Maximum */
-          if (Math.Abs(high - lmax) < float.Epsilon)
-          {
-            // Last Extreme or First Extreme
-            if (lastExtreme || Math.Abs(high - input[i - 1].HighValue) > float.Epsilon)
-            {
-              curval = high;
-              curpos = i;
-            }
-          }
-
-          /* Retrace prior move */
-          if (retrace)
-            emin = curval - (curval - refval) * change;
-
-          /* Trend Reversal */
-          if (high <= emin)
-          {
-            //output.Add(input[refpos].X, refpos == start ? input[refpos].HighValue : refval);
-            output[refpos].X = input[refpos].X;
-            output[refpos].Y = refpos == start ? input[refpos].LowValue : refval;
-            refval = curval;
-            refpos = curpos;
-            curval = low;
-            curpos = i;
-            sig    = Trend.Down;
-            continue;
-          }
-        }
-      }
-
-      // Set final values
-      output[refpos] = new PointPair(input[refpos].X, refval, PointPairBase.Missing);
-      output[curpos] = new PointPair(input[curpos].X, curval, PointPairBase.Missing);
-    }
-  }
 }

@@ -55,25 +55,19 @@ namespace ZedGraph
   [Serializable]
   public class OHLCBarItem : CurveItem, ICloneable, IBarItem
   {
-  #region Fields
+    #region Fields
 
-    /// <summary>
-    /// Private field that stores a reference to the <see cref="ZedGraph.OHLCBar"/>
-    /// class defined for this <see cref="OHLCBarItem"/>.  Use the public
-    /// property <see cref="OHLCBar"/> to access this value.
-    /// </summary>
-    /// 
-    [CLSCompliant(false)]
-    protected OHLCBar _bar;
+    [CLSCompliant(false)] protected float _dotSize = 1f;
+    [CLSCompliant(false)] protected float _dotHalfSize = 0.5f;
 
-  #endregion
+    #endregion
 
-  #region Properties
+    #region Properties
     /// <summary>
     /// Gets a reference to the <see cref="OHLCBar"/> class defined
     /// for this <see cref="OHLCBarItem"/>.
     /// </summary>
-    public OHLCBar Bar => _bar;
+    public OHLCBar Bar { get; }
 
     /// <summary>
     /// Gets a flag indicating if the X axis is the independent axis for this <see cref="CurveItem" />
@@ -81,7 +75,7 @@ namespace ZedGraph
     /// <param name="pane">The parent <see cref="GraphPane" /> of this <see cref="CurveItem" />.
     /// </param>
     /// <value>true if the X axis is independent, false otherwise</value>
-    override internal bool IsXIndependent( GraphPane pane )
+    internal override bool IsXIndependent( GraphPane pane )
     {
       return pane._barSettings.Base == BarBase.X;
     }
@@ -95,14 +89,59 @@ namespace ZedGraph
     /// <param name="pane">The parent <see cref="GraphPane" /> of this <see cref="CurveItem" />.
     /// </param>
     /// <value>true if the Z data are included, false otherwise</value>
-    override internal bool IsZIncluded( GraphPane pane )
+    internal override bool IsZIncluded( GraphPane pane )
     {
       return true;
     }
 
-  #endregion
+    /// <summary>
+    ///   Size of dots drawn at the High/Low end of a candlestick
+    /// </summary>
+    public float DotSize
+    {
+      get { return _dotSize; }
+      set { _dotSize = Math.Max(value, 1f); _dotHalfSize = _dotSize / 2f; }
+    }
 
-  #region Constructors
+    /// <summary>
+    /// Half size of a dot drawn at the High/Low end of a candlestick
+    /// </summary>
+    internal float DotHalfSize => _dotHalfSize;
+
+    /// <summary>
+    /// Color of a dot drawn at the High end of the bar (None means no dot)
+    /// </summary>
+    public Color HighDotColor { get; set; } = Default.HighDotColor;
+
+    /// <summary>
+    /// Color of a dot drawn at the High end of the bar (None means no dot)
+    /// </summary>
+    public Color LowDotColor { get; set; } = Default.LowDotColor;
+
+    #endregion
+
+    #region Defaults
+
+    /// <summary>
+    /// A simple struct that defines the
+    /// default property values for the <see cref="ZedGraph.JapaneseCandleStick"/> class.
+    /// </summary>
+    public struct Default
+    {
+      /// <summary>
+      /// The default color of the dot drawn at High price of a CandleStick
+      /// </summary>
+      public static Color HighDotColor = Color.LightPink;
+
+      /// <summary>
+      /// The default color of the dot drawn at Low price of a CandleStick
+      /// </summary>
+      public static Color LowDotColor = Color.LightSkyBlue;
+    }
+
+    #endregion
+
+    #region Constructors
     /// <summary>
     /// Create a new <see cref="OHLCBarItem"/>, specifying only the legend label.
     /// </summary>
@@ -110,7 +149,8 @@ namespace ZedGraph
     public OHLCBarItem( string label, int zOrder=-1)
       : base( label, zOrder )
     {
-      _bar = new OHLCBar();
+      Bar = MakeBar();
+      DotSize = 3;
     }
 
     /// <summary>
@@ -127,7 +167,8 @@ namespace ZedGraph
     public OHLCBarItem( string label, IPointList points, Color color, int zOrder=-1 )
       : base( label, points, zOrder )
     {
-      _bar = new OHLCBar( color );
+      Bar = MakeBar(color);
+      DotSize = 3;
     }
 
     /// <summary>
@@ -137,7 +178,7 @@ namespace ZedGraph
     public OHLCBarItem( OHLCBarItem rhs )
       : base( rhs )
     {
-      _bar = rhs._bar.Clone();
+      Bar = rhs.Bar.Clone();
     }
 
     /// <summary>
@@ -157,6 +198,11 @@ namespace ZedGraph
     public OHLCBarItem Clone()
     {
       return new OHLCBarItem( this );
+    }
+
+    protected virtual OHLCBar MakeBar(Color color = default(Color))
+    {
+      return new OHLCBar(color.IsEmpty ? LineBase.Default.Color : color);
     }
 
   #endregion
@@ -182,7 +228,10 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32( "schema2" );
 
-      _bar = (OHLCBar)info.GetValue( "stick", typeof( OHLCBar ) );
+      Bar = (OHLCBar)info.GetValue( "stick", typeof( OHLCBar ) );
+      DotSize      = info.GetSingle("dotSize");
+      HighDotColor = (Color)info.GetValue("highDotColor", typeof(Color));
+      LowDotColor  = (Color)info.GetValue("lowDotColor", typeof(Color));
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -194,13 +243,16 @@ namespace ZedGraph
     {
       base.GetObjectData( info, context );
 
-      info.AddValue( "schema2", schema2 );
-      info.AddValue( "stick", _bar );
+      info.AddValue("schema2",      schema2);
+      info.AddValue("stick",        Bar);
+      info.AddValue("dotSize",      DotSize);
+      info.AddValue("highDotColor", HighDotColor);
+      info.AddValue("lowDotColor",  LowDotColor);
     }
 
-  #endregion
+    #endregion
 
-  #region Methods
+    #region Methods
 
     /// <summary>
     /// Do all rendering associated with this <see cref="OHLCBarItem"/> to the specified
@@ -224,13 +276,10 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    override public void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor )
+    public override void Draw(Graphics g, GraphPane pane, int pos, float scaleFactor)
     {
-      if ( IsVisible )
-      {
-        _bar.Draw(g, pane, this, this.BaseAxis( pane ),
-                  this.ValueAxis( pane ), scaleFactor );
-      }
+      if (IsVisible)
+        Bar.Draw(g, pane, this, BaseAxis(pane), ValueAxis(pane), scaleFactor);
     }
 
     /// <summary>
@@ -252,7 +301,7 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    override public void DrawLegendKey( Graphics g, GraphPane pane, RectangleF rect,
+    public override void DrawLegendKey( Graphics g, GraphPane pane, RectangleF rect,
                   float scaleFactor )
     {
       float pixBase, pixHigh, pixLow, pixOpen, pixClose;
@@ -276,10 +325,10 @@ namespace ZedGraph
 
       var halfSize = 2.0f * scaleFactor;
 
-      using ( var pen = new Pen( _bar.Color, _bar.Width ) )
+      using ( var pen = new Pen( Bar.Color, Bar.Width ) )
       {
-        _bar.Draw( g, pane, pane._barSettings.Base == BarBase.X, pixBase, pixHigh,
-                   pixLow, pixOpen, pixClose, halfSize, pen );
+        Bar.Draw(g, pane, pane._barSettings.Base == BarBase.X, pixBase, pixHigh,
+                 pixLow, pixOpen, pixClose, halfSize, pen, float.NaN);
       }
     }
 
@@ -292,7 +341,7 @@ namespace ZedGraph
     /// <param name="coords">A list of coordinates that represents the "rect" for
     /// this point (used in an html AREA tag)</param>
     /// <returns>true if it's a valid point, false otherwise</returns>
-    override public bool GetCoords( GraphPane pane, int i, out string coords )
+    public override bool GetCoords( GraphPane pane, int i, out string coords )
     {
       coords = string.Empty;
 
@@ -302,10 +351,10 @@ namespace ZedGraph
       var valueAxis = ValueAxis( pane );
       var baseAxis = BaseAxis( pane );
 
-      var halfSize = _bar.Size * pane.CalcScaleFactor();
+      var halfSize = Bar.Size * pane.CalcScaleFactor();
 
-      var pt = Points[i];
-      double date = pt.X;
+      var pt   = Points[i];
+      var date = pt.X;
       double high;
       double low;
       if (pt is StockPt)
@@ -320,8 +369,8 @@ namespace ZedGraph
         low   = pt.Z;
       }
 
-      if (pt.IsInvalid3D || (!(date > 0) && baseAxis.Scale.IsLog) ||
-          ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
+      if (pt.IsInvalid3D || (date <= 0  && baseAxis.Scale.IsLog) ||
+             ((high <= 0 ||  low  <= 0) && valueAxis.Scale.IsLog))
         return false;
 
       var pixBase = baseAxis.Scale.Transform( IsOverrideOrdinal, i, date );

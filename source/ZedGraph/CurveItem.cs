@@ -475,7 +475,7 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    public abstract void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor  );
+    public abstract void Draw( Graphics g, GraphPane pane, int pos, float scaleFactor );
     
     /// <summary>
     /// Draw a legend key entry for this <see cref="CurveItem"/> at the specified location.

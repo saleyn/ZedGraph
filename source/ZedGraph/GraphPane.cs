@@ -1004,7 +1004,6 @@ namespace ZedGraph
     {
       var curve = new BarItem(label, points, color, zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1039,7 +1038,6 @@ namespace ZedGraph
     {
       var curve = new BarItem(label, x, y, color, zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1077,7 +1075,6 @@ namespace ZedGraph
     {
       var curve = new LineItem(label, x, y, color, SymbolType.Default, zOrder: zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1110,7 +1107,6 @@ namespace ZedGraph
     {
       var curve = new LineItem(label, points, color, SymbolType.Default, zOrder: zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1152,7 +1148,6 @@ namespace ZedGraph
     {
       var curve = new LineItem(label, x, y, color, symbolType, zOrder: zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1190,7 +1185,6 @@ namespace ZedGraph
     {
       var curve = new LineItem(label, points, color, symbolType, zOrder: zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1233,7 +1227,6 @@ namespace ZedGraph
       var curve = new ErrorBarItem(label, new PointPairList(x, y, baseValue),
                                    color, zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1267,7 +1260,6 @@ namespace ZedGraph
     {
       var curve = new ErrorBarItem(label, points, color, zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1306,7 +1298,6 @@ namespace ZedGraph
     {
       var curve = new HiLowBarItem(label, x, y, baseVal, color, zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1337,7 +1328,6 @@ namespace ZedGraph
     {
       var curve = new HiLowBarItem(label, points, color, zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1372,7 +1362,6 @@ namespace ZedGraph
     {
       var curve = new JapaneseCandleStickItem(label, points, zOrder);
       CurveList.Add(curve);
-
       return curve;
     }
 
@@ -1411,7 +1400,43 @@ namespace ZedGraph
     {
       var curve = new OHLCBarItem(label, points, color, zOrder);
       CurveList.Add(curve);
+      return curve;
+    }
 
+    /// <summary>
+    ///   Add a candlestick cluster graph (<see cref="OHLCBarClusterItem" /> object)
+    ///   to the plot with the given data points (<see cref="IPointList" />) and properties.
+    /// </summary>
+    /// <remarks>
+    ///   This is simplified way to add curves without knowledge of the
+    ///   <see cref="CurveList" /> class.  An alternative is to use
+    ///   the <see cref="ZedGraph.CurveList" /> Add() method.
+    ///   Note that the <see cref="IPointList" />
+    ///   should contain <see cref="StockPt" /> objects instead of <see cref="PointPair" />
+    ///   objects in order to contain all the data values required for this curve type.
+    /// </remarks>
+    /// <param name="label">
+    ///   The text label (string) for the curve that will be
+    ///   used as a <see cref="Legend" /> entry.
+    /// </param>
+    /// <param name="points">
+    ///   A <see cref="IPointList" /> of double precision value pairs that define
+    ///   the X and Y values for this curve
+    /// </param>
+    /// <param name="color">
+    ///   The color to used for the curve line,
+    ///   symbols, etc.
+    /// </param>
+    /// <returns>
+    ///   A <see cref="CurveItem" /> class for the newly created curve.
+    ///   This can then be used to access all of the curve properties that
+    ///   are not defined as arguments to the
+    ///   <see cref="AddOHLCBar(string,IPointList,Color)" /> method.
+    /// </returns>
+    public OHLCBarClusterItem AddOHLCBarCluster(string label, IPointList points, int zOrder = -1)
+    {
+      var curve = new OHLCBarClusterItem(label, points, zOrder);
+      CurveList.Add(curve);
       return curve;
     }
 

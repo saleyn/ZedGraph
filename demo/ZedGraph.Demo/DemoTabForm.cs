@@ -32,6 +32,7 @@ namespace ZedGraph.Demo
     protected override void loadDemos()
     {
       loadDemo(new OHLCBarRealTimeDemo());
+      loadDemo(new OHLCBarClusterDemo());
       loadDemo(new MasterPaneWithSplitterDemo());
 
       loadDemo(new ComboDemo());

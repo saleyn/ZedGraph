@@ -68,16 +68,6 @@ namespace ZedGraph
       /// (<see cref="JapaneseCandleStick.FallingBorder" /> property).
       /// </summary>
       public static Color FallingBorder = Color.Black;
-
-      /// <summary>
-      /// The default color of the dot drawn at High price of a CandleStick
-      /// </summary>
-      public static Color HighDotColor = Color.Red;
-
-      /// <summary>
-      /// The default color of the dot drawn at Low price of a CandleStick
-      /// </summary>
-      public static Color LowDotColor = Color.Green;
     }
 
     #endregion
@@ -124,16 +114,6 @@ namespace ZedGraph
     public Color FallingColor { get; set; }
 
     /// <summary>
-    /// Color of a dot drawn at the High end of the bar (None means no dot)
-    /// </summary>
-    public Color HighDotColor { get; set; }
-
-    /// <summary>
-    /// Color of a dot drawn at the High end of the bar (None means no dot)
-    /// </summary>
-    public Color LowDotColor { get; set; }
-
-    /// <summary>
     /// Factor used to divide bar width
     /// </summary>
     public override double WidthDivisor => 2.0f;
@@ -166,8 +146,6 @@ namespace ZedGraph
       RisingBorder  = rhs.RisingBorder.Clone();
       FallingBorder = rhs.FallingBorder.Clone();
       FallingColor  = rhs.FallingColor;
-      HighDotColor  = rhs.HighDotColor;
-      LowDotColor   = rhs.LowDotColor;
     }
 
     /// <summary>
@@ -217,8 +195,6 @@ namespace ZedGraph
       RisingBorder  = (Border)info.GetValue("risingBorder", typeof(Border));
       FallingBorder = (Border)info.GetValue("fallingBorder", typeof(Border));
       FallingColor  = (Color)info.GetValue("fallingColor", typeof(Color));
-      HighDotColor  = (Color)info.GetValue("highDotColor", typeof(Color));
-      LowDotColor   = (Color)info.GetValue("lowDotColor", typeof(Color));
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -236,8 +212,6 @@ namespace ZedGraph
       info.AddValue("risingBorder", RisingBorder);
       info.AddValue("fallingBorder", FallingBorder);
       info.AddValue("fallingColor", FallingColor);
-      info.AddValue("highDotColor", HighDotColor);
-      info.AddValue("lowDotColor", LowDotColor);
     }
 
     #endregion
@@ -313,7 +287,7 @@ namespace ZedGraph
         g.DrawLine(pen, pixHigh, pixBase, pixLow, pixBase);
       }
 
-      if (!_isOpenCloseVisible || Math.Abs(pixOpen) >= 1000000 ||
+      if (!IsOpenCloseVisible || Math.Abs(pixOpen) >= 1000000 ||
           Math.Abs(pixClose) >= 1000000)
         return;
 
@@ -325,16 +299,7 @@ namespace ZedGraph
       fill.Draw(g, rect, pt);
       border.Draw(g, pane, scaleFactor, rect);
 
-      var halfDotSz = dotHalfSize * scaleFactor;
-      var dotSize   = halfDotSz   * 2;
-
-      if (HighDotColor != Color.Empty)
-        using (var brush = new SolidBrush(HighDotColor))
-          g.FillEllipse(brush, pixBase - halfDotSz, pixHigh - halfDotSz, dotSize, dotSize);
-
-      if (LowDotColor != Color.Empty)
-        using (var brush = new SolidBrush(LowDotColor))
-          g.FillEllipse(brush, pixBase - halfDotSz, pixLow - halfDotSz, dotSize, dotSize);
+      DrawHighLowDots(g, isXBase, pixBase, pixHigh, pixLow, dotHalfSize);
     }
 
 
@@ -362,7 +327,7 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    public void Draw(Graphics g, GraphPane pane, JapaneseCandleStickItem curve,
+    public override void Draw(Graphics g, GraphPane pane, OHLCBarItem curve,
               Axis baseAxis, Axis valueAxis, float scaleFactor)
     {
       //ValueHandler valueHandler = new ValueHandler( pane, false );
@@ -371,7 +336,8 @@ namespace ZedGraph
 
       //float halfSize = _size * scaleFactor;
       var halfSize       = GetBarWidth(pane, baseAxis, scaleFactor);
-      var dotHalfSize    = Math.Max(curve.DotHalfSize, _isAutoSize ? Math.Max(2, halfSize/4) : curve.DotHalfSize);
+      var dotHalfSize    = Math.Max(curve.DotHalfSize, IsAutoSize ? Math.Max(2, halfSize/4) : curve.DotHalfSize)
+                         * scaleFactor;
 
       var tColor         = Color;
       var tFallingColor  = FallingColor;

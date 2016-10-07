@@ -42,25 +42,10 @@ namespace ZedGraph
     #region Fields
 
     /// <summary>
-    /// Private field that stores the visibility of the <see cref="OHLCBar"/> open and
-    /// close line segments ("wings").  Use the public
-    /// property <see cref="IsOpenCloseVisible"/> to access this value.  If this value is
-    /// false, the wings will not be shown.
-    /// </summary>
-    [CLSCompliant(false)] protected bool _isOpenCloseVisible;
-
-    /// <summary>
     /// Private field that stores the total width for the Opening/Closing line
     /// segments.  Use the public property <see cref="Size"/> to access this value.
     /// </summary>
     [CLSCompliant(false)] protected float _size;
-
-    /// <summary>
-    /// Private field that determines if the <see cref="Size" /> property will be
-    /// calculated automatically based on the minimum axis scale step size between
-    /// bars.  Use the public property <see cref="IsAutoSize" /> to access this value.
-    /// </summary>
-    [CLSCompliant(false)] protected bool _isAutoSize;
 
     /// <summary>
     /// The result of the autosize calculation, which is the size of the bars in
@@ -94,7 +79,17 @@ namespace ZedGraph
       /// <summary>
       /// The default value for the <see cref="ZedGraph.OHLCBar.IsAutoSize" /> property.
       /// </summary>
-      public static Boolean IsAutoSize = true;
+      public static bool IsAutoSize = true;
+
+      /// <summary>
+      /// The default color of the dot drawn at High price of a CandleStick
+      /// </summary>
+      public static Color HighDotColor = Color.Red;
+
+      /// <summary>
+      /// The default color of the dot drawn at Low price of a CandleStick
+      /// </summary>
+      public static Color LowDotColor = Color.Green;
     }
 
     #endregion
@@ -106,11 +101,7 @@ namespace ZedGraph
     /// </summary>
     /// <value>true to show the CandleStick wings, false to hide them</value>
     /// <seealso cref="Default.IsOpenCloseVisible"/>
-    public bool IsOpenCloseVisible
-    {
-      get { return _isOpenCloseVisible; }
-      set { _isOpenCloseVisible = value; }
-    }
+    public bool IsOpenCloseVisible { get; set; }
 
     /// <summary>
     /// Gets or sets the total width to be used for drawing the opening/closing line
@@ -132,11 +123,7 @@ namespace ZedGraph
     public float Size
     {
       get { return _size; }
-      set
-      {
-        _size = value;
-        _isAutoSize = false;
-      }
+      set { _size = value; IsAutoSize = false; }
     }
 
     /// <summary>
@@ -144,11 +131,17 @@ namespace ZedGraph
     /// calculated automatically based on the minimum axis scale step size between
     /// bars.
     /// </summary>
-    public bool IsAutoSize
-    {
-      get { return _isAutoSize; }
-      set { _isAutoSize = value; }
-    }
+    public bool IsAutoSize    { get; set; }
+
+    /// <summary>
+    /// Color of a dot drawn at the High end of the bar (None means no dot)
+    /// </summary>
+    public Color HighDotColor { get; set; }
+
+    /// <summary>
+    /// Color of a dot drawn at the High end of the bar (None means no dot)
+    /// </summary>
+    public Color LowDotColor { get; set; }
 
     /// <summary>
     /// Factor used to divide bar width
@@ -177,8 +170,8 @@ namespace ZedGraph
     public OHLCBar(Color color) : base(color)
     {
       _size = Default.Size;
-      _isAutoSize = Default.IsAutoSize;
-      _isOpenCloseVisible = Default.IsOpenCloseVisible;
+      IsAutoSize = Default.IsAutoSize;
+      IsOpenCloseVisible = Default.IsOpenCloseVisible;
     }
 
     /// <summary>
@@ -187,9 +180,11 @@ namespace ZedGraph
     /// <param name="rhs">The <see cref="OHLCBar"/> object from which to copy</param>
     public OHLCBar(OHLCBar rhs) : base(rhs)
     {
-      _isOpenCloseVisible = rhs._isOpenCloseVisible;
-      _size = rhs._size;
-      _isAutoSize = rhs._isAutoSize;
+      IsOpenCloseVisible = rhs.IsOpenCloseVisible;
+      _size              = rhs._size;
+      IsAutoSize         = rhs.IsAutoSize;
+      HighDotColor       = rhs.HighDotColor;
+      LowDotColor        = rhs.LowDotColor;
     }
 
     /// <summary>
@@ -234,9 +229,11 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32("schema");
 
-      _isOpenCloseVisible = info.GetBoolean("isOpenCloseVisible");
-      _size = info.GetSingle("size");
-      _isAutoSize = info.GetBoolean("isAutoSize");
+      IsOpenCloseVisible = info.GetBoolean("isOpenCloseVisible");
+      _size              = info.GetSingle("size");
+      IsAutoSize         = info.GetBoolean("isAutoSize");
+      HighDotColor       = (Color)info.GetValue("highDotColor", typeof(Color));
+      LowDotColor        = (Color)info.GetValue("lowDotColor", typeof(Color));
     }
 
     /// <summary>
@@ -247,17 +244,18 @@ namespace ZedGraph
     [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-      base.GetObjectData(info, context);
-      info.AddValue("schema", schema);
-      info.AddValue("isOpenCloseVisible", _isOpenCloseVisible);
-      info.AddValue("size", _size);
-      info.AddValue("isAutoSize", _isAutoSize);
+      base.GetObjectData(info,            context);
+      info.AddValue("schema",             schema);
+      info.AddValue("isOpenCloseVisible", IsOpenCloseVisible);
+      info.AddValue("size",               _size);
+      info.AddValue("isAutoSize",         IsAutoSize);
+      info.AddValue("highDotColor",       HighDotColor);
+      info.AddValue("lowDotColor",        LowDotColor);
     }
 
     #endregion
 
     #region Rendering Methods
-
 
     /// <summary>
     /// Draw the <see cref="OHLCBar"/> to the specified <see cref="Graphics"/>
@@ -288,34 +286,73 @@ namespace ZedGraph
     /// The scaled width of the candlesticks, pixels</param>
     /// <param name="pen">A pen with attributes of <see cref="Color"/> and
     /// <see cref="LineBase.Width"/> for this <see cref="OHLCBar"/></param>
-    public void Draw(Graphics g, GraphPane pane, bool isXBase,
-                     float pixBase, float pixHigh, float pixLow,
-                     float pixOpen, float pixClose,
-                     float halfSize, Pen pen)
+    /// <param name="dotHalfSize">The scaled half size of the dot drawn on top/bottom end of a bar</param>
+    internal virtual void Draw(Graphics g, GraphPane pane, bool isXBase, float pixBase,
+                               float pixHigh, float pixLow, float pixOpen, float pixClose,
+                               float halfSize, Pen pen, float dotHalfSize)
     {
-      if (pixBase != PointPair.Missing)
+      if (isXBase)
       {
-        if (isXBase)
+        if (Math.Abs(pixLow) < 1000000 && Math.Abs(pixHigh) < 1000000)
+          g.DrawLine(pen, pixBase, pixHigh, pixBase, pixLow);
+        if (IsOpenCloseVisible)
         {
-          if (Math.Abs(pixLow) < 1000000 && Math.Abs(pixHigh) < 1000000)
-            g.DrawLine(pen, pixBase, pixHigh, pixBase, pixLow);
-          if (_isOpenCloseVisible && Math.Abs(pixOpen) < 1000000)
+          if (Math.Abs(pixOpen)  < 1000000)
             g.DrawLine(pen, pixBase - halfSize, pixOpen, pixBase, pixOpen);
-          if (_isOpenCloseVisible && Math.Abs(pixClose) < 1000000)
+          if (Math.Abs(pixClose) < 1000000)
             g.DrawLine(pen, pixBase, pixClose, pixBase + halfSize, pixClose);
         }
-        else
+      }
+      else
+      {
+        if (Math.Abs(pixLow) < 1000000 && Math.Abs(pixHigh) < 1000000)
+          g.DrawLine(pen, pixHigh, pixBase, pixLow, pixBase);
+        if (IsOpenCloseVisible)
         {
-          if (Math.Abs(pixLow) < 1000000 && Math.Abs(pixHigh) < 1000000)
-            g.DrawLine(pen, pixHigh, pixBase, pixLow, pixBase);
-          if (_isOpenCloseVisible && Math.Abs(pixOpen) < 1000000)
+          if (Math.Abs(pixOpen)  < 1000000)
             g.DrawLine(pen, pixOpen, pixBase - halfSize, pixOpen, pixBase);
-          if (_isOpenCloseVisible && Math.Abs(pixClose) < 1000000)
+          if (Math.Abs(pixClose) < 1000000)
             g.DrawLine(pen, pixClose, pixBase, pixClose, pixBase + halfSize);
         }
       }
+
+      if (!float.IsNaN(dotHalfSize))
+        DrawHighLowDots(g, isXBase, pixBase, pixHigh, pixLow, dotHalfSize);
     }
 
+    /// <summary>
+    /// Method called just before drawing a bar
+    /// </summary>
+    protected virtual void BeforeDraw(Graphics g, GraphPane pane, Axis valueAxis,
+                                      CurveItem curve, PointPair pt,
+                                      float pixBase, float pixHigh, float pixLow, float halfDotSz)
+    {}
+
+    /// <summary>
+    /// Draw dots at the high/low ends of a bar
+    /// </summary>
+    protected void DrawHighLowDots(Graphics g, bool isXBase, float pixBase, float pixHigh, float pixLow, float halfDotSz)
+    {
+      var dotSize = halfDotSz * 2;
+
+      if (HighDotColor != Color.Empty)
+        using (var brush = new SolidBrush(HighDotColor))
+        {
+          if (isXBase)
+            g.FillEllipse(brush, pixBase - halfDotSz, pixHigh - halfDotSz, dotSize, dotSize);
+          else
+            g.FillEllipse(brush, pixHigh - halfDotSz, pixBase - halfDotSz, dotSize, dotSize);
+        }
+
+      if (LowDotColor != Color.Empty)
+        using (var brush = new SolidBrush(LowDotColor))
+        {
+          if (isXBase)
+            g.FillEllipse(brush, pixBase - halfDotSz, pixLow  - halfDotSz, dotSize, dotSize);
+          else
+            g.FillEllipse(brush, pixLow  - halfDotSz, pixBase - halfDotSz, dotSize, dotSize);
+        }
+    }
 
     /// <summary>
     /// Draw all the <see cref="OHLCBar"/>'s to the specified <see cref="Graphics"/>
@@ -341,8 +378,8 @@ namespace ZedGraph
     /// <see cref="PaneBase.CalcScaleFactor"/> method, and is used to proportionally adjust
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
-    public void Draw(Graphics g, GraphPane pane, OHLCBarItem curve,
-                     Axis baseAxis, Axis valueAxis, float scaleFactor)
+    public virtual void Draw(Graphics g, GraphPane pane, OHLCBarItem curve,
+                             Axis baseAxis, Axis valueAxis, float scaleFactor)
     {
       //ValueHandler valueHandler = new ValueHandler( pane, false );
 
@@ -350,6 +387,8 @@ namespace ZedGraph
 
       //float halfSize = _size * scaleFactor;
       var halfSize = GetBarWidth(pane, baseAxis, scaleFactor);
+      var dotHalfSize = Math.Max(curve.DotHalfSize, IsAutoSize ? Math.Max(2, halfSize / 4) : curve.DotHalfSize)
+                      * scaleFactor;
 
       using (var pen = !curve.IsSelected
                          ? new Pen(Color, Width)
@@ -376,12 +415,12 @@ namespace ZedGraph
               ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
             continue;
 
-          var pixBase =
+          var pixBase  =
             (int)(baseAxis.Scale.Transform(curve.IsOverrideOrdinal, i, date) + 0.5);
           //pixBase = baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, date );
-          var pixHigh = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, high);
-          var pixLow = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, low);
-          var pixOpen = PointPairBase.IsValueInvalid(open)
+          var pixHigh  = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, high);
+          var pixLow   = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, low);
+          var pixOpen  = PointPairBase.IsValueInvalid(open)
                           ? float.MaxValue
                           : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, open);
 
@@ -389,17 +428,23 @@ namespace ZedGraph
                           ? float.MaxValue
                           : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, close);
 
-          if (!curve.IsSelected && this.GradientFill.IsGradientValueType)
+          if (pixBase == PointPair.Missing) continue;
+
+          BeforeDraw(g, pane, valueAxis, curve, pt, pixBase, pixHigh, pixLow, halfSize);
+
+          var gradient = !curve.IsSelected && this.GradientFill.IsGradientValueType;
+
+          if (gradient)
           {
             using (var tPen = GetPen(pane, scaleFactor, pt))
               Draw(g, pane, baseAxis is IXAxis,
                    pixBase, pixHigh, pixLow, pixOpen,
-                   pixClose, halfSize, tPen);
+                   pixClose, halfSize, tPen, dotHalfSize);
           }
           else
             Draw(g, pane, baseAxis is IXAxis,
                  pixBase, pixHigh, pixLow, pixOpen,
-                 pixClose, halfSize, pen);
+                 pixClose, halfSize, pen, dotHalfSize);
         }
       }
     }
@@ -418,9 +463,9 @@ namespace ZedGraph
     /// font sizes, etc. according to the actual size of the graph.
     /// </param>
     /// <returns>The width of each bar, in pixel units</returns>
-    public float GetBarWidth(GraphPane pane, Axis baseAxis, float scaleFactor)
+    public virtual float GetBarWidth(GraphPane pane, Axis baseAxis, float scaleFactor)
     {
-      var width = _isAutoSize
+      var width = IsAutoSize
                     ? baseAxis.Scale.GetClusterWidth(_userScaleSize)/
                       (1.0F + pane._barSettings.MinClusterGap) / WidthDivisor
                     : Size*scaleFactor / WidthDivisor;

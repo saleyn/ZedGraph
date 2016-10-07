@@ -66,8 +66,8 @@ namespace ZedGraph.Demo
 			}
 
 			JapaneseCandleStickItem myCurve = myPane.AddJapaneseCandleStick( "trades", spl );
-			myCurve.Stick.IsAutoSize = true;
-			myCurve.Stick.Color = Color.Blue;
+			myCurve.Bar.IsAutoSize = true;
+			myCurve.Bar.Color = Color.Blue;
 
 			// Use DateAsOrdinal to skip weekend gaps
 			myPane.XAxis.Type = AxisType.DateAsOrdinal;

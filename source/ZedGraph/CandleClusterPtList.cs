@@ -1,49 +1,20 @@
-//============================================================================
-//PointPairList Class
-//Copyright © 2006  John Champion
-//
-//This library is free software; you can redistribute it and/or
-//modify it under the terms of the GNU Lesser General Public
-//License as published by the Free Software Foundation; either
-//version 2.1 of the License, or (at your option) any later version.
-//
-//This library is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//Lesser General Public License for more details.
-//
-//You should have received a copy of the GNU Lesser General Public
-//License along with this library; if not, write to the Free Software
-//Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//=============================================================================
-
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ZedGraph
 {
-  internal struct DoubleComparer : IComparer<double>
-  {
-    public int Compare(double x, double y) { return Math.Abs(x - y) < 1e-9 ? 0 : x > y ? 1 : -1; }
-
-    public static bool LT(double x, double y) { return x < y || (y - x) < 1e-9; }
-  }
-
   /// <summary>
-  /// A collection class containing a list of <see cref="StockPt"/> objects
+  /// A collection class containing a list of <see cref="CandleClusterPt"/> objects
   /// that define the set of points to be displayed on the curve.
   /// </summary>
-  /// 
-  /// <author> John Champion based on code by Jerry Vos</author>
-  /// <version> $Revision: 3.4 $ $Date: 2007-02-18 05:51:54 $ </version>
   [Serializable]
-  public class StockPointList : List<StockPt>, IPointListEdit, IOrdinalPointList
+  public class CandleClusterPtList : List<CandleClusterPt>, IPointListEdit, IOrdinalPointList
   {
-    private readonly List<Tuple<double,int>> _dateIndex;
-    private int                              _offset;
-     
-  #region Properties
+    private readonly List<Tuple<double, int>> _dateIndex;
+    private int _offset;
+
+    #region Properties
 
     /// <summary>
     /// Indexer to access the specified <see cref="StockPt"/> object by
@@ -57,7 +28,7 @@ namespace ZedGraph
       get { return base[index]; }
       set
       {
-        var v = new StockPt(value);
+        var v = new CandleClusterPt(value);
         if (_dateIndex != null)
         {
           if (Math.Abs(base[index].Date - v.Date) > 1e-9)
@@ -86,12 +57,12 @@ namespace ZedGraph
     /// <summary>
     /// Default constructor for the collection class
     /// </summary>
-    public StockPointList() : this(false) {}
+    public CandleClusterPtList() : this(false) { }
 
     /// <summary>
     /// Constructor for the collection class that can enable ordinal index
     /// </summary>
-    public StockPointList(bool ordinal)
+    public CandleClusterPtList(bool ordinal)
     {
       _offset = 0;
       if (ordinal)
@@ -102,18 +73,18 @@ namespace ZedGraph
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The StockPointList from which to copy</param>
-    public StockPointList( StockPointList rhs )
+    public CandleClusterPtList(CandleClusterPtList rhs)
       : this(rhs._dateIndex != null)
     {
       _offset = 0;
 
-      foreach (var pp in rhs.Select(p => new StockPt(p)))
+      foreach (var pp in rhs.Select(p => new CandleClusterPt(p)))
       {
         Add(pp);
 
         if (rhs._dateIndex == null) continue;
 
-        _dateIndex.Add(new Tuple<double, int>(pp.Date, Count-1));
+        _dateIndex.Add(new Tuple<double, int>(pp.Date, Count - 1));
       }
     }
 
@@ -131,28 +102,28 @@ namespace ZedGraph
     /// Typesafe, deep-copy clone method.
     /// </summary>
     /// <returns>A new, independent copy of this class</returns>
-    public StockPointList Clone()
+    public CandleClusterPtList Clone()
     {
-      return new StockPointList( this );
+      return new CandleClusterPtList(this);
     }
 
-  #endregion
+    #endregion
 
-  #region Methods
+    #region Methods
 
     /// <summary>
     /// Add a <see cref="StockPt"/> object to the collection at the end of the list.
     /// </summary>
     /// <param name="point">The <see cref="StockPt"/> object to
     /// be added</param>
-    public new void Add( StockPt point )
+    public new void Add(CandleClusterPt point)
     {
-      base.Add( new StockPt( point ) );
+      base.Add(new CandleClusterPt(point));
       if (_dateIndex == null) return;
 
       var date = point.Date;
-      if (_dateIndex.Count == 0 || date > _dateIndex[_dateIndex.Count-1].Item1)
-        _dateIndex.Add(new Tuple<double, int>(date, _offset + Count-1));
+      if (_dateIndex.Count == 0 || date > _dateIndex[_dateIndex.Count - 1].Item1)
+        _dateIndex.Add(new Tuple<double, int>(date, _offset + Count - 1));
       else
         throw new ArgumentException($"Dates in time-series must be chronologically increasing ({date})");
     }
@@ -161,11 +132,11 @@ namespace ZedGraph
     /// Add a <see cref="PointPair"/> object to the collection at the end of the list.
     /// </summary>
     /// <param name="point">The <see cref="PointPair"/> object to be added</param>
-    public void Add( PointPair point )
+    public void Add(PointPair point)
     {
-//      throw new ArgumentException( "Error: Only the StockPt type can be added to StockPointList" +
-//        ".  An ordinary PointPair is not allowed" );
-      base.Add( new StockPt( point ) );
+      //      throw new ArgumentException( "Error: Only the StockPt type can be added to StockPointList" +
+      //        ".  An ordinary PointPair is not allowed" );
+      base.Add(new CandleClusterPt(point));
     }
 
     /// <summary>
@@ -176,9 +147,9 @@ namespace ZedGraph
     /// <param name="date">An <see cref="XDate" /> value</param>
     /// <param name="high">The high value for the day</param>
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
-    public void Add( double date, double high )
+    public void Add(double date, double high)
     {
-      Add(new StockPt( date, PointPair.Missing, high, PointPair.Missing, PointPair.Missing, 0));
+      Add(new StockPt(date, PointPair.Missing, high, PointPair.Missing, PointPair.Missing, 0));
     }
 
     /// <summary>
@@ -193,7 +164,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add(double date, double open, double high, double low, double close, int vol)
     {
-      Add(new StockPt(date, open, high, low, close, vol));
+      Add(new CandleClusterPt(date, open, high, low, close, vol));
     }
 
     /// <summary>
@@ -208,7 +179,7 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) in the list</param>
     /// <returns>The specified <see cref="StockPt" />.
     /// </returns>
-    public StockPt GetAt( int index )
+    public CandleClusterPt GetAt(int index)
     {
       return base[index];
     }
@@ -222,9 +193,9 @@ namespace ZedGraph
             ($"Cannot remove intermediate data points (index={index}, offset={_offset}, count={Count})");
 
         var point = this[index];
-        var date  = point.X;
+        var date = point.X;
 
-        var idx   = indexOf(date);
+        var idx = indexOf(date);
         if (idx > -1 && idx < _dateIndex.Count)
           _dateIndex.RemoveAt(idx);
 
@@ -246,7 +217,7 @@ namespace ZedGraph
     /// <summary>
     /// Returns an index of the first element which does not compare less than date value.
     /// </summary>
-    public StockPt IndexOf(double date)
+    public CandleClusterPt IndexOf(double date)
     {
       var idx = indexOf(date);
       if (idx < 0 || idx == _dateIndex.Count) return null;
@@ -256,11 +227,11 @@ namespace ZedGraph
 
     private int indexOf(double date)
     {
-      if (_dateIndex == null)    return -1;
-      if (_dateIndex.Count == 0) return  0;
+      if (_dateIndex == null) return -1;
+      if (_dateIndex.Count == 0) return 0;
 
       //var comp = Comparer<T>.Default;
-      int    lo = 0, hi = Count-1;
+      int lo = 0, hi = Count - 1;
       while (lo < hi)
       {
         var m = lo + (hi - lo) / 2;
@@ -269,7 +240,7 @@ namespace ZedGraph
         else
           hi = m - 1;
       }
-      return DoubleComparer.LT(_dateIndex[lo].Item1, date) ? lo+1 : lo;
+      return DoubleComparer.LT(_dateIndex[lo].Item1, date) ? lo + 1 : lo;
     }
   }
 }

@@ -51,17 +51,17 @@ namespace ZedGraph
     /// <summary>
     /// This opening value
     /// </summary>
-    public double Open;
+    public double Open { get; set; }
 
     /// <summary>
     /// This closing value
     /// </summary>
-    public double High;
+    public double High { get; set; }
 
     /// <summary>
-    /// Low value
+    /// Volume value
     /// </summary>
-    public double Vol;
+    public int    Vol  { get; set; }
 
     /// <summary>
     /// This is a user value that can be anything.  It is used to provide special 
@@ -89,7 +89,7 @@ namespace ZedGraph
     /// <param name="high">The daily high stock price</param>
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
-    public StockPt(double date, double open, double high, double low, double close, double vol)
+    public StockPt(double date, double open, double high, double low, double close, int vol)
       : this(date, open, high, low, close, vol, null)
     {
     }
@@ -104,7 +104,7 @@ namespace ZedGraph
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
-    public StockPt(double date, double open, double high, double low, double close, double vol, string tag)
+    public StockPt(double date, double open, double high, double low, double close, int vol, string tag)
       : base(date, close, low)
     {
       Open = open;
@@ -147,7 +147,7 @@ namespace ZedGraph
       {
         Open       = PointPair.Missing;
         High       = PointPair.Missing;
-        Vol        = PointPair.Missing;
+        Vol        = 0;
         ColorValue = PointPair.Missing;
       }
     }
@@ -177,7 +177,7 @@ namespace ZedGraph
 
       Open = info.GetDouble("Open");
       High = info.GetDouble("High");
-      Vol  = info.GetDouble("Vol");
+      Vol  = info.GetInt32("Vol");
       ColorValue = info.GetDouble("ColorValue");
     }
 
@@ -204,29 +204,17 @@ namespace ZedGraph
     /// <summary>
     /// Map the Date property to the X value
     /// </summary>
-    public double Date
-    {
-      get { return X; }
-      set { X = value; }
-    }
+    public double Date { get { return X; } set { X = value; } }
 
     /// <summary>
     /// Map the high property to the Y value
     /// </summary>
-    public double Close
-    {
-      get { return Y; }
-      set { Y = value; }
-    }
+    public double Close { get { return Y; } set { Y = value; } }
 
     /// <summary>
     /// Trading volume. Map the low property to the Z value
     /// </summary>
-    public double Low
-    {
-      get { return Z; }
-      set { Z = value; }
-    }
+    public double Low { get { return Z; } set { Z = value; } } 
 
     public override double HighValue => High;
 

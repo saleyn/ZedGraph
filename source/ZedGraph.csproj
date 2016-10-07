@@ -58,8 +58,12 @@
     <Compile Include="ZedGraphControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="ZedGraph\CandleClusterPtList.cs" />
     <Compile Include="ZedGraph\DynFilteredPointList.cs" />
+    <Compile Include="ZedGraph\OHLCBarCluster.cs" />
+    <Compile Include="ZedGraph\OHLCBarClusterItem.cs" />
     <Compile Include="ZedGraph\SplitterPane.cs" />
+    <Compile Include="ZedGraph\CandleClusterPt.cs" />
     <Compile Include="ZedGraph\ZedGraph.DistanceMeasurer.cs" />
     <Compile Include="ZedGraph\ZedGraphControl.Legend.cs">
       <SubType>UserControl</SubType>
