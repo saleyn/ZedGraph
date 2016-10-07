@@ -63,10 +63,8 @@ namespace ZedGraph
 
     ////chenmin
     //public DataRow SourceRow = null;
+    public object ID { get; set; }
     public bool IsVisible { get; set; } = true;
-
-    //chen min
-    public object PointID { get; set; }
 
     public bool IsPointFilter { get; set; }
 
@@ -119,7 +117,7 @@ namespace ZedGraph
       this.Y = rhs.Y;
 
       //chenmin
-      this.PointID         = rhs.PointID;
+      this.ID              = rhs.ID;
       this.IsVisible       = rhs.IsVisible;
       this.IsPointFilter   = rhs.IsPointFilter;
       this.PointColor      = rhs.PointColor;
@@ -152,8 +150,7 @@ namespace ZedGraph
       X = info.GetDouble("X");
       Y = info.GetDouble("Y");
 
-      //chenmin
-      PointID              = info.GetValue("PointID", typeof(object));
+      ID                   = info.GetValue("ID", typeof(object));
       IsVisible            = info.GetBoolean("IsVisible");
       this.IsPointFilter   = info.GetBoolean("IsPointFilter");
       this.PointColor      = (Color)info.GetValue("PointColor", typeof(Color));
@@ -174,7 +171,7 @@ namespace ZedGraph
       info.AddValue("Y", Y);
 
       //chenmin
-      info.AddValue("PointID",         PointID);
+      info.AddValue("ID",              ID);
       info.AddValue("IsVisible",       IsVisible);
       info.AddValue("IsPointFilter",   IsPointFilter);
       info.AddValue("PointColor",      PointColor);

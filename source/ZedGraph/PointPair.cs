@@ -259,11 +259,7 @@ namespace ZedGraph
     /// can be mapped to a unique value.  This is used with the
     /// <see cref="FillType.GradientByColorValue" /> option.
     /// </remarks>
-    public virtual double ColorValue
-    {
-      get { return Z; }
-      set { Z = value; }
-    }
+    public virtual double ColorValue { get { return Z; } set { Z = value; } }
 
     #endregion
 

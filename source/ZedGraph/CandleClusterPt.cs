@@ -62,40 +62,54 @@ namespace ZedGraph
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
-    public CandleClusterPt(double date, double open, double high, double low, double close, int vol, string tag = null)
+    public CandleClusterPt(double date, double open, double high, double low, double close,
+                           int vol, string tag = null,
+                           Tuple<double, int>[] volumes = null)
       : base(date, open, high, low, close, vol, tag)
-    {}
+    {
+      if (volumes != null)
+        Volumes = volumes;
+    }
 
     /// <summary>
     /// The StockPt copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public CandleClusterPt(ICandleClusteredVolume rhs)
+    public CandleClusterPt(ICandleClusteredVolume rhs, bool cloneVolumes = true)
       : base(rhs.Date, rhs.Open, rhs.High, rhs.Low, rhs.Close, rhs.Vol)
     {
-      ctor(rhs);
+      ctor(rhs, cloneVolumes);
     }
 
     /// <summary>
     /// The StockPt copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public CandleClusterPt(CandleClusterPt rhs) : this((PointPair)rhs)
+    public CandleClusterPt(CandleClusterPt rhs, bool cloneVolumes = true)
+      : this((PointPair)rhs, cloneVolumes)
     {}
 
     /// <summary>
     /// The StockPt copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public CandleClusterPt(PointPair rhs) : base(rhs)
+    public CandleClusterPt(PointPair rhs, bool cloneVolumes = true) : base(rhs)
     {
-      ctor(rhs as ICandleClusteredVolume);
+      ctor(rhs as ICandleClusteredVolume, cloneVolumes);
     }
 
-    private void ctor(ICandleClusteredVolume rhs)
+    private void ctor(ICandleClusteredVolume rhs, bool cloneVolumes)
     {
       if (rhs != null)
-        Array.Copy(rhs.Volumes, Volumes, rhs.Volumes.Length);
+      {
+        if (cloneVolumes)
+        {
+          Volumes = new Tuple<double, int>[rhs.Volumes.Length];
+          Array.Copy(rhs.Volumes, Volumes, rhs.Volumes.Length);
+        }
+        else
+          Volumes = rhs.Volumes;
+      }
       else
         Volumes = null;
     }
