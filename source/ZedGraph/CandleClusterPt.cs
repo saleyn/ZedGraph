@@ -73,7 +73,7 @@ namespace ZedGraph
     public CandleClusterPt(ICandleClusteredVolume rhs)
       : base(rhs.Date, rhs.Open, rhs.High, rhs.Low, rhs.Close, rhs.Vol)
     {
-      
+      ctor(rhs);
     }
 
     /// <summary>
@@ -89,9 +89,13 @@ namespace ZedGraph
     /// <param name="rhs">The basis for the copy.</param>
     public CandleClusterPt(PointPair rhs) : base(rhs)
     {
-      var r = rhs as ICandleClusteredVolume;
-      if (r != null)
-        Array.Copy(r.Volumes, Volumes, r.Volumes.Length);
+      ctor(rhs as ICandleClusteredVolume);
+    }
+
+    private void ctor(ICandleClusteredVolume rhs)
+    {
+      if (rhs != null)
+        Array.Copy(rhs.Volumes, Volumes, rhs.Volumes.Length);
       else
         Volumes = null;
     }
