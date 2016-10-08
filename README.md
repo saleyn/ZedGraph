@@ -19,6 +19,10 @@ to make it more usable for financial charting.
 * Mouse selectable LineItem
 * Annotation shapes (PointObj)
 * SplitterPane and ability to adjust pane sizes within MasterPane using SplitterPane
+* Modify PointPair to implement IPointPair interface and convert all data lists to
+  support IPointPair.
+* Modify StockPt to implement IStockPt interface and convert StockPointList to
+  support IStockPt.
 
 Example:
 
