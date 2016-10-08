@@ -33,7 +33,7 @@ namespace ZedGraph
   /// modified by John Champion</author>
   /// <version> $Revision: 3.37 $ $Date: 2007/06/29 15:39:07 $ </version>
   [Serializable]
-  public class PointPairList : List<PointPair>, IPointListEdit, IOrdinalPointList
+  public class PointPairList : List<IPointPair>, IPointListEdit, IOrdinalPointList
   {
     #region Fields
     /// <summary>Private field to maintain the sort status of this
@@ -156,11 +156,11 @@ namespace ZedGraph
     /// <param name="point">The <see cref="PointPair"/> object to
     /// be added</param>
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
-    public new void Add(PointPair point)
+    public new void Add(IPointPair point)
     {
       _sorted = false;
       //base.Add( new PointPair( point ) );
-      base.Add(point.Clone());
+      base.Add((IPointPair)point.Clone());
     }
 
     /// <summary>
@@ -326,7 +326,7 @@ namespace ZedGraph
     /// <param name="point">
     /// The <see cref="PointPair"/> object to be added.
     /// </param>
-    public new void Insert(int index, PointPair point)
+    public new void Insert(int index, IPointPair point)
     {
       _sorted = false;
       base.Insert(index, point);
@@ -416,7 +416,7 @@ namespace ZedGraph
     /// <returns>true if the <see cref="PointPairList"/> objects are equal, false otherwise.</returns>
     public override bool Equals(object obj)
     {
-      PointPairList rhs = obj as PointPairList;
+      var rhs = obj as PointPairList;
       if (this.Count != rhs.Count)
         return false;
 
@@ -465,7 +465,7 @@ namespace ZedGraph
       if (_sorted)
         return true;
 
-      this.Sort(new PointPair.PointPairComparer(type));
+      Sort(new PointPair.PointPairComparer(type));
 
       return false;
     }
@@ -488,10 +488,8 @@ namespace ZedGraph
     public void SetX(double[] x)
     {
       for (int i = 0; i < x.Length; i++)
-      {
         if (i < this.Count)
           this[i].X = x[i];
-      }
 
       _sorted = false;
     }
@@ -831,13 +829,11 @@ namespace ZedGraph
 
       for (int i = 0; i < points.Count; i++)
       {
-        PointPair pt = points[i];
+        var pt = points[i];
+        if (pt.IsInvalid) continue;
 
-        if (!pt.IsInvalid)
-        {
-          minX = pt.X < minX ? pt.X : minX;
-          maxX = pt.X > maxX ? pt.X : maxX;
-        }
+        minX = pt.X < minX ? pt.X : minX;
+        maxX = pt.X > maxX ? pt.X : maxX;
       }
 
       return LinearRegression(points, pointCount, minX, maxX);
@@ -868,15 +864,14 @@ namespace ZedGraph
       double x = 0, y = 0, xx = 0, xy = 0, count = 0;
       for (int i = 0; i < points.Count; i++)
       {
-        PointPair pt = points[i];
-        if (!pt.IsInvalid)
-        {
-          x += points[i].X;
-          y += points[i].Y;
-          xx += points[i].X * points[i].X;
-          xy += points[i].X * points[i].Y;
-          count++;
-        }
+        var pt = points[i];
+        if (pt.IsInvalid) continue;
+
+        x += points[i].X;
+        y += points[i].Y;
+        xx += points[i].X * points[i].X;
+        xy += points[i].X * points[i].Y;
+        count++;
       }
 
       if (count < 2 || maxX - minX < 1e-20)
@@ -898,7 +893,7 @@ namespace ZedGraph
     }
 
     /// <summary>
-    /// Create a regression line with all visible data point 
+    /// Create a regression line with all visible data points
     /// Nov. 23, 2009
     /// zhz
     /// </summary>
@@ -912,16 +907,15 @@ namespace ZedGraph
       double x = 0, y = 0, xx = 0, xy = 0, count = 0, yy = 0;
       for (int i = 0; i < points.Count; i++)
       {
-        PointPair pt = points[i];
-        if (!pt.IsInvalid && !pt.IsPointFilter)
-        {
-          x += points[i].X;
-          y += points[i].Y;
-          xx += points[i].X * points[i].X;
-          xy += points[i].X * points[i].Y;
-          yy += points[i].Y * points[i].Y;
-          count++;
-        }
+        var pt = points[i];
+        if (pt.IsInvalid || pt.IsFiltered) continue;
+
+        x  += points[i].X;
+        y  += points[i].Y;
+        xx += points[i].X * points[i].X;
+        xy += points[i].X * points[i].Y;
+        yy += points[i].Y * points[i].Y;
+        count++;
       }
 
       R2 = (xy - x * y / count) * (xy - x * y / count) / ((xx - x * x / count) * (yy - y * y / count));

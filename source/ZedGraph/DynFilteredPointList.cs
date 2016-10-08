@@ -17,6 +17,7 @@
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ZedGraph
@@ -88,7 +89,7 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the
     /// <see cref="PointPair"/> object to be accessed.</param>
     /// <value>A <see cref="PointPair"/> object reference.</value>
-    public PointPair this[int index]
+    public IPointPair this[int index]
     {
       get
       {
@@ -97,16 +98,7 @@ namespace ZedGraph
         if (index < 0 || index >= this.Count)
           return new PointPair(xVal, yVal, PointPair.Missing, null);
 
-        var fIndex = _filtdInds[index];
-        if (fIndex < _x.Count)
-        {
-          xVal = _x[fIndex];
-          yVal = _y[fIndex];
-        }
-        //xVal = _x[_filtdInds[index]];
-        //yVal = _y[_filtdInds[index]];
-
-        return new PointPair(xVal, yVal, PointPair.Missing, null);
+        return unsafeGet(index);
       }
       set
       {
@@ -351,7 +343,7 @@ namespace ZedGraph
     /// </summary>
     /// <remarks>A data point that is not monotonically increasing will not be added.</remarks>
     /// <param name="point">The <see cref="PointPair" /> object containing the data to be added.</param>
-    public void Add(PointPair point)
+    public void Add(IPointPair point)
     {
       if (_x.Count > 0 && point.X < _x[_x.Count - 1])
         return;
@@ -535,6 +527,36 @@ namespace ZedGraph
 
       index = ind;
     }
+
+    private IPointPair unsafeGet(int index)
+    {
+      double x = PointPairBase.Missing, y = PointPairBase.Missing;
+
+      var fIndex = _filtdInds[index];
+      if (fIndex < _x.Count)
+      {
+        x = _x[fIndex];
+        y = _y[fIndex];
+      }
+
+      return new PointPair(x, y, PointPair.Missing, null);
+    }
+
+    #endregion
+
+    #region Enumeration Support
+
+    public IEnumerator<IPointPair> GetEnumerator()
+    {
+      for (var i=0; i < Count; ++i)
+        yield return unsafeGet(i);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
+
     #endregion
   }
 }

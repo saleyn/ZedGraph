@@ -417,7 +417,7 @@ namespace ZedGraph
       for (var i = 1; i < list.Count; i++)
       {
         var pt = list[i];
-        if (!pt.IsInvalid || !lastPt.IsInvalid)
+        if (pt.IsValid && lastPt.IsValid)
         {
           var step = baseAxis is IXAxis ? pt.X - lastPt.X : pt.Y - lastPt.Y;
 

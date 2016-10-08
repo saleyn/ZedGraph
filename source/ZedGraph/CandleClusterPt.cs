@@ -86,14 +86,14 @@ namespace ZedGraph
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
     public CandleClusterPt(CandleClusterPt rhs, bool cloneVolumes = true)
-      : this((PointPair)rhs, cloneVolumes)
+      : this((IPointPair)rhs, cloneVolumes)
     {}
 
     /// <summary>
     /// The StockPt copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public CandleClusterPt(PointPair rhs, bool cloneVolumes = true) : base(rhs)
+    public CandleClusterPt(IPointPair rhs, bool cloneVolumes = true) : base(rhs)
     {
       ctor(rhs as ICandleClusteredVolume, cloneVolumes);
     }
@@ -156,11 +156,6 @@ namespace ZedGraph
     #endregion
 
     #region Properties
-
-    /// <summary>
-    /// DateTime that corresponds to XDate of this point
-    /// </summary>
-    public DateTime TimeStamp => new XDate(Date).DateTime;
 
     /// <summary>
     /// Array of volume clusters aggregated by price steps: {Price, Volume}

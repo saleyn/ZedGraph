@@ -17,6 +17,8 @@
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================using System;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace ZedGraph
 {
@@ -45,29 +47,9 @@ namespace ZedGraph
   #region Fields
 
     /// <summary>
-    /// Instance of an array of x values
+    /// Instance of an array of x,y values
     /// </summary>
-    private double[] _x;
-    /// <summary>
-    /// Instance of an array of x values
-    /// </summary>
-    private double[] _y;
-    /*
-    /// <summary>
-    /// This is the minimum value of the range of interest (typically the minimum of
-    /// the range that you have zoomed into)
-    /// </summary>
-    //private double _xMinBound = double.MinValue;
-    /// <summary>
-    /// This is the maximum value of the range of interest (typically the maximum of
-    /// the range that you have zoomed into)
-    /// </summary>
-    //private double _xMaxBound = double.MaxValue;
-    */
-    /// <summary>
-    /// This is the maximum number of points that you want to see in the filtered dataset
-    /// </summary>
-    private int _maxPts = -1;
+    private CompactPt[] _data;
 
     /// <summary>
     /// The index of the xMinBound above
@@ -104,20 +86,20 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the
     /// <see cref="PointPair"/> object to be accessed.</param>
     /// <value>A <see cref="PointPair"/> object reference.</value>
-    public PointPair this[ int index ]  
+    public IPointPair this[ int index ]  
     {
       get
       {
         // See if the array should be bounded
-        if ( _minBoundIndex >= 0 && _maxBoundIndex >= 0 && _maxPts >= 0 )
+        if ( _minBoundIndex >= 0 && _maxBoundIndex >= 0 && MaxPts >= 0 )
         {
           // get number of points in bounded range
           var nPts = _maxBoundIndex - _minBoundIndex + 1;
 
-          if ( nPts > _maxPts )
+          if ( nPts > MaxPts )
           {
             // if we're skipping points, then calculate the new index
-            index = _minBoundIndex + (int) ( (double) index * (double) nPts / (double) _maxPts );
+            index = _minBoundIndex + (int) ( index * (double) nPts / MaxPts );
           }
           else
           {
@@ -126,24 +108,21 @@ namespace ZedGraph
           }
         }
 
-        var xVal = index >= 0 && index < _x.Length ? _x[index] : PointPair.Missing;
-        var yVal = index >= 0 && index < _y.Length ? _y[index] : PointPair.Missing;
-
-        return new PointPair( xVal, yVal, PointPair.Missing, null );
+        return index >= 0 && index < _data.Length ? (IPointPair)_data[index] : PointPair.Empty;
       }
 
       set
       {
         // See if the array should be bounded
-        if ( _minBoundIndex >= 0 && _maxBoundIndex >= 0 && _maxPts >= 0 )
+        if ( _minBoundIndex >= 0 && _maxBoundIndex >= 0 && MaxPts >= 0 )
         {
           // get number of points in bounded range
           int nPts = _maxBoundIndex - _minBoundIndex + 1;
 
-          if ( nPts > _maxPts )
+          if ( nPts > MaxPts )
           {
             // if we're skipping points, then calculate the new index
-            index = _minBoundIndex + (int) ( (double) index * (double) nPts / (double) _maxPts );
+            index = _minBoundIndex + (int) ( index * (double) nPts / MaxPts );
           }
           else
           {
@@ -152,11 +131,8 @@ namespace ZedGraph
           }
         }
 
-        if ( index >= 0 && index < _x.Length )
-          _x[index] = value.X;
-
-        if ( index >= 0 && index < _y.Length )
-          _y[index] = value.Y;
+        if ( index >= 0 && index < _data.Length )
+          _data[index] = new CompactPt(value);
       }
     }
 
@@ -167,38 +143,34 @@ namespace ZedGraph
     {
       get
       {
-        int arraySize = _x.Length;
+        int arraySize = _data.Length;
 
         // Is the filter active?
-        if ( _minBoundIndex >= 0 && _maxBoundIndex >= 0 && _maxPts > 0 )
-        {
-          // get the number of points within the filter bounds
-          int boundSize = _maxBoundIndex - _minBoundIndex + 1;
+        if (_minBoundIndex < 0 || _maxBoundIndex < 0 || MaxPts <= 0)
+          return arraySize;
 
-          // limit the point count to the filter bounds
-          if ( boundSize < arraySize )
-            arraySize = boundSize;
+        // get the number of points within the filter bounds
+        int boundSize = _maxBoundIndex - _minBoundIndex + 1;
 
-          // limit the point count to the declared max points
-          if ( arraySize > _maxPts )
-            arraySize = _maxPts;
-        }
+        // limit the point count to the filter bounds
+        if ( boundSize < arraySize )
+          arraySize = boundSize;
+
+        // limit the point count to the declared max points
+        if ( arraySize > MaxPts )
+          arraySize = MaxPts;
 
         return arraySize;
       }
     }
 
     /// <summary>
-    /// Gets the desired number of filtered points to output.  You can set this value by
+    /// Gets the max number of filtered points to output.  You can set this value by
     /// calling <see cref="SetBounds" />.
     /// </summary>
-    public int MaxPts
-    {
-      get { return _maxPts; }
-    }
+    public int MaxPts { get; private set; }
 
-
-  #endregion
+    #endregion
 
   #region Constructors
 
@@ -206,10 +178,22 @@ namespace ZedGraph
     /// Constructor to initialize the PointPairList from two arrays of
     /// type double.
     /// </summary>
-    public FilteredPointList( double[] x, double[] y )
+    public FilteredPointList( IReadOnlyList<double> x, IReadOnlyList<double> y )
     {
-      _x = x;
-      _y = y;
+      var len = Math.Max(x.Count, y.Count);
+      var dt = new CompactPt[len];
+      if (x.Count < y.Count)
+      {
+        for (var i = 0; i < x.Count; ++i) dt[i] = new CompactPt(x[i], y[i]);
+        for (var i = x.Count; i < y.Count; ++i) dt[i] = new CompactPt(PointPairBase.Missing, y[i]);
+      }
+      else
+      {
+        for (var i = 0; i < y.Count; ++i) dt[i] = new CompactPt(x[i], y[i]);
+        for (var i = y.Count; i < x.Count; ++i) dt[i] = new CompactPt(x[i], PointPairBase.Missing);
+      }
+
+      _data = dt;
     }
 
     /// <summary>
@@ -218,19 +202,18 @@ namespace ZedGraph
     /// <param name="rhs">The FilteredPointList from which to copy</param>
     public FilteredPointList( FilteredPointList rhs )
     {
-      _x = (double[]) rhs._x.Clone();
-      _y = (double[]) rhs._y.Clone();
+      _data = new CompactPt[rhs.Count];
+      Array.Copy(rhs._data, _data, rhs.Count);
       _minBoundIndex = rhs._minBoundIndex;
       _maxBoundIndex = rhs._maxBoundIndex;
-      _maxPts = rhs._maxPts;
-
+      MaxPts = rhs.MaxPts;
     }
 
     /// <summary>
     /// Deep-copy clone routine
     /// </summary>
     /// <returns>A new, independent copy of the FilteredPointList</returns>
-    virtual public object Clone()
+    public virtual object Clone()
     { 
       return new FilteredPointList( this ); 
     }
@@ -252,26 +235,21 @@ namespace ZedGraph
     // New code mods by ingineer
     public void SetBounds( double min, double max, int maxPts )
     {
-      _maxPts = maxPts;
+      MaxPts = maxPts;
 
       // find the index of the start and end of the bounded range
-      int first = Array.BinarySearch( _x, min );
-      int last = Array.BinarySearch( _x, max );
+      var first = Array.BinarySearch( _data, min );
+      var last  = Array.BinarySearch( _data, max );
 
       // Make sure the bounded indices are legitimate
       // if BinarySearch() doesn't find the value, it returns the bitwise
       // complement of the index of the 1st element larger than the sought value
 
       if (first < 0)
-      {
-        if (first == -1)
-          first = 0;
-        else
-          first = ~(first + 1);
-      }
+        first = first == -1 ? 0 : ~(first + 1);
 
       if ( last < 0 )
-      last = ~last;
+        last = ~last;
 
       _minBoundIndex = first;
       _maxBoundIndex = last;
@@ -305,7 +283,20 @@ namespace ZedGraph
     //    _maxBoundIndex = last;
     //}
 
-  #endregion
+    #endregion
 
+    #region Enumerator Support
+
+    public IEnumerator<IPointPair> GetEnumerator()
+    {
+      throw new NotImplementedException();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
+
+    #endregion
   }
 }

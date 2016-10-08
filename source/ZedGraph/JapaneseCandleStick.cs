@@ -263,7 +263,7 @@ namespace ZedGraph
     internal void Draw(Graphics g, GraphPane pane, bool isXBase,
                 float pixBase, float pixHigh, float pixLow,
                 float pixOpen, float pixClose, float halfSize,
-                float scaleFactor, Pen pen, Fill fill, Border border, PointPair pt,
+                float scaleFactor, Pen pen, Fill fill, Border border, IPointPair pt,
                 float dotHalfSize)
     {
       //float halfSize = (int) ( _size * scaleFactor / 2.0f + 0.5f );
@@ -379,7 +379,7 @@ namespace ZedGraph
           //   by zero, etc.
           // Also, any value <= zero on a log scale is invalid
 
-          if (curve.Points[i].IsInvalid3D || (date <= 0 && baseAxis.Scale.IsLog) ||
+          if (curve.Points[i].IsInvalid || (date <= 0 && baseAxis.Scale.IsLog) ||
              ((high <= 0 || low <= 0) && valueAxis.Scale.IsLog))
             continue;
 

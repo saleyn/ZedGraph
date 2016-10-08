@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 
@@ -153,7 +154,7 @@ namespace ZedGraph
     /// copies the reference to this <see cref="ArrayList" />, but does not actually duplicate
     /// the data.
     /// </summary>
-    private ArrayList  DataCollection;
+    private ArrayList DataCollection;
 
     /// <summary>
     /// Determines what X data will be returned by the indexer of this list.
@@ -215,7 +216,7 @@ namespace ZedGraph
     /// </summary>
     /// <param name="index">The ordinal position of the desired point in the list</param>
     /// <returns>A <see cref="PointPair" /> corresponding to the specified ordinal data position</returns>
-    public PointPair this[ int index ]
+    public IPointPair this[ int index ]
     {
       get
       {
@@ -280,5 +281,15 @@ namespace ZedGraph
       DataCollection.Insert( index, perfData );
     }
 
+    public IEnumerator<IPointPair> GetEnumerator()
+    {
+      for (int i=0; i < Count; ++i)
+        yield return this[i];
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
   }
 }

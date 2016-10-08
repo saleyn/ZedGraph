@@ -36,15 +36,17 @@ namespace ZedGraph
   /// <author> Jerry Vos modified by John Champion </author>
   /// <version> $Revision: 3.26 $ $Date: 2007-11-28 02:38:22 $ </version>
   [Serializable]
-  public class PointPair : PointPairBase, ICloneable
+  public class PointPair : PointPairBase, IPointPair
   {
+    public static readonly PointPair Empty = new PointPair(Missing, Missing, Missing);
+
     #region Member variables
 
     /// <summary>
     /// This PointPair's Z coordinate.  Also used for the lower value (dependent axis)
     /// for <see cref="HiLowBarItem"/> and <see cref="ErrorBarItem" /> charts.
     /// </summary>
-    public double Z;
+    public double Z { get; set; }
 
     /// <summary>
     /// A tag object for use by the user.  This can be used to store additional
@@ -58,7 +60,7 @@ namespace ZedGraph
     /// that you store in <see cref="Tag"/> must be a serializable type (or
     /// it will cause an exception).
     /// </remarks>
-    public object Tag;
+    public object Tag { get; set; }
 
     #endregion
 
@@ -67,19 +69,14 @@ namespace ZedGraph
     /// <summary>
     /// Default Constructor
     /// </summary>
-    public PointPair() : this(0, 0, 0, null)
-    {
-    }
+    public PointPair() : this(0, 0, 0, null) {}
 
     /// <summary>
     /// Creates a point pair with the specified X and Y.
     /// </summary>
     /// <param name="x">This pair's x coordinate.</param>
     /// <param name="y">This pair's y coordinate.</param>
-    public PointPair(double x, double y)
-      : this(x, y, 0, null)
-    {
-    }
+    public PointPair(double x, double y) : this(x, y, 0, null) {}
 
     /// <summary>
     /// Creates a point pair with the specified X, Y, and
@@ -89,9 +86,8 @@ namespace ZedGraph
     /// <param name="y">This pair's y coordinate.</param>
     /// <param name="label">This pair's string label (<see cref="Tag"/>)</param>
     public PointPair(double x, double y, string label)
-      : this(x, y, 0, label as object)
-    {
-    }
+      : this(x, y, 0, (object)label)
+    {}
 
     /// <summary>
     /// Creates a point pair with the specified X, Y, and base value.
@@ -101,8 +97,7 @@ namespace ZedGraph
     /// <param name="z">This pair's z or lower dependent coordinate.</param>
     public PointPair(double x, double y, double z)
       : this(x, y, z, null)
-    {
-    }
+    {}
 
     /// <summary>
     /// Creates a point pair with the specified X, Y, base value, and
@@ -113,9 +108,8 @@ namespace ZedGraph
     /// <param name="z">This pair's z or lower dependent coordinate.</param>
     /// <param name="label">This pair's string label (<see cref="Tag"/>)</param>
     public PointPair(double x, double y, double z, string label)
-      : this(x, y, z, label as object)
-    {
-    }
+      : this(x, y, z, (object)label)
+    {}
 
     /// <summary>
     /// Creates a point pair with the specified X, Y, base value, and
@@ -125,8 +119,7 @@ namespace ZedGraph
     /// <param name="y">This pair's y coordinate.</param>
     /// <param name="z">This pair's z or lower dependent coordinate.</param>
     /// <param name="tag">This pair's <see cref="Tag"/> property</param>
-    public PointPair(double x, double y, double z, object tag)
-      : base(x, y)
+    public PointPair(double x, double y, double z, object tag) : base(x, y)
     {
       this.Z = z;
       this.Tag = tag;
@@ -137,15 +130,13 @@ namespace ZedGraph
     /// </summary>
     /// <param name="pt">The <see cref="PointF"/> struct from which to get the
     /// new <see cref="PointPair"/> values.</param>
-    public PointPair(PointF pt) : this(pt.X, pt.Y, 0, null)
-    {
-    }
+    public PointPair(PointF pt) : this(pt.X, pt.Y, 0, null) {}
 
     /// <summary>
     /// The PointPair copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public PointPair(PointPair rhs) : base(rhs)
+    public PointPair(IPointPair rhs) : base(rhs)
     {
       this.Z = rhs.Z;
       this.Tag = rhs.Tag is ICloneable ? ((ICloneable)rhs.Tag).Clone() : rhs.Tag;
@@ -165,9 +156,9 @@ namespace ZedGraph
     /// Typesafe, deep-copy clone method.
     /// </summary>
     /// <returns>A new, independent copy of this class</returns>
-    public PointPair Clone()
+    public IPointPair Clone()
     {
-      return new PointPair(this);
+      return new PointPair((IPointPair)this);
     }
 
     /// <summary>
@@ -420,7 +411,7 @@ namespace ZedGraph
     /// ascending order sort.
     /// <seealso cref="System.Collections.ArrayList.Sort()"/>
     /// </summary>
-    public class PointPairComparer : IComparer<PointPair>
+    public class PointPairComparer : IComparer<IPointPair>
     {
       private SortType sortType;
 
@@ -439,13 +430,13 @@ namespace ZedGraph
       /// <param name="l">Point to the left.</param>
       /// <param name="r">Point to the right.</param>
       /// <returns>-1, 0, or 1 depending on l.X's relation to r.X</returns>
-      public int Compare(PointPair l, PointPair r)
+      public int Compare(IPointPair l, IPointPair r)
       {
         if (l == null && r == null)
           return 0;
-        else if (l == null && r != null)
+        if (l == null)
           return -1;
-        else if (l != null && r == null)
+        if (r == null)
           return 1;
 
         double lVal, rVal;
@@ -468,12 +459,11 @@ namespace ZedGraph
 
         if ((l == null && r == null) || (System.Math.Abs(lVal - rVal) < 1e-100))
           return 0;
-        else if (l == null && r != null)
+        if (l == null)
           return -1;
-        else if (l != null && r == null)
+        if (r == null)
           return 1;
-        else
-          return lVal < rVal ? -1 : 1;
+        return lVal < rVal ? -1 : 1;
       }
     }
 

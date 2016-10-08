@@ -18,9 +18,44 @@
 //=============================================================================
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ZedGraph
 {
+  /// <summary>
+  /// Compact structure with only two storage members X and Y.
+  /// </summary>
+  /// <remarks>intended for very large datasets</remarks>
+  public struct CompactPt : IPointPair
+  {
+    public CompactPt(double x, double y) { X = x; Y = y; }
+    public CompactPt(IPointPair rhs) { X = rhs.X; Y = rhs.Y; }
+
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Z { get { return Y; } set { Y = value; } }
+
+    public object Tag { get { return null; } set { } }
+    public double LowValue => Y;
+    public double HighValue => Y;
+    public double ColorValue => Y;
+    public bool IsValid => Y != PointPairBase.Missing && Y != PointPairBase.Missing;
+    public bool IsInvalid => !IsValid;
+    public bool IsFiltered => false;
+
+    public IPointPair Clone()
+    {
+      return new CompactPt(X, Y);
+    }
+
+    object ICloneable.Clone()
+    {
+      return Clone();
+    }
+  }
+
   /// <summary>
   /// A data collection class for ZedGraph, provided as an alternative to <see cref="PointPairList" />.
   /// </summary>
@@ -38,20 +73,16 @@ namespace ZedGraph
   [Serializable]
   public class BasicArrayPointList : IPointList
   {
-  #region Fields
+    #region Fields
 
     /// <summary>
-    /// Instance of an array of x values
+    /// Instance of an array of values
     /// </summary>
-    public double[] x;
-    /// <summary>
-    /// Instance of an array of x values
-    /// </summary>
-    public double[] y;
+    private readonly CompactPt[] _data;
 
-  #endregion
+    #endregion
 
-  #region Properties
+    #region Properties
     /// <summary>
     /// Indexer to access the specified <see cref="PointPair"/> object by
     /// its ordinal position in the list.
@@ -63,20 +94,19 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the
     /// <see cref="PointPair"/> object to be accessed.</param>
     /// <value>A <see cref="PointPair"/> object reference.</value>
-    public PointPair this[ int index ]  
+    public IPointPair this[ int index ]
     {
       get
       {
-        var xVal = index >= 0 && index < x.Length ? x[index] : PointPairBase.Missing;
-        var yVal = index >= 0 && index < y.Length ? y[index] : PointPairBase.Missing;
-        return new PointPair( xVal, yVal, PointPairBase.Missing, null );
+        return index >= 0 && index < _data.Length 
+          ? _data[index]
+          : new CompactPt(PointPairBase.Missing, PointPairBase.Missing);
       }
       set
       {
-        if ( index >= 0 && index < x.Length )
-          x[index] = value.X;
-        if ( index >= 0 && index < y.Length )
-          y[index] = value.Y;
+        if (index < 0 || index >= _data.Length)
+          throw new ArgumentOutOfRangeException($"Invalid index: {index} (count={Count})");
+        _data[index] = new CompactPt(value);
       }
     }
 
@@ -84,12 +114,9 @@ namespace ZedGraph
     /// Returns the number of points available in the arrays.  Count will be the greater
     /// of the lengths of the X and Y arrays.
     /// </summary>
-    public int Count
-    {
-      get { return x.Length > y.Length ? x.Length : y.Length; }
-    }
+    public int Count => _data.Length;
 
-  #endregion
+    #endregion
 
   #region Constructors
 
@@ -99,8 +126,20 @@ namespace ZedGraph
     /// </summary>
     public BasicArrayPointList( double[] x, double[] y )
     {
-      this.x = x;
-      this.y = y;
+      var len = Math.Max(x.Length, y.Length);
+      var dt  = new CompactPt[len];
+      if (x.Length < y.Length)
+      {
+        for(var i=0; i < x.Length; ++i) dt[i] = new CompactPt(x[i], y[i]);
+        for(var i=x.Length; i < y.Length; ++i) dt[i] = new CompactPt(PointPairBase.Missing, y[i]);
+      }
+      else
+      {
+        for (var i = 0; i < y.Length; ++i) dt[i] = new CompactPt(x[i], y[i]);
+        for (var i = y.Length; i < x.Length; ++i) dt[i] = new CompactPt(x[i], PointPairBase.Missing);
+      }
+
+      _data = dt;
     }
 
     /// <summary>
@@ -109,8 +148,8 @@ namespace ZedGraph
     /// <param name="rhs">The PointPairList from which to copy</param>
     public BasicArrayPointList( BasicArrayPointList rhs )
     {
-      x = (double[]) rhs.x.Clone();
-      y = (double[]) rhs.y.Clone();
+      _data = new CompactPt[rhs.Count];
+      Array.Copy(rhs._data, _data, rhs.Count);
     }
 
     /// <summary>
@@ -132,8 +171,17 @@ namespace ZedGraph
       return new BasicArrayPointList( this );
     }
 
-    
-  #endregion
 
+    #endregion
+
+    public IEnumerator<IPointPair> GetEnumerator()
+    {
+      return _data.Cast<IPointPair>().GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
   }
 }

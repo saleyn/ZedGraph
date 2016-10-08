@@ -54,19 +54,19 @@ namespace ZedGraph
     /// <summary>
     /// This PointPair's X coordinate
     /// </summary>
-    public double X;
+    public double X { get; set; }
 
     /// <summary>
     /// This PointPair's Y coordinate
     /// </summary>
-    public double Y;
+    public double Y { get; set; }
 
     ////chenmin
     //public DataRow SourceRow = null;
     public object ID { get; set; }
     public bool IsVisible { get; set; } = true;
 
-    public bool IsPointFilter { get; set; }
+    public bool IsFiltered { get; set; }
 
     public Color PointColor { get; set; } = Color.Blue;
 
@@ -111,18 +111,20 @@ namespace ZedGraph
     /// The PointPairBase copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public PointPairBase(PointPairBase rhs)
+    public PointPairBase(IPointPair rhs)
     {
       this.X = rhs.X;
       this.Y = rhs.Y;
 
-      //chenmin
-      this.ID              = rhs.ID;
-      this.IsVisible       = rhs.IsVisible;
-      this.IsPointFilter   = rhs.IsPointFilter;
-      this.PointColor      = rhs.PointColor;
-      this.PointSymbolType = rhs.PointSymbolType;
-      this.IsSelectable    = rhs.IsSelectable;
+      var r  = rhs as PointPairBase;
+      if (r == null) return;
+
+      this.ID              = r.ID;
+      this.IsVisible       = r.IsVisible;
+      this.IsFiltered   = r.IsFiltered;
+      this.PointColor      = r.PointColor;
+      this.PointSymbolType = r.PointSymbolType;
+      this.IsSelectable    = r.IsSelectable;
     }
 
     #endregion
@@ -152,7 +154,7 @@ namespace ZedGraph
 
       ID                   = info.GetValue("ID", typeof(object));
       IsVisible            = info.GetBoolean("IsVisible");
-      this.IsPointFilter   = info.GetBoolean("IsPointFilter");
+      this.IsFiltered   = info.GetBoolean("IsPointFilter");
       this.PointColor      = (Color)info.GetValue("PointColor", typeof(Color));
       this.PointSymbolType = (SymbolType)info.GetValue("PointSymbolType", typeof(SymbolType));
       this.IsSelectable    = info.GetBoolean("IsSelectable");
@@ -173,7 +175,7 @@ namespace ZedGraph
       //chenmin
       info.AddValue("ID",              ID);
       info.AddValue("IsVisible",       IsVisible);
-      info.AddValue("IsPointFilter",   IsPointFilter);
+      info.AddValue("IsPointFilter",   IsFiltered);
       info.AddValue("PointColor",      PointColor);
       info.AddValue("PointSymbolType", PointSymbolType);
       info.AddValue("IsSelectable",    IsSelectable);
@@ -203,6 +205,11 @@ namespace ZedGraph
                              double.IsInfinity(this.Y) ||
                              double.IsNaN(this.X) ||
                              double.IsNaN(this.Y);
+
+    /// <summary>
+    /// Returns true if the point is valid
+    /// </summary>
+    public bool IsValid => !IsInvalid;
 
     /// <summary>
     /// static method to determine if the specified point value is invalid.

@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Timer = System.Timers.Timer;
 
 namespace ZedGraph.Demo
@@ -272,7 +273,7 @@ namespace ZedGraph.Demo
           m_Data = csvFileExists ? Serializer.ReadFromCSV<CandleClusterPtList>(CSVFilename)
                                  : Serializer.ReadFromBinaryFile<CandleClusterPtList>(Filename);
 
-          foreach (var pt in m_Data)
+          foreach (var pt in m_Data.Cast<ICandleClusteredVolume>())
           {
             var lo = pt.Low;
             var hi = pt.High;
@@ -293,7 +294,7 @@ namespace ZedGraph.Demo
           var close = ((CandleClusterPt)m_Data[0]).Close;
           m_EMA = close;
 
-          foreach (var p in m_Data)
+          foreach (var p in m_Data.Cast<ICandleClusteredVolume>())
           {
             m_EMA = EMA_ALPHA * close + (1.0 - EMA_ALPHA) * m_EMA;
             m_EMAData.Add(p.Date, m_EMA);

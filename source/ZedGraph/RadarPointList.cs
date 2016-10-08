@@ -35,7 +35,7 @@ namespace ZedGraph
   /// <author>Jerry Vos and John Champion</author>
   /// <version> $Revision: 3.5 $ $Date: 2007-04-16 00:03:02 $ </version>
   [Serializable]
-  public class RadarPointList : List<PointPair>, IPointListEdit
+  public class RadarPointList : List<IPointPair>, IPointListEdit
   {
 
   #region Fields
@@ -61,7 +61,7 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the
     /// <see cref="PointPair"/> object to be accessed.</param>
     /// <value>A <see cref="PointPair"/> object reference.</value>
-    public new PointPair this[int index]
+    public new IPointPair this[int index]
     {
       get
       {
@@ -120,7 +120,7 @@ namespace ZedGraph
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
-    private PointPair GetAt( int index )
+    private IPointPair GetAt( int index )
     {
       return base[index];
     }
@@ -128,10 +128,7 @@ namespace ZedGraph
     /// <summary>
     /// gets the number of points available in the list
     /// </summary>
-    public new int Count
-    {
-      get { return base.Count + 1; }
-    }
+    public new int Count => base.Count + 1;
 
     #endregion
 

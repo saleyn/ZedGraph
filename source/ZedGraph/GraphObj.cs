@@ -936,7 +936,7 @@ namespace ZedGraph
       return 180 * Math.Atan2(y1 - y0, x1 - x0) / Math.PI;
     }
 
-    public static bool PtInPolygon(PointF[] points, PointF pt)
+    public static bool PtInPolygon(PointF[] points, IPointPair pt)
     {
       int i, j;
       bool rc = false;
@@ -953,7 +953,7 @@ namespace ZedGraph
       return rc;
     }
 
-    public static bool PtInPolygon2(PointF[] points, PointF p)
+    public static bool PtInPolygon2(PointF[] points, IPointPair p)
     {
       bool result = false;
       for (int i = 0; i < points.Length - 1; i++)

@@ -348,7 +348,7 @@ namespace ZedGraph
       if ( i < 0 || i >= Points.Count )
         return false;
 
-      PointPair pt = Points[i];
+      var pt = Points[i];
       if ( pt.IsInvalid )
         return false;
 

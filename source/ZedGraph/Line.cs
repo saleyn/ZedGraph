@@ -461,7 +461,7 @@ namespace ZedGraph
       {
         for ( int i = 0; i < curve.Points.Count; i++ )
         {
-          PointPair pt = curve.Points[i];
+          var pt = curve.Points[i];
 
           if ( pt.X != PointPair.Missing &&
               pt.Y != PointPair.Missing &&
@@ -648,7 +648,7 @@ namespace ZedGraph
       int  lastX = int.MaxValue,
           lastY = int.MaxValue;
 
-      PointPair curPt, lastPt = new PointPair();
+      IPointPair lastPt = new PointPair();
 
       bool lastBad = true;
       IPointList points = curve.Points;
@@ -686,7 +686,7 @@ namespace ZedGraph
         // Loop over each point in the curve
         for ( int i = 0; i < points.Count; i++ )
         {
-          curPt = points[i];
+          var curPt = points[i];
           double curX;
           double curY;
           if ( pane.LineType == LineType.Stack )
@@ -855,7 +855,7 @@ namespace ZedGraph
 
       float lastX = float.MaxValue,
             lastY = float.MaxValue;
-      PointPair curPt, lastPt = new PointPair();
+      IPointPair lastPt = new PointPair();
 
       bool lastBad = true;
       IPointList points = curve.Points;
@@ -881,7 +881,7 @@ namespace ZedGraph
           // Loop over each point in the curve
           for ( int i = 0; i < points.Count; i++ )
           {
-            curPt = points[i];
+            var curPt = points[i];
             double curY;
             double curX;
             if ( pane.LineType == LineType.Stack )
@@ -1023,7 +1023,7 @@ namespace ZedGraph
     /// would not see coordinates like this, if you repeatedly zoom in on a ZedGraphControl, eventually
     /// all your points will be way outside the bounds of the plot.
     /// </summary>
-    private void InterpolatePoint( Graphics g, GraphPane pane, CurveItem curve, PointPair lastPt,
+    private void InterpolatePoint( Graphics g, GraphPane pane, CurveItem curve, IPointPair lastPt,
             float scaleFactor, Pen pen, float lastX, float lastY, float tmpX, float tmpY )
     {
       try
@@ -1185,68 +1185,65 @@ namespace ZedGraph
         for ( int i = 0; i < points.Count; i++ )
         {
           // make sure that the current point is valid
-          if ( !points[i].IsInvalid )
+          if (points[i].IsInvalid) continue;
+
+          // Get the user scale values for the current point
+          // use the valueHandler only for stacked types
+          if ( pane.LineType == LineType.Stack )
           {
-            // Get the user scale values for the current point
-            // use the valueHandler only for stacked types
-            if ( pane.LineType == LineType.Stack )
-            {
-              valueHandler.GetValues( curve, i, out x, out lowVal, out y );
-            }
-            // otherwise, just access the values directly.  Avoiding the valueHandler for
-            // non-stacked types is an optimization to minimize overhead in case there are
-            // a large number of points.
-            else
-            {
-              x = points[i].X;
-              y = points[i].Y;
-            }
-
-            if ( x == PointPair.Missing || y == PointPair.Missing )
-              continue;
-
-            // Transform the user scale values to pixel locations
-            Axis xAxis = curve.GetXAxis( pane );
-            curX = xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, x );
-            Axis yAxis = curve.GetYAxis( pane );
-            curY = yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, y );
-
-            if ( curX < -1000000 || curY < -1000000 || curX > 1000000 || curY > 1000000 )
-              continue;
-
-            // Add the pixel value pair into the points array
-            // Two points are added for step type curves
-            // ignore step-type setting for smooth curves
-            if ( _isSmooth || index == 0 || this.StepType == StepType.NonStep )
-            {
-              arrPoints[index].X = curX;
-              arrPoints[index].Y = curY;
-            }
-            else if ( this.StepType == StepType.ForwardStep ||
-                    this.StepType == StepType.ForwardSegment )
-            {
-              arrPoints[index].X = curX;
-              arrPoints[index].Y = lastY;
-              index++;
-              arrPoints[index].X = curX;
-              arrPoints[index].Y = curY;
-            }
-            else if ( this.StepType == StepType.RearwardStep ||
-                    this.StepType == StepType.RearwardSegment )
-            {
-              arrPoints[index].X = lastX;
-              arrPoints[index].Y = curY;
-              index++;
-              arrPoints[index].X = curX;
-              arrPoints[index].Y = curY;
-            }
-
-            lastX = curX;
-            lastY = curY;
-            index++;
-
+            valueHandler.GetValues( curve, i, out x, out lowVal, out y );
+          }
+          // otherwise, just access the values directly.  Avoiding the valueHandler for
+          // non-stacked types is an optimization to minimize overhead in case there are
+          // a large number of points.
+          else
+          {
+            x = points[i].X;
+            y = points[i].Y;
           }
 
+          if ( x == PointPair.Missing || y == PointPair.Missing )
+            continue;
+
+          // Transform the user scale values to pixel locations
+          Axis xAxis = curve.GetXAxis( pane );
+          curX = xAxis.Scale.Transform( curve.IsOverrideOrdinal, i, x );
+          Axis yAxis = curve.GetYAxis( pane );
+          curY = yAxis.Scale.Transform( curve.IsOverrideOrdinal, i, y );
+
+          if ( curX < -1000000 || curY < -1000000 || curX > 1000000 || curY > 1000000 )
+            continue;
+
+          // Add the pixel value pair into the points array
+          // Two points are added for step type curves
+          // ignore step-type setting for smooth curves
+          if ( _isSmooth || index == 0 || this.StepType == StepType.NonStep )
+          {
+            arrPoints[index].X = curX;
+            arrPoints[index].Y = curY;
+          }
+          else if ( this.StepType == StepType.ForwardStep ||
+                    this.StepType == StepType.ForwardSegment )
+          {
+            arrPoints[index].X = curX;
+            arrPoints[index].Y = lastY;
+            index++;
+            arrPoints[index].X = curX;
+            arrPoints[index].Y = curY;
+          }
+          else if ( this.StepType == StepType.RearwardStep ||
+                    this.StepType == StepType.RearwardSegment )
+          {
+            arrPoints[index].X = lastX;
+            arrPoints[index].Y = curY;
+            index++;
+            arrPoints[index].X = curX;
+            arrPoints[index].Y = curY;
+          }
+
+          lastX = curX;
+          lastY = curY;
+          index++;
         }
 
         // Make sure there is at least one valid point

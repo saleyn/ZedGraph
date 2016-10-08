@@ -294,7 +294,7 @@ namespace ZedGraph
     public void Draw( Graphics g, GraphPane pane, bool isXBase,
                 float pixBase, float pixValue,
                 float pixLowValue, float scaleFactor, Pen pen, bool isSelected,
-                PointPair dataValue )
+                IPointPair dataValue )
     {
       if ( isXBase )
       {
@@ -363,7 +363,7 @@ namespace ZedGraph
             //   by zero, etc.
             // Also, any value <= zero on a log scale is invalid
 
-            if ( !curve.Points[i].IsInvalid3D &&
+            if ( curve.Points[i].IsValid &&
                 ( scaleBase > 0 || !baseAxis.Scale.IsLog ) &&
                 ( ( scaleValue > 0 && scaleLowValue > 0 ) || !valueAxis.Scale.IsLog ) )
             {

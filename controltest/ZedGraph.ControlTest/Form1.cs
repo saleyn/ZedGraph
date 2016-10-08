@@ -760,7 +760,7 @@ namespace ZedGraph.ControlTest
 			myPane.XAxis.Title.Text = "Trading Date";
 			myPane.YAxis.Title.Text = "Share Price, $US";
 
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is feb 1st
@@ -825,7 +825,7 @@ namespace ZedGraph.ControlTest
 			myPane.XAxis.Title.Text = "Trading Date";
 			myPane.YAxis.Title.Text = "Share Price, $US";
 
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is jan 1st
@@ -881,7 +881,7 @@ namespace ZedGraph.ControlTest
 			myPane.YAxis.Title.Text = "Price";
 
 			//Load a StockPointList with random data.........................
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is jan 1st
@@ -960,7 +960,7 @@ namespace ZedGraph.ControlTest
 			// ================================================
 			// First, set up some lists with random data...
 			// ================================================
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			PointPairList volList = new PointPairList();
 			PointPairList changeList = new PointPairList();
 
@@ -1172,7 +1172,7 @@ namespace ZedGraph.ControlTest
 			myPane.XAxis.Title.Text = "Trading Date";
 			myPane.YAxis.Title.Text = "Share Price, $US";
 
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is jan 1st
@@ -1229,7 +1229,7 @@ namespace ZedGraph.ControlTest
 			myPane.XAxis.Title.Text = "Trading Date";
 			myPane.YAxis.Title.Text = "Share Price, $US";
 
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is jan 1st
@@ -1284,7 +1284,7 @@ namespace ZedGraph.ControlTest
 			myPane.XAxis.Title.Text = "Trading Date";
 			myPane.YAxis.Title.Text = "Share Price, $US";
 
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is jan 1st
@@ -1337,7 +1337,7 @@ namespace ZedGraph.ControlTest
 			myPane.XAxis.Title.Text = "Trading Date";
 			myPane.YAxis.Title.Text = "Share Price, $US";
 
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is jan 1st
@@ -1608,9 +1608,9 @@ namespace ZedGraph.ControlTest
 
 			for ( int i = 0; i < count; i++ )
 			{
-				PointPair pt = myCurve.Points[i];
+				var pt = myCurve.Points[i];
 
-				TextObj text = new TextObj( pt.Y.ToString( "f2" ), pt.X, pt.Y,
+				var text = new TextObj( pt.Y.ToString( "f2" ), pt.X, pt.Y,
 					CoordType.AxisXYScale, AlignH.Right, AlignV.Bottom );
 				text.ZOrder = ZOrder.A_InFront;
 				text.FontSpec.Border.IsVisible = false;
@@ -1751,20 +1751,18 @@ namespace ZedGraph.ControlTest
 					IPointList pointList = curve.Points;
 					for ( int i = 0; i < pointList.Count; i++ )
 					{
-						PointPair pt = pointList[i];
-						if ( Math.Abs( x - pt.X ) < nearestX )
-						{
-							nearestCurve = curve;
-							nearestIndex = i;
-							nearestX = Math.Abs( x - pt.X );
-						}
+						var pt = pointList[i];
+					  if (!(Math.Abs(x - pt.X) < nearestX)) continue;
+					  nearestCurve = curve;
+					  nearestIndex = i;
+					  nearestX = Math.Abs( x - pt.X );
 					}
 				}
 
 
 				if ( nearestIndex >= 0 && nearestCurve != null )
 				{
-					PointPair pt = nearestCurve.Points[nearestIndex];
+					var pt = nearestCurve.Points[nearestIndex];
 
 					// Format the status label text
 					toolStripStatusXY.Text = "(" + pt.X.ToString( "f2" ) + ", " + pt.Y.ToString( "f2" ) + ")";
@@ -2615,7 +2613,7 @@ namespace ZedGraph.ControlTest
 			myPane.XAxis.Title.Text = "date time";
 			myPane.YAxis.Title.Text = "Rate";
 			Random rd = new Random( 1 );
-			RollingPointPairList list = new RollingPointPairList( 1200 );
+			var list = new RollingPointPairList<PointPair>( 1200 );
 			DateTime mynow2 = DateTime.Now;
 
 			list.Add( mynow2.ToOADate(), 15 );
@@ -2688,7 +2686,7 @@ namespace ZedGraph.ControlTest
 			myPane.XAxis.Title.Text = "Trading Date";
 			myPane.YAxis.Title.Text = "Share Price, $US";
 
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is jan 1st 
@@ -2737,7 +2735,7 @@ namespace ZedGraph.ControlTest
 			{
 				double avg = 0.0;
 				for ( int j = 0; j < 20; j++ )
-					avg += spl.GetAt( i - j ).Close;
+					avg += ((StockPt)spl.GetAt( i - j )).Close;
 				ppl.Add( i + 1, avg / 20.0 );
 			}
 			LineItem item = myPane.AddCurve( "MA-20", ppl, Color.Red );
@@ -3179,13 +3177,15 @@ namespace ZedGraph.ControlTest
 			for ( int i = 0; i < count; i++ )
 			{
 				// Get the pointpair
-				PointPair pt = curve.Points[i];
+				var pt = curve.Points[i];
 
 				// Create a text label from the Y data value
-				TextObj text = new TextObj( pt.Y.ToString( "f2" ), pt.X, pt.Y + offset,
-					CoordType.AxisXYScale, AlignH.Left, AlignV.Center );
-				text.ZOrder = ZOrder.A_InFront;
-				// Hide the border and the fill
+			  var text = new TextObj(pt.Y.ToString("f2"), pt.X, pt.Y + offset,
+			                         CoordType.AxisXYScale, AlignH.Left, AlignV.Center)
+			  {
+			    ZOrder = ZOrder.A_InFront
+			  };
+			  // Hide the border and the fill
 				text.FontSpec.Border.IsVisible = false;
 				text.FontSpec.Fill.IsVisible = false;
 				//text.FontSpec.Fill = new Fill( Color.FromArgb( 100, Color.White ) );
@@ -7017,7 +7017,7 @@ namespace ZedGraph.ControlTest
 		bool isDragPoint = false;
 		CurveItem dragCurve;
 		int dragIndex;
-		PointPair startPair;
+		IPointPair startPair;
 
 		private bool old_zedGraphControl1_MouseDownEvent( ZedGraphControl control, MouseEventArgs e )
 		{

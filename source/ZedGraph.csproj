@@ -60,6 +60,7 @@
     </Compile>
     <Compile Include="ZedGraph\CandleClusterPtList.cs" />
     <Compile Include="ZedGraph\DynFilteredPointList.cs" />
+    <Compile Include="ZedGraph\IPointPair.cs" />
     <Compile Include="ZedGraph\OHLCBarCluster.cs" />
     <Compile Include="ZedGraph\OHLCBarClusterItem.cs" />
     <Compile Include="ZedGraph\SplitterPane.cs" />

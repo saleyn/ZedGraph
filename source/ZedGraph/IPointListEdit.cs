@@ -54,14 +54,14 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the
     /// data point to be accessed.</param>
     /// <value>A <see cref="PointPair"/> object instance.</value>
-    new PointPair this[int index] { get; set; }
+    new IPointPair this[int index] { get; set; }
 
     /// <summary>
     /// Appends a point to the end of the list.  The data are passed in as a <see cref="PointPair" />
     /// object.
     /// </summary>
     /// <param name="point">The <see cref="PointPair" /> object containing the data to be added.</param>
-    void Add( PointPair point );
+    void Add( IPointPair point );
 
     /// <summary>
     /// Appends a point to the end of the list.  The data are passed in as two <see cref="Double" />
@@ -83,6 +83,5 @@ namespace ZedGraph
     /// <see cref="IPointList.Count" /> will be zero.
     /// </summary>
     void Clear();
-
   }
 }

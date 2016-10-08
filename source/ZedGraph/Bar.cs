@@ -246,7 +246,7 @@ namespace ZedGraph
     /// </param>
     public void Draw( Graphics g, GraphPane pane, float left, float right, float top,
               float bottom, float scaleFactor, bool fullFrame, bool isSelected,
-              PointPair dataValue )
+              IPointPair dataValue )
     {
       // Do a sanity check to make sure the top < bottom.  If not, reverse them
       if ( top > bottom )
@@ -314,7 +314,7 @@ namespace ZedGraph
     /// with attributes from the <see cref="Selection" /> class.
     /// </param>
     public void Draw( Graphics g, GraphPane pane, RectangleF rect, float scaleFactor,
-              bool fullFrame, bool isSelected, PointPair dataValue )
+              bool fullFrame, bool isSelected, IPointPair dataValue )
     {
       if ( isSelected )
       {
@@ -492,7 +492,7 @@ namespace ZedGraph
       //   by zero, etc.
       // Also, any value <= zero on a log scale is invalid
 
-      if ( !curve.Points[index].IsInvalid )
+      if ( curve.Points[index].IsValid )
       {
         // calculate a pixel value for the top of the bar on value axis
         pixLowVal = valueAxis.Scale.Transform( curve.IsOverrideOrdinal, index, curLowVal );

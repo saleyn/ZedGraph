@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace ZedGraph
 {
@@ -31,6 +32,21 @@ namespace ZedGraph
   }
 
   /// <summary>
+  /// Interface that elements of StockPointList must support
+  /// </summary>
+  public interface IStockPt : IPointPair
+  {
+    DateTime TimeStamp { get; }
+    double   Date      { get; }
+    double   Open      { get; }
+    double   High      { get; }
+    double   Low       { get; }
+    double   Close     { get; }
+
+    new IStockPt Clone();
+  }
+
+  /// <summary>
   /// A collection class containing a list of <see cref="StockPt"/> objects
   /// that define the set of points to be displayed on the curve.
   /// </summary>
@@ -38,7 +54,8 @@ namespace ZedGraph
   /// <author> John Champion based on code by Jerry Vos</author>
   /// <version> $Revision: 3.4 $ $Date: 2007-02-18 05:51:54 $ </version>
   [Serializable]
-  public class StockPointList : List<StockPt>, IPointListEdit, IOrdinalPointList
+  public class StockPointList<T> : List<IStockPt>, IPointListEdit, IOrdinalPointList
+    where T : IStockPt, new()
   {
     private readonly List<Tuple<double,int>> _dateIndex;
     private int                              _offset;
@@ -52,19 +69,20 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the
     /// <see cref="StockPt"/> object to be accessed.</param>
     /// <value>A <see cref="StockPt"/> object reference.</value>
-    public new PointPair this[int index]
+    public new IPointPair this[int index]
     {
       get { return base[index]; }
       set
       {
-        var v = new StockPt(value);
+        if (!(value is IStockPt))
+          throw new InvalidOperationException($"Invalid value type of {value}");
         if (_dateIndex != null)
         {
-          if (Math.Abs(base[index].Date - v.Date) > 1e-9)
+          if (Math.Abs(base[index].X - value.X) > 1e-9)
             throw new ArgumentException
-              ($"Cannot change date on item#{index}: {new XDate(base[index].Date)} to {new XDate(v.Date)}");
+              ($"Cannot change date on item#{index}: {new XDate(base[index].X)} to {new XDate(value.X)}");
         }
-        base[index] = v;
+        base[index] = ((IStockPt)value).Clone();
       }
     }
 
@@ -102,14 +120,14 @@ namespace ZedGraph
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The StockPointList from which to copy</param>
-    public StockPointList( StockPointList rhs )
+    public StockPointList( StockPointList<T> rhs )
       : this(rhs._dateIndex != null)
     {
       _offset = 0;
 
-      foreach (var pp in rhs.Select(p => new StockPt(p)))
+      foreach (var pp in rhs.Cast<IStockPt>())
       {
-        Add(pp);
+        Add(pp.Clone());
 
         if (rhs._dateIndex == null) continue;
 
@@ -131,9 +149,9 @@ namespace ZedGraph
     /// Typesafe, deep-copy clone method.
     /// </summary>
     /// <returns>A new, independent copy of this class</returns>
-    public StockPointList Clone()
+    public StockPointList<T> Clone()
     {
-      return new StockPointList( this );
+      return new StockPointList<T>( this );
     }
 
   #endregion
@@ -145,12 +163,12 @@ namespace ZedGraph
     /// </summary>
     /// <param name="point">The <see cref="StockPt"/> object to
     /// be added</param>
-    public new void Add( StockPt point )
+    public void Add( T point )
     {
-      base.Add( new StockPt( point ) );
+      base.Add( point.Clone() );
       if (_dateIndex == null) return;
 
-      var date = point.Date;
+      var date = point.X;
       if (_dateIndex.Count == 0 || date > _dateIndex[_dateIndex.Count-1].Item1)
         _dateIndex.Add(new Tuple<double, int>(date, _offset + Count-1));
       else
@@ -161,11 +179,11 @@ namespace ZedGraph
     /// Add a <see cref="PointPair"/> object to the collection at the end of the list.
     /// </summary>
     /// <param name="point">The <see cref="PointPair"/> object to be added</param>
-    public void Add( PointPair point )
+    public void Add( IPointPair point )
     {
-//      throw new ArgumentException( "Error: Only the StockPt type can be added to StockPointList" +
-//        ".  An ordinary PointPair is not allowed" );
-      base.Add( new StockPt( point ) );
+      if (!(point is StockPt))
+        throw new ArgumentException("Only points of StockPt type can be added to StockPointList!");
+      base.Add( ((T)point).Clone() );
     }
 
     /// <summary>
@@ -178,7 +196,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add( double date, double high )
     {
-      Add(new StockPt( date, PointPair.Missing, high, PointPair.Missing, PointPair.Missing, 0));
+      add(date, PointPair.Missing, high, PointPair.Missing, PointPair.Missing, 0);
     }
 
     /// <summary>
@@ -193,7 +211,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add(double date, double open, double high, double low, double close, int vol)
     {
-      Add(new StockPt(date, open, high, low, close, vol));
+      add(date, open, high, low, close, vol);
     }
 
     /// <summary>
@@ -208,7 +226,7 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) in the list</param>
     /// <returns>The specified <see cref="StockPt" />.
     /// </returns>
-    public StockPt GetAt( int index )
+    public IPointPair GetAt( int index )
     {
       return base[index];
     }
@@ -246,7 +264,7 @@ namespace ZedGraph
     /// <summary>
     /// Returns an index of the first element which does not compare less than date value.
     /// </summary>
-    public StockPt IndexOf(double date)
+    public IPointPair IndexOf(double date)
     {
       var idx = indexOf(date);
       if (idx < 0 || idx == _dateIndex.Count) return null;
@@ -270,6 +288,26 @@ namespace ZedGraph
           hi = m - 1;
       }
       return DoubleComparer.LT(_dateIndex[lo].Item1, date) ? lo+1 : lo;
+    }
+
+    private void add(double date, double open, double high, double low, double close, int vol)
+    {
+      if (typeof(T) != typeof(StockPt))
+        throw new InvalidOperationException($"Invalid data type {typeof(T)}: expected {typeof(StockPt)}");
+      var p  = new T() as StockPt;
+      p.Date  = date;
+      p.Open  = open;
+      p.High  = high;
+      p.Low   = low;
+      p.Close = close;
+      p.Vol   = vol;
+      Add(p);
+    }
+
+    public new IEnumerator<IPointPair> GetEnumerator()
+    {
+      foreach (var p in this)
+        yield return p;
     }
   }
 }

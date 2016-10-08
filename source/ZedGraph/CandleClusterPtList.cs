@@ -23,7 +23,7 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the
     /// <see cref="StockPt"/> object to be accessed.</param>
     /// <value>A <see cref="StockPt"/> object reference.</value>
-    public new PointPair this[int index]
+    public new IPointPair this[int index]
     {
       get { return base[index]; }
       set
@@ -57,7 +57,7 @@ namespace ZedGraph
     /// <summary>
     /// Default constructor for the collection class
     /// </summary>
-    public CandleClusterPtList() : this(false) { }
+    public CandleClusterPtList() : this(false) {}
 
     /// <summary>
     /// Constructor for the collection class that can enable ordinal index
@@ -78,7 +78,7 @@ namespace ZedGraph
     {
       _offset = 0;
 
-      foreach (var pp in rhs.Select(p => new CandleClusterPt(p)))
+      foreach (var pp in rhs.Cast<CandleClusterPt>().Select(p => new CandleClusterPt(p)))
       {
         Add(pp);
 
@@ -132,7 +132,7 @@ namespace ZedGraph
     /// Add a <see cref="PointPair"/> object to the collection at the end of the list.
     /// </summary>
     /// <param name="point">The <see cref="PointPair"/> object to be added</param>
-    public void Add(PointPair point)
+    public void Add(IPointPair point)
     {
       //      throw new ArgumentException( "Error: Only the StockPt type can be added to StockPointList" +
       //        ".  An ordinary PointPair is not allowed" );
@@ -149,7 +149,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add(double date, double high)
     {
-      Add(new StockPt(date, PointPair.Missing, high, PointPair.Missing, PointPair.Missing, 0));
+      Add(new CandleClusterPt(date, PointPair.Missing, high, PointPair.Missing, PointPair.Missing, 0));
     }
 
     /// <summary>
@@ -241,6 +241,11 @@ namespace ZedGraph
           hi = m - 1;
       }
       return DoubleComparer.LT(_dateIndex[lo].Item1, date) ? lo + 1 : lo;
+    }
+
+    public new IEnumerator<IPointPair> GetEnumerator()
+    {
+      return base.GetEnumerator();
     }
   }
 }

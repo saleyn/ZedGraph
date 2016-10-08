@@ -49,7 +49,7 @@ namespace ZedGraph.Demo
       return pointPairList;
     }
 
-    private static bool IsVisible(GraphPane pane, LineItem lineItem, PointPair point)
+    private static bool IsVisible(GraphPane pane, LineItem lineItem, IPointPair point)
     {
       var xScale = lineItem.GetXAxis(pane).Scale;
       var yScale = lineItem.GetYAxis(pane).Scale;
@@ -59,7 +59,7 @@ namespace ZedGraph.Demo
 
     private static void LogVisibility(ZedGraphControl obj, LineItem lineItem, PointPairList points)
     {
-      List<PointPair> visiblePoints = VisiblePoints(obj.GraphPane, lineItem, points);
+      var visiblePoints = VisiblePoints(obj.GraphPane, lineItem, points);
       obj.GraphPane.XAxis.Title.Text = "Visible: " + string.Join(",", visiblePoints.Select(pp => string.Format("({0:N1},{1:N1})", pp.X, pp.Y)));
     }
   }

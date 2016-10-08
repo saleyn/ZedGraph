@@ -635,11 +635,11 @@ namespace ZedGraph.UnitTest
 
 			for ( int iCurve = 0; iCurve < 2; iCurve++ )
 			{
-				PointPairList ppList = testee.CurveList[iCurve].Points as PointPairList;
+				var ppList = testee.CurveList[iCurve].Points as PointPairList;
 
 				for ( int i = 0; i < testee.CurveList[iCurve].Points.Count; i++ )
 				{
-					PointPair pt = ppList[i];
+					var pt = ppList[i];
 					pt.Y = 0;
 					ppList[i] = pt;
 
@@ -1035,7 +1035,7 @@ namespace ZedGraph.UnitTest
 
 				for ( int i = 0; i < ppList.Count; i++ )
 				{
-					PointPair pt = ppList[i];
+					var pt = ppList[i];
 
 					if ( i % 3 == 0 )
 						pt.Y = PointPair.Missing;

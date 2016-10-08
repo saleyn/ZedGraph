@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 namespace ZedGraph
@@ -91,7 +92,7 @@ namespace ZedGraph
     /// <returns>Returns a <see cref="PointPair" /> instance containing the
     /// data specified by <see cref="XType" /> and <see cref="YType" />
     /// </returns>
-    public PointPair this[int index]
+    public IPointPair this[int index]
     {
       get
       {
@@ -106,10 +107,7 @@ namespace ZedGraph
     /// <summary>
     /// Gets the number of samples in the collection
     /// </summary>
-    public int Count
-    {
-      get { return list.Count; }
-    }
+    public int Count => list.Count;
 
     /// <summary>
     /// Get the specified data type from the specified sample
@@ -194,5 +192,15 @@ namespace ZedGraph
       //  list.Add( sample );
     }
 
+    public IEnumerator<IPointPair> GetEnumerator()
+    {
+      for (int i=0; i < Count; ++i)
+        yield return this[i];
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
   }
 }

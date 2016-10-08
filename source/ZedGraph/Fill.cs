@@ -888,7 +888,7 @@ namespace ZedGraph
     /// color gradient.  This is only applicable for <see cref="FillType.GradientByX"/>,
     /// <see cref="FillType.GradientByY"/> or <see cref="FillType.GradientByZ"/>.</param>
     /// <returns>A <see cref="System.Drawing.Brush"/> class representing the fill brush</returns>
-    public Brush MakeBrush( RectangleF rect, PointPair dataValue )
+    public Brush MakeBrush( RectangleF rect, IPointPair dataValue )
     {
       // get a brush
       if ( this.IsVisible && ( !_color.IsEmpty || _brush != null ) )
@@ -942,7 +942,7 @@ namespace ZedGraph
       return new SolidBrush( Color.White );
     }
 
-    internal Color GetGradientColor( PointPair dataValue )
+    internal Color GetGradientColor( IPointPair dataValue )
     {
       double val;
 
@@ -1138,15 +1138,12 @@ namespace ZedGraph
     /// <param name="pt">The data value to be used in case it's a
     /// <see cref="FillType.GradientByX" />, <see cref="FillType.GradientByY" />, or
     /// <see cref="FillType.GradientByZ" /> <see cref="FillType" />.</param>
-    public void Draw( Graphics g, RectangleF rect, PointPair pt )
+    public void Draw( Graphics g, RectangleF rect, IPointPair pt )
     {
-      if ( this.IsVisible )
-      {
-        using ( Brush brush = this.MakeBrush( rect, pt ) )
-        {
-          g.FillRectangle( brush, rect );
-        }
-      }
+      if (!this.IsVisible) return;
+
+      using ( var brush = this.MakeBrush( rect, pt ) )
+        g.FillRectangle( brush, rect );
     }
 
 

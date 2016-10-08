@@ -19,28 +19,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
 
 namespace ZedGraph
 {
-  /// <summary>
-  /// A simple storage struct to maintain an individual sampling of data.  This only
-  /// contains two data values in order to reduce to memory load for large datasets.
-  /// (e.g., no Tag or Z property)
-  /// </summary>
-  public struct DataPoint
-  {
-    /// <summary>
-    /// The X value for the point, stored as a double type.
-    /// </summary>
-    public double X;
-    /// <summary>
-    /// The Y value for the point, stored as a double type.
-    /// </summary>
-    public double Y;
-  }
-
   /// <summary>
   /// A collection class to maintain a set of samples.
   /// </summary>
@@ -54,7 +35,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.5 $ $Date: 2007-06-02 06:56:03 $ </version>
   [Serializable]
-  public class NoDupePointList : List<DataPoint>, IPointListEdit
+  public class NoDupePointList : List<IPointPair>, IPointListEdit
   {
     /// <summary>
     /// Protected field that stores a value indicating whether or not the data have been filtered.
@@ -79,16 +60,6 @@ namespace ZedGraph
     [CLSCompliant(false)]
     protected int[] _visibleIndicies;
 
-
-    /// <summary>
-    /// Protected field that stores a value that determines how close a point must be to a prior
-    /// neighbor in order to be filtered out.  Use the public property <see cref="FilterMode" />
-    /// to access this value.
-    /// </summary>
-    [CLSCompliant(false)]
-    protected int _filterMode;
-
-
     /// <summary>
     /// Gets or sets a value that determines how close a point must be to a prior
     /// neighbor in order to be filtered out.
@@ -101,11 +72,7 @@ namespace ZedGraph
     /// a particular pixel location is taken, any subsequent point that lies within 2
     /// pixels of that location will be filtered out.
     /// </remarks>
-    public int FilterMode
-    {
-      get { return _filterMode; }
-      set { _filterMode = value; }
-    }
+    public int FilterMode { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether or not the data have been filtered.  If the data
@@ -128,7 +95,7 @@ namespace ZedGraph
     /// and <see cref="PointPair.Tag" /> properties will be defaulted to
     /// <see cref="PointPairBase.Missing" /> and null, respectively.
     /// </returns>
-    public new PointPair this[int index]
+    public new IPointPair this[int index]
     {
       get
       {
@@ -136,9 +103,7 @@ namespace ZedGraph
         if ( _isFiltered )
           j = _visibleIndicies[index];
 
-        DataPoint dp = base[j];
-        PointPair pt = new PointPair( dp.X, dp.Y );
-        return pt;
+        return base[j];
       }
       set
       {
@@ -146,10 +111,7 @@ namespace ZedGraph
         if ( _isFiltered )
           j = _visibleIndicies[index];
 
-        DataPoint dp;
-        dp.X = value.X;
-        dp.Y = value.Y;
-        base[j] = dp;
+        base[j] = new CompactPt(value);
       }
     }
 
@@ -167,31 +129,13 @@ namespace ZedGraph
     public int TotalCount => base.Count;
 
     /// <summary>
-    /// Append a data point to the collection
-    /// </summary>
-    /// <param name="pt">The <see cref="PointPair" /> value to append</param>
-    public void Add( PointPair pt )
-    {
-      var dp = new DataPoint
-      {
-        X = pt.X,
-        Y = pt.Y
-      };
-      Add( dp );
-    }
-
-
-    /// <summary>
     /// Append a point to the collection
     /// </summary>
     /// <param name="x">The x value of the point to append</param>
     /// <param name="y">The y value of the point to append</param>
     public void Add( double x, double y )
     {
-      var dp = new DataPoint();
-      dp.X = x;
-      dp.Y = y;
-      Add( dp );
+      Add(new CompactPt(x, y));
     }
 
 
@@ -220,7 +164,7 @@ namespace ZedGraph
       _isFiltered = false;
       _filteredCount = 0;
       _visibleIndicies = null;
-      _filterMode = 0;
+      FilterMode = 0;
     }
 
     /// <summary>
@@ -236,7 +180,7 @@ namespace ZedGraph
 
       _filteredCount = rhs._filteredCount;
       _isFiltered = rhs._isFiltered;
-      _filterMode = rhs._filterMode;
+      FilterMode = rhs.FilterMode;
 
       _visibleIndicies = (int[])rhs._visibleIndicies?.Clone();
     }
@@ -246,7 +190,7 @@ namespace ZedGraph
     /// translation to a PointPair.
     /// </summary>
     /// <param name="index">The ordinal position of the DataPoint of interest</param>
-    protected DataPoint GetDataPointAt( int index )
+    protected IPointPair GetDataPointAt( int index )
     {
       return base[index];
     }
@@ -311,13 +255,13 @@ namespace ZedGraph
       xAxis.Scale.SetupScaleData( pane );
       yAxis.Scale.SetupScaleData( pane );
 
-      int n = _filterMode < 0 ? 0 : _filterMode;
+      int n = FilterMode < 0 ? 0 : FilterMode;
       int left = (int)pane.Chart.Rect.Left;
       int top = (int)pane.Chart.Rect.Top;
 
       for ( int i=0; i<base.Count; i++ )
       {
-        DataPoint dp = base[i];
+        var dp = base[i];
         int x = (int)( xAxis.Scale.Transform( dp.X ) + 0.5 ) - left;
         int y = (int)( yAxis.Scale.Transform( dp.Y ) + 0.5 ) - top;
 
@@ -333,14 +277,14 @@ namespace ZedGraph
                 used |= ( ix >= 0 && ix < width && iy >= 0 && iy < height && usedArray[ix, iy] );
           }
 
-          if ( !used )
-          {
-            usedArray[x, y] = true;
-            _visibleIndicies[_filteredCount] = i;
-            _filteredCount++;
-          }
+          if (used) continue;
+
+          usedArray[x, y] = true;
+          _visibleIndicies[_filteredCount] = i;
+          _filteredCount++;
         }
       }
     }
+
   }
 }

@@ -163,7 +163,7 @@ namespace ZedGraph
     #region Rendering Methods
 
     protected override void BeforeDraw(Graphics g, GraphPane pane, 
-                                       Axis valueAxis, CurveItem curve, PointPair pt,
+                                       Axis valueAxis, CurveItem curve, IPointPair pt,
                                        float pixBase, float pixHigh, float pixLow, float halfSize)
     {
       var p = pt as CandleClusterPt;

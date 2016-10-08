@@ -35,7 +35,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.4 $ $Date: 2007-02-07 07:46:46 $ </version>
   [Serializable]
-  public class StockPt : PointPair
+  public class StockPt : PointPair, IStockPt
   {
 
     #region Member variables
@@ -118,8 +118,7 @@ namespace ZedGraph
     /// The StockPt copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public StockPt(StockPt rhs)
-      : base(rhs)
+    public StockPt(StockPt rhs) : base((IPointPair)rhs)
     {
       Open       = rhs.Open;
       High       = rhs.High;
@@ -132,8 +131,7 @@ namespace ZedGraph
     /// The StockPt copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public StockPt(PointPair rhs)
-      : base(rhs)
+    public StockPt(IPointPair rhs) : base(rhs)
     {
       if (rhs is StockPt)
       {
@@ -141,7 +139,7 @@ namespace ZedGraph
         Open       = pt.Open;
         Vol        = pt.Vol;
         High       = pt.High;
-        ColorValue = rhs.ColorValue;
+        ColorValue = ((StockPt)rhs).ColorValue;
       }
       else
       {
@@ -201,6 +199,8 @@ namespace ZedGraph
 
     #region Properties
 
+    public DateTime TimeStamp => new XDate(Date).DateTime;
+
     /// <summary>
     /// Map the Date property to the X value
     /// </summary>
@@ -226,6 +226,11 @@ namespace ZedGraph
     {
       get { return _colorValue; }
       set { _colorValue = value; }
+    }
+
+    public new IStockPt Clone()
+    {
+      return new StockPt(this);
     }
 
     /// <summary>

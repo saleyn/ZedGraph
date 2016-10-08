@@ -359,7 +359,7 @@ namespace ZedGraph
     /// with attributes from the <see cref="Selection" /> class.
     /// </param>
     public void DrawSymbol( Graphics g, GraphPane pane, int x, int y,
-                            float scaleFactor, bool isSelected, PointPair dataValue )
+                            float scaleFactor, bool isSelected, IPointPair dataValue )
     {
       var source = isSelected ? Selection.Symbol : this;
       DrawSymbol(g, pane, Type, x, y, Size, IsVisible, source.Fill, source.Border,
@@ -369,10 +369,10 @@ namespace ZedGraph
     /// <summary>
     /// Used internally to draw symbol.
     /// </summary>
-    static internal void DrawSymbol(Graphics g, GraphPane pane, SymbolType type,
+    internal static void DrawSymbol(Graphics g, GraphPane pane, SymbolType type,
       int x, int y, float size,
       bool isVisible, Fill fill, Border border, float scaleFactor,
-      bool isAntiAlias, PointPair dataValue)
+      bool isAntiAlias, IPointPair dataValue)
     {
       // Only draw if the symbol is visible
       if (!isVisible || type == SymbolType.None || Math.Abs(x) >= 100000 || Math.Abs(y) >= 100000)

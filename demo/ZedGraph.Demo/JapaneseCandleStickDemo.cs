@@ -40,7 +40,7 @@ namespace ZedGraph.Demo
 			myPane.XAxis.Title.Text = "Trading Date";
 			myPane.YAxis.Title.Text = "Share Price, $US";
 
-			StockPointList spl = new StockPointList();
+			var spl = new StockPointList<StockPt>();
 			Random rand = new Random();
 
 			// First day is jan 1st

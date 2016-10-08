@@ -20,6 +20,7 @@
 using System;
 using System.Drawing;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows.Forms;
@@ -38,12 +39,6 @@ namespace ZedGraph
   [Serializable]
   public class DataSourcePointList : IPointList
   {
-    //private object _dataSource = null; 
-    private string _xDataMember = null;
-    private string _yDataMember = null;
-    private string _zDataMember = null;
-    private string _tagDataMember = null;
-
     #region Properties
 
     /// <summary> 
@@ -53,23 +48,14 @@ namespace ZedGraph
     /// <param name="index">The ordinal position (zero-based) of the 
     /// <see cref="PointPair"/> object to be accessed.</param> 
     /// <value>A <see cref="PointPair"/> object reference.</value> 
-    public PointPair this[int index]
+    public IPointPair this[int index]
     {
       get
       {
         if ( index < 0 || index >= BindingSource.Count )
-          throw new System.ArgumentOutOfRangeException( "Error: Index out of range" );
+          throw new ArgumentOutOfRangeException( "Error: Index out of range" );
 
-        object row = BindingSource[index];
-
-        double x = GetDouble( row, _xDataMember, index );
-        double y = GetDouble( row, _yDataMember, index );
-        double z = GetDouble( row, _zDataMember, index );
-        object tag = GetObject( row, _tagDataMember );
-
-        PointPair pt = new PointPair( x, y, z );
-        pt.Tag = tag;
-        return pt;
+        return unsafeGet(index);
       }
     }
 
@@ -109,11 +95,7 @@ namespace ZedGraph
     /// </summary> 
     /// <remarks>Set this to null leave the X data values set to <see cref="PointPairBase.Missing" /> 
     /// </remarks> 
-    public string XDataMember
-    {
-      get { return _xDataMember; }
-      set { _xDataMember = value; }
-    }
+    public string XDataMember { get; set; }
 
     /// <summary> 
     /// The <see cref="string" /> name of the property or column from which to obtain the 
@@ -121,11 +103,7 @@ namespace ZedGraph
     /// </summary> 
     /// <remarks>Set this to null leave the Y data values set to <see cref="PointPairBase.Missing" /> 
     /// </remarks> 
-    public string YDataMember
-    {
-      get { return _yDataMember; }
-      set { _yDataMember = value; }
-    }
+    public string YDataMember { get; set; }
 
     /// <summary> 
     /// The <see cref="string" /> name of the property or column from which to obtain the 
@@ -133,11 +111,7 @@ namespace ZedGraph
     /// </summary> 
     /// <remarks>Set this to null leave the Z data values set to <see cref="PointPairBase.Missing" /> 
     /// </remarks> 
-    public string ZDataMember
-    {
-      get { return _zDataMember; }
-      set { _zDataMember = value; }
-    }
+    public string ZDataMember { get; set; }
 
     /// <summary> 
     /// The <see cref="string" /> name of the property or column from which to obtain the 
@@ -147,11 +121,7 @@ namespace ZedGraph
     /// data, then the tags may be used as tooltips using the 
     /// <see cref="ZedGraphControl.IsShowPointValues" /> option. 
     /// </remarks> 
-    public string TagDataMember
-    {
-      get { return _tagDataMember; }
-      set { _tagDataMember = value; }
-    }
+    public string TagDataMember { get; set; }
 
     #endregion
 
@@ -163,10 +133,10 @@ namespace ZedGraph
     public DataSourcePointList()
     {
       BindingSource = new BindingSource();
-      _xDataMember = string.Empty;
-      _yDataMember = string.Empty;
-      _zDataMember = string.Empty;
-      _tagDataMember = string.Empty;
+      XDataMember   = string.Empty;
+      YDataMember   = string.Empty;
+      ZDataMember   = string.Empty;
+      TagDataMember = string.Empty;
     }
 
     /// <summary> 
@@ -177,14 +147,14 @@ namespace ZedGraph
       : this()
     {
       BindingSource.DataSource = rhs.BindingSource.DataSource;
-      if ( rhs._xDataMember != null )
-        _xDataMember = (string)rhs._xDataMember.Clone();
-      if ( rhs._yDataMember != null )
-        _yDataMember = (string)rhs._yDataMember.Clone();
-      if ( rhs._zDataMember != null )
-        _zDataMember = (string)rhs._zDataMember.Clone();
-      if ( rhs._tagDataMember != null )
-        _tagDataMember = (string)rhs._tagDataMember.Clone();
+      if ( rhs.XDataMember != null )
+        XDataMember = (string)rhs.XDataMember.Clone();
+      if ( rhs.YDataMember != null )
+        YDataMember = (string)rhs.YDataMember.Clone();
+      if ( rhs.ZDataMember != null )
+        ZDataMember = (string)rhs.ZDataMember.Clone();
+      if ( rhs.TagDataMember != null )
+        TagDataMember = (string)rhs.TagDataMember.Clone();
     }
 
     /// <summary> 
@@ -222,7 +192,7 @@ namespace ZedGraph
     /// </param> 
     private double GetDouble( object row, string dataMember, int index )
     {
-      if ( dataMember == null || dataMember == string.Empty )
+      if ( string.IsNullOrEmpty(dataMember) )
         return index + 1;
 
       //Type myType = row.GetType();
@@ -284,6 +254,32 @@ namespace ZedGraph
       return val;
     }
 
+    private IPointPair unsafeGet(int index)
+    {
+      var row = BindingSource[index];
+
+      var x   = GetDouble(row, XDataMember, index);
+      var y   = GetDouble(row, YDataMember, index);
+      var z   = GetDouble(row, ZDataMember, index);
+      var tag = GetObject(row, TagDataMember);
+
+      return new PointPair(x, y, z) {Tag = tag};
+    }
+
+    #endregion
+
+    #region Enumeration Support
+
+    public IEnumerator<IPointPair> GetEnumerator()
+    {
+      for (var i = 0; i < Count; ++i)
+        yield return unsafeGet(i);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
 
     #endregion
   }

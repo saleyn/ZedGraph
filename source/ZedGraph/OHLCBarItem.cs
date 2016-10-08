@@ -369,8 +369,8 @@ namespace ZedGraph
         low   = pt.Z;
       }
 
-      if (pt.IsInvalid3D || (date <= 0  && baseAxis.Scale.IsLog) ||
-             ((high <= 0 ||  low  <= 0) && valueAxis.Scale.IsLog))
+      if (pt.IsInvalid || (date <= 0  && baseAxis.Scale.IsLog) ||
+         ((high <= 0   ||  low  <= 0) && valueAxis.Scale.IsLog))
         return false;
 
       var pixBase = baseAxis.Scale.Transform( IsOverrideOrdinal, i, date );

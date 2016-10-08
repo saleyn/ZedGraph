@@ -33,7 +33,7 @@ namespace ZedGraph
   /// <author> John Champion </author>
   /// <version> $Revision: 3.3 $ $Date: 2007-03-17 18:43:44 $ </version>
   [Serializable]
-  public class PointPair4 : PointPair, ISerializable
+  public class PointPair4 : PointPair
   {
 
   #region Member variables
@@ -50,7 +50,7 @@ namespace ZedGraph
     /// <summary>
     /// Default Constructor
     /// </summary>
-    public PointPair4() : base()
+    public PointPair4()
     {
       this.T = 0;
     }
@@ -86,7 +86,7 @@ namespace ZedGraph
     /// The PointPair4 copy constructor.
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
-    public PointPair4( PointPair4 rhs ) : base( rhs )
+    public PointPair4( PointPair4 rhs ) : base( (IPointPair)rhs )
     {
       this.T = rhs.T;
     }

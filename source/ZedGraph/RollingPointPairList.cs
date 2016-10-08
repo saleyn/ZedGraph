@@ -18,7 +18,8 @@
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================
 using System;
-using System.Text;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -43,7 +44,8 @@ namespace ZedGraph
   /// <version> $Date: 2007-11-05 04:33:26 $ </version>
   /// </summary>
   [Serializable]
-  public class RollingPointPairList : ISerializable, IPointListEdit
+  public class RollingPointPairList<T> : ISerializable, IPointListEdit
+    where T : IPointPair, new()
   {
 
   #region Fields
@@ -52,7 +54,7 @@ namespace ZedGraph
     /// An array of PointPair objects that acts as the underlying buffer.
     /// </summary>
     [CLSCompliant(false)]
-    protected PointPair[] _mBuffer;
+    protected T[] _data;
 
     /// <summary>
     /// The index of the previously enqueued item. -1 if buffer is empty.
@@ -78,7 +80,7 @@ namespace ZedGraph
     public RollingPointPairList( int capacity )
       : this( capacity, false )
     {
-      _mBuffer = new PointPair[capacity];
+      _data = new T[capacity];
       _headIdx = _tailIdx = -1;
     }
 
@@ -96,12 +98,13 @@ namespace ZedGraph
     /// <seealso cref="Add(double,double,double)"/>
     public RollingPointPairList( int capacity, bool preLoad )
     {
-      _mBuffer = new PointPair[capacity];
+      _data = new T[capacity];
       _headIdx = _tailIdx = -1;
 
-      if ( preLoad )
-        for ( int i = 0; i < capacity; i++ )
-          _mBuffer[i] = new PointPair();
+      if (!preLoad) return;
+
+      for ( int i = 0; i < capacity; i++ )
+        _data[i] = new T();
     }
 
     /// <summary>
@@ -112,12 +115,10 @@ namespace ZedGraph
     /// <param name="rhs">The <see cref="IPointList" /> to be copied.</param>
     public RollingPointPairList( IPointList rhs )
     {
-      _mBuffer = new PointPair[rhs.Count];
+      _data = new T[rhs.Count];
 
       for ( int i = 0; i < rhs.Count; i++ )
-      {
-        _mBuffer[i] = new PointPair( rhs[i] );
-      }
+        _data[i] = (T)rhs[i].Clone();
 
       _headIdx = rhs.Count - 1;
       _tailIdx = 0;
@@ -130,7 +131,7 @@ namespace ZedGraph
     /// <summary>
     /// Gets the capacity of the rolling buffer.
     /// </summary>
-    public int Capacity => _mBuffer.Length;
+    public int Capacity => _data.Length;
 
     /// <summary>
     /// Gets the count of items within the rolling buffer. Note that this may be less than
@@ -147,7 +148,7 @@ namespace ZedGraph
           return ( _headIdx - _tailIdx ) + 1;
 
         if ( _tailIdx > _headIdx )
-          return ( _mBuffer.Length - _tailIdx ) + _headIdx + 1;
+          return ( _data.Length - _tailIdx ) + _headIdx + 1;
 
         return 1;
       }
@@ -157,10 +158,7 @@ namespace ZedGraph
     /// Gets a bolean that indicates if the buffer is empty.
     /// Alternatively you can test Count==0.
     /// </summary>
-    public bool IsEmpty
-    {
-      get { return _headIdx == -1; }
-    }
+    public bool IsEmpty => _headIdx == -1;
 
     /// <summary>
     /// Gets or sets the <see cref="PointPair" /> at the specified index in the buffer.
@@ -169,7 +167,7 @@ namespace ZedGraph
     /// Index must be within the current size of the buffer, e.g., the set
     /// method will not expand the buffer even if <see cref="Capacity" /> is available
     /// </remarks>
-    public PointPair this[int index]
+    public IPointPair this[int index]
     {
       get
       {
@@ -177,10 +175,10 @@ namespace ZedGraph
           throw new ArgumentOutOfRangeException();
 
         index += _tailIdx;
-        if ( index >= _mBuffer.Length )
-          index -= _mBuffer.Length;
+        if ( index >= _data.Length )
+          index -= _data.Length;
 
-        return _mBuffer[index];
+        return _data[index];
       }
       set
       {
@@ -188,10 +186,10 @@ namespace ZedGraph
           throw new ArgumentOutOfRangeException();
 
         index += _tailIdx;
-        if ( index >= _mBuffer.Length )
-          index -= _mBuffer.Length;
+        if ( index >= _data.Length )
+          index -= _data.Length;
 
-        _mBuffer[index] = value;
+        _data[index] = (T)value;
       }
 
     }
@@ -214,9 +212,9 @@ namespace ZedGraph
     /// Typesafe, deep-copy clone method.
     /// </summary>
     /// <returns>A new, independent copy of this class</returns>
-    public RollingPointPairList Clone()
+    public RollingPointPairList<T> Clone()
     {
-      return new RollingPointPairList( this );
+      return new RollingPointPairList<T>(this);
     }
 
     /// <summary>
@@ -243,14 +241,14 @@ namespace ZedGraph
       else
       {
         // Determine the index to write to.
-        if ( ++_headIdx == _mBuffer.Length )
+        if ( ++_headIdx == _data.Length )
         {  // Wrap around.
           _headIdx = 0;
         }
 
         if ( _headIdx == _tailIdx )
         {  // Buffer overflow. Increment tailIdx.
-          if ( ++_tailIdx == _mBuffer.Length )
+          if ( ++_tailIdx == _data.Length )
           {  // Wrap around.
             _tailIdx = 0;
           }
@@ -265,9 +263,9 @@ namespace ZedGraph
     /// overwriting old values if the buffer is full.
     /// </summary>
     /// <param name="item">The <see cref="PointPair" /> to be added.</param>
-    public void Add( PointPair item )
+    public void Add( IPointPair item )
     {
-      _mBuffer[ GetNextIndex() ] = item;
+      _data[ GetNextIndex() ] = (T)item;
     }
 
     /// <summary>
@@ -278,7 +276,7 @@ namespace ZedGraph
     public void Add( IPointList pointList )
     {   // A slightly more efficient approach would be to determine where the new points should placed within
       // the buffer and to then copy them in directly - updating the head and tail indexes appropriately.
-      for ( int i = 0; i < pointList.Count; i++ )
+      for ( var i = 0; i < pointList.Count; i++ )
         Add( pointList[i] );
     }
 
@@ -289,14 +287,14 @@ namespace ZedGraph
     /// if the buffer was empty. 
     /// Check the buffer's length (<see cref="Count" />) or the <see cref="IsEmpty" />
     /// property to avoid exceptions.</returns>
-    public PointPair Remove()
+    public IPointPair Remove()
     {
       if ( _tailIdx == -1 )
       {  // buffer is currently empty.
         throw new InvalidOperationException( "buffer is empty." );
       }
 
-      PointPair o = _mBuffer[_tailIdx];
+      var o = _data[_tailIdx];
 
       if ( _tailIdx == _headIdx )
       {  // The buffer is now empty.
@@ -304,7 +302,7 @@ namespace ZedGraph
         return o;
       }
 
-      if ( ++_tailIdx == _mBuffer.Length )
+      if ( ++_tailIdx == _data.Length )
       {  // Wrap around.
         _tailIdx = 0;
       }
@@ -333,10 +331,10 @@ namespace ZedGraph
       // shift all the items that lie after index back by 1
       for ( int i = index + _tailIdx; i < _tailIdx + count - 1; i++ )
       {
-        i = ( i >= _mBuffer.Length ) ? 0 : i;
+        i = ( i >= _data.Length ) ? 0 : i;
         int j = i + 1;
-        j = ( j >= _mBuffer.Length ) ? 0 : j;
-        _mBuffer[i] = _mBuffer[j];
+        j = ( j >= _data.Length ) ? 0 : j;
+        _data[i] = _data[j];
       }
 
       // Remove the item from the head (it's been duplicated already)
@@ -372,14 +370,12 @@ namespace ZedGraph
     /// Pop an item off the head of the queue.
     /// </summary>
     /// <returns>The popped item. Throws an exception if the buffer was empty.</returns>
-    public PointPair Pop()
+    public IPointPair Pop()
     {
-      if ( _tailIdx == -1 )
-      {  // buffer is currently empty.
+      if ( _tailIdx == -1 ) // buffer is currently empty.
         throw new InvalidOperationException( "buffer is empty." );
-      }
 
-      PointPair o = _mBuffer[_headIdx];
+      var o = _data[_headIdx];
 
       if ( _tailIdx == _headIdx )
       {  // The buffer is now empty.
@@ -389,7 +385,7 @@ namespace ZedGraph
 
       if ( --_headIdx == -1 )
       {  // Wrap around.
-        _headIdx = _mBuffer.Length - 1;
+        _headIdx = _data.Length - 1;
       }
 
       return o;
@@ -401,14 +397,12 @@ namespace ZedGraph
     /// <returns>The <see cref="PointPair" /> item at the head of the queue.
     /// Throws an <see cref="InvalidOperationException" /> if the buffer was empty.
     /// </returns>
-    public PointPair Peek()
+    public IPointPair Peek()
     {
-      if ( _headIdx == -1 )
-      {  // buffer is currently empty.
+      if ( _headIdx == -1 )  // buffer is currently empty.
         throw new InvalidOperationException( "buffer is empty." );
-      }
 
-      return _mBuffer[_headIdx];
+      return _data[_headIdx];
     }
 
   #endregion
@@ -439,14 +433,14 @@ namespace ZedGraph
       // advance the rolling list
       GetNextIndex();
 
-      if ( _mBuffer[_headIdx] == null )
-        _mBuffer[_headIdx] = new PointPair( x, y, z, tag );
+      if ( _data[_headIdx] == null )
+        _data[_headIdx] = new T {X=x, Y=y, Z=z, Tag=tag};
       else
       {
-        _mBuffer[_headIdx].X = x;
-        _mBuffer[_headIdx].Y = y;
-        _mBuffer[_headIdx].Z = z;
-        _mBuffer[_headIdx].Tag = tag;
+        _data[_headIdx].X = x;
+        _data[_headIdx].Y = y;
+        _data[_headIdx].Z = z;
+        _data[_headIdx].Tag = tag;
       }
     }
 
@@ -537,16 +531,16 @@ namespace ZedGraph
 
       for ( int i = 0; i < len; i++ )
       {
-        PointPair point = new PointPair( 0, 0, 0 );
+        var point = new T {X=0, Y=0, Z=0};
         if ( x == null )
-          point.X = (double)i + 1.0;
+          point.X = i + 1.0;
         else if ( i < x.Length )
           point.X = x[i];
         else
           point.X = PointPair.Missing;
 
         if ( y == null )
-          point.Y = (double)i + 1.0;
+          point.Y = i + 1.0;
         else if ( i < y.Length )
           point.Y = y[i];
         else
@@ -582,24 +576,24 @@ namespace ZedGraph
 
       for ( int i = 0; i < len; i++ )
       {
-        PointPair point = new PointPair();
+        var point = new T();
 
         if ( x == null )
-          point.X = (double)i + 1.0;
+          point.X = i + 1.0;
         else if ( i < x.Length )
           point.X = x[i];
         else
           point.X = PointPair.Missing;
 
         if ( y == null )
-          point.Y = (double)i + 1.0;
+          point.Y = i + 1.0;
         else if ( i < y.Length )
           point.Y = y[i];
         else
           point.Y = PointPair.Missing;
 
         if ( z == null )
-          point.Z = (double)i + 1.0;
+          point.Z = i + 1.0;
         else if ( i < z.Length )
           point.Z = z[i];
         else
@@ -633,7 +627,7 @@ namespace ZedGraph
 
       _headIdx = info.GetInt32( "headIdx" );
       _tailIdx = info.GetInt32( "tailIdx" );
-      _mBuffer = (PointPair[])info.GetValue( "mBuffer", typeof( PointPair[] ) );
+      _data = (T[])info.GetValue( "data", typeof(T[]) );
     }
     /// <summary>
     /// Populates a <see cref="SerializationInfo"/> instance with the data needed to serialize the target object
@@ -643,13 +637,33 @@ namespace ZedGraph
     [SecurityPermissionAttribute( SecurityAction.Demand, SerializationFormatter = true )]
     public virtual void GetObjectData( SerializationInfo info, StreamingContext context )
     {
-      info.AddValue( "schema", schema );
+      info.AddValue( "schema",  schema );
       info.AddValue( "headIdx", _headIdx );
       info.AddValue( "tailIdx", _tailIdx );
-      info.AddValue( "mBuffer", _mBuffer );
+      info.AddValue( "data",    _data );
     }
 
-  #endregion
+    #endregion
 
+    #region Enumeration Support
+
+    public IEnumerator<IPointPair> GetEnumerator()
+    {
+      int i = _tailIdx, e = _headIdx;
+      while (i != e)
+      {
+        yield return this[i];
+
+        if (++i == _data.Length)
+          i = 0;
+      }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
+
+    #endregion
   }
 }

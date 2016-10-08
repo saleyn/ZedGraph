@@ -430,7 +430,7 @@ namespace ZedGraph
     /// An accessor for the <see cref="PointPair"/> datum for this <see cref="CurveItem"/>.
     /// Index is the ordinal reference (zero based) of the point.
     /// </summary>
-    public PointPair this[int index] =>
+    public IPointPair this[int index] =>
       Points == null ? new PointPair( PointPair.Missing, PointPair.Missing ) : Points[index];
 
     /// <summary>

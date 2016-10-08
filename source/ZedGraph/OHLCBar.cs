@@ -324,7 +324,7 @@ namespace ZedGraph
     /// Method called just before drawing a bar
     /// </summary>
     protected virtual void BeforeDraw(Graphics g, GraphPane pane, Axis valueAxis,
-                                      CurveItem curve, PointPair pt,
+                                      CurveItem curve, IPointPair pt,
                                       float pixBase, float pixHigh, float pixLow, float halfDotSz)
     {}
 
@@ -411,7 +411,7 @@ namespace ZedGraph
           //   by zero, etc.
           // Also, any value <= zero on a log scale is invalid
 
-          if (curve.Points[i].IsInvalid3D || (!(date > 0) && baseAxis.Scale.IsLog) ||
+          if (curve.Points[i].IsInvalid || (!(date > 0) && baseAxis.Scale.IsLog) ||
               ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
             continue;
 
@@ -476,7 +476,7 @@ namespace ZedGraph
 
     #endregion
 
-    protected static void GetOHLC(PointPair pt, out double date, out double o,
+    protected static void GetOHLC(IPointPair pt, out double date, out double o,
                                   out double h, out double l, out double c)
     {
       date = pt.X;

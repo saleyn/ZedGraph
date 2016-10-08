@@ -46,7 +46,7 @@ namespace ZedGraph.Demo
         Enabled = false,
         SynchronizingObject = ZedGraphControl
       };
-      m_Data = new StockPointList(true);
+      m_Data = new StockPointList<StockPt>(true);
       m_ZigZagData = new PointPairList();
       m_FilteredData = new DynFilteredPointList(new[] {0.0}, new[] {0.0});
       m_EMAData = new PointPairList();
@@ -288,12 +288,12 @@ namespace ZedGraph.Demo
         {
           m_EMAData.Clear();
           m_ZigZagData.Clear();
-          m_Data = csvFileExists ? Serializer.ReadFromCSV<StockPointList>(CSVFilename)
-                                 : Serializer.ReadFromBinaryFile<StockPointList>(Filename);
+          m_Data = csvFileExists ? Serializer.ReadFromCSV<StockPointList<StockPt>>(CSVFilename)
+                                 : Serializer.ReadFromBinaryFile<StockPointList<StockPt>>(Filename);
           var close = ((StockPt)m_Data[0]).Close;
           m_EMA = close;
 
-          foreach (var p in m_Data)
+          foreach (var p in m_Data.Cast<StockPt>())
           {
             m_EMA = EMA_ALPHA * close + (1.0 - EMA_ALPHA) * m_EMA;
             m_EMAData.Add(p.Date, m_EMA);
@@ -351,7 +351,7 @@ namespace ZedGraph.Demo
     }
 
     private readonly Timer m_Timer;
-    private          StockPointList m_Data;
+    private          StockPointList<StockPt> m_Data;
     private readonly PointPairList m_EMAData;
     private readonly PointPairList m_ZigZagData;
     private readonly DynFilteredPointList m_FilteredData;

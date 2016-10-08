@@ -361,7 +361,7 @@ namespace ZedGraph
     /// </param>
     /// <returns>A <see cref="Pen" /> object with the properties of this <see cref="LineBase" />
     /// </returns>
-    public Pen GetPen( PaneBase pane, float scaleFactor, PointPair dataValue )
+    public Pen GetPen( PaneBase pane, float scaleFactor, IPointPair dataValue )
     {
       var color = Color;
       if ( GradientFill.IsGradientValueType )

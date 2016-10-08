@@ -43,7 +43,7 @@ namespace ZedGraph
       myPane.Rect = new RectangleF(0, 0, 640f, 480f);
       myPane.XAxis.Type = AxisType.DateAsOrdinal;
 
-      StockPointList spl = CreateStockPointList(5);
+      var spl = CreateStockPointList(5);
       OHLCBarItem myCurve = myPane.AddOHLCBar("trades", spl, Color.Black);
 
       AxisChangeAndDraw(myPane);
@@ -61,7 +61,7 @@ namespace ZedGraph
       GraphPane myPane = new GraphPane();
       myPane.Rect = new RectangleF(0, 0, 640f, 480f);
 
-      StockPointList spl = CreateStockPointList(60 * 24);
+      var spl = CreateStockPointList(60 * 24);
       OHLCBarItem myCurve = myPane.AddOHLCBar("trades", spl, Color.Black);
 
       myPane.XAxis.Type = AxisType.DateAsOrdinal;
@@ -82,7 +82,7 @@ namespace ZedGraph
       myPane.Rect = new RectangleF(0, 0, 640f, 480f);
       myPane.XAxis.Type = AxisType.DateAsOrdinal;
 
-      StockPointList spl = CreateStockPointList(60 * 24 * 7);
+      var spl = CreateStockPointList(60 * 24 * 7);
       OHLCBarItem myCurve = myPane.AddOHLCBar("trades", spl, Color.Black);
 
       AxisChangeAndDraw(myPane);
@@ -101,7 +101,7 @@ namespace ZedGraph
       myPane.Rect = new RectangleF(0, 0, 640f, 480f);
       myPane.XAxis.Type = AxisType.Date;
 
-      StockPointList spl = CreateStockPointList(5);
+      var spl = CreateStockPointList(5);
 
       OHLCBarItem myCurve = myPane.AddOHLCBar("trades", spl, Color.Black);
 
@@ -121,7 +121,7 @@ namespace ZedGraph
       myPane.Rect = new RectangleF(0, 0, 640f, 480f);
       myPane.XAxis.Type = AxisType.Date;
 
-      StockPointList spl = CreateStockPointList(60 * 24);
+      var spl = CreateStockPointList(60 * 24);
 
       OHLCBarItem myCurve = myPane.AddOHLCBar("trades", spl, Color.Black);
 
@@ -141,7 +141,7 @@ namespace ZedGraph
       myPane.Rect = new RectangleF(0, 0, 640f, 480f);
       myPane.XAxis.Type = AxisType.Date;
 
-      StockPointList spl = CreateStockPointList(60 * 24 * 7);
+      var spl = CreateStockPointList(60 * 24 * 7);
 
       OHLCBarItem myCurve = myPane.AddOHLCBar("trades", spl, Color.Black);
 
@@ -163,9 +163,9 @@ namespace ZedGraph
       }
     }
 
-    private static StockPointList CreateStockPointList(long valueStepSizeMinutes)
+    private static StockPointList<StockPt> CreateStockPointList(long valueStepSizeMinutes)
     {
-      StockPointList spl = new StockPointList();
+      var spl = new StockPointList<StockPt>();
       Random rand = new Random();
 
       XDate xDate = new XDate(2013, 1, 1);
