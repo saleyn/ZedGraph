@@ -48,7 +48,7 @@ namespace ZedGraph.Demo
       };
       m_Data = new StockPointList<StockPt>(true);
       m_ZigZagData = new PointPairList();
-      m_FilteredData = new DynFilteredPointList(new[] {0.0}, new[] {0.0});
+      m_FilteredData = new DynFilteredPointList<PointPair>(new[] {0.0}, new[] {0.0});
       m_EMAData = new PointPairList();
       m_Rand = new Random();
       var now = fillSampleData();
@@ -354,7 +354,7 @@ namespace ZedGraph.Demo
     private          StockPointList<StockPt> m_Data;
     private readonly PointPairList m_EMAData;
     private readonly PointPairList m_ZigZagData;
-    private readonly DynFilteredPointList m_FilteredData;
+    private readonly DynFilteredPointList<PointPair> m_FilteredData;
     private float    m_ZigZagPercent = 0.20f;
 
     private XDate m_Now;

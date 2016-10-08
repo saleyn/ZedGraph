@@ -48,19 +48,23 @@ namespace ZedGraph
   /// <author> ingineer based on John Champion's FilteredPointList class</author>
   /// <version> $Revision: $ $Date: $ </version>
   [Serializable]
-  public class DynFilteredPointList : IPointListEdit
+  public class DynFilteredPointList<T> : IPointListEdit
+    where T : IPointPair, new()
   {
+    private struct Comparer : IComparer<T>
+    {
+      public int Compare(T x, T y)
+      {
+        return x.X.CompareTo(y.X);
+      }
+    }
 
     #region Fields
 
     /// <summary>
-    /// Instance of a List of x values
+    /// Instance of a List of x,y values
     /// </summary>
-    private List<double> _x;
-    /// <summary>
-    /// Instance of a List of y values
-    /// </summary>
-    private List<double> _y;
+    private List<T> _data;
 
     /// <summary>
     /// Instance of an array of filtered x value indices
@@ -93,30 +97,28 @@ namespace ZedGraph
     {
       get
       {
-        var xVal = PointPair.Missing;
-        var yVal = PointPair.Missing;
         if (index < 0 || index >= this.Count)
-          return new PointPair(xVal, yVal, PointPair.Missing, null);
+          return PointPair.Empty;
 
         return unsafeGet(index);
       }
       set
       {
-        var ind = _x.BinarySearch(value.X);
+        var ind = _data.BinarySearch((T)value, new Comparer());
 
         if (ind < 0)
           ind = ~ind;
 
-        if (ind > _x.Count) return;
+        if (ind > _data.Count) return;
 
-        _x.Insert(ind, value.X);
-        _y.Insert(ind, value.Y);
+        _data.Insert(ind, (T)value); // FiXME: should we clone?
       }
     }
 
     public int Ordinal(double value)
     {
-      int ind = _x.BinarySearch(value);
+      var p = new T {X = value};
+      int ind = _data.BinarySearch(p, new Comparer());
       if (ind < 0)
         ind = ~ind;
 
@@ -131,7 +133,7 @@ namespace ZedGraph
     /// <summary>
     /// Returns the number of points in the underlying data set.
     /// </summary>
-    public int UnFilteredCount => _x.Count;
+    public int UnFilteredCount => _data.Count;
 
     /// <summary>
     /// Gets the desired number of filtered points to output.  You can set this value by
@@ -170,9 +172,7 @@ namespace ZedGraph
     /// </summary>
     public DynFilteredPointList()
     {
-      _x = new List<double>();
-      _y = new List<double>();
-
+      _data      = new List<T>();
       _filtdInds = new List<int>();
     }
 
@@ -192,8 +192,17 @@ namespace ZedGraph
     /// </summary>
     public DynFilteredPointList(List<double> x, List<double> y)
     {
-      _x = x;
-      _y = y;
+      var dt  = new List<T>();
+      if (x.Count <= y.Count)
+      {
+        for (var i = 0; i < x.Count; ++i) dt.Add(new T {X=x[i], Y=y[i]});
+        for (var i = x.Count; i < y.Count; ++i) dt.Add(new T { X = PointPair.Missing, Y = y[i] });
+      }
+      else
+      {
+        for (var i = 0; i < y.Count; ++i) dt.Add(new T { X = x[i], Y = y[i] });
+        for (var i = y.Count; i < x.Count; ++i) dt.Add(new T { X=x[i], Y = PointPair.Missing});
+      }
       _filtdInds = new List<int>();
     }
 
@@ -202,12 +211,10 @@ namespace ZedGraph
     /// </summary>
     /// <remarks>Assumes the _x and _y arrays are monotonically increasing</remarks>
     /// <param name="rhs">The FilteredPointList from which to copy</param>
-    public DynFilteredPointList(DynFilteredPointList rhs)
+    public DynFilteredPointList(DynFilteredPointList<T> rhs)
     {
       // the only way we can deep Clone a list is to use GetRange
-      _x = new List<double>(rhs._x.GetRange(0, rhs._x.Count).ToArray()); // Clone rhs._x
-      _y = new List<double>(rhs._y.GetRange(0, rhs._y.Count).ToArray()); // Clone rhs._y
-
+      _data = new List<T>(rhs._data.GetRange(0, rhs._data.Count)); // Clone rhs._x
       _filtdInds = new List<int>(rhs._filtdInds.GetRange(0, rhs._filtdInds.Count)); // Clone rhs._filtdPts
 
       MinBoundIndex = rhs.MinBoundIndex;
@@ -223,7 +230,7 @@ namespace ZedGraph
     /// <returns>A new, independent copy of the FilteredPointList</returns>
     public virtual object Clone()
     {
-      return new DynFilteredPointList(this);
+      return new DynFilteredPointList<T>(this);
     }
 
 
@@ -267,7 +274,7 @@ namespace ZedGraph
       var elemsToFilter = (MaxBoundIndex - MinBoundIndex) + 1; // +1 for last pt to touch Y2Axis
 
       // if too few points (or we've been asked not to filter), don't filter
-      if (_x.Count > 0 && (elemsToFilter < maxPts || maxPts == -1))
+      if (_data.Count > 0 && (elemsToFilter < maxPts || maxPts == -1))
       {
         _filtdInds.Clear();
         for (int i = MinBoundIndex; i < (MinBoundIndex + elemsToFilter); i++)
@@ -295,7 +302,7 @@ namespace ZedGraph
 
       while (ind <= MaxBoundIndex)
       {
-        var nextSegmentStart = _x[ind] + segmentWidth;
+        var nextSegmentStart = _data[ind].X + segmentWidth;
 
         if (IsApplyHighLowLogic)
         {
@@ -331,7 +338,7 @@ namespace ZedGraph
             }
 
             // move to the next quarter of this segment
-            moveIndexToXVal(ref ind, nextSegmentStart + ((segmentWidth * i) / POINTS_PER_SEGMENT));
+            moveIndexToXVal(ref ind, nextSegmentStart + (segmentWidth * i) / POINTS_PER_SEGMENT);
           }
         }
       }
@@ -345,11 +352,15 @@ namespace ZedGraph
     /// <param name="point">The <see cref="PointPair" /> object containing the data to be added.</param>
     public void Add(IPointPair point)
     {
-      if (_x.Count > 0 && point.X < _x[_x.Count - 1])
+      Add((T)point);
+    }
+
+    public void Add(T point)
+    {
+      if (_data.Count > 0 && point.X < _data[_data.Count - 1].X)
         return;
 
-      _x.Add(point.X);
-      _y.Add(point.Y);
+      _data.Add(point);
 
       MaxPts++;
     }
@@ -363,11 +374,10 @@ namespace ZedGraph
     /// <param name="y">The <see cref="Double" /> value containing the Y data to be added.</param>
     public void Add(double x, double y)
     {
-      if (_x.Count > 0 && x < _x[_x.Count - 1])
+      if (_data.Count > 0 && x < _data[_data.Count - 1].X)
         return;
 
-      _x.Add(x);
-      _y.Add(y);
+      _data.Add(new T {X=x, Y=y});
 
       MaxPts++;
     }
@@ -379,17 +389,16 @@ namespace ZedGraph
     /// to ensure the filtered subset contains valid indices into the underlying list.
     /// </remarks>
     /// <returns>The removed item or if the list was empty, null.</returns>
-    public PointPair Remove()
+    public IPointPair Remove()
     {
-      if (_x.Count == 0)
+      if (_data.Count == 0)
         return null;
 
-      int prevLastIndex = _x.Count - 1;
+      var prevLastIndex = _data.Count - 1;
 
-      PointPair pp = new PointPair(_x[prevLastIndex], _y[prevLastIndex]);
+      var pp = _data[prevLastIndex];
 
-      _x.RemoveAt(prevLastIndex);
-      _y.RemoveAt(prevLastIndex);
+      _data.RemoveAt(prevLastIndex);
 
       return pp;
     }
@@ -407,11 +416,10 @@ namespace ZedGraph
     /// </param>
     public void RemoveAt(int index)
     {
-      if (index >= _x.Count || index >= _x.Count || index < 0)
+      if (index >= _data.Count || index >= _data.Count || index < 0)
         throw new ArgumentOutOfRangeException();
 
-      _x.RemoveAt(index);
-      _y.RemoveAt(index);
+      _data.RemoveAt(index);
     }
 
     /// <summary>
@@ -420,9 +428,7 @@ namespace ZedGraph
     /// </summary>
     public void Clear()
     {
-      _x.Clear();
-      _y.Clear();
-
+      _data.Clear();
       _filtdInds.Clear();
 
       MaxPts = -1;
@@ -439,9 +445,13 @@ namespace ZedGraph
     /// </summary>
     private void setMinMaxBoundIndex(double min, double max)
     {
+      var mi  = new T {X = min};
+      var mx  = new T {X = max};
+      var cmp = new Comparer();
+
       // find the index of the start and end of the bounded range
-      int first = _x.BinarySearch(min);
-      int last  = _x.BinarySearch(max);
+      int first = _data.BinarySearch(mi, cmp);
+      int last  = _data.BinarySearch(mx, cmp);
 
       // Make sure the bounded indices are legitimate
       // if BinarySearch() doesn't find the value, it returns the bitwise
@@ -453,8 +463,8 @@ namespace ZedGraph
       if (last < 0)
         last = ~last;
 
-      if (last >= _x.Count && _x.Count > 0)
-        last = _x.Count - 1;
+      if (last >= _data.Count && _data.Count > 0)
+        last = _data.Count - 1;
 
       MinBoundIndex = first;
       MaxBoundIndex = last;
@@ -468,14 +478,13 @@ namespace ZedGraph
     private void getMinMaxIndices(ref int index, double nextSegmentStart,
         out int minIndex, out int maxIndex)
     {
-      double y;
       double miny = double.MaxValue, maxy = double.MinValue;
 
       minIndex = maxIndex = index;
 
-      while (_x[index] < nextSegmentStart)
+      while (_data[index].X < nextSegmentStart)
       {
-        y = _y[index];
+        var y = _data[index].Y;
 
         if (y > maxy)
         {
@@ -490,7 +499,7 @@ namespace ZedGraph
         }
 
         index++;
-        if (index >= _x.Count)
+        if (index >= _data.Count)
           break;
       }
     }
@@ -513,33 +522,26 @@ namespace ZedGraph
     }
 
     /// <summary>
-    /// Search <see cref="_x"/> for xVal and set the index to it.
+    /// Search <see cref="_data"/> for xVal and set the index to it.
     /// </summary>
     private void moveIndexToXVal(ref int index, double xVal)
     {
-      int ind = _x.BinarySearch(xVal);
+      var val = new T {X = xVal};
+      int ind = _data.BinarySearch(val, new Comparer());
 
       if (ind < 0)
         ind = ~ind;
 
-      if (ind >= _x.Count && _x.Count > 0)
-        ind = _x.Count - 1;
+      if (ind >= _data.Count && _data.Count > 0)
+        ind = _data.Count - 1;
 
       index = ind;
     }
 
     private IPointPair unsafeGet(int index)
     {
-      double x = PointPairBase.Missing, y = PointPairBase.Missing;
-
       var fIndex = _filtdInds[index];
-      if (fIndex < _x.Count)
-      {
-        x = _x[fIndex];
-        y = _y[fIndex];
-      }
-
-      return new PointPair(x, y, PointPair.Missing, null);
+      return fIndex < _data.Count ? (IPointPair)_data[fIndex] : PointPair.Empty;
     }
 
     #endregion

@@ -128,7 +128,7 @@ namespace ZedGraph
     {
       var len = Math.Max(x.Length, y.Length);
       var dt  = new CompactPt[len];
-      if (x.Length < y.Length)
+      if (x.Length <= y.Length)
       {
         for(var i=0; i < x.Length; ++i) dt[i] = new CompactPt(x[i], y[i]);
         for(var i=x.Length; i < y.Length; ++i) dt[i] = new CompactPt(PointPairBase.Missing, y[i]);
