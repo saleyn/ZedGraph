@@ -23,6 +23,7 @@ to make it more usable for financial charting.
   support IPointPair.
 * Modify StockPt to implement IStockPt interface and convert StockPointList to
   support IStockPt.
+* Implement support for IEnumerable in IPointList lists.
 
 Example:
 
