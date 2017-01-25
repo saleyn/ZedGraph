@@ -278,12 +278,12 @@ namespace ZedGraph.Demo
             var lo = pt.Low;
             var hi = pt.High;
 
-            var inc  = 0.0005;
+            var inc  = 0.0005f;
             var next = (lo - lo % inc) + inc;
-            var list = new List<Tuple<double,int>>();
+            var list = new List<Tuple<float,float,int>>();
             while (next < hi)
             {
-              list.Add(Tuple.Create(lo, m_Rand.Next(1000)));
+              list.Add(Tuple.Create(lo, lo+inc-0.0001f, m_Rand.Next(1000)));
               lo    = next;
               next += inc;
             }
@@ -401,11 +401,11 @@ namespace ZedGraph.Demo
 
       if (add)
       {
-        var open = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        var close = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        var hi = Math.Max(open, close) + m_Rand.NextDouble()*5.0;
-        var low = Math.Min(open, close) - m_Rand.NextDouble()*5.0;
-        var vol = m_Rand.NextDouble()*1000;
+        var open  = (float)(m_Open + m_Rand.NextDouble()*10.0 - 5.0);
+        var close = (float)(m_Open + m_Rand.NextDouble()*10.0 - 5.0);
+        var hi    = (float)(Math.Max(open, close) + m_Rand.NextDouble()*5.0);
+        var low   = (float)(Math.Min(open, close) - m_Rand.NextDouble()*5.0);
+        var vol   = m_Rand.NextDouble()*1000;
 
         var x = now.XLDate - (now.XLDate%diff);
         pt = new StockPt(x, open, hi, low, close, (int)vol);
@@ -468,9 +468,9 @@ namespace ZedGraph.Demo
       else if (m_Data.Count > 0)
       {
         pt = LastPoint;
-        pt.Close = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        pt.High = Math.Max(pt.High, Math.Max(m_Open, pt.Close) + m_Rand.NextDouble()*5.0);
-        pt.Low = Math.Min(pt.Low, Math.Min(m_Open, pt.Close) - m_Rand.NextDouble()*5.0);
+        pt.Close = (float)(m_Open + m_Rand.NextDouble()*10.0 - 5.0);
+        pt.High  = (float)Math.Max(pt.High, Math.Max(m_Open, pt.Close) + m_Rand.NextDouble()*5.0);
+        pt.Low   = (float)Math.Min(pt.Low, Math.Min(m_Open, pt.Close) - m_Rand.NextDouble()*5.0);
 
         if (timer && Math.Abs(Math.Round(m_Pane.XAxis.Scale.Max) - m_Data.Count) < 5)
           set_min_max(pt.Low, pt.High, false);

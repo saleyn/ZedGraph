@@ -765,14 +765,14 @@ namespace ZedGraph.ControlTest
 
 			// First day is feb 1st
 			XDate xDate = new XDate( 2006, 2, 1 );
-			double open = 50.0;
+			var open = 50.0f;
 
 			for ( int i = 0; i < 20; i++ )
 			{
-				double x = xDate.XLDate;
-				double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
-				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
+				double  x = xDate.XLDate;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
 				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
@@ -830,14 +830,14 @@ namespace ZedGraph.ControlTest
 
 			// First day is jan 1st
 			XDate xDate = new XDate( 2006, 1, 1 );
-			double open = 50.0;
+			var open = 50.0f;
 
 			for ( int i = 0; i < 50; i++ )
 			{
 				double x = xDate.XLDate;
-				double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
-				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
 				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
@@ -885,17 +885,17 @@ namespace ZedGraph.ControlTest
 			Random rand = new Random();
 
 			// First day is jan 1st
-			XDate xDate = new XDate( 2006, 1, 1 );
-			double open = 50.0;
+			XDate  xDate = new XDate( 2006, 1, 1 );
+			var    open  = 50.0f;
 			double prevClose = 0;
 
 			// Loop to make 50 days of data
 			for ( int i = 0; i < 50; i++ )
 			{
 				double x = xDate.XLDate;
-				double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
-				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
 				// Create a StockPt instead of a PointPair so we can carry 6 properties
 				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
@@ -967,8 +967,8 @@ namespace ZedGraph.ControlTest
 			Random rand = new Random();
 
 			// First day is jan 1st
-			XDate xDate = new XDate( 2006, 1, 1 );
-			double open = 50.0;
+			var xDate = new XDate( 2006, 1, 1 );
+			var open = 50.0f;
 			double prevClose = 50.0;
 			const int numDays = 365;
 
@@ -977,11 +977,11 @@ namespace ZedGraph.ControlTest
 			{
 				double x = xDate.XLDate;
 				//double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double close = open * ( 0.95 + rand.NextDouble() * 0.1 );
+				var close = (float)(open * ( 0.95 + rand.NextDouble() * 0.1 ));
 				//double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
 				//double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
-				double hi = Math.Max( open, close ) * ( 1.0 + rand.NextDouble() * 0.05 );
-				double low = Math.Min( open, close ) * ( 0.95 + rand.NextDouble() * 0.05 );
+				var    hi  = (float)(Math.Max( open, close ) * ( 1.0 + rand.NextDouble() * 0.05 ));
+				var    low = (float)(Math.Min( open, close ) * ( 0.95 + rand.NextDouble() * 0.05 ));
 				int    vol = 25 + (int)(rand.NextDouble() * 100.0);
 				double change = close - prevClose;
 
@@ -1177,14 +1177,14 @@ namespace ZedGraph.ControlTest
 
 			// First day is jan 1st
 			XDate xDate = new XDate( 2006, 1, 1 );
-			double open = 50.0;
+			var open = 50.0f;
 
 			for ( int i = 0; i < 100; i++ )
 			{
-				double x = xDate.XLDate;
-				double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
-				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
+				double  x = xDate.XLDate;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
 				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
@@ -1234,14 +1234,14 @@ namespace ZedGraph.ControlTest
 
 			// First day is jan 1st
 			XDate xDate = new XDate( 2006, 1, 1 );
-			double open = 50.0;
+			var open = 50.0f;
 
 			for ( int i = 0; i < 500; i++ )
 			{
-				double x = xDate.XLDate;
-				double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
-				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
+				double  x = xDate.XLDate;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
 				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
@@ -1289,14 +1289,14 @@ namespace ZedGraph.ControlTest
 
 			// First day is jan 1st
 			XDate xDate = new XDate( 2006, 1, 1 );
-			double open = 50.0;
+			var open = 50.0f;
 
 			for ( int i = 0; i < 50; i++ )
 			{
-				double x = xDate.XLDate;
-				double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
-				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
+				double  x = xDate.XLDate;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
 				StockPt pt = new StockPt( x, open, hi, low, close, 100000 );
 				spl.Add( pt );
@@ -1342,14 +1342,14 @@ namespace ZedGraph.ControlTest
 
 			// First day is jan 1st
 			XDate xDate = new XDate( 2006, 1, 1 );
-			double open = 50.0;
+			var open = 50.0f;
 
 			for ( int i = 0; i < 50; i++ )
 			{
 				double x = xDate.XLDate;
-				double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
-				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
         StockPt pt = new StockPt(x, open, hi, low, close, 100000);
         spl.Add( pt );
@@ -2691,14 +2691,14 @@ namespace ZedGraph.ControlTest
 
 			// First day is jan 1st 
 			XDate xDate = new XDate( 2006, 1, 1 );
-			double open = 50.0;
+			var open = 50.0f;
 
 			for ( int i = 0; i < 1000; i++ )
 			{
 				double x = xDate.XLDate;
-				double close = open + rand.NextDouble() * 10.0 - 5.0;
-				double hi = Math.Max( open, close ) + rand.NextDouble() * 5.0;
-				double low = Math.Min( open, close ) - rand.NextDouble() * 5.0;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
         StockPt pt = new StockPt(x, open, hi, low, close, 100000);
         spl.Add( pt );

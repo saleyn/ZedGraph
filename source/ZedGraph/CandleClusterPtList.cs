@@ -149,7 +149,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add(double date, double high)
     {
-      Add(new CandleClusterPt(date, PointPair.Missing, high, PointPair.Missing, PointPair.Missing, 0));
+      Add(new CandleClusterPt(date, PointPair.Missing, (float)high, PointPair.Missing, PointPair.Missing, 0));
     }
 
     /// <summary>
@@ -162,7 +162,7 @@ namespace ZedGraph
     /// <param name="close">The closing value for the day</param>
     /// <param name="vol">The trading volume for the day</param>
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
-    public void Add(double date, double open, double high, double low, double close, int vol)
+    public void Add(double date, float open, float high, float low, float close, int vol)
     {
       Add(new CandleClusterPt(date, open, high, low, close, vol));
     }

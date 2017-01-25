@@ -51,12 +51,12 @@ namespace ZedGraph
     /// <summary>
     /// This opening value
     /// </summary>
-    public double Open { get; set; }
+    public float Open { get; set; }
 
     /// <summary>
     /// This closing value
     /// </summary>
-    public double High { get; set; }
+    public float High { get; set; }
 
     /// <summary>
     /// Volume value
@@ -89,7 +89,7 @@ namespace ZedGraph
     /// <param name="high">The daily high stock price</param>
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
-    public StockPt(double date, double open, double high, double low, double close, int vol)
+    public StockPt(double date, float open, float high, float low, float close, int vol)
       : this(date, open, high, low, close, vol, null)
     {
     }
@@ -104,7 +104,7 @@ namespace ZedGraph
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
-    public StockPt(double date, double open, double high, double low, double close, int vol, string tag)
+    public StockPt(double date, float open, float high, float low, float close, int vol, string tag)
       : base(date, close, low)
     {
       Open = open;
@@ -173,8 +173,8 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32("schema3");
 
-      Open = info.GetDouble("Open");
-      High = info.GetDouble("High");
+      Open = (float)info.GetDouble("Open");
+      High = (float)info.GetDouble("High");
       Vol  = info.GetInt32("Vol");
       ColorValue = info.GetDouble("ColorValue");
     }
@@ -209,12 +209,12 @@ namespace ZedGraph
     /// <summary>
     /// Map the high property to the Y value
     /// </summary>
-    public double Close { get { return Y; } set { Y = value; } }
+    public float  Close { get { return (float)Y; } set { Y = value; } }
 
     /// <summary>
     /// Trading volume. Map the low property to the Z value
     /// </summary>
-    public double Low { get { return Z; } set { Z = value; } } 
+    public float  Low { get { return (float)Z; } set { Z = value; } } 
 
     public override double HighValue => High;
 

@@ -43,7 +43,7 @@ namespace ZedGraph
     /// <summary>
     /// Missing values are represented internally using <see cref="System.Double.MaxValue"/>.
     /// </summary>
-    public const double Missing = double.MaxValue;
+    public const float Missing = float.MinValue;
 
     /// <summary>
     /// The default format to be used for displaying point values via the
@@ -62,13 +62,12 @@ namespace ZedGraph
     public double Y { get; set; }
 
     ////chenmin
-    //public DataRow SourceRow = null;
-    public object ID { get; set; }
-    public bool IsVisible { get; set; } = true;
+    //public DataRow        SourceRow = null;
 
-    public bool IsFiltered { get; set; }
-
-    public Color PointColor { get; set; } = Color.Blue;
+    public object ID         { get; set; }
+    public bool   IsVisible  { get; set; } = true;
+    public bool   IsFiltered { get; set; }
+    public Color  PointColor { get; set; } = Color.Blue;
 
     public SymbolType PointSymbolType { get; set; } = SymbolType.Square;
 
@@ -81,10 +80,7 @@ namespace ZedGraph
     /// <summary>
     /// Default Constructor
     /// </summary>
-    public PointPairBase()
-      : this(0, 0)
-    {
-    }
+    public PointPairBase() : this(0, 0) {}
 
     /// <summary>
     /// Creates a point pair with the specified X and Y.
@@ -121,7 +117,7 @@ namespace ZedGraph
 
       this.ID              = r.ID;
       this.IsVisible       = r.IsVisible;
-      this.IsFiltered   = r.IsFiltered;
+      this.IsFiltered      = r.IsFiltered;
       this.PointColor      = r.PointColor;
       this.PointSymbolType = r.PointSymbolType;
       this.IsSelectable    = r.IsSelectable;
@@ -154,7 +150,7 @@ namespace ZedGraph
 
       ID                   = info.GetValue("ID", typeof(object));
       IsVisible            = info.GetBoolean("IsVisible");
-      this.IsFiltered   = info.GetBoolean("IsPointFilter");
+      this.IsFiltered      = info.GetBoolean("IsFiltered");
       this.PointColor      = (Color)info.GetValue("PointColor", typeof(Color));
       this.PointSymbolType = (SymbolType)info.GetValue("PointSymbolType", typeof(SymbolType));
       this.IsSelectable    = info.GetBoolean("IsSelectable");
@@ -175,7 +171,7 @@ namespace ZedGraph
       //chenmin
       info.AddValue("ID",              ID);
       info.AddValue("IsVisible",       IsVisible);
-      info.AddValue("IsPointFilter",   IsFiltered);
+      info.AddValue("IsFiltered",      IsFiltered);
       info.AddValue("PointColor",      PointColor);
       info.AddValue("PointSymbolType", PointSymbolType);
       info.AddValue("IsSelectable",    IsSelectable);

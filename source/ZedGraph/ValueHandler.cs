@@ -135,14 +135,14 @@ namespace ZedGraph
             {
               if ((baseAxis is IXAxis) && Math.Abs(points[i].X - baseVal) < float.Epsilon)
               {
-                curVal = points[i].Y;
+                curVal = (float)points[i].Y;
                 break;
               }
 
               if (baseAxis is IXAxis || Math.Abs(points[i].Y - baseVal) > float.Epsilon)
                 continue;
 
-              curVal = points[i].X;
+              curVal = (float)points[i].X;
               break;
             }
           }
@@ -150,7 +150,7 @@ namespace ZedGraph
           else if (iPt < tmpCurve.Points.Count)
           {
             // Get the value for the appropriate value axis
-            curVal = baseAxis is IXAxis ? tmpCurve.Points[iPt].Y : tmpCurve.Points[iPt].X;
+            curVal = (float)(baseAxis is IXAxis ? tmpCurve.Points[iPt].Y : tmpCurve.Points[iPt].X);
           }
 
           // If it's a missing value, skip it

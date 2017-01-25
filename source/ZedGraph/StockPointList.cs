@@ -38,10 +38,10 @@ namespace ZedGraph
   {
     DateTime TimeStamp { get; }
     double   Date      { get; }
-    double   Open      { get; }
-    double   High      { get; }
-    double   Low       { get; }
-    double   Close     { get; }
+    float    Open      { get; }
+    float    High      { get; }
+    float    Low       { get; }
+    float    Close     { get; }
 
     new IStockPt Clone();
   }
@@ -125,7 +125,7 @@ namespace ZedGraph
     {
       _offset = 0;
 
-      foreach (var pp in rhs.Cast<IStockPt>())
+      foreach (IStockPt pp in rhs)
       {
         Add(pp.Clone());
 
@@ -196,7 +196,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add( double date, double high )
     {
-      add(date, PointPair.Missing, high, PointPair.Missing, PointPair.Missing, 0);
+      add(date, PointPair.Missing, (float)high, PointPair.Missing, PointPair.Missing, 0);
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ namespace ZedGraph
     /// <param name="close">The closing value for the day</param>
     /// <param name="vol">The trading volume for the day</param>
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
-    public void Add(double date, double open, double high, double low, double close, int vol)
+    public void Add(double date, float open, float high, float low, float close, int vol)
     {
       add(date, open, high, low, close, vol);
     }
@@ -290,7 +290,7 @@ namespace ZedGraph
       return DoubleComparer.LT(_dateIndex[lo].Item1, date) ? lo+1 : lo;
     }
 
-    private void add(double date, double open, double high, double low, double close, int vol)
+    private void add(double date, float open, float high, float low, float close, int vol)
     {
       if (typeof(T) != typeof(StockPt))
         throw new InvalidOperationException($"Invalid data type {typeof(T)}: expected {typeof(StockPt)}");

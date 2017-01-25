@@ -400,10 +400,10 @@ namespace ZedGraph.Demo
 
       if (add)
       {
-        var open = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        var close = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        var hi = Math.Max(open, close) + m_Rand.NextDouble()*5.0;
-        var low = Math.Min(open, close) - m_Rand.NextDouble()*5.0;
+        var open  = (float)(m_Open + m_Rand.NextDouble()*10.0 - 5.0);
+        var close = (float)(m_Open + m_Rand.NextDouble()*10.0 - 5.0);
+        var hi    = (float)(Math.Max(open, close) + m_Rand.NextDouble()*5.0);
+        var low   = (float)(Math.Min(open, close) - m_Rand.NextDouble()*5.0);
         var vol = m_Rand.NextDouble()*1000;
 
         var x = now.XLDate - (now.XLDate%diff);
@@ -467,9 +467,9 @@ namespace ZedGraph.Demo
       else if (m_Data.Count > 0)
       {
         pt = LastPoint;
-        pt.Close = m_Open + m_Rand.NextDouble()*10.0 - 5.0;
-        pt.High = Math.Max(pt.High, Math.Max(m_Open, pt.Close) + m_Rand.NextDouble()*5.0);
-        pt.Low = Math.Min(pt.Low, Math.Min(m_Open, pt.Close) - m_Rand.NextDouble()*5.0);
+        pt.Close = (float)(m_Open + m_Rand.NextDouble()*10.0 - 5.0);
+        pt.High  = (float)Math.Max(pt.High, Math.Max(m_Open, pt.Close) + m_Rand.NextDouble()*5.0);
+        pt.Low   = (float)Math.Min(pt.Low, Math.Min(m_Open, pt.Close) - m_Rand.NextDouble()*5.0);
 
         if (timer && Math.Abs(Math.Round(m_Pane.XAxis.Scale.Max) - m_Data.Count) < 5)
           set_min_max(pt.Low, pt.High, false);
@@ -592,10 +592,10 @@ namespace ZedGraph.Demo
           var dt  = line.Substring(0, 16);
           var row = line.Substring(17).Split(',');
           var d = DateTime.ParseExact(dt, "yyyy.MM.dd,hh:mm", CultureInfo.InvariantCulture);
-          var o = double.Parse(row[0]);
-          var h = double.Parse(row[1]);
-          var l = double.Parse(row[2]);
-          var c = double.Parse(row[3]);
+          var o = float.Parse(row[0]);
+          var h = float.Parse(row[1]);
+          var l = float.Parse(row[2]);
+          var c = float.Parse(row[3]);
           var v = int.Parse(row[4]);
 
           output.Add(new StockPt(new XDate(d), o, h, l, c, v));

@@ -27,13 +27,13 @@ namespace ZedGraph
   {
     DateTime TimeStamp { get; }
     double   Date      { get; set; }
-    double   Open      { get; set; }
-    double   High      { get; set; }
-    double   Low       { get; set; }
-    double   Close     { get; set; }
+    float    Open      { get; set; }
+    float    High      { get; set; }
+    float    Low       { get; set; }
+    float    Close     { get; set; }
     int      Vol       { get; set; }
 
-    Tuple<double, int>[] Volumes { get; set; }
+    Tuple<float, float, int>[] Volumes { get; set; }
   }
 
   /// <summary>
@@ -62,9 +62,9 @@ namespace ZedGraph
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
-    public CandleClusterPt(double date, double open, double high, double low, double close,
+    public CandleClusterPt(double date, float open, float high, float low, float close,
                            int vol, string tag = null,
-                           Tuple<double, int>[] volumes = null)
+                           Tuple<float, float, int>[] volumes = null)
       : base(date, open, high, low, close, vol, tag)
     {
       if (volumes != null)
@@ -104,7 +104,7 @@ namespace ZedGraph
       {
         if (cloneVolumes)
         {
-          Volumes = new Tuple<double, int>[rhs.Volumes.Length];
+          Volumes = new Tuple<float, float, int>[rhs.Volumes.Length];
           Array.Copy(rhs.Volumes, Volumes, rhs.Volumes.Length);
         }
         else
@@ -121,7 +121,7 @@ namespace ZedGraph
     /// <summary>
     /// Current schema value that defines the version of the serialized file
     /// </summary>
-    private const int schema3 = 12;
+    private const int schema4 = 12;
 
     /// <summary>
     /// Constructor for deserializing objects
@@ -137,7 +137,7 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       var sch = info.GetInt32("schema3");
 
-      Volumes = (Tuple<double, int>[])info.GetValue("volumes", typeof(Tuple<double,int>[]));
+      Volumes = (Tuple<float, float, int>[])info.GetValue("volumes", typeof(Tuple<float,float,int>[]));
     }
 
     /// <summary>
@@ -149,7 +149,7 @@ namespace ZedGraph
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
       base.GetObjectData(info, context);
-      info.AddValue("schema3", schema3);
+      info.AddValue("schema4", schema4);
       info.AddValue("volumes", Volumes);
     }
 
@@ -160,7 +160,7 @@ namespace ZedGraph
     /// <summary>
     /// Array of volume clusters aggregated by price steps: {Price, Volume}
     /// </summary>
-    public Tuple<double, int>[] Volumes { get; set; }
+    public Tuple<float, float, int>[] Volumes { get; set; }
 
     #endregion
 

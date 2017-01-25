@@ -169,14 +169,14 @@ namespace ZedGraph
       Random rand = new Random();
 
       XDate xDate = new XDate(2013, 1, 1);
-      double open = 50.0;
+      var open = 50.0f;
 
       for (int i = 0; i < 50; i++)
       {
         double x = xDate.XLDate;
-        double close = open + rand.NextDouble() * 10.0 - 5.0;
-        double hi = Math.Max(open, close) + rand.NextDouble() * 5.0;
-        double low = Math.Min(open, close) - rand.NextDouble() * 5.0;
+				var close = (float)(open + rand.NextDouble() * 10.0 - 5.0);
+				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
+				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
         StockPt pt = new StockPt(x, open, hi, low, close, 100000);
         spl.Add(pt);

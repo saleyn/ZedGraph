@@ -173,19 +173,18 @@ namespace ZedGraph
         //using (var backBrush = new SolidBrush(Default.ClusterBaseColor))
         //  g.FillRectangle(backBrush, pixBase - halfSize, pixHigh, halfSize*2, pixLow - pixHigh);
 
-        var prevPricePix = pixLow;
+        //var prevPricePix = pixLow;
 
         foreach (var v in p.Volumes)
         {
-          var nextPricePix = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, 0, v.Item1);
+          var fromPricePix = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, 0, v.Item1);
+          var toPricePix   = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, 0, v.Item2);
 
-          var color = getVolumeColor(v.Item2);
+          var color = getVolumeColor(v.Item3);
 
           if (color != Default.ClusterBaseColor)
             using (var brush = new SolidBrush(color))
-              g.FillRectangle(brush, pixBase - halfSize/2, nextPricePix, halfSize, prevPricePix-nextPricePix);
-
-          prevPricePix = nextPricePix;
+              g.FillRectangle(brush, pixBase - halfSize/2, fromPricePix, halfSize, toPricePix);
         }
       }
 
