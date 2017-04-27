@@ -404,10 +404,11 @@ namespace ZedGraph.Demo
         var close = (float)(m_Open + m_Rand.NextDouble()*10.0 - 5.0);
         var hi    = (float)(Math.Max(open, close) + m_Rand.NextDouble()*5.0);
         var low   = (float)(Math.Min(open, close) - m_Rand.NextDouble()*5.0);
-        var vol = m_Rand.NextDouble()*1000;
+        var bvol  = m_Rand.NextDouble()*1000;
+        var svol  = m_Rand.NextDouble()*1000;
 
         var x = now.XLDate - (now.XLDate%diff);
-        pt = new StockPt(x, open, hi, low, close, (int)vol);
+        pt = new StockPt(x, open, hi, low, close, (int)bvol, (int)svol);
 
         m_Data.Add(pt);
         m_Open = close;
@@ -596,9 +597,19 @@ namespace ZedGraph.Demo
           var h = float.Parse(row[1]);
           var l = float.Parse(row[2]);
           var c = float.Parse(row[3]);
-          var v = int.Parse(row[4]);
+          int vbuy, vsell, n = int.Parse(row[4]);
+          if (row.Length == 5)
+          {
+            vbuy  = n/2;
+            vsell = n - vbuy;
+          }
+          else
+          {
+            vbuy  = n;
+            vsell = int.Parse(row[5]);
+          }
 
-          output.Add(new StockPt(new XDate(d), o, h, l, c, v));
+          output.Add(new StockPt(new XDate(d), o, h, l, c, vbuy, vsell));
         }
       }
 

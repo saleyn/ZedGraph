@@ -1433,9 +1433,9 @@ namespace ZedGraph
     ///   are not defined as arguments to the
     ///   <see cref="AddOHLCBar(string,IPointList,Color)" /> method.
     /// </returns>
-    public OHLCBarClusterItem AddOHLCBarCluster(string label, IPointList points, int zOrder = -1)
+    public OHLCBarClusterItem AddOHLCBarCluster(string label, IPointList points, int zOrder = -1, float clustStep = OHLCBarCluster.Default.DEF_CLUST_STEP)
     {
-      var curve = new OHLCBarClusterItem(label, points, zOrder);
+      var curve = new OHLCBarClusterItem(label, points, zOrder, clustStep);
       CurveList.Add(curve);
       return curve;
     }

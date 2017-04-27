@@ -61,7 +61,9 @@ namespace ZedGraph
     /// <summary>
     /// Volume value
     /// </summary>
-    public int    Vol  { get; set; }
+    public int    VolBuy  { get; set; }
+    public int    VolSell { get; set; }
+    public int    Volume  => VolBuy + VolSell;
 
     /// <summary>
     /// This is a user value that can be anything.  It is used to provide special 
@@ -76,7 +78,7 @@ namespace ZedGraph
     /// <summary>
     /// Default Constructor
     /// </summary>
-    public StockPt() : this(0, 0, 0, 0, 0, 0, null)
+    public StockPt() : this(0, 0, 0, 0, 0, 0, 0, null)
     {
     }
 
@@ -89,8 +91,8 @@ namespace ZedGraph
     /// <param name="high">The daily high stock price</param>
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
-    public StockPt(double date, float open, float high, float low, float close, int vol)
-      : this(date, open, high, low, close, vol, null)
+    public StockPt(double date, float open, float high, float low, float close, int volBuy, int volSell)
+      : this(date, open, high, low, close, volBuy, volSell, null)
     {
     }
 
@@ -104,14 +106,15 @@ namespace ZedGraph
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
-    public StockPt(double date, float open, float high, float low, float close, int vol, string tag)
+    public StockPt(double date, float open, float high, float low, float close, int volBuy, int volSell, string tag)
       : base(date, close, low)
     {
-      Open = open;
-      High = high;
-      Vol  = vol;
+      Open       = open;
+      High       = high;
+      VolBuy     = volBuy;
+      VolSell    = volSell;
       ColorValue = PointPair.Missing;
-      Tag = tag;
+      Tag        = tag;
     }
 
     /// <summary>
@@ -122,7 +125,8 @@ namespace ZedGraph
     {
       Open       = rhs.Open;
       High       = rhs.High;
-      Vol        = rhs.Vol;
+      VolBuy     = rhs.VolBuy;
+      VolSell    = rhs.VolSell;
       ColorValue = rhs.ColorValue;
       Tag        = rhs.Tag is ICloneable ? ((ICloneable)rhs.Tag).Clone() : rhs.Tag;
     }
@@ -133,11 +137,12 @@ namespace ZedGraph
     /// <param name="rhs">The basis for the copy.</param>
     public StockPt(IPointPair rhs) : base(rhs)
     {
-      if (rhs is StockPt)
+      if (rhs is IOHLCV)
       {
-        var pt     = rhs as StockPt;
+        var pt     = rhs as IOHLCV;
         Open       = pt.Open;
-        Vol        = pt.Vol;
+        VolBuy     = pt.VolBuy;
+        VolSell    = pt.VolSell;
         High       = pt.High;
         ColorValue = ((StockPt)rhs).ColorValue;
       }
@@ -145,7 +150,8 @@ namespace ZedGraph
       {
         Open       = PointPair.Missing;
         High       = PointPair.Missing;
-        Vol        = 0;
+        VolBuy     = 0;
+        VolSell    = 0;
         ColorValue = PointPair.Missing;
       }
     }
@@ -173,9 +179,10 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       int sch = info.GetInt32("schema3");
 
-      Open = (float)info.GetDouble("Open");
-      High = (float)info.GetDouble("High");
-      Vol  = info.GetInt32("Vol");
+      Open       = (float)info.GetDouble("Open");
+      High       = (float)info.GetDouble("High");
+      VolBuy     = info.GetInt32("VolBuy");
+      VolSell    = info.GetInt32("VolSell");
       ColorValue = info.GetDouble("ColorValue");
     }
 
@@ -187,11 +194,12 @@ namespace ZedGraph
     [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-      base.GetObjectData(info, context);
-      info.AddValue("schema3", schema3);
-      info.AddValue("Open", Open);
-      info.AddValue("High", High);
-      info.AddValue("Vol",  Vol);
+      base.GetObjectData(info,    context);
+      info.AddValue("schema3",    schema3);
+      info.AddValue("Open",       Open);
+      info.AddValue("High",       High);
+      info.AddValue("VolBuy",     VolBuy);
+      info.AddValue("VolSell",    VolSell);
       info.AddValue("ColorValue", ColorValue);
     }
 

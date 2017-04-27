@@ -32,9 +32,9 @@ namespace ZedGraph
   }
 
   /// <summary>
-  /// Interface that elements of StockPointList must support
+  /// Interface for OHLC candles
   /// </summary>
-  public interface IStockPt : IPointPair
+  public interface IOHLC
   {
     DateTime TimeStamp { get; }
     double   Date      { get; }
@@ -42,7 +42,23 @@ namespace ZedGraph
     float    High      { get; }
     float    Low       { get; }
     float    Close     { get; }
+  }
 
+  /// <summary>
+  /// Interface for OHLC candles with volume
+  /// </summary>
+  public interface IOHLCV : IOHLC
+  {
+    int VolBuy  { get; }
+    int VolSell { get; }
+    int Volume  { get; }
+  }
+
+  /// <summary>
+  /// Interface that elements of StockPointList must support
+  /// </summary>
+  public interface IStockPt : IPointPair, IOHLCV
+  {
     new IStockPt Clone();
   }
 
@@ -181,7 +197,7 @@ namespace ZedGraph
     /// <param name="point">The <see cref="PointPair"/> object to be added</param>
     public void Add( IPointPair point )
     {
-      if (!(point is StockPt))
+      if (!(point is IOHLC))
         throw new ArgumentException("Only points of StockPt type can be added to StockPointList!");
       base.Add( ((T)point).Clone() );
     }
@@ -196,7 +212,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add( double date, double high )
     {
-      add(date, PointPair.Missing, (float)high, PointPair.Missing, PointPair.Missing, 0);
+      add(date, PointPair.Missing, (float)high, PointPair.Missing, PointPair.Missing, 0, 0);
     }
 
     /// <summary>
@@ -207,11 +223,12 @@ namespace ZedGraph
     /// <param name="high">The high value for the day</param>
     /// <param name="low">The low value for the day</param>
     /// <param name="close">The closing value for the day</param>
-    /// <param name="vol">The trading volume for the day</param>
+    /// <param name="volBuy">The trading buy volume for the day</param>
+    /// <param name="volSell">The trading sell volume for the day</param>
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
-    public void Add(double date, float open, float high, float low, float close, int vol)
+    public void Add(double date, float open, float high, float low, float close, int volBuy, int volSell)
     {
-      add(date, open, high, low, close, vol);
+      add(date, open, high, low, close, volBuy, volSell);
     }
 
     /// <summary>
@@ -290,17 +307,19 @@ namespace ZedGraph
       return DoubleComparer.LT(_dateIndex[lo].Item1, date) ? lo+1 : lo;
     }
 
-    private void add(double date, float open, float high, float low, float close, int vol)
+    private void add(double date, float open, float high, float low, float close, int volBuy, int volSell)
     {
       if (typeof(T) != typeof(StockPt))
         throw new InvalidOperationException($"Invalid data type {typeof(T)}: expected {typeof(StockPt)}");
-      var p  = new T() as StockPt;
-      p.Date  = date;
-      p.Open  = open;
-      p.High  = high;
-      p.Low   = low;
-      p.Close = close;
-      p.Vol   = vol;
+
+      var p     = new T() as StockPt;
+      p.Date    = date;
+      p.Open    = open;
+      p.High    = high;
+      p.Low     = low;
+      p.Close   = close;
+      p.VolBuy  = volBuy;
+      p.VolSell = volSell;
       Add(p);
     }
 

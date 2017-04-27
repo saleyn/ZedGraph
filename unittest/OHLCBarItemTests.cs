@@ -178,7 +178,7 @@ namespace ZedGraph
 				var hi    = (float)(Math.Max( open, close ) + rand.NextDouble() * 5.0);
 				var low   = (float)(Math.Min( open, close ) - rand.NextDouble() * 5.0);
 
-        StockPt pt = new StockPt(x, open, hi, low, close, 100000);
+        StockPt pt = new StockPt(x, open, hi, low, close, 50000, 50000);
         spl.Add(pt);
 
         open = close;

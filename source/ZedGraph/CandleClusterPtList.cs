@@ -78,7 +78,7 @@ namespace ZedGraph
     {
       _offset = 0;
 
-      foreach (var pp in rhs.Cast<CandleClusterPt>().Select(p => new CandleClusterPt(p)))
+      foreach (var pp in rhs.Cast<ICandleClusteredVolume>().Select(p => new CandleClusterPt(p)))
       {
         Add(pp);
 
@@ -149,7 +149,7 @@ namespace ZedGraph
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
     public void Add(double date, double high)
     {
-      Add(new CandleClusterPt(date, PointPair.Missing, (float)high, PointPair.Missing, PointPair.Missing, 0));
+      Add(new CandleClusterPt(date, PointPair.Missing, (float)high, PointPair.Missing, PointPair.Missing, 0, 0));
     }
 
     /// <summary>
@@ -160,11 +160,12 @@ namespace ZedGraph
     /// <param name="high">The high value for the day</param>
     /// <param name="low">The low value for the day</param>
     /// <param name="close">The closing value for the day</param>
-    /// <param name="vol">The trading volume for the day</param>
+    /// <param name="volBuy">The trading buy volume for the day</param>
+    /// <param name="volSell">The trading sell volume for the day</param>
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
-    public void Add(double date, float open, float high, float low, float close, int vol)
+    public void Add(double date, float open, float high, float low, float close, int volBuy, int volSell)
     {
-      Add(new CandleClusterPt(date, open, high, low, close, vol));
+      Add(new CandleClusterPt(date, open, high, low, close, volBuy, volSell));
     }
 
     /// <summary>

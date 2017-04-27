@@ -30,6 +30,22 @@ using Timer = System.Timers.Timer;
 
 namespace ZedGraph.Demo
 {
+  public struct VolInfo : IClusterVolume
+  {
+    public VolInfo(float px, int volBuy, int volSell)
+    {
+      Price   = px;
+      VolBuy  = volBuy;
+      VolSell = volSell;
+    }
+
+    public float Price      { get; }
+    public int   VolSell    { get; set; }
+    public int   VolBuy     { get; set; }
+    public int   Volume   => VolBuy + VolSell;
+    public int   VolDelta => VolBuy - VolSell;
+  }
+
   /// <summary>
   /// Summary description for SimpleDemo.
   /// </summary>
@@ -207,7 +223,7 @@ namespace ZedGraph.Demo
       //      myCurve.Bar.Width             = 2;
       //      myCurve.Bar.IsAutoSize        = true;
       //      myCurve.Bar.Color             = Color.DodgerBlue;
-      var myCurve = m_Pane.AddOHLCBarCluster("EUR/USD", m_Data, zOrder:0);
+      var myCurve = m_Pane.AddOHLCBarCluster("EUR/USD", m_Data, zOrder:0, clustStep:0.0005f);
       myCurve.Bar.Color = Color.FromArgb(255, 0, 255, 0);
       myCurve.Bar.VolumeHeatMap.Add(500, Color.DarkViolet);
       myCurve.Bar.VolumeHeatMap.Add(750, Color.Violet);
@@ -280,10 +296,10 @@ namespace ZedGraph.Demo
 
             var inc  = 0.0005f;
             var next = (lo - lo % inc) + inc;
-            var list = new List<Tuple<float,float,int>>();
+            var list = new List<IClusterVolume>();
             while (next < hi)
             {
-              list.Add(Tuple.Create(lo, lo+inc-0.0001f, m_Rand.Next(1000)));
+              list.Add(new VolInfo(lo, m_Rand.Next(1000), m_Rand.Next(1000)));
               lo    = next;
               next += inc;
             }
@@ -291,7 +307,7 @@ namespace ZedGraph.Demo
             pt.Volumes = list.ToArray();
           }
 
-          var close = ((CandleClusterPt)m_Data[0]).Close;
+          var close = ((ICandleClusteredVolume)m_Data[0]).Close;
           m_EMA = close;
 
           foreach (var p in m_Data.Cast<ICandleClusteredVolume>())
@@ -405,10 +421,11 @@ namespace ZedGraph.Demo
         var close = (float)(m_Open + m_Rand.NextDouble()*10.0 - 5.0);
         var hi    = (float)(Math.Max(open, close) + m_Rand.NextDouble()*5.0);
         var low   = (float)(Math.Min(open, close) - m_Rand.NextDouble()*5.0);
-        var vol   = m_Rand.NextDouble()*1000;
+        var bvol  = m_Rand.NextDouble()*1000;
+        var svol  = m_Rand.NextDouble()*1000;
 
         var x = now.XLDate - (now.XLDate%diff);
-        pt = new StockPt(x, open, hi, low, close, (int)vol);
+        pt = new StockPt(x, open, hi, low, close, (int)bvol, (int)svol);
 
         m_Data.Add(pt);
         m_Open = close;

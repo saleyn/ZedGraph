@@ -100,9 +100,12 @@ namespace ZedGraph
     ///   Create a new <see cref="OHLCBarItem" />, specifying only the legend label.
     /// </summary>
     /// <param name="label">The label that will appear in the legend.</param>
-    public OHLCBarClusterItem(string label, int zOrder = -1)
+    public OHLCBarClusterItem(string label, int zOrder = -1,
+                              float clustStep = OHLCBarCluster.Default.DEF_CLUST_STEP)
       : base(label, zOrder)
-    {}
+    {
+      Bar.ClusterStep = clustStep;
+    }
 
     /// <summary>
     ///   Create a new <see cref="JapaneseCandleStickItem" /> using the specified properties.
@@ -114,9 +117,12 @@ namespace ZedGraph
     ///   <see cref="IPointList" /> should contain <see cref="StockPt" /> items rather
     ///   than <see cref="PointPair" /> items.
     /// </param>
-    public OHLCBarClusterItem(string label, IPointList points, int zOrder=-1)
+    public OHLCBarClusterItem(string label, IPointList points, int zOrder = -1,
+                              float clustStep = OHLCBarCluster.Default.DEF_CLUST_STEP)
       : base(label, points, LineBase.Default.Color, zOrder)
-    {}
+    {
+      Bar.ClusterStep = clustStep;
+    }
 
     /// <summary>
     ///   The Copy Constructor
@@ -124,7 +130,9 @@ namespace ZedGraph
     /// <param name="rhs">The <see cref="JapaneseCandleStickItem" /> object from which to copy</param>
     public OHLCBarClusterItem(OHLCBarClusterItem rhs)
       : base(rhs)
-    {}
+    {
+      Bar.ClusterStep = rhs.Bar.ClusterStep;
+    }
 
     /// <summary>
     ///   Implement the <see cref="ICloneable" /> interface in a typesafe manner by just

@@ -357,9 +357,9 @@ namespace ZedGraph
       var date = pt.X;
       double high;
       double low;
-      if (pt is StockPt)
+      if (pt is IOHLC)
       {
-        var p = (StockPt)pt;
+        var p = (IOHLC)pt;
         high  = p.High;
         low   = p.Low;
       }

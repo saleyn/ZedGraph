@@ -480,9 +480,9 @@ namespace ZedGraph
                                   out double h, out double l, out double c)
     {
       date = pt.X;
-      if (pt is StockPt)
+      if (pt is IOHLC)
       {
-        var p = (StockPt)pt;
+        var p = (IOHLC)pt;
         o = p.Open;
         h = p.High;
         l = p.Low;

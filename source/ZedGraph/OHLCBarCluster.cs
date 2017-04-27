@@ -56,6 +56,8 @@ namespace ZedGraph
     /// </summary>
     public new struct Default
     {
+      public const float DEF_CLUST_STEP    = 0.0005f;
+
       /// <summary>
       /// The default fillcolor for drawing the rising case CandleSticks
       /// (<see cref="JapaneseCandleStick.RisingFill"/> property).
@@ -69,7 +71,7 @@ namespace ZedGraph
 
       public static Color ClusterBaseColor = Color.DimGray;
 
-      public static float ClusterStep      = 0.0005f;
+      public static float ClusterStep      = DEF_CLUST_STEP;
     }
 
     #endregion
@@ -166,7 +168,7 @@ namespace ZedGraph
                                        Axis valueAxis, CurveItem curve, IPointPair pt,
                                        float pixBase, float pixHigh, float pixLow, float halfSize)
     {
-      var p = pt as CandleClusterPt;
+      var p = pt as ICandleClusteredVolume;
 
       if (p?.Volumes != null)
       {
@@ -175,16 +177,20 @@ namespace ZedGraph
 
         //var prevPricePix = pixLow;
 
+        var halfClustStep = ClusterStep / 2;
+
         foreach (var v in p.Volumes)
         {
-          var fromPricePix = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, 0, v.Item1);
-          var toPricePix   = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, 0, v.Item2);
-
-          var color = getVolumeColor(v.Item3);
+          var low          = Math.Max(p.Low,  v.Price - halfClustStep);
+          var high         = Math.Min(p.High, v.Price + halfClustStep);
+          var fromPricePix = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, 0, low);
+          var toPricePix   = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, 0, high);
+          var height       = Math.Abs(toPricePix-fromPricePix);
+          var color        = getVolumeColor(v.VolSell+v.VolBuy);
 
           if (color != Default.ClusterBaseColor)
             using (var brush = new SolidBrush(color))
-              g.FillRectangle(brush, pixBase - halfSize/2, fromPricePix, halfSize, toPricePix);
+              g.FillRectangle(brush, pixBase - halfSize/2, toPricePix, halfSize, height);
         }
       }
 

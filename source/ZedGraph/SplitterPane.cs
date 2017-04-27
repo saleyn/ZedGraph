@@ -26,7 +26,6 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace ZedGraph

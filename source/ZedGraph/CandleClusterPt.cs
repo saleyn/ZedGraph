@@ -23,17 +23,18 @@ using System.Security.Permissions;
 
 namespace ZedGraph
 {
-  public interface ICandleClusteredVolume
+  public interface IClusterVolume
   {
-    DateTime TimeStamp { get; }
-    double   Date      { get; set; }
-    float    Open      { get; set; }
-    float    High      { get; set; }
-    float    Low       { get; set; }
-    float    Close     { get; set; }
-    int      Vol       { get; set; }
+    float Price    { get; }
+    int   VolSell  { get; }
+    int   VolBuy   { get; }
+    int   Volume   { get; } // Total volume
+    int   VolDelta { get; } // Buy-Sell volume
+  }
 
-    Tuple<float, float, int>[] Volumes { get; set; }
+  public interface ICandleClusteredVolume : IOHLCV
+  {
+    IClusterVolume[] Volumes { get; set; }
   }
 
   /// <summary>
@@ -49,7 +50,7 @@ namespace ZedGraph
     /// <summary>
     /// Default Constructor
     /// </summary>
-    public CandleClusterPt() : this(0, 0, 0, 0, 0, 0)
+    public CandleClusterPt() : this(0, 0, 0, 0, 0, 0, 0)
     {}
 
     /// <summary>
@@ -63,9 +64,9 @@ namespace ZedGraph
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
     public CandleClusterPt(double date, float open, float high, float low, float close,
-                           int vol, string tag = null,
-                           Tuple<float, float, int>[] volumes = null)
-      : base(date, open, high, low, close, vol, tag)
+                           int volBuy, int volSell, string tag = null,
+                           IClusterVolume[] volumes = null)
+      : base(date, open, high, low, close, volBuy, volSell, tag)
     {
       if (volumes != null)
         Volumes = volumes;
@@ -76,7 +77,7 @@ namespace ZedGraph
     /// </summary>
     /// <param name="rhs">The basis for the copy.</param>
     public CandleClusterPt(ICandleClusteredVolume rhs, bool cloneVolumes = true)
-      : base(rhs.Date, rhs.Open, rhs.High, rhs.Low, rhs.Close, rhs.Vol)
+      : base(rhs.Date, rhs.Open, rhs.High, rhs.Low, rhs.Close, rhs.VolBuy, rhs.VolSell)
     {
       ctor(rhs, cloneVolumes);
     }
@@ -104,7 +105,7 @@ namespace ZedGraph
       {
         if (cloneVolumes)
         {
-          Volumes = new Tuple<float, float, int>[rhs.Volumes.Length];
+          Volumes = new IClusterVolume[rhs.Volumes.Length];
           Array.Copy(rhs.Volumes, Volumes, rhs.Volumes.Length);
         }
         else
@@ -137,7 +138,7 @@ namespace ZedGraph
       // backwards compatible as new member variables are added to classes
       var sch = info.GetInt32("schema3");
 
-      Volumes = (Tuple<float, float, int>[])info.GetValue("volumes", typeof(Tuple<float,float,int>[]));
+      Volumes = (IClusterVolume[])info.GetValue("volumes", typeof(IClusterVolume[]));
     }
 
     /// <summary>
@@ -160,7 +161,7 @@ namespace ZedGraph
     /// <summary>
     /// Array of volume clusters aggregated by price steps: {Price, Volume}
     /// </summary>
-    public Tuple<float, float, int>[] Volumes { get; set; }
+    public IClusterVolume[] Volumes { get; set; }
 
     #endregion
 
