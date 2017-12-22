@@ -139,24 +139,15 @@ namespace ZedGraph
     ///   calling the typed version of <see cref="Clone" />
     /// </summary>
     /// <returns>A deep copy of this object</returns>
-    object ICloneable.Clone()
-    {
-      return Clone();
-    }
+    object ICloneable.Clone() => Clone();
 
     /// <summary>
     ///   Typesafe, deep-copy clone method.
     /// </summary>
     /// <returns>A new, independent copy of this class</returns>
-    public new OHLCBarClusterItem Clone()
-    {
-      return new OHLCBarClusterItem(this);
-    }
+    public new OHLCBarClusterItem Clone() => new OHLCBarClusterItem(this);
 
-    protected override OHLCBar MakeBar(Color color = default(Color))
-    {
-      return new OHLCBarCluster();
-    }
+    protected override OHLCBar MakeBar(Color color = default) => new OHLCBarCluster();
 
     #endregion
 

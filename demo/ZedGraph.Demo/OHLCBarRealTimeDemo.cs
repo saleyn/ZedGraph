@@ -60,6 +60,8 @@ namespace ZedGraph.Demo
 
       m_Pane = base.GraphPane;
 
+      ZedGraphControl.HPanOverflow = 0.2;
+
       //------------------------------------------------------------------------
       // Setup the pane and X/Y axis
       //------------------------------------------------------------------------
@@ -96,6 +98,8 @@ namespace ZedGraph.Demo
       m_Pane.XAxis.Scale.FontSpec.Size = 9;
       //m_Pane.XAxis.Scale.MajorStep             = 2;
       //m_Pane.XAxis.Scale.MinorStep             = 30;
+      m_Pane.XAxis.MinZoom = 10;
+
       m_Pane.XAxis.Scale.MaxAuto = true;
       m_Pane.XAxis.Scale.MinAuto = true;
       //      m_Pane.XAxis.Scale.MajorStep             = new XDate(0, 0, 0, 0, 2, 0).XLDate;
@@ -156,6 +160,9 @@ namespace ZedGraph.Demo
 
       m_Pane.Y2Axis.MajorTic.Size = 3;
       m_Pane.Y2Axis.MinorTic.Size = 1;
+
+      m_Pane.Y2Axis.MinZoom = 5.0;
+
       //m_Pane.Y2Axis.Scale.AlignH               = AlignH.Right;
       m_Pane.Y2Axis.Scale.Align = AlignP.Outside;
       m_Pane.Y2Axis.Scale.MinAuto = true;
@@ -338,6 +345,7 @@ namespace ZedGraph.Demo
       ZedGraphControl.ZoomResolution = 0.001;
       m_DistanceMeasurer.Coord = CoordType.AxisXY2Scale;
       GraphPane.AxisChange();
+      m_Timer.Enabled = true;
     }
 
     public override void Deactivate()
@@ -348,6 +356,7 @@ namespace ZedGraph.Demo
       //ZedGraphControl.IsEnableVZoom = true;
       ZedGraphControl.IsAutoScrollRange = false;
       m_DistanceMeasurer.Coord = CoordType.AxisXYScale;
+      m_Timer.Enabled = false;
     }
 
     private readonly Timer m_Timer;
@@ -643,8 +652,8 @@ namespace ZedGraph.Demo
 
       var sig    = Trend.None;
       int refpos = start, curpos = start+1;
-      var refval = (input[refpos].HighValue + input[refpos].LowValue) / 2;
-      var curval = (input[curpos].HighValue + input[curpos].LowValue) / 2;
+      var refval = (input[refpos].High + input[refpos].Low) / 2;
+      var curval = (input[curpos].High + input[curpos].Low) / 2;
 
       for (var i = curpos; i < end; ++i)
       {
@@ -665,8 +674,8 @@ namespace ZedGraph.Demo
 
         /* Find local maximum and minimum */
 
-        var lmax = Math.Max(curval, input[i].HighValue);
-        var lmin = Math.Min(curval, input[i].LowValue);
+        var lmax = Math.Max(curval, input[i].High);
+        var lmin = Math.Min(curval, input[i].Low);
 
         /* Find first trend */
 
@@ -684,8 +693,8 @@ namespace ZedGraph.Demo
           }
         }
 
-        var low  = input[i].LowValue;
-        var high = input[i].HighValue;
+        var low  = input[i].Low;
+        var high = input[i].High;
 
         if (sig == Trend.Down) // Downtrend
         {
@@ -693,7 +702,7 @@ namespace ZedGraph.Demo
           if (Math.Abs(low - lmin) < float.Epsilon)
           {
             // Last Extreme or First Extreme
-            if (lastExtreme || Math.Abs(low - input[i - 1].LowValue) > float.Epsilon)
+            if (lastExtreme || Math.Abs(low - input[i - 1].Low) > float.Epsilon)
             {
               curval = low;
               curpos = i;
@@ -709,7 +718,7 @@ namespace ZedGraph.Demo
           {
             //output.Add(input[refpos].X, refpos == start ? input[refpos].HighValue : refval);
             output[refpos].X = input[refpos].X;
-            output[refpos].Y = refpos == start ? input[refpos].HighValue : refval;
+            output[refpos].Y = refpos == start ? input[refpos].High : refval;
             refval = curval;
             refpos = curpos;
             curval = high;
@@ -725,7 +734,7 @@ namespace ZedGraph.Demo
           if (Math.Abs(high - lmax) < float.Epsilon)
           {
             // Last Extreme or First Extreme
-            if (lastExtreme || Math.Abs(high - input[i - 1].HighValue) > float.Epsilon)
+            if (lastExtreme || Math.Abs(high - input[i - 1].High) > float.Epsilon)
             {
               curval = high;
               curpos = i;
@@ -741,7 +750,7 @@ namespace ZedGraph.Demo
           {
             //output.Add(input[refpos].X, refpos == start ? input[refpos].HighValue : refval);
             output[refpos].X = input[refpos].X;
-            output[refpos].Y = refpos == start ? input[refpos].LowValue : refval;
+            output[refpos].Y = refpos == start ? input[refpos].Low : refval;
             refval = curval;
             refpos = curpos;
             curval = low;

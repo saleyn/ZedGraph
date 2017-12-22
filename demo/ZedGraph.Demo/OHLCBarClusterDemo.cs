@@ -40,10 +40,10 @@ namespace ZedGraph.Demo
     }
 
     public float Price      { get; }
-    public int   VolSell    { get; set; }
-    public int   VolBuy     { get; set; }
-    public int   Volume   => VolBuy + VolSell;
-    public int   VolDelta => VolBuy - VolSell;
+    public float VolSell    { get; set; }
+    public float VolBuy     { get; set; }
+    public float Volume   => VolBuy + VolSell;
+    public float VolDelta => VolBuy - VolSell;
   }
 
   /// <summary>

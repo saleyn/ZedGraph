@@ -112,8 +112,8 @@ namespace ZedGraph
     /// </remarks>
     internal double MinLinearized
     {
-      get { return Linearize(_min); }
-      set { _min = DeLinearize(value); }
+      get => Linearize(_min);
+      set => _min = DeLinearize(value);
     }
 
     /// <summary>
@@ -125,8 +125,8 @@ namespace ZedGraph
     /// </remarks>
     internal double MaxLinearized
     {
-      get { return Linearize(_max); }
-      set { _max = DeLinearize(value); }
+      get => Linearize(_max);
+      set => _max = DeLinearize(value);
     }
 
     /// <summary>
@@ -1374,7 +1374,7 @@ namespace ZedGraph
     // /// <seealso cref="NumDec"/>
     public int Mag
     {
-      get { return _mag; }
+      get => _mag;
       set
       {
         _mag = value;

@@ -325,7 +325,7 @@ namespace ZedGraph
       : base(title, rect)
     {
       XAxis           = new XAxis(xTitle);
-      X2Axis          = new X2Axis("");
+      X2Axis          = new X2Axis(string.Empty);
 
       YAxisList       = new YAxisList();
       Y2AxisList      = new Y2AxisList();
@@ -1648,10 +1648,8 @@ namespace ZedGraph
         return false;
       }
 
-      object obj;
-      var res = findAxis(mousePt, g, out obj, out index, out rect, CalcScaleFactor(),
+      var res = findAxis(mousePt, g, out var obj, out index, out rect, CalcScaleFactor(),
                          ZOrder.H_BehindAll);
-
       if (res)
         nearestObj = (Axis)obj;
 

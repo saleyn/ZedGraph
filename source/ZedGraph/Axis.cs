@@ -25,6 +25,12 @@ using System.Security.Permissions;
 
 namespace ZedGraph
 {
+  public enum AxisSide
+  {
+    Natural,    // Left or Bottom
+    Reverse     // Top or Right
+  }
+
   /// <summary>
   ///   The Axis class is an abstract base class that encompasses all properties
   ///   and methods required to define a graph Axis.
@@ -241,8 +247,9 @@ namespace ZedGraph
     ///   Default constructor for <see cref="Axis" /> that sets all axis properties
     ///   to default values as defined in the <see cref="Default" /> class.
     /// </summary>
-    protected Axis()
+    protected Axis(AxisSide side)
     {
+      Side = side;
       Scale = new LinearScale(this);
       Cross = 0.0;
       CrossAuto = true;
@@ -276,10 +283,7 @@ namespace ZedGraph
     ///   except for the <see cref="Title" />.
     /// </summary>
     /// <param name="title">A string containing the axis title</param>
-    protected Axis(string title) : this()
-    {
-      Title.Text = title;
-    }
+    protected Axis(string title, AxisSide side) : this(side) => Title.Text = title;
 
     /// <summary>
     ///   The Copy Constructor.
@@ -287,19 +291,20 @@ namespace ZedGraph
     /// <param name="rhs">The Axis object from which to copy</param>
     protected Axis(Axis rhs)
     {
-      Scale = rhs.Scale.Clone(this);
-      Cross = rhs.Cross;
-      CrossAuto = rhs.CrossAuto;
-      MajorTic = rhs.MajorTic.Clone();
-      MinorTic = rhs.MinorTic.Clone();
-      MajorGrid = rhs.MajorGrid.Clone();
-      MinorGrid = rhs.MinorGrid.Clone();
-      IsVisible = rhs.IsVisible;
+      Side                 = rhs.Side;
+      Scale                = rhs.Scale.Clone(this);
+      Cross                = rhs.Cross;
+      CrossAuto            = rhs.CrossAuto;
+      MajorTic             = rhs.MajorTic.Clone();
+      MinorTic             = rhs.MinorTic.Clone();
+      MajorGrid            = rhs.MajorGrid.Clone();
+      MinorGrid            = rhs.MinorGrid.Clone();
+      IsVisible            = rhs.IsVisible;
       IsAxisSegmentVisible = rhs.IsAxisSegmentVisible;
-      Title = rhs.Title.Clone();
-      AxisGap = rhs.AxisGap;
-      MinSpace = rhs.MinSpace;
-      Color = rhs.Color;
+      Title                = rhs.Title.Clone();
+      AxisGap              = rhs.AxisGap;
+      MinSpace             = rhs.MinSpace;
+      Color                = rhs.Color;
 
       if (rhs.LineHObjs != null)
         LineHObjs = rhs.LineHObjs.Clone();
@@ -406,6 +411,17 @@ namespace ZedGraph
     public Scale Scale { get; set; }
 
     /// <summary>
+    /// Side of this axis.
+    /// </summary>
+    /// <remarks>Determines if this is let/bottom or right/top axis </remarks>
+    public AxisSide Side { get; }
+
+    /// <summary>
+    /// Determines minimum zooming distance
+    /// </summary>
+    public double MinZoom { get; set; }
+
+    /// <summary>
     ///   Gets or sets the scale value at which this axis should cross the "other" axis.
     /// </summary>
     /// <remarks>
@@ -425,7 +441,7 @@ namespace ZedGraph
     /// <seealso cref="CrossAuto" />
     public double Cross
     {
-      get { return _cross; }
+      get => _cross;
       set
       {
         _cross = value;
@@ -841,18 +857,22 @@ namespace ZedGraph
     }
 
     /// <summary>
-    ///   Return true if difference between two values is below the scale's resolution
+    ///   Return true if difference between two values is above the scale's resolution
     /// </summary>
     /// <param name="v1"></param>
     /// <param name="v2"></param>
     /// <returns></returns>
-    internal void MinScaleLimit(double v1, ref double v2)
+    public bool MinScaleLimit(double v1, ref double v2)
     {
       var limit = Scale.MajorStep*Scale.MajorUnitMultiplier;
-      if ((v1 > float.MaxValue) || (v2 > float.MaxValue)) return;
-      var diff = Math.Abs(v1 - v2);
-      if ((Scale.MajorStep < float.MaxValue) && (diff < limit))
+      if ((v1 > float.MaxValue) || (v2 > float.MaxValue)) return false;
+      var diff  = Math.Abs(v1 - v2);
+      var below = Scale.MajorStep < float.MaxValue && (v2 == 0 || diff < limit);
+
+      if (below)
         v2 = v1 < v2 ? v1 + limit : v1 - limit;
+
+      return !below;
     }
 
     /// <summary>
@@ -1236,7 +1256,7 @@ namespace ZedGraph
       using (var minorGridPen = MinorGrid.GetPen(pane, scaleFactor))
       {
         // Draw the minor tic marks
-        while ((dVal < last) && (iTic < 5000))
+        while (dVal < last && iTic > 0 && iTic < 5000)
         {
           // Calculate the scale value for the current tic
           dVal = Scale.CalcMinorTicValue(baseVal, iTic);

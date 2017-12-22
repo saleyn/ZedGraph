@@ -26,10 +26,10 @@ namespace ZedGraph
   public interface IClusterVolume
   {
     float Price    { get; }
-    int   VolSell  { get; }
-    int   VolBuy   { get; }
-    int   Volume   { get; } // Total volume
-    int   VolDelta { get; } // Buy-Sell volume
+    float VolSell  { get; }
+    float VolBuy   { get; }
+    float Volume   { get; } // Total volume
+    float VolDelta { get; } // Buy-Sell volume
   }
 
   public interface ICandleClusteredVolume : IOHLCV
@@ -64,7 +64,7 @@ namespace ZedGraph
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
     public CandleClusterPt(double date, float open, float high, float low, float close,
-                           int volBuy, int volSell, string tag = null,
+                           float volBuy, float volSell, string tag = null,
                            IClusterVolume[] volumes = null)
       : base(date, open, high, low, close, volBuy, volSell, tag)
     {

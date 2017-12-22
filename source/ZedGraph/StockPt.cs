@@ -40,37 +40,6 @@ namespace ZedGraph
 
     #region Member variables
 
-    // member variable mapping:
-    //   Date  = X
-    //   Close = Y
-    //   Low   = Z
-    //   Open  = Open
-    //   High  = High
-    //   Vol   = Vol
-
-    /// <summary>
-    /// This opening value
-    /// </summary>
-    public float Open { get; set; }
-
-    /// <summary>
-    /// This closing value
-    /// </summary>
-    public float High { get; set; }
-
-    /// <summary>
-    /// Volume value
-    /// </summary>
-    public int    VolBuy  { get; set; }
-    public int    VolSell { get; set; }
-    public int    Volume  => VolBuy + VolSell;
-
-    /// <summary>
-    /// This is a user value that can be anything.  It is used to provide special 
-    /// property-based coloration to the graph elements.
-    /// </summary>
-    private double _colorValue;
-
     #endregion
 
     #region Constructors
@@ -91,7 +60,7 @@ namespace ZedGraph
     /// <param name="high">The daily high stock price</param>
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
-    public StockPt(double date, float open, float high, float low, float close, int volBuy, int volSell)
+    public StockPt(double date, float open, float high, float low, float close, float volBuy, float volSell)
       : this(date, open, high, low, close, volBuy, volSell, null)
     {
     }
@@ -106,7 +75,7 @@ namespace ZedGraph
     /// <param name="low">The daily low stock price</param>
     /// <param name="vol">The daily trading volume</param>
     /// <param name="tag">The user-defined <see cref="PointPair.Tag" /> property.</param>
-    public StockPt(double date, float open, float high, float low, float close, int volBuy, int volSell, string tag)
+    public StockPt(double date, float open, float high, float low, float close, float volBuy, float volSell, string tag)
       : base(date, close, low)
     {
       Open       = open;
@@ -177,13 +146,13 @@ namespace ZedGraph
     {
       // The schema value is just a file version parameter.  You can use it to make future versions
       // backwards compatible as new member variables are added to classes
-      int sch = info.GetInt32("schema3");
+      var sch = info.GetInt32("schema3");
 
       Open       = (float)info.GetDouble("Open");
       High       = (float)info.GetDouble("High");
       VolBuy     = info.GetInt32("VolBuy");
       VolSell    = info.GetInt32("VolSell");
-      ColorValue = info.GetDouble("ColorValue");
+      ColorValue = (float)info.GetDouble("ColorValue");
     }
 
     /// <summary>
@@ -207,39 +176,57 @@ namespace ZedGraph
 
     #region Properties
 
-    public DateTime TimeStamp => new XDate(Date).DateTime;
+    public DateTime TimeStamp { get => new XDate(Date).DateTime; set => Date = new XDate(value); }
 
     /// <summary>
     /// Map the Date property to the X value
     /// </summary>
-    public double Date { get { return X; } set { X = value; } }
+    public double Date { get => X; set => X = value; }
+
+    // member variable mapping:
+    //   Date  = X
+    //   Close = Y
+    //   Low   = Z
+    //   Open  = Open
+    //   High  = High
+    //   Vol   = Vol
+
+    /// <summary>
+    /// This opening value
+    /// </summary>
+    public float Open { get; set; }
 
     /// <summary>
     /// Map the high property to the Y value
     /// </summary>
-    public float  Close { get { return (float)Y; } set { Y = value; } }
+    public float Close { get => (float)Y; set => Y = value; }
 
     /// <summary>
-    /// Trading volume. Map the low property to the Z value
+    /// The "low" value for this point (lower dependent-axis value).
     /// </summary>
-    public float  Low { get { return (float)Z; } set { Z = value; } } 
+    /// <value>The lower dependent value for this <see cref="PointPair"/>.</value>
+    public new float Low { get => (float)Z; set => Z = value; }
 
-    public override double HighValue => High;
+    /// <summary>
+    /// The "high" value for this point (lower dependent-axis value).
+    /// </summary>
+    /// <value>The lower dependent value for this <see cref="PointPair"/>.</value>
+    public new float High { get; set; }
+
+    /// <summary>
+    /// Volume value
+    /// </summary>
+    public float VolBuy  { get; set; }
+    public float VolSell { get; set; }
+    public float Volume  { get; set; }
 
     /// <summary>
     /// The ColorValue property.  This is used with the
     /// <see cref="FillType.GradientByColorValue" /> option.
     /// </summary>
-    public override double ColorValue
-    {
-      get { return _colorValue; }
-      set { _colorValue = value; }
-    }
+    public new float ColorValue { get; set; }
 
-    public new IStockPt Clone()
-    {
-      return new StockPt(this);
-    }
+    public new IStockPt Clone() => new StockPt(this);
 
     /// <summary>
     /// Readonly value that determines if either the Date, Close, Open, High, or Low

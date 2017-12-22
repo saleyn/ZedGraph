@@ -19,10 +19,8 @@ namespace ZedGraph
     {
       if (capacity == 0)
         throw new ArgumentException(nameof(capacity));
-      if (list == null)
-        throw new ArgumentNullException(nameof(list));
 
-      m_List      = list;
+      m_List      = list ?? throw new ArgumentNullException(nameof(list));
       m_MinIdx    = 0;
       m_MaxIdx    = 0;
       m_MinFifo   = new Deque<int>(capacity);

@@ -71,6 +71,11 @@ namespace ZedGraph
       public static float Size = 12;
 
       /// <summary>
+      /// The default fillcolor for drawing the falling case CandleSticks
+      /// </summary>
+      public static Color FallingColor = Color.Black;
+
+      /// <summary>
       /// The default display mode for symbols (<see cref="OHLCBar.IsOpenCloseVisible"/> property).
       /// true to display symbols, false to hide them.
       /// </summary>
@@ -134,6 +139,13 @@ namespace ZedGraph
     public bool IsAutoSize    { get; set; }
 
     /// <summary>
+    /// Gets or sets the <see cref="System.Drawing.Color"/> data for this
+    /// <see cref="OHLCBar"/> when the value of the candlestick is
+    /// falling.
+    /// </summary>
+    public Color FallingColor { get; set; }
+
+    /// <summary>
     /// Color of a dot drawn at the High end of the bar (None means no dot)
     /// </summary>
     public Color HighDotColor { get; set; }
@@ -169,9 +181,10 @@ namespace ZedGraph
     /// </param>
     public OHLCBar(Color color) : base(color)
     {
-      _size = Default.Size;
-      IsAutoSize = Default.IsAutoSize;
+      _size              = Default.Size;
+      IsAutoSize         = Default.IsAutoSize;
       IsOpenCloseVisible = Default.IsOpenCloseVisible;
+      FallingColor       = Default.FallingColor;
     }
 
     /// <summary>
@@ -185,6 +198,7 @@ namespace ZedGraph
       IsAutoSize         = rhs.IsAutoSize;
       HighDotColor       = rhs.HighDotColor;
       LowDotColor        = rhs.LowDotColor;
+      FallingColor       = Default.FallingColor;
     }
 
     /// <summary>
@@ -390,10 +404,12 @@ namespace ZedGraph
       var dotHalfSize = Math.Max(curve.DotHalfSize, IsAutoSize ? Math.Max(2, halfSize / 4) : curve.DotHalfSize)
                       * scaleFactor;
 
-      using (var pen = !curve.IsSelected
-                         ? new Pen(Color, Width)
-                         : new Pen(Selection.Border.Color, Selection.Border.Width))
-        //        using ( Pen pen = new Pen( _color, _penWidth ) )
+      using (var pen = curve.IsSelected
+                         ? new Pen(Selection.Border.Color, Selection.Border.Width)
+                         : new Pen(Color, Width))
+      using (var fallingPen = curve.IsSelected
+                         ? new Pen(Selection.Border.Color, Selection.Border.Width)
+                         : new Pen(FallingColor, Width))
       {
         // Loop over each defined point              
         for (int i = 0; i < curve.Points.Count; i++)
@@ -415,18 +431,20 @@ namespace ZedGraph
               ((!(high > 0) || !(low > 0)) && valueAxis.Scale.IsLog))
             continue;
 
-          var pixBase  =
+          var pixBase =
             (int)(baseAxis.Scale.Transform(curve.IsOverrideOrdinal, i, date) + 0.5);
           //pixBase = baseAxis.Scale.Transform( curve.IsOverrideOrdinal, i, date );
-          var pixHigh  = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, high);
-          var pixLow   = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, low);
-          var pixOpen  = PointPairBase.IsValueInvalid(open)
+          var pixHigh = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, high);
+          var pixLow = valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, low);
+          var pixOpen = PointPairBase.IsValueInvalid(open)
                           ? float.MaxValue
                           : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, open);
 
           var pixClose = PointPair.IsValueInvalid(close)
                           ? float.MaxValue
                           : valueAxis.Scale.Transform(curve.IsOverrideOrdinal, i, close);
+
+          var rising = close > open;
 
           if (pixBase == PointPair.Missing) continue;
 
@@ -444,7 +462,7 @@ namespace ZedGraph
           else
             Draw(g, pane, baseAxis is IXAxis,
                  pixBase, pixHigh, pixLow, pixOpen,
-                 pixClose, halfSize, pen, dotHalfSize);
+                 pixClose, halfSize, rising ? pen : fallingPen, dotHalfSize);
         }
       }
     }

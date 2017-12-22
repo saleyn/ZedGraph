@@ -277,7 +277,7 @@ namespace ZedGraph
         // otherwise, the curve is not a stacked type (not a stacked bar or stacked line)
         lowVal = (!(curve is HiLowBarItem)) && (!(curve is ErrorBarItem))
                    ? 0
-                   : curve.Points[iPt].LowValue;
+                   : curve.Points[iPt].Low;
 
         hiVal = baseAxis is IXAxis ? curve.Points[iPt].Y : curve.Points[iPt].X;
       }

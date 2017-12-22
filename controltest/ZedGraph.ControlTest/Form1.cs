@@ -5164,7 +5164,7 @@ namespace ZedGraph.ControlTest
 			zgc.IsScrollY2 = true;
 			zgc.IsAutoScrollRange = true;
 
-			YAxis y3axis = new YAxis( "Y3" );
+			var y3axis = new YAxis("Y3");
 			myPane.YAxisList.Add( y3axis );
 			myPane.Y2Axis.Title.Text = "Y2";
 			myPane.Y2Axis.IsVisible = true;
@@ -6399,7 +6399,7 @@ namespace ZedGraph.ControlTest
 			LineItem myCurve = myPane.AddCurve( "Curve 1", vList, Color.Blue );
 
 
-			Y2Axis yAxisCur = new Y2Axis( "Curve 2" );
+			var yAxisCur = new Y2Axis("Curve 2");
 			yAxisCur.IsVisible = true;
 			myPane.Y2AxisList.Add( yAxisCur );
 			// turn off the opposite tics so the Y2 tics don't show up on the Y axis

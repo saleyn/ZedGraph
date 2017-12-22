@@ -743,8 +743,8 @@ namespace ZedGraph
         var curOrd = i + 1;
         var curX   = isXOrdinal && !IsOverrideOrdinal ? curOrd : point.X;
         var curY   = isYOrdinal ? i + 1 : point.Y;
-        var loZ    = isZOrdinal ? i + 1 : Math.Min(point.LowValue, point.HighValue); //point.Z;
-        var hiZ    = isZOrdinal ? i + 1 : Math.Max(point.LowValue, point.HighValue);//point.Z;
+        var loZ    = isZOrdinal ? i + 1 : Math.Min(point.Low, point.High); //point.Z;
+        var hiZ    = isZOrdinal ? i + 1 : Math.Max(point.Low, point.High);//point.Z;
 
         var outOfBounds = curX < xLBound || curX > xUBound ||
                           curY < yLBound || curY > yUBound ||

@@ -201,7 +201,7 @@ namespace ZedGraph
 
     #region Private Methods
 
-    private Color getVolumeColor(int volume)
+    private Color getVolumeColor(double volume)
     {
       var color = VolumeHeatMap.LastOrDefault(x => x.Key <= volume);
       return color.Value.IsEmpty ? Default.ClusterBaseColor : color.Value;

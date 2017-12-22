@@ -33,27 +33,20 @@ namespace ZedGraph
     public CompactPt(double x, double y) { X = x; Y = y; }
     public CompactPt(IPointPair rhs) { X = rhs.X; Y = rhs.Y; }
 
-    public double X { get; set; }
-    public double Y { get; set; }
-    public double Z { get { return Y; } set { Y = value; } }
+    public double X   { get; set; }
+    public double Y   { get; set; }
+    public double Z   { get => Y; set => value = Y; }
 
     public object Tag { get { return null; } set { } }
-    public double LowValue => Y;
-    public double HighValue => Y;
-    public double ColorValue => Y;
-    public bool IsValid => Y != PointPairBase.Missing && Y != PointPairBase.Missing;
-    public bool IsInvalid => !IsValid;
-    public bool IsFiltered => false;
+    public float  Low        => (float)Y;
+    public float  High       => (float)Y;
+    public float  ColorValue => (float)Y;
+    public bool   IsValid    => Y != PointPairBase.Missing && Y != PointPairBase.Missing;
+    public bool   IsInvalid  => !IsValid;
+    public bool   IsFiltered => false;
 
-    public IPointPair Clone()
-    {
-      return new CompactPt(X, Y);
-    }
-
-    object ICloneable.Clone()
-    {
-      return Clone();
-    }
+    public IPointPair Clone() => new CompactPt(X, Y);
+    object ICloneable.Clone() => Clone();
   }
 
   /// <summary>

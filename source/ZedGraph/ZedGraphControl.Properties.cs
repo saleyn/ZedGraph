@@ -372,20 +372,6 @@ namespace ZedGraph
     public bool IsEnableVEdit { get; set; }
 
     /// <summary>
-    /// Gets or sets a value that determines whether or not zooming is allowed for the control.
-    /// </summary>
-    /// <remarks>
-    /// Zooming is done by left-clicking inside the <see cref="Chart.Rect"/> to drag
-    /// out a rectangle, indicating the new scale ranges that will be part of the graph.
-    /// </remarks>
-    [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
-     DefaultValue( true ),
-     Description( "true to allow horizontal and vertical zooming by left-click-drag" )]
-    public bool IsEnableZoom
-    {
-      set { IsEnableHZoom = value; IsEnableVZoom = value; }
-    }
-    /// <summary>
     /// Gets or sets a value that determines whether or not zooming is allowed for the control in
     /// the horizontal direction.
     /// </summary>
@@ -438,6 +424,16 @@ namespace ZedGraph
      DefaultValue( true ),
      Description( "true to allow horizontal panning by middle-mouse-drag or shift-left-drag" )]
     public bool IsEnableHPan { get; set; } = true;
+
+    /// <summary>
+    /// Controls offset from right edge during horizontal panning expressed as a fraction of visible area
+    /// </summary>
+    /// <seealso cref="IsEnableHPan"/>
+    [Bindable(true), Category("Display"), NotifyParentProperty(true),
+     DefaultValue(true),
+     Description("Controls offset from right edge during horizontal panning")]
+    public  double  HPanOverflow { get => _hPanOverflow; set { if (value >= 0) _hPanOverflow = value; } }
+    private double _hPanOverflow { get; set; } = 0d;
 
     /// <summary>
     /// Gets or sets a value that determines whether or not panning is allowed for the control in
@@ -493,8 +489,8 @@ namespace ZedGraph
      Description( "Provides access to the SaveFileDialog for the 'Save As' menu item" )]
     public SaveFileDialog SaveFileDialog
     {
-      get { return _saveFileDialog ?? (_saveFileDialog = new SaveFileDialog()); }
-      set { _saveFileDialog = value; }
+      get => _saveFileDialog ?? (_saveFileDialog = new SaveFileDialog());
+      set => _saveFileDialog = value;
     }
 
     /// <summary>
@@ -596,7 +592,7 @@ namespace ZedGraph
      Description( "true to display the horizontal scroll bar" )]
     public bool IsShowHScrollBar
     {
-      get { return _isShowHScrollBar; }
+      get => _isShowHScrollBar;
       set { _isShowHScrollBar = value; ZedGraphControl_ReSize( this, new EventArgs() ); }
     }
     /// <summary>
@@ -620,7 +616,7 @@ namespace ZedGraph
      Description( "true to display the vertical scroll bar" )]
     public bool IsShowVScrollBar
     {
-      get { return _isShowVScrollBar; }
+      get => _isShowVScrollBar;
       set { _isShowVScrollBar = value; ZedGraphControl_ReSize( this, new EventArgs() ); }
     }
 
@@ -640,7 +636,7 @@ namespace ZedGraph
      Description( "true to force the X axis ranges for all GraphPanes to match" )]
     public bool IsSynchronizeXAxes
     {
-      get { return _isSynchronizeXAxes; }
+      get => _isSynchronizeXAxes;
       set
       {
         if ( _isSynchronizeXAxes != value )
@@ -665,7 +661,7 @@ namespace ZedGraph
      Description( "true to force the Y axis ranges for all GraphPanes to match" )]
     public bool IsSynchronizeYAxes
     {
-      get { return _isSynchronizeYAxes; }
+      get => _isSynchronizeYAxes;
       set
       {
         if ( _isSynchronizeYAxes != value )
@@ -698,10 +694,8 @@ namespace ZedGraph
      Description( "true to scroll the Y2 axis along with the Y axis" )]
     public bool IsScrollY2
     {
-      get {
-        return Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0 &&
-               Y2ScrollRangeList[0].IsScrollable;
-      }
+      get => Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0 &&
+             Y2ScrollRangeList[0].IsScrollable;
       set
       {
         if (Y2ScrollRangeList == null || Y2ScrollRangeList.Count <= 0) return;
@@ -757,8 +751,8 @@ namespace ZedGraph
      Description( "Sets the manual scroll minimum value for the X axis" )]
     public double ScrollMinX
     {
-      get { return _xScrollRange.Min; }
-      set { _xScrollRange.Min = value; }
+      get => _xScrollRange.Min;
+      set => _xScrollRange.Min = value;
     }
     /// <summary>
     /// The maximum value for the X axis scroll range.
@@ -776,8 +770,8 @@ namespace ZedGraph
      Description( "Sets the manual scroll maximum value for the X axis" )]
     public double ScrollMaxX
     {
-      get { return _xScrollRange.Max; }
-      set { _xScrollRange.Max = value; }
+      get => _xScrollRange.Max;
+      set => _xScrollRange.Max = value;
     }
     /// <summary>
     /// The minimum value for the Y axis scroll range.
@@ -798,11 +792,9 @@ namespace ZedGraph
      Description( "Sets the manual scroll minimum value for the Y axis" )]
     public double ScrollMinY
     {
-      get {
-        return YScrollRangeList != null && YScrollRangeList.Count > 0
-          ? YScrollRangeList[0].Min
-          : double.NaN;
-      }
+      get => YScrollRangeList != null && YScrollRangeList.Count > 0
+               ? YScrollRangeList[0].Min
+               : double.NaN;
       set
       {
         if (YScrollRangeList == null || YScrollRangeList.Count <= 0) return;
@@ -830,15 +822,13 @@ namespace ZedGraph
      Description( "Sets the manual scroll maximum value for the Y axis" )]
     public double ScrollMaxY
     {
-      get {
-        return YScrollRangeList != null && YScrollRangeList.Count > 0
-          ? YScrollRangeList[0].Max
-          : double.NaN;
-      }
+      get => YScrollRangeList != null && YScrollRangeList.Count > 0
+               ? YScrollRangeList[0].Max
+               : double.NaN;
       set
       {
         if (YScrollRangeList == null || YScrollRangeList.Count <= 0) return;
-        ScrollRange tmp = YScrollRangeList[0];
+        var tmp = YScrollRangeList[0];
         tmp.Max = value;
         YScrollRangeList[0] = tmp;
       }
@@ -862,21 +852,15 @@ namespace ZedGraph
      Description( "Sets the manual scroll minimum value for the Y2 axis" )]
     public double ScrollMinY2
     {
-      get
-      {
-        if ( Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0 )
-          return Y2ScrollRangeList[0].Min;
-        else
-          return double.NaN;
-      }
+      get => Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0
+               ? Y2ScrollRangeList[0].Min
+               : double.NaN;
       set
       {
-        if ( Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0 )
-        {
-          ScrollRange tmp = Y2ScrollRangeList[0];
-          tmp.Min = value;
-          Y2ScrollRangeList[0] = tmp;
-        }
+        if (Y2ScrollRangeList == null || Y2ScrollRangeList.Count <= 0) return;
+        var tmp = Y2ScrollRangeList[0];
+        tmp.Min = value;
+        Y2ScrollRangeList[0] = tmp;
       }
     }
     /// <summary>
@@ -898,11 +882,9 @@ namespace ZedGraph
      Description( "Sets the manual scroll maximum value for the Y2 axis" )]
     public double ScrollMaxY2
     {
-      get {
-        return Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0
-          ? Y2ScrollRangeList[0].Max
-          : double.NaN;
-      }
+      get => Y2ScrollRangeList != null && Y2ScrollRangeList.Count > 0
+               ? Y2ScrollRangeList[0].Max
+               : double.NaN;
       set
       {
         if (Y2ScrollRangeList == null || Y2ScrollRangeList.Count <= 0) return;
@@ -975,11 +957,7 @@ namespace ZedGraph
     [Bindable( true ), Category( "Display" ), NotifyParentProperty( true ),
      DefaultValue( false ),
      Description( "true to center the mouse wheel zoom at the current mouse location" )]
-    public bool IsZoomOnMouseCenter
-    {
-      get { return _isZoomOnMouseCenter; }
-      set { _isZoomOnMouseCenter = value; }
-    }
+    public bool IsZoomOnMouseCenter { get; set; }
 
     /// <summary>
     /// Gets the graph pane's current image.
@@ -1010,10 +988,7 @@ namespace ZedGraph
      DesignerSerializationVisibility( DesignerSerializationVisibility.Hidden )]
     public bool BeenDisposed
     {
-      get
-      {
-        lock ( this ) return _masterPane == null;
-      }
+      get { lock ( this ) return _masterPane == null; }
     }
 
     // Revision: JCarpenter 10/06
@@ -1040,15 +1015,9 @@ namespace ZedGraph
     /// <summary>
     /// Readonly property to get selected graph
     /// </summary>
-    public GraphObj SelectedGraph
-    {
-      get
-      {
-        if (_graphDragState.Obj != null && _graphDragState.Obj.IsSelected)
-          return _graphDragState.Obj;
-        return null;
-      }
-    }
+    public GraphObj SelectedGraph => _graphDragState.Obj != null && _graphDragState.Obj.IsSelected
+                                  ?  _graphDragState.Obj
+                                  :  null;
 
     /// <summary>
     /// Type of cross hair to display
@@ -1070,10 +1039,8 @@ namespace ZedGraph
     /// </summary>
     public FontSpec CrossHairFontSpec { get; }
 
-    public void ResetSelectedGraph()
-    {
-      _graphDragState.Reset();
-    }
-  #endregion
+    public void ResetSelectedGraph() => _graphDragState.Reset();
+
+    #endregion
   }
 }

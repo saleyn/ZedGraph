@@ -358,8 +358,12 @@ namespace ZedGraph
         tFallingBorder = Selection.Border;
       }
 
-      using (var risingPen  = new Pen(tColor, tPenWidth))
-      using (var fallingPen = new Pen(tFallingColor, tPenWidth))
+      using (var risingPen  = curve.IsSelected
+                            ? new Pen(Selection.Border.Color, Selection.Border.Width)
+                            : new Pen(tColor, tPenWidth))
+      using (var fallingPen = curve.IsSelected
+                            ? new Pen(Selection.Border.Color, Selection.Border.Width)
+                            : new Pen(tFallingColor, tPenWidth))
       {
         // Loop over each defined point              
         for (int i = 0; i < curve.Points.Count; i++)
@@ -397,7 +401,7 @@ namespace ZedGraph
 
           var rising = close > open;
 
-          if (!curve.IsSelected && this.GradientFill.IsGradientValueType)
+          if (this.GradientFill.IsGradientValueType)
           {
             using (var tPen = GetPen(pane, scaleFactor, pt))
               Draw(g, pane, baseAxis is IXAxis,

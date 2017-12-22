@@ -34,9 +34,9 @@ namespace ZedGraph
     double Z   { get; set; }
     object Tag { get; set; }
 
-    double LowValue   { get; }
-    double HighValue  { get; }
-    double ColorValue { get; }
+    float  Low        { get; }
+    float  High       { get; }
+    float  ColorValue { get; }
     bool   IsValid    { get; }
     bool   IsInvalid  { get; }
     bool   IsFiltered { get; }

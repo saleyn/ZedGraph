@@ -71,10 +71,7 @@ namespace ZedGraph
     /// Default constructor that sets all <see cref="YAxis"/> properties to
     /// default values as defined in the <see cref="Default"/> class
     /// </summary>
-    public YAxis()
-      : this( "Y Axis" )
-    {
-    }
+    public YAxis() : this("Y Axis") {}
 
     /// <summary>
     /// Default constructor that sets all <see cref="YAxis"/> properties to
@@ -82,8 +79,8 @@ namespace ZedGraph
     /// for the axis title
     /// </summary>
     /// <param name="title">The <see cref="Axis.Title"/> for this axis</param>
-    public YAxis( string title )
-      : base( title )
+    public YAxis(string title)
+      : base( title, AxisSide.Natural )
     {
       IsVisible = Default.IsVisible;
       MajorGrid._isZeroLine = Default.IsZeroLine;

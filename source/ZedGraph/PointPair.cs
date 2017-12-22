@@ -232,14 +232,14 @@ namespace ZedGraph
     /// This is really just an alias for <see cref="PointPair.Z"/>.
     /// </summary>
     /// <value>The lower dependent value for this <see cref="PointPair"/>.</value>
-    public virtual double LowValue => Z;
+    public float Low { get => (float)Z; set => Z = value; }
 
     /// <summary>
     /// The "high" value for this point (lower dependent-axis value).
     /// This is really just an alias for <see cref="PointPair.Z"/>.
     /// </summary>
     /// <value>The lower dependent value for this <see cref="PointPair"/>.</value>
-    public virtual double HighValue => Z;
+    public float High { get => (float)Z; set => Z = value; }
 
     /// <summary>
     /// The ColorValue property is just an alias for the <see cref="PointPair.Z" />
@@ -250,7 +250,7 @@ namespace ZedGraph
     /// can be mapped to a unique value.  This is used with the
     /// <see cref="FillType.GradientByColorValue" /> option.
     /// </remarks>
-    public virtual double ColorValue { get { return Z; } set { Z = value; } }
+    public float ColorValue { get => (float)Z; set => Z = value; }
 
     #endregion
 

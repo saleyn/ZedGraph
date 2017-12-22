@@ -36,12 +36,12 @@ namespace ZedGraph
   /// </summary>
   public interface IOHLC
   {
-    DateTime TimeStamp { get; }
-    double   Date      { get; }
-    float    Open      { get; }
-    float    High      { get; }
-    float    Low       { get; }
-    float    Close     { get; }
+    DateTime TimeStamp { get; set; }
+    double   Date      { get; set; }
+    float    Open      { get; set; }
+    float    High      { get; set; }
+    float    Low       { get; set; }
+    float    Close     { get; set; }
   }
 
   /// <summary>
@@ -49,9 +49,9 @@ namespace ZedGraph
   /// </summary>
   public interface IOHLCV : IOHLC
   {
-    int VolBuy  { get; }
-    int VolSell { get; }
-    int Volume  { get; }
+    float VolBuy  { get; set; }
+    float VolSell { get; set; }
+    float Volume  { get; set; }
   }
 
   /// <summary>
@@ -70,13 +70,14 @@ namespace ZedGraph
   /// <author> John Champion based on code by Jerry Vos</author>
   /// <version> $Revision: 3.4 $ $Date: 2007-02-18 05:51:54 $ </version>
   [Serializable]
-  public class StockPointList<T> : List<IStockPt>, IPointListEdit, IOrdinalPointList
+  public class StockPointList<T> : List<T>, IPointListEdit, IOrdinalPointList
     where T : IStockPt, new()
   {
     private readonly List<Tuple<double,int>> _dateIndex;
     private int                              _offset;
-     
-  #region Properties
+    private IEnumerable<T> m_EnumerableImplementation;
+
+    #region Properties
 
     /// <summary>
     /// Indexer to access the specified <see cref="StockPt"/> object by
@@ -87,7 +88,7 @@ namespace ZedGraph
     /// <value>A <see cref="StockPt"/> object reference.</value>
     public new IPointPair this[int index]
     {
-      get { return base[index]; }
+      get => base[index];
       set
       {
         if (!(value is IStockPt))
@@ -98,7 +99,7 @@ namespace ZedGraph
             throw new ArgumentException
               ($"Cannot change date on item#{index}: {new XDate(base[index].X)} to {new XDate(value.X)}");
         }
-        base[index] = ((IStockPt)value).Clone();
+        base[index] = (T)value.Clone();
       }
     }
 
@@ -181,7 +182,7 @@ namespace ZedGraph
     /// be added</param>
     public void Add( T point )
     {
-      base.Add( point.Clone() );
+      base.Add( (T)point.Clone() );
       if (_dateIndex == null) return;
 
       var date = point.X;
@@ -199,7 +200,10 @@ namespace ZedGraph
     {
       if (!(point is IOHLC))
         throw new ArgumentException("Only points of StockPt type can be added to StockPointList!");
-      base.Add( ((T)point).Clone() );
+      if ((point is IStockPt))
+        base.Add((T)((IStockPt)point).Clone());
+      else
+        base.Add( (T)point.Clone() );
     }
 
     /// <summary>
@@ -226,7 +230,7 @@ namespace ZedGraph
     /// <param name="volBuy">The trading buy volume for the day</param>
     /// <param name="volSell">The trading sell volume for the day</param>
     /// <returns>The zero-based ordinal index where the point was added in the list.</returns>
-    public void Add(double date, float open, float high, float low, float close, int volBuy, int volSell)
+    public void Add(double date, float open, float high, float low, float close, float volBuy, float volSell)
     {
       add(date, open, high, low, close, volBuy, volSell);
     }
@@ -307,25 +311,26 @@ namespace ZedGraph
       return DoubleComparer.LT(_dateIndex[lo].Item1, date) ? lo+1 : lo;
     }
 
-    private void add(double date, float open, float high, float low, float close, int volBuy, int volSell)
+    private void add(double date, float open, float high, float low, float close, float volBuy, float volSell)
     {
-      if (typeof(T) != typeof(StockPt))
-        throw new InvalidOperationException($"Invalid data type {typeof(T)}: expected {typeof(StockPt)}");
+      if (typeof(T).IsAssignableFrom(typeof(IStockPt)))
+        throw new InvalidOperationException($"Invalid data type {typeof(T)}: expected {typeof(IStockPt)}");
 
-      var p     = new T() as StockPt;
-      p.Date    = date;
-      p.Open    = open;
-      p.High    = high;
-      p.Low     = low;
-      p.Close   = close;
-      p.VolBuy  = volBuy;
-      p.VolSell = volSell;
+      var p           = new T() as IStockPt;
+      p.Date          = date;
+      p.Open          = open;
+      ((IOHLC)p).High = high;
+      ((IOHLC)p).Low  = low;
+      p.Close         = close;
+      p.VolBuy        = volBuy;
+      p.VolSell       = volSell;
       Add(p);
     }
 
-    public new IEnumerator<IPointPair> GetEnumerator()
+    public IEnumerator<IPointPair> GetEnumerator()
     {
-      foreach (var p in this)
+      var ev = (IList<IPointPair>)this;
+      foreach (var p in ev)
         yield return p;
     }
   }

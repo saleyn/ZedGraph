@@ -69,8 +69,6 @@ namespace ZedGraph
     // The ratio of the largeChange to the smallChange for the scroll bars
     private const int _ScrollSmallRatio = 10;
 
-    private bool _isZoomOnMouseCenter = false;
-
     /// <summary>
     /// private field that stores a <see cref="PrintDocument" /> instance, which maintains
     /// a persistent selection of printer options.
@@ -175,8 +173,10 @@ namespace ZedGraph
       //this.MouseWheel += new System.Windows.Forms.MouseEventHandler( this.ZedGraphControl_MouseWheel );
 
       // Use double-buffering for flicker-free updating:
-      SetStyle( ControlStyles.UserPaint    | ControlStyles.AllPaintingInWmPaint
-              | ControlStyles.DoubleBuffer | ControlStyles.ResizeRedraw, true );
+      SetStyle( ControlStyles.UserPaint
+              | ControlStyles.AllPaintingInWmPaint
+              | ControlStyles.DoubleBuffer
+              | ControlStyles.ResizeRedraw, true );
       //isTransparentBackground = false;
       //SetStyle( ControlStyles.Opaque, false );
       SetStyle( ControlStyles.SupportsTransparentBackColor, true );
@@ -244,10 +244,27 @@ namespace ZedGraph
         _masterPane = null;
       }
     }
-  
-  #endregion
 
-  #region Methods
+    #endregion
+
+    #region Public Methods
+
+    /// <summary>
+    /// Sets a value that determines whether or not zooming is allowed for the control.
+    /// </summary>
+    /// <remarks>
+    /// Zooming is done by left-clicking inside the <see cref="Chart.Rect"/> to drag
+    /// out a rectangle, indicating the new scale ranges that will be part of the graph.
+    /// </remarks>
+    public void EnableZoom(bool value)
+    {
+      IsEnableHZoom = value;
+      IsEnableVZoom = value;
+    }
+
+    #endregion
+    
+    #region Methods
 
     /// <summary>
     /// Called by the system to update the control on-screen
@@ -263,12 +280,11 @@ namespace ZedGraph
         if ( BeenDisposed || _masterPane == null || GraphPane == null )
           return;
 
-        if ( hScrollBar1 != null && this.GraphPane != null &&
-          vScrollBar1 != null && YScrollRangeList != null )
+        if ( hScrollBar1 != null && GraphPane != null &&
+             vScrollBar1 != null && YScrollRangeList != null )
         {
-          SetScroll( hScrollBar1, this.GraphPane.XAxis, _xScrollRange.Min, _xScrollRange.Max );
-          SetScroll( vScrollBar1, this.GraphPane.YAxis, YScrollRangeList[0].Min,
-            YScrollRangeList[0].Max );
+          SetScroll( hScrollBar1, GraphPane.XAxis, _xScrollRange.Min, _xScrollRange.Max );
+          SetScroll( vScrollBar1, GraphPane.YAxis, YScrollRangeList[0].Min, YScrollRangeList[0].Max );
         }
 
         base.OnPaint( e );
@@ -313,6 +329,8 @@ namespace ZedGraph
             _lastCrosshairYlabelRect = yaxis.DrawYValueLabel(g, pane, _lastCrosshairPoint.Y, CrossHairFontSpec);
           }
         }
+
+        //this.Invalidate();
       }
     }
 
@@ -332,7 +350,7 @@ namespace ZedGraph
         if ( BeenDisposed || _masterPane == null )
           return;
 
-        Size newSize = this.Size;
+        var newSize = this.Size;
 
         if ( _isShowHScrollBar )
         {
@@ -375,11 +393,8 @@ namespace ZedGraph
         if ( BeenDisposed || _masterPane == null )
           return;
 
-        using ( Graphics g = this.CreateGraphics() )
-        {
-          _masterPane.AxisChange( g );
-          //g.Dispose();
-        }
+        using (var g = this.CreateGraphics())
+          _masterPane.AxisChange(g);
 
         if ( IsAutoScrollRange )
           SetScrollRangeFromData();
@@ -461,12 +476,11 @@ namespace ZedGraph
     /// </returns>
     private void ZoomStatePush( PaneBase primaryPane )
     {
-      var pane = primaryPane as GraphPane;
-      if (pane == null) return;
+      if (!(primaryPane is GraphPane pane)) return;
 
       if ( _isSynchronizeXAxes || _isSynchronizeYAxes )
       {
-        for ( int i = 0; i < _masterPane.PaneList.Count; i++ )
+        for ( var i = 0; i < _masterPane.PaneList.Count; i++ )
         {
           if ( i < _zoomStateStack.Count && _masterPane.PaneList[i] is GraphPane)
             ((GraphPane)_masterPane.PaneList[i]).ZoomStack.Add( _zoomStateStack[i] );

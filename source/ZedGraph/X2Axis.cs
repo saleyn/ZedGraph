@@ -68,7 +68,7 @@ namespace ZedGraph
     /// default values as defined in the <see cref="Default"/> class
     /// </summary>
     public X2Axis()
-      : this( "X2 Axis" )
+      : this("X2 Axis")
     {
     }
 
@@ -78,8 +78,8 @@ namespace ZedGraph
     /// for the axis title
     /// </summary>
     /// <param name="title">The <see cref="Axis.Title"/> for this axis</param>
-    public X2Axis( string title )
-      : base( title )
+    public X2Axis(string title)
+      : base( title, AxisSide.Reverse )
     {
       IsVisible = Default.IsVisible;
       MajorGrid._isZeroLine = Default.IsZeroLine;
@@ -91,10 +91,7 @@ namespace ZedGraph
     /// The Copy Constructor
     /// </summary>
     /// <param name="rhs">The X2Axis object from which to copy</param>
-    public X2Axis( X2Axis rhs )
-      : base( rhs )
-    {
-    }
+    public X2Axis( X2Axis rhs ) : base( rhs ) {}
 
     /// <summary>
     /// Implement the <see cref="ICloneable" /> interface in a typesafe manner by just
