@@ -352,7 +352,6 @@ namespace ZedGraph.Demo
       //ZedGraphControl.IsEnableHZoom = false;
       //ZedGraphControl.IsEnableVZoom = true;
       ZedGraphControl.IsAutoScrollRange = true;
-      ZedGraphControl.ZoomResolution = 0.001;
       m_DistanceMeasurer.Coord = CoordType.AxisXY2Scale;
       GraphPane.AxisChange();
     }
