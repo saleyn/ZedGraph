@@ -2704,9 +2704,9 @@ namespace ZedGraph
       if (_ownerAxis is IYAxis)
       {
         Scale scale;
-        if (pane.YAxis.Scale.Valid)
+        if (pane.YAxis.Scale.Valid && _ownerAxis is YAxis)
           scale = pane.YAxis.Scale;
-        else if (pane.Y2Axis.Scale.Valid)
+        else if (pane.Y2Axis.Scale.Valid && _ownerAxis is Y2Axis)
           scale = pane.Y2Axis.Scale;
         else
           return;
